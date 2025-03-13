@@ -28,7 +28,7 @@ public class MainWindow extends JFrame {
         mainPanel.setLayout(new BorderLayout());
 
         // 顶部标题（仅用于演示，可自行修改或删除）
-        JLabel titleLabel = new JLabel("智能个人财务管理系统", SwingConstants.CENTER);
+        JLabel titleLabel = new JLabel("Smart Finance Manager", SwingConstants.CENTER);
         titleLabel.setFont(new Font("SansSerif", Font.BOLD, 20));
         mainPanel.add(titleLabel, BorderLayout.NORTH);
 
@@ -37,19 +37,19 @@ public class MainWindow extends JFrame {
         buttonPanel.setLayout(new FlowLayout());
 
         // 示例按钮：手动添加交易
-        JButton addTransactionButton = new JButton("手动添加交易");
+        JButton addTransactionButton = new JButton("Add Transaction");
         buttonPanel.add(addTransactionButton);
 
         // 示例按钮：导入交易CSV
-        JButton importCSVButton = new JButton("导入交易CSV");
+        JButton importCSVButton = new JButton("Import TransactionCSV");
         buttonPanel.add(importCSVButton);
 
         // 示例按钮：分析支出
-        JButton analyzeSpendingButton = new JButton("分析支出");
+        JButton analyzeSpendingButton = new JButton("Analyze Outcome");
         buttonPanel.add(analyzeSpendingButton);
 
         // 示例按钮：设置 / 偏好
-        JButton settingsButton = new JButton("系统设置");
+        JButton settingsButton = new JButton("System Setting");
         buttonPanel.add(settingsButton);
 
         // 将中间的按钮面板加到主面板中间
