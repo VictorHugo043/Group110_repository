@@ -1,11 +1,10 @@
 package com.myfinanceapp.ui.loginscene;
-
-import com.myfinanceapp.ui.signup.SignUp;
+import com.myfinanceapp.ui.statusscene.Status;
+import com.myfinanceapp.ui.signupscene.SignUp;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
@@ -21,6 +20,8 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import com.myfinanceapp.service.UserService;
+import javafx.scene.control.Alert;
 
 
 /**
@@ -106,6 +107,29 @@ public class LoginScene {
         Button loginButton = new Button("Log in ➜");
         loginButton.setPrefWidth(160);
         loginButton.setStyle("-fx-background-color: #3377ff; -fx-text-fill: white; -fx-font-weight: bold;");
+        // 修改setOnAction
+        loginButton.setOnAction(e -> {
+            String uname = usernameField.getText();
+            String pass = passwordField.getText();
+
+            if (uname.isEmpty() || pass.isEmpty()) {
+                showAlert("Error", "Username or Password cannot be empty!");
+                return;
+            }
+
+            UserService userService = new UserService();
+            boolean valid = userService.checkLogin(uname, pass);
+            if (valid) {
+                // 登录成功: 跳转到你想要的场景
+                // e.g. Status page or main dashboard
+                 stage.setScene(Status.createScene(stage, 800, 450));
+                showAlert("Success", "Login Successful!");
+            } else {
+                // 登录失败
+                showAlert("Error", "Invalid username or password!");
+            }
+        });
+
 
         // 最底部：Don't have an account? Sign Up
         Label noAccountLabel = new Label("Don't have an account?");
@@ -139,5 +163,12 @@ public class LoginScene {
 
         // =========== 5. 创建并返回场景 ===========
         return new Scene(root, width, height);
+    }
+    private static void showAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 }

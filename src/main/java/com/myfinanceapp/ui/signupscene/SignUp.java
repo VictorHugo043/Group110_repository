@@ -1,4 +1,4 @@
-package com.myfinanceapp.ui.signup;
+package com.myfinanceapp.ui.signupscene;
 
 import com.myfinanceapp.ui.loginscene.LoginScene;
 import javafx.geometry.Insets;
@@ -21,7 +21,9 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-
+import com.myfinanceapp.service.UserService;
+import javafx.scene.control.Alert;
+import java.io.IOException;
 import java.util.Objects;
 
 
@@ -118,18 +120,43 @@ public class SignUp {
         Button nextBtn = new Button("Next ➜");
         nextBtn.setPrefWidth(140);
         nextBtn.setStyle("-fx-background-color: #3377ff; -fx-text-fill: white; -fx-font-weight: bold;");
-        // 点击后可在此处理注册逻辑，也可切换到下个场景
-        nextBtn.setOnAction(e -> {
-            // 例如：读取 username/password，验证或切换场景
-            String user = usernameField.getText();
-            String pass = passwordField.getText();
-            System.out.println("注册信息: " + user + ", " + pass);
-        });
-
-        // ============== 7. 复选框 + 超链接 ==============
         CheckBox agreeCheckBox = new CheckBox("Agree to ");
         agreeCheckBox.setFont(Font.font("Arial", 11));
         agreeCheckBox.setTextFill(Color.WHITE);
+
+        nextBtn.setOnAction(e -> {
+            String user = usernameField.getText();
+            String pass = passwordField.getText();
+
+            // 1) 先判断是否勾选了协议
+            if (!agreeCheckBox.isSelected()) {
+                showAlert("Error", "You must agree to the Terms of use and Privacy Policy to register!");
+                return;
+            }
+
+            // 简单判空
+            if (user.isEmpty() || pass.isEmpty()) {
+                showAlert("Error", "Username or Password cannot be empty!");
+                return;
+            }
+
+            // 调用 UserService 注册
+            UserService userService = new UserService();
+            boolean success = userService.registerUser(user, pass);
+            if (success) {
+                showAlert("Success", "User registered successfully!");
+                // 也可自动跳转回登录界面
+                stage.setScene(LoginScene.createScene(stage, 800, 450));
+            } else {
+                showAlert("Error", "Username already exists!");
+            }
+        });
+
+
+        // ============== 7. 复选框 + 超链接 ==============
+        //CheckBox agreeCheckBox = new CheckBox("Agree to ");
+        //agreeCheckBox.setFont(Font.font("Arial", 11));
+        //agreeCheckBox.setTextFill(Color.WHITE);
 
         Hyperlink termsLink = new Hyperlink("Terms of use");
         termsLink.setFont(Font.font("Arial", 11));
@@ -172,5 +199,16 @@ public class SignUp {
 
         // 生成场景
         return new Scene(root, width, height);
+    }
+
+// ... 其他代码不变 ...
+
+    /** 新增一个 showAlert 方法，用于弹窗提醒 */
+    private static void showAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 }
