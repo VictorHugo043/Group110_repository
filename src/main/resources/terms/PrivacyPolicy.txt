@@ -1,0 +1,27 @@
+At Finanger, we value your privacy. This Privacy Policy explains how we collect, use, and protect your personal and financial data.
+————————————————————————————————————————————————————————
+1. Information We Collect
+We may collect the following types of information:
+◆ Personal Information: Name, email, phone number (for account registration).
+◆ Financial Data: Income, expenses, budgets, savings goals (entered by you).
+◆ Device Information: IP address, browser type, app usage logs.
+◆ Cookies & Tracking: Used to improve service experience.
+2. How We Use Your Data
+Your data is used for:
+◆ Providing and improving Finanger’s financial tracking features.
+◆ Generating reports and analytics (for your personal use only).
+◆ Enhancing security and preventing fraud.
+3. Data Sharing & Third Parties
+We DO NOT sell your personal data. However, we may share data with:
+◆ Service Providers (e.g., cloud storage, payment processors).
+◆ Legal Authorities (only if required by law).
+4. Data Security
+We use industry-standard encryption to protect your financial data. However, no online system is 100% secure, so we encourage strong passwords.
+5. Your RightsYou have the right to:
+◆ Access your financial records.
+◆ Edit or delete personal data (subject to legal restrictions).
+◆ Opt-out of data tracking (some features may be affected).
+6. Data Retention
+Your data will be stored as long as you have an account. If you delete your account, data is permanently removed within 6 months, except where required by law.
+7. Changes to Privacy Policy
+We may update this policy, and significant changes will be notified in the app.
