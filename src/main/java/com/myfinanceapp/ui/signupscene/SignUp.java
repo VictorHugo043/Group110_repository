@@ -1,5 +1,7 @@
 package com.myfinanceapp.ui.signupscene;
 
+import com.myfinanceapp.ui.registrationterms.PrivacyPolicy;
+import com.myfinanceapp.ui.registrationterms.TermofUse;
 import com.myfinanceapp.ui.loginscene.LoginScene;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;

@@ -15,8 +15,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-public class TermofUse {
 
+public class TermofUse {
     public static Scene createScene(Stage stage, double width, double height) {
         BorderPane root = new BorderPane();
         root.setPrefSize(width, height);
