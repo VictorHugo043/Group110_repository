@@ -23,6 +23,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import com.myfinanceapp.service.UserService;
 import javafx.scene.control.Alert;
+import com.myfinanceapp.ui.registrationterms.PrivacyPolicy;
+import com.myfinanceapp.ui.registrationterms.TermofUse;
 import java.io.IOException;
 import java.util.Objects;
 
@@ -161,9 +163,21 @@ public class SignUp {
         Hyperlink termsLink = new Hyperlink("Terms of use");
         termsLink.setFont(Font.font("Arial", 11));
         termsLink.setTextFill(Color.DARKBLUE);
+        termsLink.setOnAction(e -> {
+            // 跳到 TermsOfUse 场景
+            Scene termsScene = TermofUse.createScene(stage, 800, 450);
+            stage.setScene(termsScene);
+            stage.setTitle("Terms of Use");
+        });
         Hyperlink privacyLink = new Hyperlink("Privacy Policy");
         privacyLink.setFont(Font.font("Arial", 11));
         privacyLink.setTextFill(Color.DARKBLUE);
+        privacyLink.setOnAction(e -> {
+            // 跳到 PrivacyPolicy 场景
+            Scene policyScene = PrivacyPolicy.createScene(stage, 800, 450);
+            stage.setScene(policyScene);
+            stage.setTitle("Privacy Policy");
+        });
 
         // 可以将 " and " 做成一个 Label
         Label andLabel = new Label(" and ");
