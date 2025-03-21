@@ -3,6 +3,7 @@ package com.myfinanceapp.ui.signupscene;
 import com.myfinanceapp.ui.registrationterms.PrivacyPolicy;
 import com.myfinanceapp.ui.registrationterms.TermofUse;
 import com.myfinanceapp.ui.loginscene.LoginScene;
+import com.myfinanceapp.service.UserService;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
@@ -16,172 +17,156 @@ import javafx.scene.shape.Polygon;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
-import javafx.scene.control.Button;
-import javafx.scene.control.Hyperlink;
-import javafx.scene.control.Label;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextField;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
-import com.myfinanceapp.service.UserService;
-import javafx.scene.control.Alert;
-import com.myfinanceapp.ui.registrationterms.PrivacyPolicy;
-import com.myfinanceapp.ui.registrationterms.TermofUse;
-import java.io.IOException;
 import java.util.Objects;
-
 
 public class SignUp {
 
-    public static Scene createScene(Stage stage, double width, double height) {
-        // 根节点：Group，承载多边形 + 容器
-        Group root = new Group();
+    private static final double INITIAL_WIDTH = 800;
+    private static final double INITIAL_HEIGHT = 450;
 
-        // ============== 1. 左侧图片 (Polygon) ==============
-        Image bgImage = new Image(
-                Objects.requireNonNull(SignUp.class.getResource("/pictures/signupbg.png")).toExternalForm()
-        );
-        // 多边形来实现斜线分割，顶点坐标可根据需求调整
-        Polygon leftPolygon = new Polygon(
-                0,    0,
-                480,  0,
-                280,  height,
-                0,    height
-        );
+    private static Group root;
+    private static Polygon leftPolygon;
+    private static Polygon rightPolygon;
+    private static Pane rightPane;
+    private static VBox vbox;
+
+    // 将固定坐标转换为比例（相对于 800×450）
+    // 左侧多边形: (0,0), (480,0), (280,450), (0,450)
+    private static final double[] LEFT_POLY_FRACS = {
+            0.0, 0.0,
+            480.0 / INITIAL_WIDTH, 0.0,
+            280.0 / INITIAL_WIDTH, 1.0,
+            0.0, 1.0
+    };
+    // 右侧多边形: (480,0), (800,0), (800,450), (280,450)
+    private static final double[] RIGHT_POLY_FRACS = {
+            480.0 / INITIAL_WIDTH, 0.0,
+            1.0, 0.0,
+            1.0, 1.0,
+            280.0 / INITIAL_WIDTH, 1.0
+    };
+
+    // rightPane 原先 layoutX = 440, 即 440/800 = 0.55
+    private static final double RIGHT_PANE_X_FRAC = 440.0 / INITIAL_WIDTH;
+
+    // 用户输入控件（后面不需要重排坐标，因为它们在 VBox 内自动排列）
+    private static TextField usernameField;
+    private static PasswordField passwordField;
+    private static CheckBox agreeCheckBox;
+
+    public static Scene createScene(Stage stage, double width, double height) {
+        root = new Group();
+        Scene scene = new Scene(root, width, height);
+
+        // 设置最小窗口尺寸
+        stage.setMinWidth(INITIAL_WIDTH);
+        stage.setMinHeight(INITIAL_HEIGHT);
+        stage.setResizable(true);
+
+        // === 左右多边形 ===
+        leftPolygon = new Polygon();
+        Image bgImage = new Image(Objects.requireNonNull(SignUp.class.getResource("/pictures/signupbg.png")).toExternalForm());
         leftPolygon.setFill(new ImagePattern(bgImage, 0, 0, 1, 1, true));
 
-        // ============== 2. 右侧蓝色 (Polygon) ==============
-        Polygon rightPolygon = new Polygon(
-                480,  0,
-                width, 0,
-                width, height,
-                280,  height
-        );
+        rightPolygon = new Polygon();
         rightPolygon.setFill(Color.web("#93D2F3"));
 
-        // 将两个多边形加到根节点
         root.getChildren().addAll(leftPolygon, rightPolygon);
 
-        // ============== 3. 在右侧放置 Pane + VBox ==============
-        Pane rightPane = new Pane();
-        rightPane.setLayoutX(440);  // 紧贴多边形的右边起点
-        rightPane.setPrefSize(width - 440, height);
+        // === 右侧 Pane 和 VBox ===
+        rightPane = new Pane();
+        root.getChildren().add(rightPane);
 
-        // VBox 用于垂直布局各元素
-        VBox vbox = new VBox(20); // 20px 间隔
+        vbox = new VBox(20);
         vbox.setAlignment(Pos.CENTER);
-        vbox.setPadding(new Insets(30, 30, 30, 30));
-        vbox.setPrefSize(rightPane.getPrefWidth(), rightPane.getPrefHeight());
+        vbox.setPadding(new Insets(30));
+        rightPane.getChildren().add(vbox);
 
-        // ============== 4. 标题区 ==============
-        // "Sign Up to" + 下方 "Finanger" 带一条横线（可用CSS或分两个Label实现）
+        // === 标题区 ===
         Label mainTitle = new Label("Sign Up to");
-        mainTitle.setFont(Font.font("PingFang SC",FontWeight.BOLD, 32));
+        mainTitle.setFont(Font.font("PingFang SC", FontWeight.BOLD, 32));
         mainTitle.setTextFill(Color.WHITE);
         mainTitle.setStyle("-fx-underline: true;");
         mainTitle.setMaxWidth(Double.MAX_VALUE);
         mainTitle.setAlignment(Pos.CENTER_LEFT);
 
         Label subTitle = new Label("Finanger");
-        subTitle.setFont(Font.font("Arial",FontWeight.BOLD ,18));
+        subTitle.setFont(Font.font("Arial", FontWeight.BOLD, 18));
         subTitle.setTextFill(Color.WHITE);
-        // 也可添加下划线、或在底部画一条线
-        //subTitle.setStyle("-fx-underline: true;");
         subTitle.setMaxWidth(Double.MAX_VALUE);
         subTitle.setAlignment(Pos.CENTER_LEFT);
 
-        vbox.getChildren().addAll(mainTitle, subTitle);
-
         VBox titleBox = new VBox(2, mainTitle, subTitle);
         titleBox.setAlignment(Pos.CENTER_RIGHT);
-        titleBox.setMaxWidth(Region.USE_PREF_SIZE);      // 宽度自适应文字
-        // 把文本添加进 titleBox
-        //titleBox.getChildren().addAll(mainTitle, subTitle);
+        titleBox.setMaxWidth(Region.USE_PREF_SIZE);
+        vbox.getChildren().add(titleBox);
 
-        // 2) 将 titleBox 加进原先的 vbox
-        //vbox.getChildren().add(titleBox);
-
-        // ============== 5. 用户名/密码输入框 ==============
+        // === 用户名和密码输入区域 ===
         Label userLabel = new Label("Username:");
         userLabel.setFont(Font.font("Arial", FontWeight.BOLD, 12));
         userLabel.setTextFill(Color.WHITE);
-        TextField usernameField = new TextField();
+        usernameField = new TextField();
         usernameField.setPrefWidth(180);
-
         HBox userBox = new HBox(10, userLabel, usernameField);
-        userBox.setAlignment(Pos.CENTER_LEFT);
+        userBox.setAlignment(Pos.CENTER);
 
-        Label passLabel = new Label("Password: ");
+        Label passLabel = new Label("Password:");
         passLabel.setFont(Font.font("Arial", FontWeight.BOLD, 12));
         passLabel.setTextFill(Color.WHITE);
-        PasswordField passwordField = new PasswordField();
+        passwordField = new PasswordField();
         passwordField.setPrefWidth(180);
-
         HBox passBox = new HBox(10, passLabel, passwordField);
-        passBox.setAlignment(Pos.CENTER_LEFT);
+        passBox.setAlignment(Pos.CENTER);
 
-        // ============== 6. “Next” 按钮 ==============
+        vbox.getChildren().addAll(userBox, passBox);
+
+        // === Next 按钮和协议 ===
         Button nextBtn = new Button("Next ➜");
         nextBtn.setPrefWidth(140);
         nextBtn.setStyle("-fx-background-color: #3377ff; -fx-text-fill: white; -fx-font-weight: bold;");
-        CheckBox agreeCheckBox = new CheckBox("Agree to ");
+        agreeCheckBox = new CheckBox("Agree to ");
         agreeCheckBox.setFont(Font.font("Arial", 11));
         agreeCheckBox.setTextFill(Color.WHITE);
 
         nextBtn.setOnAction(e -> {
             String user = usernameField.getText();
             String pass = passwordField.getText();
-
-            // 1) 先判断是否勾选了协议
             if (!agreeCheckBox.isSelected()) {
                 showAlert("Error", "You must agree to the Terms of use and Privacy Policy to register!");
                 return;
             }
-
-            // 简单判空
             if (user.isEmpty() || pass.isEmpty()) {
                 showAlert("Error", "Username or Password cannot be empty!");
                 return;
             }
-
-            // 调用 UserService 注册
             UserService userService = new UserService();
             boolean success = userService.registerUser(user, pass);
             if (success) {
                 showAlert("Success", "User registered successfully!");
-                // 也可自动跳转回登录界面
-                stage.setScene(LoginScene.createScene(stage, 800, 450));
+                stage.setScene(LoginScene.createScene(stage, INITIAL_WIDTH, INITIAL_HEIGHT));
             } else {
                 showAlert("Error", "Username already exists!");
             }
         });
 
-
-        // ============== 7. 复选框 + 超链接 ==============
-        //CheckBox agreeCheckBox = new CheckBox("Agree to ");
-        //agreeCheckBox.setFont(Font.font("Arial", 11));
-        //agreeCheckBox.setTextFill(Color.WHITE);
-
         Hyperlink termsLink = new Hyperlink("Terms of use");
         termsLink.setFont(Font.font("Arial", 11));
         termsLink.setTextFill(Color.DARKBLUE);
         termsLink.setOnAction(e -> {
-            // 跳到 TermsOfUse 场景
-            Scene termsScene = TermofUse.createScene(stage, 800, 450);
+            Scene termsScene = TermofUse.createScene(stage, INITIAL_WIDTH, INITIAL_HEIGHT);
             stage.setScene(termsScene);
             stage.setTitle("Terms of Use");
         });
+
         Hyperlink privacyLink = new Hyperlink("Privacy Policy");
         privacyLink.setFont(Font.font("Arial", 11));
         privacyLink.setTextFill(Color.DARKBLUE);
         privacyLink.setOnAction(e -> {
-            // 跳到 PrivacyPolicy 场景
-            Scene policyScene = PrivacyPolicy.createScene(stage, 800, 450);
+            Scene policyScene = PrivacyPolicy.createScene(stage, INITIAL_WIDTH, INITIAL_HEIGHT);
             stage.setScene(policyScene);
             stage.setTitle("Privacy Policy");
         });
 
-        // 可以将 " and " 做成一个 Label
         Label andLabel = new Label(" and ");
         andLabel.setFont(Font.font("Arial", 11));
         andLabel.setTextFill(Color.WHITE);
@@ -189,37 +174,51 @@ public class SignUp {
         HBox agreeBox = new HBox(2, agreeCheckBox, termsLink, andLabel, privacyLink);
         agreeBox.setAlignment(Pos.CENTER);
 
-        // ============== 8. “Already have an account?” 链接 ==============
         Hyperlink alreadyLink = new Hyperlink("Already have an account?");
         alreadyLink.setTextFill(Color.DARKBLUE);
-        // 点击后返回到登录界面
         alreadyLink.setOnAction(e -> {
-            // 假设有 LoginScene，可以跳转回登录
-            Scene loginScene = LoginScene.createScene(stage, 800, 450);
+            Scene loginScene = LoginScene.createScene(stage, INITIAL_WIDTH, INITIAL_HEIGHT);
             stage.setScene(loginScene);
             stage.setTitle("Finanger - Login");
-            //stage.setScene(LoginScene.createScene(stage, width, height));
         });
 
-        // ============== 9. 将所有元素加入 VBox ==============
-        vbox.getChildren().addAll(
-                titleBox,
-                userBox,
-                passBox,
-                nextBtn,
-                agreeBox,
-                alreadyLink
-        );
-        rightPane.getChildren().add(vbox);
-        root.getChildren().add(rightPane);
+        vbox.getChildren().addAll(nextBtn, agreeBox, alreadyLink);
 
-        // 生成场景
-        return new Scene(root, width, height);
+        // 添加动态重排监听
+        scene.widthProperty().addListener((obs, oldVal, newVal) -> relayout());
+        scene.heightProperty().addListener((obs, oldVal, newVal) -> relayout());
+        relayout();
+
+        return scene;
     }
 
-// ... 其他代码不变 ...
+    private static void relayout() {
+        double curWidth = root.getScene().getWidth();
+        double curHeight = root.getScene().getHeight();
 
-    /** 新增一个 showAlert 方法，用于弹窗提醒 */
+        // 重新计算左侧多边形坐标
+        leftPolygon.getPoints().setAll(
+                LEFT_POLY_FRACS[0] * curWidth, LEFT_POLY_FRACS[1] * curHeight,
+                LEFT_POLY_FRACS[2] * curWidth, LEFT_POLY_FRACS[3] * curHeight,
+                LEFT_POLY_FRACS[4] * curWidth, LEFT_POLY_FRACS[5] * curHeight,
+                LEFT_POLY_FRACS[6] * curWidth, LEFT_POLY_FRACS[7] * curHeight
+        );
+
+        // 重新计算右侧多边形坐标
+        rightPolygon.getPoints().setAll(
+                RIGHT_POLY_FRACS[0] * curWidth, RIGHT_POLY_FRACS[1] * curHeight,
+                RIGHT_POLY_FRACS[2] * curWidth, RIGHT_POLY_FRACS[3] * curHeight,
+                RIGHT_POLY_FRACS[4] * curWidth, RIGHT_POLY_FRACS[5] * curHeight,
+                RIGHT_POLY_FRACS[6] * curWidth, RIGHT_POLY_FRACS[7] * curHeight
+        );
+
+        // 重新计算 rightPane 的位置和大小
+        double paneX = RIGHT_PANE_X_FRAC * curWidth;
+        rightPane.setLayoutX(paneX);
+        rightPane.setPrefSize(curWidth - paneX, curHeight);
+        vbox.setPrefSize(rightPane.getPrefWidth(), rightPane.getPrefHeight());
+    }
+
     private static void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(title);
