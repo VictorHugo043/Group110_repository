@@ -9,23 +9,27 @@ import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
 public class PrivacyPolicy {
+    private static final double INITIAL_WIDTH = 800;
+    private static final double INITIAL_HEIGHT = 450;
+
     public static Scene createScene(Stage stage, double width, double height) {
         BorderPane root = new BorderPane();
         root.setPrefSize(width, height);
 
-        // 顶部
+        stage.setMinWidth(INITIAL_WIDTH);
+        stage.setMinHeight(INITIAL_HEIGHT);
+        stage.setResizable(true);
+
         VBox topContainer = new VBox();
         topContainer.setPadding(new Insets(10, 15, 0, 15));
         topContainer.setSpacing(5);
 
-        // 行1: Finanger (LOGO) + back按钮
         HBox logoBackRow = new HBox();
         logoBackRow.setAlignment(Pos.CENTER_LEFT);
 
@@ -39,14 +43,12 @@ public class PrivacyPolicy {
         Button backBtn = new Button("back");
         backBtn.setStyle("-fx-background-color: #BEE3F8; -fx-text-fill: black;");
         backBtn.setOnAction(e -> {
-            Scene signUpScene = SignUp.createScene(stage, width, height);
+            Scene signUpScene = SignUp.createScene(stage, INITIAL_WIDTH, INITIAL_HEIGHT);
             stage.setScene(signUpScene);
             stage.setTitle("Sign Up");
         });
-
         logoBackRow.getChildren().addAll(logoLabel, spacer, backBtn);
 
-        // 行2: Last Updated + Title
         VBox updatedAndTitleBox = new VBox();
         updatedAndTitleBox.setAlignment(Pos.CENTER);
 
@@ -59,20 +61,20 @@ public class PrivacyPolicy {
         updatedAndTitleBox.getChildren().addAll(lastUpdated, titleLabel);
 
         topContainer.getChildren().addAll(logoBackRow, updatedAndTitleBox);
-
         root.setTop(topContainer);
 
-        // 中心 TextArea
         TextArea textArea = new TextArea(loadPolicyContent("/terms/PrivacyPolicy.txt"));
         textArea.setWrapText(true);
         textArea.setEditable(false);
         textArea.setPadding(new Insets(10));
         textArea.setStyle("-fx-border-color: black; -fx-border-width: 1;");
-        textArea.setPrefSize(width - 40, height - 200);
 
+        textArea.prefWidthProperty().bind(root.widthProperty().subtract(40));
+        textArea.prefHeightProperty().bind(root.heightProperty().subtract(150));
         root.setCenter(textArea);
 
-        return new Scene(root, width, height);
+        Scene scene = new Scene(root, width, height);
+        return scene;
     }
 
     private static String loadPolicyContent(String resourcePath) {
