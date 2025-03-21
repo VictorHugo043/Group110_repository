@@ -1,5 +1,6 @@
 package com.myfinanceapp.ui.signupscene;
 
+
 import com.myfinanceapp.ui.registrationterms.PrivacyPolicy;
 import com.myfinanceapp.ui.registrationterms.TermofUse;
 import com.myfinanceapp.ui.loginscene.LoginScene;
@@ -102,7 +103,7 @@ public class SignUp {
         vbox.getChildren().add(titleBox);
 
         // === 用户名和密码输入区域 ===
-        Label userLabel = new Label("Username:");
+        Label userLabel = new Label("Set Your Username:");
         userLabel.setFont(Font.font("Arial", FontWeight.BOLD, 12));
         userLabel.setTextFill(Color.WHITE);
         usernameField = new TextField();
@@ -110,7 +111,7 @@ public class SignUp {
         HBox userBox = new HBox(10, userLabel, usernameField);
         userBox.setAlignment(Pos.CENTER);
 
-        Label passLabel = new Label("Password:");
+        Label passLabel = new Label("Set your Password:");
         passLabel.setFont(Font.font("Arial", FontWeight.BOLD, 12));
         passLabel.setTextFill(Color.WHITE);
         passwordField = new PasswordField();
