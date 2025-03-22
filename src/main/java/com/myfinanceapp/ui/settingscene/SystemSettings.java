@@ -1,6 +1,6 @@
 package com.myfinanceapp.ui.settingscene;
 
-import com.myfinanceapp.ui.loginscene.LoginScene;
+import com.myfinanceapp.ui.common.LeftSidebarFactory;
 import com.myfinanceapp.ui.statusscene.Status;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -22,7 +22,7 @@ public class SystemSettings {
         root.setStyle("-fx-background-color: white;");
 
         // ===== 左侧导航栏：与 Status 一致，但 Settings 选中 =====
-        VBox sideBar = createLeftSidebar(stage);
+        VBox sideBar = LeftSidebarFactory.createLeftSidebar(stage,"Settings");
         root.setLeft(sideBar);
 
         // ===== 中心容器：包含顶部选项栏 + 设置表单，共用同一个圆角边框 =====
@@ -64,7 +64,7 @@ public class SystemSettings {
     /**
      * 左侧边栏，沿用和 Status 同样的样式，只是「Settings」按钮选中
      */
-    private static VBox createLeftSidebar(Stage stage) {
+    /*private static VBox createLeftSidebar(Stage stage) {
         VBox sideBar = new VBox(15);
         sideBar.setPadding(new Insets(20, 0, 20, 15));
         sideBar.setAlignment(Pos.TOP_LEFT);
@@ -114,7 +114,7 @@ public class SystemSettings {
                 logoutBox
         );
         return sideBar;
-    }
+    } */
 
     /**
      * 生成侧边栏按钮（与 Status 同样逻辑）

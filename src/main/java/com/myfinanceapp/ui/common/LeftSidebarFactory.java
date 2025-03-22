@@ -1,0 +1,139 @@
+package com.myfinanceapp.ui.common;
+
+import com.myfinanceapp.ui.loginscene.LoginScene;
+import com.myfinanceapp.ui.settingscene.SystemSettings;
+import com.myfinanceapp.ui.statusscene.Status;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.control.*;
+import javafx.scene.image.*;
+import javafx.scene.layout.*;
+import javafx.scene.text.Font;
+import javafx.stage.Stage;
+
+import java.util.Objects;
+
+public class LeftSidebarFactory {
+
+    /**
+     * 创建左侧边栏，支持传入一个 selectedButton 表示哪个按钮是“选中”。
+     * 可取值如 "Status", "Goals", "New", "Settings", "Logout" 等
+     */
+    public static VBox createLeftSidebar(Stage stage, String selectedButton) {
+        VBox sideBar = new VBox(15);
+        sideBar.setPadding(new Insets(20, 0, 20, 15));
+        sideBar.setAlignment(Pos.TOP_LEFT);
+        sideBar.setPrefWidth(170);
+
+        // 在 sideBar 的右侧画一条 2px 蓝色竖线
+        sideBar.setStyle(
+                "-fx-background-color: white;" +
+                        "-fx-border-color: #3282FA;" +
+                        "-fx-border-width: 0 2 0 0;"
+        );
+
+        // 顶部文字
+        Label welcomeLabel = new Label("Only \nyou can do!");
+        welcomeLabel.setFont(new Font(18));
+        welcomeLabel.setTextFill(javafx.scene.paint.Color.DARKBLUE);
+
+        // 创建五个按钮，判断哪个是选中
+        // 例：String "Settings" 表示 Settings 选中
+        HBox statusBox   = createSidebarButtonBox(stage, "Status",   "status_icon_default.png",   "status_icon_selected.png",   selectedButton.equals("Status"));
+        HBox goalsBox    = createSidebarButtonBox(stage, "Goals",    "goals_icon_default.png",    "goals_icon_selected.png",    selectedButton.equals("Goals"));
+        HBox newBox      = createSidebarButtonBox(stage, "New",      "new_icon_default.png",      "new_icon_selected.png",      selectedButton.equals("New"));
+        HBox settingsBox = createSidebarButtonBox(stage, "Settings", "settings_icon_default.png", "settings_icon_selected.png", selectedButton.equals("Settings"));
+        HBox logoutBox   = createSidebarButtonBox(stage, "Log out",  "logout_icon_default.png",   "logout_icon_selected.png",   selectedButton.equals("Log out"));
+
+        sideBar.getChildren().addAll(
+                welcomeLabel,
+                statusBox,
+                goalsBox,
+                newBox,
+                settingsBox,
+                logoutBox
+        );
+        return sideBar;
+    }
+
+    /**
+     * 生成单个按钮Box，可根据 isActive 决定是否覆盖竖线
+     */
+    private static HBox createSidebarButtonBox(Stage stage, String text, String defaultIcon, String selectedIcon, boolean isActive) {
+        Label label = new Label(text);
+        label.setFont(new Font(14));
+        label.setPrefSize(isActive ? 172 : 170, 40); // 选中时多2px
+        label.setAlignment(Pos.CENTER_LEFT);
+        label.setPadding(new Insets(0, 10, 0, 20));
+
+        String iconFile = isActive ? selectedIcon : defaultIcon;
+        var url = Objects.requireNonNull(
+                LeftSidebarFactory.class.getResource("/pictures/" + iconFile),
+                "Resource /pictures/" + iconFile + " not found!"
+        );
+        ImageView iconView = new ImageView(new Image(url.toExternalForm()));
+        iconView.setFitWidth(18);
+        iconView.setFitHeight(18);
+        label.setGraphic(iconView);
+        label.setGraphicTextGap(10);
+
+        if (isActive) {
+            // 选中样式
+            label.setStyle(
+                    "-fx-background-color: white; " +
+                            "-fx-text-fill: #3282FA; " +
+                            "-fx-border-color: #3282FA transparent #3282FA #3282FA; " +
+                            "-fx-border-width: 2 0 2 2; " +
+                            "-fx-border-radius: 8 0 0 8;" +
+                            "-fx-background-radius: 8 0 0 8;"
+            );
+        } else {
+            // 未选中样式
+            label.setStyle(
+                    "-fx-background-color: #E0F0FF; " +
+                            "-fx-text-fill: black; " +
+                            "-fx-border-color: #3282FA transparent #3282FA #3282FA; " +
+                            "-fx-border-width: 2 0 2 2; " +
+                            "-fx-border-radius: 8 0 0 8;" +
+                            "-fx-background-radius: 8 0 0 8;"
+            );
+        }
+
+        // 点击事件，根据按钮 text 做不同跳转
+        label.setOnMouseClicked(e -> {
+            switch (text) {
+                case "Status":
+                    // 跳转 Status
+                    stage.setScene(Status.createScene(stage, 800, 450));
+                    break;
+                case "Goals":
+                    // TODO: Goals page
+                    break;
+                case "New":
+                    // TODO: New page
+                    break;
+                case "Settings":
+                    stage.setScene(SystemSettings.createScene(stage, 800, 450));
+                    break;
+                case "Log out":
+                    Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure you want to log out?");
+                    confirm.setHeaderText(null);
+                    confirm.setTitle("Confirm Logout");
+                    confirm.showAndWait().ifPresent(response -> {
+                        if (response == ButtonType.OK) {
+                            stage.setScene(LoginScene.createScene(stage, 800, 450));
+                            stage.setTitle("Finanger - Login");
+                        }
+                    });
+                    break;
+            }
+        });
+
+        HBox box = new HBox(label);
+        box.setAlignment(Pos.CENTER_LEFT);
+        if (isActive) {
+            box.setTranslateX(2);
+        }
+        return box;
+    }
+}

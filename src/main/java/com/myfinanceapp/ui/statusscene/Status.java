@@ -1,6 +1,6 @@
 package com.myfinanceapp.ui.statusscene;
-import com.myfinanceapp.ui.settingscene.SystemSettings;
-import com.myfinanceapp.ui.loginscene.LoginScene;
+
+import com.myfinanceapp.ui.common.LeftSidebarFactory;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -21,61 +21,7 @@ public class Status {
         root.setStyle("-fx-background-color: white;");
 
         // ============ 左侧导航 sideBar ============
-        VBox sideBar = new VBox(15);
-        sideBar.setPadding(new Insets(20, 0, 20, 15));
-        sideBar.setAlignment(Pos.TOP_LEFT);
-        sideBar.setPrefWidth(170);
-        // 让 sideBar 右侧有一条 2px 蓝线
-        sideBar.setStyle(
-                "-fx-background-color: white;" +
-                        "-fx-border-color: #3282FA;" +
-                        "-fx-border-width: 0 2 0 0;"
-        );
-
-        // 欢迎文字
-        Label welcomeLabel = new Label("Welcome \nback!");
-        welcomeLabel.setFont(new Font(18));
-        welcomeLabel.setTextFill(Color.DARKBLUE);
-
-        // 按钮: Status(选中), Goals, New, Settings, Log out
-        HBox statusBox   = createSidebarButtonBox("Status",   "status_icon_default.png",   "status_icon_selected.png",   true);
-        HBox goalsBox    = createSidebarButtonBox("Goals",    "goals_icon_default.png",    "goals_icon_selected.png",    false);
-        HBox newBox      = createSidebarButtonBox("New",      "new_icon_default.png",      "new_icon_selected.png",      false);
-        HBox settingsBox = createSidebarButtonBox("Settings", "settings_icon_default.png", "settings_icon_selected.png", false);
-        HBox logoutBox   = createSidebarButtonBox("Log out",  "logout_icon_default.png",   "logout_icon_selected.png",   false);
-
-        // 示例：切换页面逻辑
-        goalsBox.getChildren().get(0).setOnMouseClicked(e -> {
-            // stage.setScene(GoalsScene.createScene(stage, 800, 450));
-        });
-        newBox.getChildren().get(0).setOnMouseClicked(e -> {
-            // ...
-        });
-        settingsBox.getChildren().get(0).setOnMouseClicked(e -> {
-            stage.setScene(SystemSettings.createScene(stage, 800, 450));
-            // ...
-        });
-        logoutBox.getChildren().get(0).setOnMouseClicked(e -> {
-            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure you want to log out?");
-            confirm.setHeaderText(null);
-            confirm.setTitle("Confirm Logout");
-            confirm.showAndWait().ifPresent(response -> {
-                if (response == ButtonType.OK) {
-                    stage.setScene(LoginScene.createScene(stage, 800, 450));
-                    stage.setTitle("Finanger - Login");
-                }
-            });
-        });
-
-        // 将组件加入 sideBar
-        sideBar.getChildren().addAll(
-                welcomeLabel,
-                statusBox,
-                goalsBox,
-                newBox,
-                settingsBox,
-                logoutBox
-        );
+        VBox sideBar = LeftSidebarFactory.createLeftSidebar(stage,"Status");
         root.setLeft(sideBar);
 
         // ============ 中间内容区 ============
