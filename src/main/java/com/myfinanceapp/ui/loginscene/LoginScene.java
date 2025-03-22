@@ -147,6 +147,12 @@ public class LoginScene {
         // Forgot link
         forgotLink = new Hyperlink("Forgot password?");
         forgotLink.setTextFill(Color.DARKBLUE);
+        forgotLink.setOnAction(e -> {
+            // 跳转到 ResetPassword 界面
+            Scene resetScene = ResetPassword.createScene(stage, 800, 450);
+            stage.setScene(resetScene);
+            stage.setTitle("Finanger - Reset Password");
+        });
 
         // 登录按钮
         loginButton = new Button("Log in ➜");

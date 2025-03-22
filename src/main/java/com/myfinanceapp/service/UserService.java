@@ -26,7 +26,7 @@ public class UserService {
     /**
      * 注册用户：追加到JSON中
      */
-    public boolean registerUser(String username, String password) {
+    public boolean registerUser(String username, String password,String secQuestion, String secAnswer) {
         // 1. 先读取当前JSON中已有的用户列表
         List<User> users = loadUsers();
         // 2. 检查是否重名
@@ -37,7 +37,7 @@ public class UserService {
             }
         }
         // 3. 不存在则添加
-        users.add(new User(username, password));
+        users.add(new User(username, password, secQuestion, secAnswer));
         // 4. 保存回JSON
         saveUsers(users);
         return true;
@@ -87,6 +87,28 @@ public class UserService {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+    public User findUserByUsername(String username) {
+        List<User> users = loadUsers(); // CSV/JSON 读取
+        for (User u : users) {
+            if (u.getUsername().equalsIgnoreCase(username)) {
+                return u;
+            }
+        }
+        return null;
+    }
+
+    public boolean updateUser(User updatedUser) {
+        List<User> users = loadUsers();
+        for (int i=0; i<users.size(); i++) {
+            if (users.get(i).getUsername().equalsIgnoreCase(updatedUser.getUsername())) {
+                // 更新
+                users.set(i, updatedUser);
+                saveUsers(users); // 写回CSV/JSON
+                return true;
+            }
+        }
+        return false;
     }
 
 }

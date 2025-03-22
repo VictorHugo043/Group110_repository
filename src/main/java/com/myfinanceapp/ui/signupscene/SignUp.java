@@ -20,6 +20,7 @@ import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 import java.util.Objects;
 
+
 public class SignUp {
 
     private static final double INITIAL_WIDTH = 800;
@@ -54,6 +55,8 @@ public class SignUp {
     private static TextField usernameField;
     private static PasswordField passwordField;
     private static CheckBox agreeCheckBox;
+    private static ComboBox<String> securityQuestionCombo;
+    private static TextField securityAnswerField;
 
     public static Scene createScene(Stage stage, double width, double height) {
         root = new Group();
@@ -121,6 +124,38 @@ public class SignUp {
 
         vbox.getChildren().addAll(userBox, passBox);
 
+        // 1) Security Question
+        Label questionLabel = new Label("Set your Security Question");
+        questionLabel.setFont(Font.font("Arial", FontWeight.BOLD, 12));
+        questionLabel.setTextFill(Color.WHITE);
+
+        // 准备几个常用问题
+        securityQuestionCombo = new ComboBox<>();
+        securityQuestionCombo.getItems().addAll(
+                "What is your favorite book?",
+                "What was the name of your first pet?",
+                "What is your best friend's name?",
+                "What city were you born in?"
+        );
+        securityQuestionCombo.setValue("What is your favorite book?"); // 默认
+
+        VBox questionContainer = new VBox(5, questionLabel, securityQuestionCombo);
+        questionContainer.setAlignment(Pos.CENTER_LEFT);
+
+        // 2) Security Answer
+        Label answerLabel = new Label("Your answer:");
+        answerLabel.setFont(Font.font("Arial", FontWeight.BOLD, 12));
+        answerLabel.setTextFill(Color.WHITE);
+
+        securityAnswerField = new TextField();
+        securityAnswerField.setPrefWidth(180);
+
+        VBox answerContainer = new VBox(5, answerLabel, securityAnswerField);
+        answerContainer.setAlignment(Pos.CENTER_LEFT);
+
+        // 在 vbox.getChildren().addAll(userBox, passBox); 后面插入
+        vbox.getChildren().addAll(questionContainer, answerContainer);
+
         // === Next 按钮和协议 ===
         Button nextBtn = new Button("Next ➜");
         nextBtn.setPrefWidth(140);
@@ -132,16 +167,18 @@ public class SignUp {
         nextBtn.setOnAction(e -> {
             String user = usernameField.getText();
             String pass = passwordField.getText();
+            String secQuestion = securityQuestionCombo.getValue();
+            String secAnswer   = securityAnswerField.getText();
             if (!agreeCheckBox.isSelected()) {
                 showAlert("Error", "You must agree to the Terms of use and Privacy Policy to register!");
                 return;
             }
-            if (user.isEmpty() || pass.isEmpty()) {
-                showAlert("Error", "Username or Password cannot be empty!");
+            if (user.isEmpty() || pass.isEmpty()|| secAnswer.isEmpty()) {
+                showAlert("Error", "Fields cannot be empty!");
                 return;
             }
             UserService userService = new UserService();
-            boolean success = userService.registerUser(user, pass);
+            boolean success = userService.registerUser(user, pass,secQuestion,secAnswer);
             if (success) {
                 showAlert("Success", "User registered successfully!");
                 stage.setScene(LoginScene.createScene(stage, INITIAL_WIDTH, INITIAL_HEIGHT));

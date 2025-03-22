@@ -3,6 +3,8 @@ package com.myfinanceapp.ui.common;
 import com.myfinanceapp.ui.loginscene.LoginScene;
 import com.myfinanceapp.ui.settingscene.SystemSettings;
 import com.myfinanceapp.ui.statusscene.Status;
+import com.myfinanceapp.ui.goalsscene.Goals;
+import com.myfinanceapp.ui.transactionscene.TransactionScene;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
@@ -107,10 +109,12 @@ public class LeftSidebarFactory {
                     stage.setScene(Status.createScene(stage, 800, 450));
                     break;
                 case "Goals":
-                    // TODO: Goals page
+                    // TODO
+                    //stage.setScene(Goals.createScene(stage, 800, 450));
                     break;
                 case "New":
-                    // TODO: New page
+                    // TODO
+                    //stage.setScene(TransactionScene.createScene(stage, 800, 450));
                     break;
                 case "Settings":
                     stage.setScene(SystemSettings.createScene(stage, 800, 450));
