@@ -1,5 +1,6 @@
 package com.myfinanceapp.ui.common;
 
+import com.myfinanceapp.model.User;
 import com.myfinanceapp.ui.loginscene.LoginScene;
 import com.myfinanceapp.ui.settingscene.SystemSettings;
 import com.myfinanceapp.ui.statusscene.Status;
@@ -21,7 +22,7 @@ public class LeftSidebarFactory {
      * 创建左侧边栏，支持传入一个 selectedButton 表示哪个按钮是“选中”。
      * 可取值如 "Status", "Goals", "New", "Settings", "Logout" 等
      */
-    public static VBox createLeftSidebar(Stage stage, String selectedButton) {
+    public static VBox createLeftSidebar(Stage stage, String selectedButton, User loggedUser) {
         VBox sideBar = new VBox(15);
         sideBar.setPadding(new Insets(20, 0, 20, 15));
         sideBar.setAlignment(Pos.TOP_LEFT);
@@ -41,11 +42,11 @@ public class LeftSidebarFactory {
 
         // 创建五个按钮，判断哪个是选中
         // 例：String "Settings" 表示 Settings 选中
-        HBox statusBox   = createSidebarButtonBox(stage, "Status",   "status_icon_default.png",   "status_icon_selected.png",   selectedButton.equals("Status"));
-        HBox goalsBox    = createSidebarButtonBox(stage, "Goals",    "goals_icon_default.png",    "goals_icon_selected.png",    selectedButton.equals("Goals"));
-        HBox newBox      = createSidebarButtonBox(stage, "New",      "new_icon_default.png",      "new_icon_selected.png",      selectedButton.equals("New"));
-        HBox settingsBox = createSidebarButtonBox(stage, "Settings", "settings_icon_default.png", "settings_icon_selected.png", selectedButton.equals("Settings"));
-        HBox logoutBox   = createSidebarButtonBox(stage, "Log out",  "logout_icon_default.png",   "logout_icon_selected.png",   selectedButton.equals("Log out"));
+        HBox statusBox   = createSidebarButtonBox(stage, "Status",   "status_icon_default.png",   "status_icon_selected.png",   selectedButton.equals("Status"),loggedUser);
+        HBox goalsBox    = createSidebarButtonBox(stage, "Goals",    "goals_icon_default.png",    "goals_icon_selected.png",    selectedButton.equals("Goals"),loggedUser);
+        HBox newBox      = createSidebarButtonBox(stage, "New",      "new_icon_default.png",      "new_icon_selected.png",      selectedButton.equals("New"),loggedUser);
+        HBox settingsBox = createSidebarButtonBox(stage, "Settings", "settings_icon_default.png", "settings_icon_selected.png", selectedButton.equals("Settings"),loggedUser);
+        HBox logoutBox   = createSidebarButtonBox(stage, "Log out",  "logout_icon_default.png",   "logout_icon_selected.png",   selectedButton.equals("Log out"),loggedUser);
 
         sideBar.getChildren().addAll(
                 welcomeLabel,
@@ -61,7 +62,7 @@ public class LeftSidebarFactory {
     /**
      * 生成单个按钮Box，可根据 isActive 决定是否覆盖竖线
      */
-    private static HBox createSidebarButtonBox(Stage stage, String text, String defaultIcon, String selectedIcon, boolean isActive) {
+    private static HBox createSidebarButtonBox(Stage stage, String text, String defaultIcon, String selectedIcon, boolean isActive,User loggedUser) {
         Label label = new Label(text);
         label.setFont(new Font(14));
         label.setPrefSize(isActive ? 172 : 170, 40); // 选中时多2px
@@ -106,7 +107,7 @@ public class LeftSidebarFactory {
             switch (text) {
                 case "Status":
                     // 跳转 Status
-                    stage.setScene(Status.createScene(stage, 800, 450));
+                    stage.setScene(Status.createScene(stage, 800, 450,loggedUser));
                     break;
                 case "Goals":
                     // TODO
@@ -117,7 +118,7 @@ public class LeftSidebarFactory {
                     //stage.setScene(TransactionScene.createScene(stage, 800, 450));
                     break;
                 case "Settings":
-                    stage.setScene(SystemSettings.createScene(stage, 800, 450));
+                    stage.setScene(SystemSettings.createScene(stage, 800, 450,loggedUser));
                     break;
                 case "Log out":
                     Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure you want to log out?");

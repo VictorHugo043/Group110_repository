@@ -107,15 +107,15 @@ public class SignUp {
 
         // === 用户名和密码输入区域 ===
         Label userLabel = new Label("Set Your Username:");
-        userLabel.setFont(Font.font("Arial", FontWeight.BOLD, 12));
+        userLabel.setFont(Font.font("Arial", FontWeight.BOLD, 10));
         userLabel.setTextFill(Color.WHITE);
         usernameField = new TextField();
         usernameField.setPrefWidth(180);
         HBox userBox = new HBox(10, userLabel, usernameField);
         userBox.setAlignment(Pos.CENTER);
 
-        Label passLabel = new Label("Set your Password:");
-        passLabel.setFont(Font.font("Arial", FontWeight.BOLD, 12));
+        Label passLabel = new Label("Set Your Password:");
+        passLabel.setFont(Font.font("Arial", FontWeight.BOLD, 10));
         passLabel.setTextFill(Color.WHITE);
         passwordField = new PasswordField();
         passwordField.setPrefWidth(180);

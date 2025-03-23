@@ -1,5 +1,6 @@
 package com.myfinanceapp.ui.settingscene;
 
+import  com.myfinanceapp.model.User;
 import com.myfinanceapp.ui.common.LeftSidebarFactory;
 import com.myfinanceapp.ui.common.SettingsTopBarFactory;
 import com.myfinanceapp.ui.statusscene.Status;
@@ -11,15 +12,16 @@ import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
+
 public class About {
 
-    public static Scene createScene(Stage stage, double width, double height) {
+    public static Scene createScene(Stage stage, double width, double height,User loggedUser) {
         // 整体 BorderPane
         BorderPane root = new BorderPane();
         root.setStyle("-fx-background-color: white;");
 
         // 左侧边栏: Settings选中 (与 SystemSettings 相同)
-        VBox sideBar = LeftSidebarFactory.createLeftSidebar(stage, "Settings");
+        VBox sideBar = LeftSidebarFactory.createLeftSidebar(stage, "Settings",loggedUser);
         root.setLeft(sideBar);
 
         // 中心容器: 垂直组合 (topBar, outerBox)，放入 centerBox
@@ -30,13 +32,14 @@ public class About {
         container.setAlignment(Pos.CENTER);
 
         // Tab栏: About 选中
-        HBox topBar = SettingsTopBarFactory.createTopBar(stage,"About");
+        HBox topBar = SettingsTopBarFactory.createTopBar(stage,"About",loggedUser);
 
         // outerBox: 下方圆角容器
         VBox outerBox = new VBox(0);
-        outerBox.setMaxWidth(600);
-        outerBox.setMaxHeight(400);
         outerBox.setAlignment(Pos.TOP_CENTER);
+        outerBox.setMaxWidth(510);
+        outerBox.setMaxHeight(400);
+        //outerBox.setAlignment(Pos.TOP_CENTER);
         outerBox.setStyle(
                 "-fx-border-color: #3282FA;" +
                         "-fx-border-width: 2;" +
@@ -46,7 +49,7 @@ public class About {
         );
 
         // 中心内容：About 文本
-        Pane aboutContent = createAboutContent(stage);
+        Pane aboutContent = createAboutContent(stage,loggedUser);
 
         outerBox.getChildren().addAll(aboutContent);
         container.getChildren().addAll(topBar, outerBox);
@@ -60,7 +63,7 @@ public class About {
     /**
      * 生成 About 界面的正文内容
      */
-    private static Pane createAboutContent(Stage stage) {
+    private static Pane createAboutContent(Stage stage,User loggedUser) {
         VBox container = new VBox(20);
         container.setAlignment(Pos.TOP_CENTER);
         container.setPadding(new Insets(30));
@@ -93,7 +96,7 @@ public class About {
         backBtn.setOnAction(e -> {
             // 回到Status或者Settings主界面
             // 若你想直接回到Status
-            stage.setScene(Status.createScene(stage, 800, 450));
+            stage.setScene(Status.createScene(stage, 800, 450,loggedUser));
         });
 
         buttonBox.getChildren().addAll(resetBtn, backBtn);

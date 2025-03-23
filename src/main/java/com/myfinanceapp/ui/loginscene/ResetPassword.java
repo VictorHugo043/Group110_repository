@@ -259,7 +259,7 @@ public class ResetPassword {
         // 匹配成功 => 重设密码
         foundUser.setPassword(newPass);
         UserService userService = new UserService();
-        boolean updated = userService.updateUser(foundUser); // 需实现
+        boolean updated = userService.updateUserName(foundUser, foundUser.getUsername()); // 需实现
         if (updated) {
             showAlert("Success", "Password reset successfully!");
             // 回到登录界面

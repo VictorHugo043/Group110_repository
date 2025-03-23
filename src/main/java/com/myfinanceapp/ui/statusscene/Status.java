@@ -1,5 +1,6 @@
 package com.myfinanceapp.ui.statusscene;
 
+import com.myfinanceapp.model.User;
 import com.myfinanceapp.ui.common.LeftSidebarFactory;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -11,13 +12,16 @@ import javafx.stage.Stage;
 
 public class Status {
 
-    public static Scene createScene(Stage stage, double width, double height) {
+    private static User currentUser;
+
+    public static Scene createScene(Stage stage, double width, double height, User loggedUser) {
+        Status.currentUser = loggedUser;
         // 主容器
         BorderPane root = new BorderPane();
         root.setStyle("-fx-background-color: white;");
 
         // ============ 左侧导航 sideBar ============
-        VBox sideBar = LeftSidebarFactory.createLeftSidebar(stage,"Status");
+        VBox sideBar = LeftSidebarFactory.createLeftSidebar(stage,"Status",loggedUser);
         root.setLeft(sideBar);
 
         // ============ 中间内容区 ============

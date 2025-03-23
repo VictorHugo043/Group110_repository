@@ -1,5 +1,5 @@
 package com.myfinanceapp.ui.common;
-
+import com.myfinanceapp.model.User;
 import com.myfinanceapp.ui.settingscene.About;
 import com.myfinanceapp.ui.settingscene.SystemSettings;
 import com.myfinanceapp.ui.settingscene.OtherSettings;
@@ -24,7 +24,7 @@ public class SettingsTopBarFactory {
      * 创建顶部Tab栏，4个选项：
      * @param activeTab 传入 "System Settings", "User Options", "Other Settings", "About" 表示哪个被选中
      */
-    public static HBox createTopBar(Stage stage,String activeTab) {
+    public static HBox createTopBar(Stage stage,String activeTab,User loggedUser) {
         HBox topBar = new HBox(10);
         topBar.setPadding(new Insets(0, 0, 0, 0));
         topBar.setAlignment(Pos.BOTTOM_LEFT);
@@ -37,13 +37,12 @@ public class SettingsTopBarFactory {
 
 
          aboutTab.setOnMouseClicked(e -> {
-             stage.setScene(About.createScene(stage,800,450));});
+             stage.setScene(About.createScene(stage,800,450,loggedUser));});
          systemSettingsTab.setOnMouseClicked(e ->{
-             stage.setScene(SystemSettings.createScene(stage,800,450));
+             stage.setScene(SystemSettings.createScene(stage,800,450,loggedUser));
          });
          userOptionsTab.setOnMouseClicked(e ->{
-             // TODO
-             //stage.setScene(UserOptions.createScene(stage, 800, 450));
+             stage.setScene(UserOptions.createScene(stage, 800, 450,loggedUser));
          });
          otherSettingsTab.setOnMouseClicked(e->{
              // TODO

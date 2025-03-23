@@ -1,4 +1,5 @@
 package com.myfinanceapp.ui.settingscene;
+import com.myfinanceapp.model.User;
 import com.myfinanceapp.ui.common.SettingsTopBarFactory;
 import com.myfinanceapp.ui.common.LeftSidebarFactory;
 import com.myfinanceapp.ui.statusscene.Status;
@@ -17,12 +18,12 @@ import java.util.Objects;
 
 public class SystemSettings {
 
-    public static Scene createScene(Stage stage, double width, double height) {
+    public static Scene createScene(Stage stage, double width, double height, User loggedUser) {
         BorderPane root = new BorderPane();
         root.setStyle("-fx-background-color: white;");
 
         // ===== 左侧导航栏：与 Status 一致，但 Settings 选中 =====
-        VBox sideBar = LeftSidebarFactory.createLeftSidebar(stage,"Settings");
+        VBox sideBar = LeftSidebarFactory.createLeftSidebar(stage,"Settings",loggedUser);
         root.setLeft(sideBar);
 
         // ===== 中心容器：包含顶部选项栏 + 设置表单，共用同一个圆角边框 =====
@@ -49,7 +50,7 @@ public class SystemSettings {
 
         // 1) 顶部 Tab 栏 (与外Box同背景)
         // topBar = createTopBar(stage, width, height);
-        HBox topBar = SettingsTopBarFactory.createTopBar(stage,"System Settings");
+        HBox topBar = SettingsTopBarFactory.createTopBar(stage,"System Settings",loggedUser);
         // 2) 表单
         Pane settingsForm = createSettingsForm(stage);
 
@@ -73,31 +74,64 @@ public class SystemSettings {
         container.setPadding(new Insets(30));
 
         // 语言
+        // 图标
+        ImageView languagesIcon = new ImageView();
+        languagesIcon.setFitWidth(20);
+        languagesIcon.setFitHeight(20);
+        // 例如 /pictures/user_icon.png 或使用 Unicode
+        try {
+            Image icon = new Image(Objects.requireNonNull(UserOptions.class.getResource("/pictures/languages_icon.png")).toExternalForm());
+            languagesIcon.setImage(icon);
+        } catch(Exception e) {
+            // fallback: do nothing
+        }
         HBox langBox = new HBox(20);
         Label langLabel = new Label("Languages");
         langLabel.setFont(Font.font("Arial", 14));
         ComboBox<String> langCombo = new ComboBox<>();
         langCombo.getItems().addAll("English", "Chinese", "Spanish");
         langCombo.setValue("English");
-        langBox.getChildren().addAll(langLabel, langCombo);
+        langBox.getChildren().addAll(languagesIcon,langLabel, langCombo);
 
         // Night/Daytime
+        // 图标
+        ImageView dayIcon = new ImageView();
+        dayIcon.setFitWidth(20);
+        dayIcon.setFitHeight(20);
+
+        try {
+            Image icon = new Image(Objects.requireNonNull(UserOptions.class.getResource("/pictures/day_icon.png")).toExternalForm());
+            dayIcon.setImage(icon);
+        } catch(Exception e) {
+            // fallback: do nothing
+        }
         HBox nightBox = new HBox(20);
         Label nightLabel = new Label("Night/Daytime Mode");
         nightLabel.setFont(Font.font("Arial", 14));
         ComboBox<String> nightCombo = new ComboBox<>();
         nightCombo.getItems().addAll("Daytime", "Nighttime");
         nightCombo.setValue("Daytime");
-        nightBox.getChildren().addAll(nightLabel, nightCombo);
+        nightBox.getChildren().addAll(dayIcon,nightLabel, nightCombo);
 
         // Window Size
+        // 图标
+        ImageView windowIcon = new ImageView();
+        windowIcon.setFitWidth(20);
+        windowIcon.setFitHeight(20);
+
+        try {
+            Image icon = new Image(Objects.requireNonNull(UserOptions.class.getResource("/pictures/window_icon.png")).toExternalForm());
+            windowIcon.setImage(icon);
+        } catch(Exception e) {
+            // fallback: do nothing
+        }
         HBox sizeBox = new HBox(20);
         Label sizeLabel = new Label("Window Size");
         sizeLabel.setFont(Font.font("Arial", 14));
         ComboBox<String> sizeCombo = new ComboBox<>();
         sizeCombo.getItems().addAll("1920x1080", "1366x768", "1280x720");
         sizeCombo.setValue("1920x1080");
-        sizeBox.getChildren().addAll(sizeLabel, sizeCombo);
+        sizeBox.getChildren().addAll(windowIcon,sizeLabel, sizeCombo);
 
         // 按钮区
         HBox buttonBox = new HBox(30);
@@ -108,7 +142,7 @@ public class SystemSettings {
         backBtn.setStyle("-fx-background-color: #E0F0FF; -fx-text-fill: #3282FA; -fx-font-weight: bold;");
         backBtn.setOnAction(e -> {
             // 回到 Status
-            stage.setScene(Status.createScene(stage, 800, 450));
+            stage.setScene(Status.createScene(stage, 800, 450, null));
         });
 
         buttonBox.getChildren().addAll(resetBtn, backBtn);

@@ -1,5 +1,6 @@
 package com.myfinanceapp.ui.loginscene;
 
+import com.myfinanceapp.model.User;
 import com.myfinanceapp.service.UserService;
 import com.myfinanceapp.ui.signupscene.SignUp;
 import com.myfinanceapp.ui.statusscene.Status;
@@ -169,10 +170,10 @@ public class LoginScene {
             }
 
             UserService userService = new UserService();
-            boolean valid = userService.checkLogin(uname, pass);
-            if (valid) {
+            User loggedUser = userService.loginGetUser(uname, pass);
+            if (loggedUser != null) {
                 // 跳转到 Status
-                stage.setScene(Status.createScene(stage, INITIAL_WIDTH, INITIAL_HEIGHT));
+                stage.setScene(Status.createScene(stage, INITIAL_WIDTH, INITIAL_HEIGHT,loggedUser));
                 showAlert("Success", "Login Successful!");
             } else {
                 showAlert("Error", "Invalid username or password!");
