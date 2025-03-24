@@ -80,6 +80,7 @@ public class UserService {
     /**
      * 保存用户列表到 JSON
      */
+    //可以优化，不需要每次都把一整个用户信息重新写进去
     private void saveUsers(List<User> users) {
         File jsonFile = new File(USER_JSON_PATH);
         try (Writer writer = new OutputStreamWriter(new FileOutputStream(jsonFile), StandardCharsets.UTF_8)) {

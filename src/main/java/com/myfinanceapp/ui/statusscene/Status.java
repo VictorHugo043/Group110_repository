@@ -10,6 +10,7 @@ import javafx.stage.Stage;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import com.myfinanceapp.ui.loginscene.LoginScene;
+import com.myfinanceapp.ui.transactionscene.TransactionScene;
 
 
 public class Status {
@@ -24,7 +25,15 @@ public class Status {
         sideBar.setAlignment(Pos.CENTER);
         Label welcomeLabel = new Label("Welcome \nback!");
         welcomeLabel.setFont(new Font(18));
-        sideBar.getChildren().addAll(welcomeLabel, new Label("Status"), new Label("Goals"), new Label("New"), new Label("Settings"));
+
+        Label newLabel = new Label("New");
+        newLabel.setOnMouseClicked(event -> {
+            //点击后跳转到添加交易记录页面
+            stage.setScene(TransactionScene.createScene(stage, 800, 450));
+            stage.setTitle("Finanger - New Transations");
+            });
+
+        sideBar.getChildren().addAll(welcomeLabel, new Label("Status"), new Label("Goals"), newLabel, new Label("Settings"));
         Label logoutLabel = new Label("Log out");
         logoutLabel.setTextFill(Color.BLUE); // 或者自定义样式
         logoutLabel.setOnMouseClicked(event -> {
@@ -43,7 +52,7 @@ public class Status {
             });
         });
 
-// 将这个 logoutLabel 加到 sideBar 里
+        // 将这个 logoutLabel 加到 sideBar 里
         sideBar.getChildren().add(logoutLabel);
         root.setLeft(sideBar);
 
