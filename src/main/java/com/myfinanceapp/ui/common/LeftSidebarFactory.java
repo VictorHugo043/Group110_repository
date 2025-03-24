@@ -110,8 +110,8 @@ public class LeftSidebarFactory {
                     stage.setScene(Status.createScene(stage, 800, 450,loggedUser));
                     break;
                 case "Goals":
-                    // TODO
-                    //stage.setScene(Goals.createScene(stage, 800, 450));
+                    
+                    stage.setScene(Goals.createScene(stage, 800, 450,loggedUser));
                     break;
                 case "New":
                     // TODO
