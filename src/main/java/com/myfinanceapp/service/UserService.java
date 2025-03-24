@@ -26,7 +26,7 @@ public class UserService {
     /**
      * 注册用户：追加到JSON中
      */
-    public boolean registerUser(String username, String password) {
+    public boolean registerUser(String username, String password,String secQuestion, String secAnswer) {
         // 1. 先读取当前JSON中已有的用户列表
         List<User> users = loadUsers();
         // 2. 检查是否重名
@@ -37,7 +37,7 @@ public class UserService {
             }
         }
         // 3. 不存在则添加
-        users.add(new User(username, password));
+        users.add(new User(username, password, secQuestion, secAnswer));
         // 4. 保存回JSON
         saveUsers(users);
         return true;
@@ -59,7 +59,7 @@ public class UserService {
     /**
      * 加载全部用户
      */
-    private List<User> loadUsers() {
+    private static List<User> loadUsers() {
         File jsonFile = new File(USER_JSON_PATH);
         if (!jsonFile.exists()) {
             // 文件不存在则返回空列表
@@ -80,8 +80,7 @@ public class UserService {
     /**
      * 保存用户列表到 JSON
      */
-    //可以优化，不需要每次都把一整个用户信息重新写进去
-    private void saveUsers(List<User> users) {
+    private static void saveUsers(List<User> users) {
         File jsonFile = new File(USER_JSON_PATH);
         try (Writer writer = new OutputStreamWriter(new FileOutputStream(jsonFile), StandardCharsets.UTF_8)) {
             gson.toJson(users, writer);
@@ -89,5 +88,54 @@ public class UserService {
             e.printStackTrace();
         }
     }
+    public User findUserByUsername(String username) {
+        List<User> users = loadUsers(); // CSV/JSON 读取
+        for (User u : users) {
+            if (u.getUsername().equalsIgnoreCase(username)) {
+                return u;
+            }
+        }
+        return null;
+    }
+
+    /*public boolean updateUser(User updatedUser) {
+        List<User> users = loadUsers();
+        for (int i=0; i<users.size(); i++) {
+            if (users.get(i).getUsername().equalsIgnoreCase(updatedUser.getUsername())) {
+                // 更新
+                users.set(i, updatedUser);
+                saveUsers(users); // 写回CSV/JSON
+                return true;
+            }
+        }
+        return false;
+    }*/
+    public static boolean updateUserName(User user, String oldName){
+        List<User> users = loadUsers();
+        for(int i=0; i<users.size(); i++){
+            if(users.get(i).getUsername().equalsIgnoreCase(oldName)){
+                // 找到 => users.set(i, user);
+                users.set(i, user);
+                saveUsers(users);
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+
+    public User loginGetUser(String username, String password) {
+        // 假设你在 CSV 或 JSON 中读出所有 User
+        List<User> users = loadUsers();
+        for(User u: users){
+            if(u.getUsername().equalsIgnoreCase(username)
+                    && u.getPassword().equals(password)) {
+                return u; // 找到并返回完整 User
+            }
+        }
+        return null; // 未找到
+    }
+
 
 }
