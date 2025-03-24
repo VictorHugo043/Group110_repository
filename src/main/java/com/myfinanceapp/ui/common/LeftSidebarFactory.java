@@ -35,10 +35,34 @@ public class LeftSidebarFactory {
                         "-fx-border-width: 0 2 0 0;"
         );
 
-        // 顶部文字
+        /*// 顶部文字
         Label welcomeLabel = new Label("Only \nyou can do!");
         welcomeLabel.setFont(new Font(18));
+        welcomeLabel.setTextFill(javafx.scene.paint.Color.DARKBLUE);*/
+        // 根据 selectedButton 设置顶部文字
+        String labelText;
+        switch (selectedButton) {
+            case "Status":
+                labelText = "Welcome back!";
+                break;
+            case "Goals":
+                labelText = "It's My Goal!!!!!";
+                break;
+            case "New":
+                labelText = "Every day is a\nnew beginning";
+                break;
+            case "Settings":
+                labelText = "Only you can do!";
+                break;
+            default:
+                labelText = "Only \nyou can do!"; // 或你想要的默认值
+                break;
+        }
+
+        Label welcomeLabel = new Label(labelText);
+        welcomeLabel.setFont(new Font(18));
         welcomeLabel.setTextFill(javafx.scene.paint.Color.DARKBLUE);
+
 
         // 创建五个按钮，判断哪个是选中
         // 例：String "Settings" 表示 Settings 选中

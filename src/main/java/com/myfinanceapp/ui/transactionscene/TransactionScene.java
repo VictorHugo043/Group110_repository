@@ -47,6 +47,7 @@ public class TransactionScene {
         ComboBox<String> typeCombo = new ComboBox<>();
         typeCombo.getItems().addAll("Income", "Expense");
         typeCombo.setPrefWidth(150);
+        typeCombo.setValue("Expense");  // Set default value
         VBox typeBox = new VBox(typeLabel, typeCombo);
         typeBox.setAlignment(Pos.CENTER);
 
@@ -54,6 +55,7 @@ public class TransactionScene {
         ComboBox<String> currencyCombo = new ComboBox<>();
         currencyCombo.getItems().addAll("CNY", "USD", "EUR");
         currencyCombo.setPrefWidth(150);
+        currencyCombo.setValue("CNY");  // Set default value
         VBox currencyBox = new VBox(currencyLabel, currencyCombo);
         currencyBox.setAlignment(Pos.CENTER);
 
@@ -98,13 +100,13 @@ public class TransactionScene {
             transaction.setCategory(categoryField.getText());
             transaction.setPaymentMethod(methodField.getText());
 
-            TransactionService transactionService = new TransactionService();
-            transactionService.addTransaction(transaction);
+            TransactionService service = new TransactionService();
+            service.addTransaction(loggedUser, transaction); // 传入 username
 
             // 提交后清空输入框内容
             dateField.clear();  // 清空日期文本框
-            typeCombo.setValue(null);  // 清空类型选择框
-            currencyCombo.setValue(null);  // 清空货币选择框
+            //typeCombo.setValue(null);  // 清空类型选择框
+            //currencyCombo.setValue(null);  // 清空货币选择框
             amountField.clear();  // 清空金额文本框
             categoryField.clear();  // 清空类别文本框
             methodField.clear();  // 清空支付方式文本框
@@ -144,8 +146,8 @@ public class TransactionScene {
             fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV Files", "*.csv"));
             File file = fileChooser.showOpenDialog(stage);
             if (file != null) {
-                TransactionService transactionService= new TransactionService();
-                transactionService.importTransactionsFromCSV(file);
+                TransactionService service = new TransactionService();
+                service.importTransactionsFromCSV(loggedUser, file);
             }
         });
         //这里需要完善一下
