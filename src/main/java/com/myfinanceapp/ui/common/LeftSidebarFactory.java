@@ -114,8 +114,7 @@ public class LeftSidebarFactory {
                     stage.setScene(Goals.createScene(stage, 800, 450,loggedUser));
                     break;
                 case "New":
-                    // TODO
-                    //stage.setScene(TransactionScene.createScene(stage, 800, 450));
+                    stage.setScene(TransactionScene.createScene(stage, 800, 450,loggedUser));
                     break;
                 case "Settings":
                     stage.setScene(SystemSettings.createScene(stage, 800, 450,loggedUser));
