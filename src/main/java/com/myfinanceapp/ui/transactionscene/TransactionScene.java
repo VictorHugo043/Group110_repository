@@ -1,8 +1,8 @@
 package com.myfinanceapp.ui.transactionscene;
 
 import com.myfinanceapp.model.Transaction;
+import com.myfinanceapp.model.User;
 import com.myfinanceapp.service.TransactionService;
-import com.myfinanceapp.ui.loginscene.LoginScene;
 import javafx.geometry.Pos;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -14,51 +14,18 @@ import javafx.scene.Scene;
 import javafx.scene.layout.VBox;
 import javafx.scene.control.*;
 import java.io.File;
-import com.myfinanceapp.ui.statusscene.Status;
 import javafx.geometry.Insets;
+import com.myfinanceapp.ui.common.LeftSidebarFactory;
+
 
 
 public class TransactionScene {
-    public static Scene createScene(Stage stage, double width, double height) {
+    public static Scene createScene(Stage stage, double width, double height, User loggedUser) {
         BorderPane root = new BorderPane();
+        root.setStyle("-fx-background-color: white;");
 
-        // 左侧导航
-        VBox sideBar = new VBox(20);
-        sideBar.setStyle("-fx-background-color: #E0F0FF;");
-        sideBar.setPrefWidth(150);
-        sideBar.setAlignment(Pos.CENTER);
-        Label welcomeLabel = new Label("Welcome \nback!");
-        welcomeLabel.setFont(new Font(18));
 
-        Label statusLabel = new Label("Status");
-        statusLabel.setOnMouseClicked(event -> {
-            //点击后跳转到添加交易记录页面
-            stage.setScene(Status.createScene(stage, 800, 450));
-            stage.setTitle("Finanger - New Transations");
-        });
-
-        sideBar.getChildren().addAll(welcomeLabel, statusLabel, new Label("Goals"), new Label("New"), new Label("Settings"));
-
-        Label logoutLabel = new Label("Log out");
-        logoutLabel.setTextFill(Color.BLUE); // 或者自定义样式
-        logoutLabel.setOnMouseClicked(event -> {
-            // 点击后，弹出确认对话框
-            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure you want to log out?");
-            confirm.setHeaderText(null);
-            confirm.setTitle("Confirm Logout");
-
-            // 等待用户操作
-            confirm.showAndWait().ifPresent(response -> {
-                if (response == ButtonType.OK) {
-                    // 确认，则跳转回登录界面
-                    stage.setScene(LoginScene.createScene(stage, 800, 450));
-                    stage.setTitle("Finanger - Login");
-                }
-            });
-        });
-
-        // 将这个 logoutLabel 加到 sideBar 里
-        sideBar.getChildren().add(logoutLabel);
+        VBox sideBar = LeftSidebarFactory.createLeftSidebar(stage,"New",loggedUser);
         root.setLeft(sideBar);
 
         //中间手动输入部分
