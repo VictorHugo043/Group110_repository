@@ -24,21 +24,32 @@ public class TransactionScene {
         BorderPane root = new BorderPane();
         root.setStyle("-fx-background-color: white;");
 
-
         VBox sideBar = LeftSidebarFactory.createLeftSidebar(stage,"New",loggedUser);
         root.setLeft(sideBar);
 
         //中间手动输入部分
         VBox centerBox = new VBox();
+        centerBox.setStyle(
+                "-fx-border-color: #3282FA;" +
+                        "-fx-border-width: 2;" +
+                        "-fx-border-radius: 15;" +
+                        "-fx-background-color: white;" +
+                        "-fx-padding: 20;"  // 为右侧栏添加内边距，避免内容与边框紧贴
+        );
         Label topicLabel = new Label("Manual Import:");
         topicLabel.setTextFill(Color.DARKBLUE);
+
+        // 设置 topicLabel 和后续内容之间的间距
+        topicLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+        VBox.setMargin(topicLabel, new Insets(10, 0, 10, 0)); // 增加与下方内容的间距
 
         //页面一开始光标就focus在date框里面，需要改一下
         Label dateLabel = new Label("Transition Date");
         dateLabel.setTextFill(Color.DARKBLUE);
         TextField dateField = new TextField();
         dateField.setPromptText("yyyy-MM-dd");
-        dateField.setPrefWidth(150);
+        dateField.setMaxWidth(200);  // 设置输入框的最大宽度为 120
+        dateField.setPrefWidth(150); // 确保输入框宽度为 120
         VBox dateBox = new VBox(dateLabel, dateField);
         dateBox.setAlignment(Pos.CENTER);
 
@@ -46,6 +57,7 @@ public class TransactionScene {
         typeLabel.setTextFill(Color.DARKBLUE);
         ComboBox<String> typeCombo = new ComboBox<>();
         typeCombo.getItems().addAll("Income", "Expense");
+        typeCombo.setMaxWidth(200);
         typeCombo.setPrefWidth(150);
         typeCombo.setValue("Expense");  // Set default value
         VBox typeBox = new VBox(typeLabel, typeCombo);
@@ -54,6 +66,7 @@ public class TransactionScene {
         Label currencyLabel = new Label("Currency");
         ComboBox<String> currencyCombo = new ComboBox<>();
         currencyCombo.getItems().addAll("CNY", "USD", "EUR");
+        currencyCombo.setMaxWidth(200);
         currencyCombo.setPrefWidth(150);
         currencyCombo.setValue("CNY");  // Set default value
         VBox currencyBox = new VBox(currencyLabel, currencyCombo);
@@ -63,30 +76,40 @@ public class TransactionScene {
         amountLabel.setTextFill(Color.DARKBLUE);
         TextField amountField = new TextField();
         amountField.setPromptText("Please enter amount");
+        amountField.setMaxWidth(200);
         amountField.setPrefWidth(150);
         VBox amountBox = new VBox(amountLabel, amountField);
         amountBox.setAlignment(Pos.CENTER);
+
 
         Label categoryLabel = new Label("Category");
         categoryLabel.setTextFill(Color.DARKBLUE);
         TextField categoryField = new TextField();
         categoryField.setPromptText("e.g., Salary, Rent, Utilities");
+        categoryField.setMaxWidth(200);
         categoryField.setPrefWidth(150);
         VBox categoryBox = new VBox(categoryLabel, categoryField);
         categoryBox.setAlignment(Pos.CENTER);
+
 
         Label methodLabel = new Label("Payment Method");
         methodLabel.setTextFill(Color.DARKBLUE);
         TextField methodField = new TextField();
         methodField.setPromptText("e.g., Cash, PayPal, Bank Transfer");
+        methodField.setMaxWidth(200);
         methodField.setPrefWidth(150);
         VBox methodBox = new VBox(methodLabel, methodField);
         methodBox.setAlignment(Pos.CENTER);
 
         Button submitManualBtn = new Button("Submit");
-        submitManualBtn.setPrefWidth(80);
-        submitManualBtn.setStyle("-fx-background-color: #3377ff; -fx-text-fill: white; -fx-font-weight: bold;");
+        submitManualBtn.setMaxWidth(150);
+        submitManualBtn.setPrefWidth(100);
+        submitManualBtn.setStyle("-fx-background-color: #E0F0FF; " +
+                "-fx-text-fill: #3282FA; -fx-font-weight: bold; " +
+                "-fx-border-radius: 15;"); // 新增：按钮的背景色，文本颜色，字体粗细和圆角
+
         VBox.setMargin(submitManualBtn, new Insets(20, 0, 0, 0));
+        submitManualBtn.setAlignment(Pos.CENTER); // 将按钮居中对齐
         submitManualBtn.setOnAction(event -> {
 
             //！ 传入数据错误的判断及处理（日期是否符合格式要求）
@@ -129,16 +152,30 @@ public class TransactionScene {
                 methodBox,
                 submitManualBtn
         );
+        centerBox.setSpacing(10);  // 增加整个区域内的元素间距，以确保文本与下一个输入框有空隙
+        centerBox.setAlignment(Pos.CENTER);  // 让整个 centerBox 内的元素居中
+
 
         //右侧传输csv文件部分
         VBox rightBar = new VBox();
-
-        Label promptLabel = new Label("Manual Import:");
+        rightBar.setStyle(
+                "-fx-border-color: #3282FA;" +
+                        "-fx-border-width: 2;" +
+                        "-fx-border-radius: 15;" +
+                        "-fx-background-color: white;" +
+                        "-fx-padding: 20;"  // 为右侧栏添加内边距，避免内容与边框紧贴
+        );
+        Label promptLabel = new Label("File Import:");
+        VBox.setMargin(promptLabel, new Insets(10, 0, 10, 0)); // 增加与下方内容的间距
         promptLabel.setTextFill(Color.DARKBLUE);
-
+        promptLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
         Button importCSVButton =  new Button("Select a file");
         importCSVButton.setPrefWidth(100);
-        importCSVButton.setStyle("-fx-background-color: #3377ff; -fx-text-fill: white; -fx-font-weight: bold;");
+        importCSVButton.setStyle("-fx-background-color: #E0F0FF; " +
+                "-fx-text-fill: #3282FA; -fx-font-weight: bold; " +
+                "-fx-border-radius: 15;"); // 新增：按钮的背景色，文本颜色，字体粗细和圆角
+
+
         importCSVButton.setOnAction(event -> {
             //FileChooser 是 JavaFX 提供的一个用于选择文件的控件。fileChooser 会弹出一个文件选择对话框，允许用户浏览文件系统并选择文件。
             FileChooser fileChooser = new FileChooser();
@@ -150,10 +187,28 @@ public class TransactionScene {
                 service.importTransactionsFromCSV(loggedUser, file);
             }
         });
-        //这里需要完善一下
-        Label formatLabel = new Label("格式要求..");
-        formatLabel.setFont(new Font(20));
+
+        Label formatLabel = new Label("Your .CSV file should\ncontain the following columns:\n\n" +
+                "Transaction Date\n" +
+                "(format: YYYY–MM–DD, e.g. 2025–03–15)\n\n" +
+                "Transaction Type\n" +
+                "(only: Income / Expense)\n\n" +
+                "Currency\n" +
+                "(currency type, e.g. CNY, USD)\n\n" +
+                "Amount\n" +
+                "(number format, e.g. 1234.56)\n\n" +
+                "Category\n" +
+                "(income and expense category)\n\n" +
+                "Payment Method\n" +
+                "(payment method)");
+        formatLabel.setFont(new Font(11));
         formatLabel.setTextFill(Color.DARKBLUE);
+        // 设定按钮和文本之间的间距
+        VBox.setMargin(formatLabel, new Insets(10, 0, 0, 0)); // 为文本上方添加10的间距
+        // 设置所有组件的居中对齐
+        rightBar.setAlignment(Pos.CENTER);  // 将右侧栏内容居中
+        formatLabel.setAlignment(Pos.CENTER);
+        importCSVButton.setAlignment(Pos.CENTER);  // 设置按钮居中
 
         rightBar.getChildren().addAll(
                 promptLabel,
@@ -166,6 +221,7 @@ public class TransactionScene {
         centerAndRight.setSpacing(20);  // 设置两者之间的间距
         centerBox.setPrefWidth(width / 2);  // 手动输入区域占宽度的一半
         rightBar.setPrefWidth(width / 2);  // 文件上传区域占宽度的一半
+
 
         root.setCenter(centerAndRight);  // 设置为中心区域
 
