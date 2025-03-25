@@ -1,0 +1,29 @@
+[
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440000",
+      "type": "SAVING",
+      "title": "Saving Goal",
+      "targetAmount": 1000.0,
+      "currentAmount": 900.0,
+      "deadline": "2025-03-30",
+      "category": null
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440001",
+      "type": "DEBT_REPAYMENT",
+      "title": "Debt Repayment Goal",
+      "targetAmount": 500.0,
+      "currentAmount": 500.0,
+      "deadline": "2025-03-30",
+      "category": null
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440002",
+      "type": "BUDGET_CONTROL",
+      "title": "Budget Control Goal",
+      "targetAmount": 2000.0,
+      "currentAmount": 2200.0,
+      "deadline": "2025-03-30",
+      "category": "Food expenses"
+    }
+  ]

@@ -1,0 +1,31 @@
+[ {
+  "id" : "5857d9f1-805c-4a13-a549-0665b5f1acb7",
+  "type" : "SAVING",
+  "title" : "Saving Goal",
+  "targetAmount" : 1000.0,
+  "currentAmount" : 600.0,
+  "deadline" : "2025-03-30",
+  "category" : null,
+  "completed" : false,
+  "progressPercentage" : 60
+}, {
+  "id" : "cd06bf8a-14b5-4513-99bd-7347f103d59c",
+  "type" : "DEBT_REPAYMENT",
+  "title" : "Debt Repayment Goal",
+  "targetAmount" : 500.0,
+  "currentAmount" : 500.0,
+  "deadline" : "2025-03-30",
+  "category" : null,
+  "completed" : true,
+  "progressPercentage" : 100
+}, {
+  "id" : "832781c9-165f-4ece-a515-d3a98bd73712",
+  "type" : "BUDGET_CONTROL",
+  "title" : "Budget Control Goal",
+  "targetAmount" : 2000.0,
+  "currentAmount" : 2200.0,
+  "deadline" : "2025-03-30",
+  "category" : "Food expenses",
+  "completed" : false,
+  "progressPercentage" : 100
+} ]
