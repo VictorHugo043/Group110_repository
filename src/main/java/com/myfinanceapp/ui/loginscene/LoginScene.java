@@ -172,13 +172,14 @@ public class LoginScene {
             UserService userService = new UserService();
             User loggedUser = userService.loginGetUser(uname, pass);
             if (loggedUser != null) {
-                // 跳转到 Status
-                stage.setScene(Status.createScene(stage, INITIAL_WIDTH, INITIAL_HEIGHT,loggedUser));
+                // Login successful, jump to Status scene
+                stage.setScene(Status.createScene(stage, INITIAL_WIDTH, INITIAL_HEIGHT, loggedUser));
                 showAlert("Success", "Login Successful!");
             } else {
                 showAlert("Error", "Invalid username or password!");
             }
         });
+
 
         // SignUp
         Label noAccountLabel = new Label("Don't have an account?");
