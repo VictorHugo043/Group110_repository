@@ -14,6 +14,9 @@ import javafx.scene.Scene;
 import javafx.scene.layout.VBox;
 import javafx.scene.control.*;
 import java.io.File;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+
 import javafx.geometry.Insets;
 import com.myfinanceapp.ui.common.LeftSidebarFactory;
 
@@ -44,12 +47,18 @@ public class TransactionScene {
         VBox.setMargin(topicLabel, new Insets(10, 0, 10, 0)); // 增加与下方内容的间距
 
         //页面一开始光标就focus在date框里面，需要改一下
+        //修改这里：确保初始时文本框不自动获得焦点
         Label dateLabel = new Label("Transition Date");
         dateLabel.setTextFill(Color.DARKBLUE);
         TextField dateField = new TextField();
         dateField.setPromptText("yyyy-MM-dd");
+
         dateField.setMaxWidth(200);  // 设置输入框的最大宽度为 120
         dateField.setPrefWidth(150); // 确保输入框宽度为 120
+
+        //dateField.setPrefWidth(150);
+        //dateField.setFocusTraversable(false); // 防止自动获取焦点
+
         VBox dateBox = new VBox(dateLabel, dateField);
         dateBox.setAlignment(Pos.CENTER);
 
@@ -60,6 +69,7 @@ public class TransactionScene {
         typeCombo.setMaxWidth(200);
         typeCombo.setPrefWidth(150);
         typeCombo.setValue("Expense");  // Set default value
+        typeCombo.setFocusTraversable(false); // 防止自动获取焦点
         VBox typeBox = new VBox(typeLabel, typeCombo);
         typeBox.setAlignment(Pos.CENTER);
 
@@ -69,6 +79,7 @@ public class TransactionScene {
         currencyCombo.setMaxWidth(200);
         currencyCombo.setPrefWidth(150);
         currencyCombo.setValue("CNY");  // Set default value
+        currencyCombo.setFocusTraversable(false); // 防止自动获取焦点
         VBox currencyBox = new VBox(currencyLabel, currencyCombo);
         currencyBox.setAlignment(Pos.CENTER);
 
@@ -78,6 +89,7 @@ public class TransactionScene {
         amountField.setPromptText("Please enter amount");
         amountField.setMaxWidth(200);
         amountField.setPrefWidth(150);
+        amountField.setFocusTraversable(false); // 防止自动获取焦点
         VBox amountBox = new VBox(amountLabel, amountField);
         amountBox.setAlignment(Pos.CENTER);
 
@@ -88,6 +100,7 @@ public class TransactionScene {
         categoryField.setPromptText("e.g., Salary, Rent, Utilities");
         categoryField.setMaxWidth(200);
         categoryField.setPrefWidth(150);
+        categoryField.setFocusTraversable(false); // 防止自动获取焦点
         VBox categoryBox = new VBox(categoryLabel, categoryField);
         categoryBox.setAlignment(Pos.CENTER);
 
@@ -98,6 +111,7 @@ public class TransactionScene {
         methodField.setPromptText("e.g., Cash, PayPal, Bank Transfer");
         methodField.setMaxWidth(200);
         methodField.setPrefWidth(150);
+        methodField.setFocusTraversable(false); // 防止自动获取焦点
         VBox methodBox = new VBox(methodLabel, methodField);
         methodBox.setAlignment(Pos.CENTER);
 
@@ -113,6 +127,128 @@ public class TransactionScene {
         submitManualBtn.setOnAction(event -> {
 
             //！ 传入数据错误的判断及处理（日期是否符合格式要求）
+            // 检查所有字段是否已填写
+            if (dateField.getText().isEmpty() || 
+            amountField.getText().isEmpty() || 
+                categoryField.getText().isEmpty() || 
+                methodField.getText().isEmpty()) {
+                
+                // 弹出提示窗口，要求填写所有字段
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Missing Information");
+                alert.setHeaderText(null);
+                alert.setContentText("Please fill in all blanks before submitting");
+                alert.showAndWait();
+                return; // 停止提交过程
+            }
+            // 验证日期格式和范围
+            try {
+                // 首先检查基本格式
+                String dateText = dateField.getText();
+                String datePattern = "yyyy-MM-dd";
+                SimpleDateFormat dateFormat = new SimpleDateFormat(datePattern);
+                dateFormat.setLenient(false);
+                dateFormat.parse(dateText);
+                
+                // 额外检查月份和日期范围
+                String[] dateParts = dateText.split("-");
+                if (dateParts.length == 3) {
+                    int year = Integer.parseInt(dateParts[0]);
+                    int month = Integer.parseInt(dateParts[1]);
+                    int day = Integer.parseInt(dateParts[2]);
+                    
+                    if (month < 1 || month > 12) {
+                        throw new ParseException("Invalid month", 0);
+                    }
+                    
+                    if (day < 1 || day > 31) {
+                        throw new ParseException("Invalid day", 0);
+                    }
+                    
+                    // 检查特定月份的天数上限
+                    int maxDays;
+                    switch (month) {
+                        case 4: case 6: case 9: case 11:
+                            maxDays = 30;
+                            break;
+                        case 2:
+                            // 检查闰年
+                            boolean isLeapYear = (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
+                            maxDays = isLeapYear ? 29 : 28;
+                            break;
+                        default:
+                            maxDays = 31;
+                    }
+                    
+                    if (day > maxDays) {
+                        throw new ParseException("Day exceeds maximum for month", 0);
+                    }
+                }
+            } catch (ParseException | NumberFormatException e) {
+                // 弹出提示窗口，告知日期格式错误
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Invalid Date");
+                alert.setHeaderText(null);
+                alert.setContentText("Please enter a valid date in format yyyy-MM-dd\n" +
+                                    "Month must be 1-12 and day must be 1-31");
+                alert.showAndWait();
+                return; // 停止提交过程
+            }
+           
+            // 验证category和payment method只包含英文单词
+            if (!categoryField.getText().matches("^[a-zA-Z\\s]+$")) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Invalid Category");
+                alert.setHeaderText(null);
+                alert.setContentText("Category must contain only English letters");
+                alert.showAndWait();
+                return;
+            }
+
+            if (!methodField.getText().matches("^[a-zA-Z\\s]+$")) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Invalid Payment Method");
+                alert.setHeaderText(null);
+                alert.setContentText("Payment method must contain only English letters");
+                alert.showAndWait();
+                return;
+            }
+            
+            
+            // 验证金额格式
+            double amount;
+            try {
+                amount = Double.parseDouble(amountField.getText());
+            } catch (NumberFormatException e) {
+                // 弹出提示窗口，告知金额格式错误
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Invalid Amount");
+                alert.setHeaderText(null);
+                alert.setContentText("please type in a valid number");
+                alert.showAndWait();
+                return; // 停止提交过程
+            }
+            
+            // 检查交易类型与金额正负是否匹配
+            String transactionType = typeCombo.getValue();
+            if ((transactionType.equals("Income") && amount <= 0) || 
+                (transactionType.equals("Expense") && amount >= 0)) {
+                
+                // 弹出提示窗口，告知金额与交易类型不匹配
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Invalid Amount");
+                alert.setHeaderText(null);
+                if (transactionType.equals("Income")) {
+                    alert.setContentText("Income must be a postive number.");
+                } else {
+                    alert.setContentText("Expense must be a negative number.");
+                }
+                alert.showAndWait();
+                return; // 停止提交过程
+            }
+
+
+
 
             Transaction transaction = new Transaction();
 

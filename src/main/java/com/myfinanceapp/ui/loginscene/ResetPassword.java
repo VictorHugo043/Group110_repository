@@ -219,15 +219,24 @@ public class ResetPassword {
         }
 
         UserService userService = new UserService();
-        User user = userService.findUserByUsername(uname);
-        if (user == null) {
+
+        // 先通过用户名获取用户对象
+        User userByUsername = userService.findUserByUsername(uname);
+        if (userByUsername == null) {
             showAlert("Error", "User not found!");
             return;
         }
 
-        // 找到用户 => 显示安全问题, 启用回答与重置密码
-        foundUser = user;
-        questionLabel.setText(user.getSecurityQuestion());
+        // 获取 UID，再用 UID 查找完整用户信息
+        String uid = userByUsername.getUid();
+        foundUser = userService.findUserByUid(uid);
+        if (foundUser == null) {
+            showAlert("Error", "User not found!");
+            return;
+        }
+
+        // 显示安全问题
+        questionLabel.setText(foundUser.getSecurityQuestion());
         questionLabel.setDisable(false);
         answerField.setDisable(false);
         newPasswordField.setDisable(false);
@@ -259,7 +268,7 @@ public class ResetPassword {
         // 匹配成功 => 重设密码
         foundUser.setPassword(newPass);
         UserService userService = new UserService();
-        boolean updated = userService.updateUserName(foundUser, foundUser.getUsername()); // 需实现
+        boolean updated = userService.updatePassword(foundUser.getUid(), newPass); // 需实现
         if (updated) {
             showAlert("Success", "Password reset successfully!");
             // 回到登录界面
