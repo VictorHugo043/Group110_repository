@@ -1,11 +1,14 @@
 package com.myfinanceapp.service;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.myfinanceapp.model.Goal;
 import com.myfinanceapp.model.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,109 +16,112 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class GoalManager {
-    private static final String GOALS_FILE_PATH = "src/main/resources/goals/goals.json";
+    private static final String GOALS_DIRECTORY_PATH = "src/main/resources/goals/";
     private static final ObjectMapper objectMapper = new ObjectMapper()
             .registerModule(new JavaTimeModule())
-            .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-    
+            .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    private static final Logger logger = LoggerFactory.getLogger(GoalManager.class);
+
+    /**
+     * 获取用户的目标列表
+     */
     public static List<Goal> getUserGoals(User user) {
-        File goalsFile = new File(GOALS_FILE_PATH);
-        
-        if (!goalsFile.exists()) {
-            // 如果文件不存在，创建示例目标
-            List<Goal> sampleGoals = createSampleGoals();
-            try {
-                saveGoals(sampleGoals);
-            } catch (IOException e) {
-                e.printStackTrace();
-                return new ArrayList<>();
-            }
-            return sampleGoals;
-        }
-        
         try {
-            return objectMapper.readValue(goalsFile, 
-                    objectMapper.getTypeFactory().constructCollectionType(List.class, Goal.class));
+            return getAllGoals(user);
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("加载目标失败", e);
             return new ArrayList<>();
         }
     }
-    
-    public static void saveGoals(List<Goal> goals) throws IOException {
-        objectMapper.writerWithDefaultPrettyPrinter()
-                .writeValue(new File(GOALS_FILE_PATH), goals);
+
+    /**
+     * 添加新目标
+     */
+    public static void addGoal(Goal goal, User user) throws IOException {
+        List<Goal> existingGoals = getAllGoals(user);
+        setGoalId(goal);
+        setUserId(goal, user);
+        existingGoals.add(goal);
+        saveGoals(existingGoals, user);
     }
-    
-    public static void addGoal(Goal goal) throws IOException {
-        List<Goal> existingGoals = getUserGoals(null); // 这里暂时不区分用户
-        
-        // 为新目标生成ID
+
+    /**
+     * 设置目标ID（如果未提供则生成）
+     */
+    private static void setGoalId(Goal goal) {
         if (goal.getId() == null || goal.getId().isEmpty()) {
             goal.setId(UUID.randomUUID().toString());
         }
-        
-        existingGoals.add(goal);
-        saveGoals(existingGoals);
     }
-    
-    public static void updateGoal(Goal updatedGoal) throws IOException {
-        List<Goal> existingGoals = getUserGoals(null);
-        
-        for (int i = 0; i < existingGoals.size(); i++) {
-            if (existingGoals.get(i).getId().equals(updatedGoal.getId())) {
-                existingGoals.set(i, updatedGoal);
-                break;
-            }
+
+    /**
+     * 设置用户ID（如果未提供且用户存在）
+     */
+    private static void setUserId(Goal goal, User user) {
+        if (user != null && (goal.getUserId() == null || goal.getUserId().isEmpty())) {
+            goal.setUserId(user.getUid());
         }
-        
-        saveGoals(existingGoals);
     }
-    
-    public static void deleteGoal(String goalId) throws IOException {
-        List<Goal> existingGoals = getUserGoals(null);
+
+    /**
+     * 更新目标
+     */
+    public static void updateGoal(Goal updatedGoal, User user) throws IOException {
+        List<Goal> existingGoals = getAllGoals(user);
+        existingGoals = existingGoals.stream()
+                .map(goal -> goal.getId().equals(updatedGoal.getId()) ? updatedGoal : goal)
+                .collect(Collectors.toList());
+        saveGoals(existingGoals, user);
+    }
+
+    /**
+     * 删除目标
+     */
+    public static void deleteGoal(String goalId, User user) throws IOException {
+        List<Goal> existingGoals = getAllGoals(user);
         existingGoals.removeIf(goal -> goal.getId().equals(goalId));
-        saveGoals(existingGoals);
+        saveGoals(existingGoals, user);
     }
-    
-    private static List<Goal> createSampleGoals() {
-        List<Goal> sampleGoals = new ArrayList<>();
-        
-        // 添加储蓄目标示例
-        sampleGoals.add(new Goal(
-            UUID.randomUUID().toString(),
-            "SAVING",
-            "Saving Goal",
-            1000.0,
-            600.0,
-            LocalDate.of(2025, 3, 30),
-            null
-        ));
-        
-        // 添加债务偿还目标示例
-        sampleGoals.add(new Goal(
-            UUID.randomUUID().toString(),
-            "DEBT_REPAYMENT",
-            "Debt Repayment Goal",
-            500.0,
-            500.0,
-            LocalDate.of(2025, 3, 30),
-            null
-        ));
-        
-        // 添加预算控制目标示例
-        sampleGoals.add(new Goal(
-            UUID.randomUUID().toString(),
-            "BUDGET_CONTROL",
-            "Budget Control Goal",
-            2000.0,
-            2200.0,
-            LocalDate.of(2025, 3, 30),
-            "Food expenses"
-        ));
-        
-        return sampleGoals;
+
+    /**
+     * 获取所有目标（不过滤）
+     */
+    private static List<Goal> getAllGoals(User user) throws IOException {
+        File goalsFile = getGoalsFile(user);
+        if (!goalsFile.exists()) {
+            return new ArrayList<>();
+        }
+        return objectMapper.readValue(goalsFile, objectMapper.getTypeFactory().constructCollectionType(List.class, Goal.class));
+    }
+
+    /**
+     * 保存目标到文件
+     */
+    public static void saveGoals(List<Goal> goals, User user) throws IOException {
+        ensureDirectoryExists();
+        File goalsFile = getGoalsFile(user);
+        objectMapper.writerWithDefaultPrettyPrinter().writeValue(goalsFile, goals);
+    }
+
+    /**
+     * 确保目录存在
+     */
+    private static void ensureDirectoryExists() {
+        File directory = new File(GOALS_DIRECTORY_PATH);
+        if (!directory.exists() && !directory.mkdirs()) {
+            logger.error("创建目录失败: {}", directory.getAbsolutePath());
+        }
+    }
+
+    /**
+     * 获取目标文件
+     */
+    private static File getGoalsFile(User user) {
+        String fileName = user.getUid() + ".json";
+        return new File(GOALS_DIRECTORY_PATH + fileName);
     }
 }
