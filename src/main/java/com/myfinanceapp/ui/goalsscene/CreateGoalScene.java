@@ -4,6 +4,8 @@ import com.myfinanceapp.model.Goal;
 import com.myfinanceapp.model.User;
 import com.myfinanceapp.service.GoalManager;
 import com.myfinanceapp.ui.common.LeftSidebarFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -15,128 +17,232 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.UUID;
 
+/**
+ * Scene for creating a new financial goal.
+ * Allows users to create different types of goals with various parameters.
+ */
 public class CreateGoalScene {
+
+    private static final Logger logger = LoggerFactory.getLogger(CreateGoalScene.class);
+    private static final String DEFAULT_GOAL_TITLE = "New Goal";
+    private static final Font LABEL_FONT = Font.font("Arial", 14);
+    private static final Color LABEL_COLOR = Color.DARKBLUE;
+    private static final String[] GOAL_TYPES = {"Saving Goal", "Debt Repayment Goal", "Budget Control Goal"};
     
+    // UI Constants
+    private static final String BACKGROUND_STYLE = "-fx-background-color: white;";
+    private static final String SAVE_BUTTON_STYLE = "-fx-background-color: #3282FA; -fx-text-fill: white;";
+    private static final double FORM_MAX_WIDTH = 600;
+    private static final double BUTTON_WIDTH = 120;
+    private static final double FIELD_WIDTH = 250;
+    private static final double MAIN_PADDING = 40;
+
+    /**
+     * Creates and returns a scene for goal creation
+     * 
+     * @param stage The primary stage
+     * @param width Scene width
+     * @param height Scene height
+     * @param loggedUser Current logged in user
+     * @return A fully constructed Scene for goal creation
+     */
     public static Scene createScene(Stage stage, double width, double height, User loggedUser) {
         BorderPane root = new BorderPane();
-        root.setStyle("-fx-background-color: white;");
+        root.setStyle(BACKGROUND_STYLE);
 
-        // 左侧导航栏
+        // Left sidebar
         VBox sideBar = LeftSidebarFactory.createLeftSidebar(stage, "Create Goal", loggedUser);
         root.setLeft(sideBar);
-        
-        // 主容器
+
+        // Main container
         VBox mainBox = new VBox(20);
         mainBox.setAlignment(Pos.CENTER);
-        mainBox.setPadding(new Insets(40));
-        mainBox.setMaxWidth(600);
+        mainBox.setPadding(new Insets(MAIN_PADDING));
+        mainBox.setMaxWidth(FORM_MAX_WIDTH);
 
-        // 标题
+        // Title
         Label titleLabel = new Label("Create New Goal");
         titleLabel.setFont(Font.font("Arial", 24));
         titleLabel.setTextFill(Color.DARKBLUE);
 
-        // 表单容器
+        // Form container
         GridPane grid = new GridPane();
         grid.setHgap(20);
         grid.setVgap(15);
         grid.setAlignment(Pos.CENTER);
 
-        // 组件样式
-        Font labelFont = Font.font("Arial", 14);
-        Color labelColor = Color.DARKBLUE;
+        // Goal type selection
+        ComboBox<String> typeCombo = createComboBox(GOAL_TYPES, 0, grid, "Type of your goal:", LABEL_FONT, LABEL_COLOR);
 
-        // 目标类型选择
-        ComboBox<String> typeCombo = new ComboBox<>();
-        typeCombo.getItems().addAll("Saving Goal", "Debt Repayment Goal", "Budget Control Goal");
-        typeCombo.getSelectionModel().selectFirst();
-        typeCombo.setPrefWidth(250);
+        // Goal title field
+        TextField titleField = createTextField("Goal Title", 1, grid, "Goal title:", LABEL_FONT, LABEL_COLOR);
+
+        // Target amount field
+        TextField amountField = createTextField("Target Amount (CNY)", 2, grid, "Target amount:", LABEL_FONT, LABEL_COLOR);
+
+        // Deadline date picker
+        DatePicker deadlinePicker = createDatePicker(3, grid, "Deadline:", LABEL_FONT, LABEL_COLOR);
         
-        // 目标标题
-        TextField titleField = new TextField();
-        titleField.setPromptText("Goal Title");
-        titleField.setPrefWidth(250);
+        // Ensure deadline is in the future
+        deadlinePicker.setDayCellFactory(picker -> new DateCell() {
+            @Override
+            public void updateItem(LocalDate date, boolean empty) {
+                super.updateItem(date, empty);
+                setDisable(empty || date.isBefore(LocalDate.now()));
+            }
+        });
+
+        // Category field (only visible for budget control goals)
+        TextField categoryField = createTextField("Category (for Budget Control)", 4, grid, "Category:", LABEL_FONT, LABEL_COLOR);
+        Label categoryLabel = (Label) grid.getChildren().stream()
+                .filter(node -> GridPane.getRowIndex(node) == 4 && GridPane.getColumnIndex(node) == 0)
+                .findFirst().orElse(null);
         
-        // 目标金额
-        TextField amountField = new TextField();
-        amountField.setPromptText("Target Amount (CNY)");
-        amountField.setPrefWidth(250);
+        if (categoryLabel != null) {
+            categoryLabel.setVisible(false);
+        }
+        categoryField.setVisible(false);
 
-        // 截止日期
-        DatePicker deadlinePicker = new DatePicker(LocalDate.now().plusMonths(1));
-        deadlinePicker.setPrefWidth(250);
+        // Show/hide category field based on selected goal type
+        typeCombo.setOnAction(e -> {
+            boolean isBudgetControl = typeCombo.getValue().equals(GOAL_TYPES[2]); // "Budget Control Goal"
+            categoryField.setVisible(isBudgetControl);
+            if (categoryLabel != null) {
+                categoryLabel.setVisible(isBudgetControl);
+            }
+        });
 
-        // 添加组件到网格
-        addStyledRow(grid, 0, "Type of your goal:", typeCombo, labelFont, labelColor);
-        addStyledRow(grid, 1, "Goal title:", titleField, labelFont, labelColor);
-        addStyledRow(grid, 2, "Target amount:", amountField, labelFont, labelColor);
-        addStyledRow(grid, 3, "Deadline:", deadlinePicker, labelFont, labelColor);
-
-        // 按钮区域
+        // Buttons area
         HBox buttonBox = new HBox(15);
         buttonBox.setAlignment(Pos.CENTER);
-        
-        Button saveButton = new Button("Save Goal");
-        saveButton.setStyle("-fx-background-color: #3282FA; -fx-text-fill: white;");
-        saveButton.setPrefWidth(120);
-        
-        Button cancelButton = new Button("Cancel");
-        cancelButton.setPrefWidth(120);
-        
-        buttonBox.getChildren().addAll(saveButton, cancelButton);
-        
-        // 保存按钮点击事件
-        saveButton.setOnAction(event -> {
-            try {
-                String goalTitle = titleField.getText().isEmpty() ? "New Goal" : titleField.getText();
-                
-                Goal newGoal = new Goal(
-                    UUID.randomUUID().toString(),
-                    getGoalType(typeCombo.getValue()),
-                    goalTitle,
-                    Double.parseDouble(amountField.getText()),
-                    0.0, // 当前金额默认0
-                    deadlinePicker.getValue(),
-                    null
-                );
-                
+
+        Button saveButton = createButton("Save Goal", SAVE_BUTTON_STYLE, event -> {
+            if (validateForm(loggedUser, titleField, amountField, typeCombo, categoryField, deadlinePicker)) {
                 try {
-                    // Save the new goal to storage
-                    GoalManager.addGoal(newGoal);
-                    
+                    String goalTitle = titleField.getText().isEmpty() ? DEFAULT_GOAL_TITLE : titleField.getText();
+                    String goalType = getGoalType(typeCombo.getValue());
+
+                    // Get category if it's a budget control goal
+                    String category = null;
+                    if ("BUDGET_CONTROL".equals(goalType) && categoryField.isVisible()) {
+                        category = categoryField.getText();
+                    }
+
+                    // Create new goal with userId
+                    Goal newGoal = new Goal();
+                    newGoal.setId(UUID.randomUUID().toString());
+                    newGoal.setUserId(loggedUser.getUid());
+                    newGoal.setType(goalType);
+                    newGoal.setTitle(goalTitle);
+                    newGoal.setTargetAmount(parseDouble(amountField.getText()));
+                    newGoal.setCurrentAmount(0.0); // Default current amount is 0
+                    newGoal.setDeadline(deadlinePicker.getValue());
+                    newGoal.setCategory(category);
+
+                    // Save the new goal to storage with user information
+                    GoalManager.addGoal(newGoal, loggedUser);
+
                     // Navigate back to goals list
                     Scene goalsScene = Goals.createScene(stage, width, height, loggedUser);
                     stage.setScene(goalsScene);
                 } catch (IOException e) {
                     showErrorAlert("Failed to save goal: " + e.getMessage());
+                    logger.error("Failed to save goal", e);
                 }
-            } catch (NumberFormatException e) {
-                showErrorAlert("Invalid amount format");
             }
         });
-        
-        // 取消按钮点击事件
-        cancelButton.setOnAction(event -> {
+
+        Button cancelButton = createButton("Cancel", null, event -> {
             Scene goalsScene = Goals.createScene(stage, width, height, loggedUser);
             stage.setScene(goalsScene);
         });
 
-        // 组装整个界面
+        buttonBox.getChildren().addAll(saveButton, cancelButton);
+
+        // Assemble the entire UI
         mainBox.getChildren().addAll(titleLabel, grid, buttonBox);
-        
-        // 使用居中布局
+
+        // Center layout
         VBox centerContainer = new VBox(mainBox);
         centerContainer.setAlignment(Pos.CENTER);
         root.setCenter(centerContainer);
 
         return new Scene(root, width, height);
     }
-    
+
+    /**
+     * Validates the goal creation form
+     */
+    private static boolean validateForm(User loggedUser, TextField titleField, TextField amountField, 
+                                      ComboBox<String> typeCombo, TextField categoryField, DatePicker deadlinePicker) {
+        // Check if user is logged in
+        if (loggedUser == null) {
+            showErrorAlert("User not logged in");
+            return false;
+        }
+        
+        // Validate amount
+        try {
+            double amount = parseDouble(amountField.getText());
+            if (amount <= 0) {
+                showErrorAlert("Amount must be greater than zero");
+                return false;
+            }
+        } catch (NumberFormatException e) {
+            showErrorAlert("Invalid amount format - please enter a valid number");
+            return false;
+        }
+        
+        // Validate deadline
+        if (deadlinePicker.getValue().isBefore(LocalDate.now())) {
+            showErrorAlert("Deadline must be in the future");
+            return false;
+        }
+        
+        return true;
+    }
+
+    private static ComboBox<String> createComboBox(String[] items, int row, GridPane grid, String labelText, Font font, Color color) {
+        ComboBox<String> comboBox = new ComboBox<>();
+        comboBox.getItems().addAll(items);
+        comboBox.getSelectionModel().selectFirst();
+        comboBox.setPrefWidth(FIELD_WIDTH);
+        addStyledRow(grid, row, labelText, comboBox, font, color);
+        return comboBox;
+    }
+
+    private static TextField createTextField(String promptText, int row, GridPane grid, String labelText, Font font, Color color) {
+        TextField textField = new TextField();
+        textField.setPromptText(promptText);
+        textField.setPrefWidth(FIELD_WIDTH);
+        addStyledRow(grid, row, labelText, textField, font, color);
+        return textField;
+    }
+
+    private static DatePicker createDatePicker(int row, GridPane grid, String labelText, Font font, Color color) {
+        DatePicker datePicker = new DatePicker(LocalDate.now().plusMonths(1));
+        datePicker.setPrefWidth(FIELD_WIDTH);
+        addStyledRow(grid, row, labelText, datePicker, font, color);
+        return datePicker;
+    }
+
+    private static Button createButton(String text, String style, EventHandler<ActionEvent> action) {
+        Button button = new Button(text);
+        if (style != null) {
+            button.setStyle(style);
+        }
+        button.setPrefWidth(BUTTON_WIDTH);
+        button.setOnAction(action);
+        return button;
+    }
+
     private static String getGoalType(String selection) {
         if (selection.startsWith("Saving")) {
             return "SAVING";
@@ -161,5 +267,9 @@ public class CreateGoalScene {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    private static double parseDouble(String text) throws NumberFormatException {
+        return Double.parseDouble(text);
     }
 }
