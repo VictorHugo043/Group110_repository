@@ -92,10 +92,16 @@ public class GoalManager {
      */
     private static List<Goal> getAllGoals(User user) throws IOException {
         File goalsFile = getGoalsFile(user);
-        if (!goalsFile.exists()) {
+        if (!goalsFile.exists() || goalsFile.length() == 0) {
             return new ArrayList<>();
         }
-        return objectMapper.readValue(goalsFile, objectMapper.getTypeFactory().constructCollectionType(List.class, Goal.class));
+        try {
+            return objectMapper.readValue(goalsFile, objectMapper.getTypeFactory().constructCollectionType(List.class, Goal.class));
+        } catch (Exception e) {
+            logger.error("Error parsing goals file: " + e.getMessage(), e);
+            // If there's a parsing error, return an empty list
+            return new ArrayList<>();
+        }
     }
 
     /**
