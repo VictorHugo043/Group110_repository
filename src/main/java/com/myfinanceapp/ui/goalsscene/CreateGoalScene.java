@@ -24,10 +24,6 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.UUID;
 
-/**
- * Scene for creating a new financial goal.
- * Allows users to create different types of goals with various parameters.
- */
 public class CreateGoalScene {
 
     private static final Logger logger = LoggerFactory.getLogger(CreateGoalScene.class);
@@ -35,6 +31,7 @@ public class CreateGoalScene {
     private static final Font LABEL_FONT = Font.font("Arial", 14);
     private static final Color LABEL_COLOR = Color.DARKBLUE;
     private static final String[] GOAL_TYPES = {"Saving Goal", "Debt Repayment Goal", "Budget Control Goal"};
+    private static final String[] CURRENCIES = {"CNY", "USD", "EUR", "JPY", "GBP"};
     
     // UI Constants
     private static final String BACKGROUND_STYLE = "-fx-background-color: white;";
@@ -44,15 +41,6 @@ public class CreateGoalScene {
     private static final double FIELD_WIDTH = 250;
     private static final double MAIN_PADDING = 40;
 
-    /**
-     * Creates and returns a scene for goal creation
-     * 
-     * @param stage The primary stage
-     * @param width Scene width
-     * @param height Scene height
-     * @param loggedUser Current logged in user
-     * @return A fully constructed Scene for goal creation
-     */
     public static Scene createScene(Stage stage, double width, double height, User loggedUser) {
         BorderPane root = new BorderPane();
         root.setStyle(BACKGROUND_STYLE);
@@ -85,10 +73,14 @@ public class CreateGoalScene {
         TextField titleField = createTextField("Goal Title", 1, grid, "Goal title:", LABEL_FONT, LABEL_COLOR);
 
         // Target amount field
-        TextField amountField = createTextField("Target Amount (CNY)", 2, grid, "Target amount:", LABEL_FONT, LABEL_COLOR);
+        TextField amountField = createTextField("Target Amount", 2, grid, "Target amount:", LABEL_FONT, LABEL_COLOR);
+        
+        // Currency selection
+        ComboBox<String> currencyCombo = createComboBox(CURRENCIES, 3, grid, "Currency:", LABEL_FONT, LABEL_COLOR);
+        currencyCombo.getSelectionModel().selectFirst();
 
         // Deadline date picker
-        DatePicker deadlinePicker = createDatePicker(3, grid, "Deadline:", LABEL_FONT, LABEL_COLOR);
+        DatePicker deadlinePicker = createDatePicker(4, grid, "Deadline:", LABEL_FONT, LABEL_COLOR);
         
         // Ensure deadline is in the future
         deadlinePicker.setDayCellFactory(picker -> new DateCell() {
@@ -100,9 +92,9 @@ public class CreateGoalScene {
         });
 
         // Category field (only visible for budget control goals)
-        TextField categoryField = createTextField("Category (for Budget Control)", 4, grid, "Category:", LABEL_FONT, LABEL_COLOR);
+        TextField categoryField = createTextField("Category (for Budget Control)", 5, grid, "Category:", LABEL_FONT, LABEL_COLOR);
         Label categoryLabel = (Label) grid.getChildren().stream()
-                .filter(node -> GridPane.getRowIndex(node) == 4 && GridPane.getColumnIndex(node) == 0)
+                .filter(node -> GridPane.getRowIndex(node) == 5 && GridPane.getColumnIndex(node) == 0)
                 .findFirst().orElse(null);
         
         if (categoryLabel != null) {
@@ -145,6 +137,7 @@ public class CreateGoalScene {
                     newGoal.setCurrentAmount(0.0); // Default current amount is 0
                     newGoal.setDeadline(deadlinePicker.getValue());
                     newGoal.setCategory(category);
+                    newGoal.setCurrency(currencyCombo.getValue());
 
                     // Save the new goal to storage with user information
                     GoalService.addGoal(newGoal, loggedUser);
@@ -177,9 +170,6 @@ public class CreateGoalScene {
         return new Scene(root, width, height);
     }
 
-    /**
-     * Validates the goal creation form
-     */
     private static boolean validateForm(User loggedUser, TextField titleField, TextField amountField, 
                                       ComboBox<String> typeCombo, TextField categoryField, DatePicker deadlinePicker) {
         // Check if user is logged in

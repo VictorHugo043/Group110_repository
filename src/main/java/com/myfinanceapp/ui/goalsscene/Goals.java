@@ -36,7 +36,7 @@ public class Goals {
         centerGrid.setVgap(20); // 垂直间距
         centerGrid.setPadding(new javafx.geometry.Insets(20, 20, 20, 20));
 
-        // 获取用户的目标列表，使用 GoalManager 的 getUserGoals 方法
+        // 获取用户的目标列表
         List<Goal> userGoals = GoalService.getUserGoals(loggedUser);
 
         // Add debugging label to show how many goals were loaded
@@ -186,9 +186,9 @@ public class Goals {
         StackPane indicatorContainer = new StackPane();
         switch (goal.getType()) {
             case "SAVING":
-                Label targetAmount = new Label("Target Amount: " + goal.getTargetAmount() + " CNY");
+                Label targetAmount = new Label("Target Amount: " + goal.getTargetAmount() + " " + goal.getCurrency());
                 Label deadline = new Label("Deadline: " + goal.getDeadline().format(formatter));
-                Label currentSavings = new Label("Current Savings: " + goal.getCurrentAmount() + " CNY");
+                Label currentSavings = new Label("Current Savings: " + goal.getCurrentAmount() + " " + goal.getCurrency());
                 textInfo.getChildren().addAll(targetAmount, deadline, currentSavings);
 
                 // 创建进度圆形
@@ -202,9 +202,9 @@ public class Goals {
                 indicatorContainer.getChildren().addAll(progressCircle, progressLabel);
                 break;
             case "DEBT_REPAYMENT":
-                Label totalDebtAmount = new Label("Total Debt Amount: " + goal.getTargetAmount() + " CNY");
+                Label totalDebtAmount = new Label("Total Debt Amount: " + goal.getTargetAmount() + " " + goal.getCurrency());
                 Label repaymentDeadline = new Label("Repayment Deadline: " + goal.getDeadline().format(formatter));
-                Label amountPaid = new Label("Amount Paid: " + goal.getCurrentAmount() + " CNY");
+                Label amountPaid = new Label("Amount Paid: " + goal.getCurrentAmount() + " " + goal.getCurrency());
                 textInfo.getChildren().addAll(totalDebtAmount, repaymentDeadline, amountPaid);
 
                 // 创建对号/进度圆形
@@ -227,8 +227,8 @@ public class Goals {
                 break;
             case "BUDGET_CONTROL":
                 Label budgetCategory = new Label("Budget Category: " + (goal.getCategory() != null ? goal.getCategory() : "General"));
-                Label budgetAmount = new Label("Budget Amount: " + goal.getTargetAmount() + " CNY");
-                Label currentExpenses = new Label("Current Expenses: " + goal.getCurrentAmount() + " CNY");
+                Label budgetAmount = new Label("Budget Amount: " + goal.getTargetAmount() + " " + goal.getCurrency());
+                Label currentExpenses = new Label("Current Expenses: " + goal.getCurrentAmount() + " " + goal.getCurrency());
                 textInfo.getChildren().addAll(budgetCategory, budgetAmount, currentExpenses);
 
                 // 创建指示器
