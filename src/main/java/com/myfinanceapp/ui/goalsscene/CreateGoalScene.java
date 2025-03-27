@@ -2,7 +2,7 @@ package com.myfinanceapp.ui.goalsscene;
 
 import com.myfinanceapp.model.Goal;
 import com.myfinanceapp.model.User;
-import com.myfinanceapp.service.GoalManager;
+import com.myfinanceapp.service.GoalService;
 import com.myfinanceapp.ui.common.LeftSidebarFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -147,7 +147,7 @@ public class CreateGoalScene {
                     newGoal.setCategory(category);
 
                     // Save the new goal to storage with user information
-                    GoalManager.addGoal(newGoal, loggedUser);
+                    GoalService.addGoal(newGoal, loggedUser);
 
                     // Navigate back to goals list
                     Scene goalsScene = Goals.createScene(stage, width, height, loggedUser);
