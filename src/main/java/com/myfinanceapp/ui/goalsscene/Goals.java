@@ -154,6 +154,20 @@ public class Goals {
                 "-fx-cursor: hand;"
         );
         
+       // Initially hide the delete button
+       deleteButton.setVisible(false);
+    
+       // Show delete button on mouse enter
+       card.setOnMouseEntered(event -> {
+           deleteButton.setVisible(true);
+        });
+    
+       // Hide delete button on mouse exit
+       card.setOnMouseExited(event -> {
+           deleteButton.setVisible(false);
+        });
+
+
         // Position the delete button to the top-right
         StackPane.setAlignment(deleteButton, Pos.TOP_RIGHT);
         StackPane.setMargin(deleteButton, new Insets(5, 5, 0, 0));
