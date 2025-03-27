@@ -58,7 +58,7 @@ public class CreateGoalScene {
         root.setStyle(BACKGROUND_STYLE);
 
         // Left sidebar
-        VBox sideBar = LeftSidebarFactory.createLeftSidebar(stage, "Create Goal", loggedUser);
+        VBox sideBar = LeftSidebarFactory.createLeftSidebar(stage, "Goals", loggedUser);
         root.setLeft(sideBar);
 
         // Main container
