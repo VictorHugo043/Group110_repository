@@ -264,15 +264,16 @@ public class Goals {
                 break;
 
                 case "DEBT_REPAYMENT":
+                double totalDebtRepayment = transactionService.calculateTotalAmountByCategory("Loan Repayment");
                 Label totalDebtAmount = new Label("Total Debt Amount: " + goal.getTargetAmount() + " " + goal.getCurrency());
                 Label repaymentDeadline = new Label("Repayment Deadline: " + goal.getDeadline().format(formatter));
-                Label amountPaid = new Label("Amount Paid: " + goal.getCurrentAmount() + " " + goal.getCurrency());
+                Label amountPaid = new Label("Amount Paid: " + totalDebtRepayment + " " + goal.getCurrency());
                 textInfo.getChildren().addAll(totalDebtAmount, repaymentDeadline, amountPaid);
 
                 // 计算进度百分比
                 double debtProgressPercentage = 0;
                 if (goal.getTargetAmount() > 0) {
-                    debtProgressPercentage = Math.min(100, (goal.getCurrentAmount() / goal.getTargetAmount()) * 100);
+                    debtProgressPercentage = Math.min(100, (totalDebtRepayment / goal.getTargetAmount()) * 100);
                 }
 
                 // 背景圆弧（灰色）
