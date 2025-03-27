@@ -3,15 +3,20 @@ package com.myfinanceapp.ui.goalsscene;
 import com.myfinanceapp.model.Goal;
 import com.myfinanceapp.model.User;
 import com.myfinanceapp.ui.common.LeftSidebarFactory;
-import com.myfinanceapp.service.GoalManager;
+import com.myfinanceapp.service.GoalService;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
+import javafx.geometry.Insets;
+import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -32,7 +37,7 @@ public class Goals {
         centerGrid.setPadding(new javafx.geometry.Insets(20, 20, 20, 20));
 
         // 获取用户的目标列表，使用 GoalManager 的 getUserGoals 方法
-        List<Goal> userGoals = GoalManager.getUserGoals(loggedUser);
+        List<Goal> userGoals = GoalService.getUserGoals(loggedUser);
 
         // Add debugging label to show how many goals were loaded
         String debugText = "Found " + userGoals.size() + " goals for user";
@@ -64,7 +69,7 @@ public class Goals {
                     // 确保目标的用户ID与当前登录用户匹配
                     if (loggedUser == null || goal.getUserId() == null || 
                         loggedUser.getUid().equals(goal.getUserId())) {
-                        VBox goalCard = createGoalCard(goal);
+                        VBox goalCard = createGoalCard(goal, stage, loggedUser);
                         centerGrid.add(goalCard, col, row);
                         // Debug info for each goal
                         System.out.println("Added goal: " + goal.getTitle() + 
@@ -103,7 +108,7 @@ public class Goals {
         return new Scene(root, width, height);
     }
 
-    private static VBox createGoalCard(Goal goal) {
+    private static VBox createGoalCard(Goal goal, Stage stage, User loggedUser) {
         VBox card = new VBox(10);
         card.setAlignment(Pos.CENTER);
         card.setMaxWidth(300);
@@ -115,6 +120,58 @@ public class Goals {
                         "-fx-background-radius: 12;" +
                         "-fx-background-color: white;"
         );
+
+        // Create delete button
+        Button deleteButton = new Button("×");
+        deleteButton.setStyle(
+                "-fx-background-color: transparent;" +
+                "-fx-text-fill: #FF5252;" +
+                "-fx-font-size: 16px;" +
+                "-fx-font-weight: bold;" +
+                "-fx-cursor: hand;"
+        );
+        
+        // Position the delete button to the top-right
+        StackPane.setAlignment(deleteButton, Pos.TOP_RIGHT);
+        StackPane.setMargin(deleteButton, new Insets(5, 5, 0, 0));
+        
+        // Handle delete button click
+        deleteButton.setOnAction(event -> {
+            // Confirm deletion with alert
+            Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
+            confirmation.setTitle("Delete Goal");
+            confirmation.setHeaderText("Delete \"" + goal.getTitle() + "\"");
+            confirmation.setContentText("Are you sure you want to delete this goal? This action cannot be undone.");
+            
+            // Show dialog and wait for user response
+            confirmation.showAndWait().ifPresent(response -> {
+                if (response == ButtonType.OK) {
+                    try {
+                        // Store original window dimensions
+                        double originalWidth = stage.getScene().getWidth();
+                        double originalHeight = stage.getScene().getHeight();
+                        
+                        // Delete the goal
+                        GoalService.deleteGoal(goal.getId(), loggedUser);
+                        
+                        // Refresh the goals scene with the exact original dimensions
+                        Scene newScene = createScene(stage, originalWidth, originalHeight, loggedUser);
+                        stage.setScene(newScene);
+                    } catch (IOException e) {
+                        // Show error message
+                        Alert error = new Alert(Alert.AlertType.ERROR);
+                        error.setTitle("Error");
+                        error.setHeaderText("Failed to delete goal");
+                        error.setContentText("An error occurred: " + e.getMessage());
+                        error.show();
+                        e.printStackTrace();
+                    }
+                }
+            });
+            
+            // Prevent event from bubbling up to the card click handler
+            event.consume();
+        });
 
         Label title = new Label(goal.getTitle());
         title.setFont(Font.font("Arial", 16));
@@ -194,11 +251,23 @@ public class Goals {
                 break;
         }
 
+        // Create a container for the title and delete button
+        StackPane titleContainer = new StackPane();
+        HBox titleBox = new HBox();
+        titleBox.setAlignment(Pos.CENTER);
+        titleBox.getChildren().add(title);
+        titleContainer.getChildren().addAll(titleBox, deleteButton);
+        StackPane.setAlignment(titleBox, Pos.CENTER);
+        StackPane.setAlignment(deleteButton, Pos.TOP_RIGHT);
+        StackPane.setMargin(deleteButton, new Insets(5, 5, 0, 0));
+        
         // 创建左右布局的HBox
         HBox contentLayout = new HBox(15);
         contentLayout.setAlignment(Pos.CENTER);
         contentLayout.getChildren().addAll(textInfo, indicatorContainer);
-        card.getChildren().addAll(title, contentLayout);
+        
+        // Add the title container instead of just the title
+        card.getChildren().addAll(titleContainer, contentLayout);
         return card;
     }
 
