@@ -1,12 +1,16 @@
 # Group110_repository
 
 ## Members:
-### Zhihan Liu,2022213506,221170836,loveyuban@gmail.com (Nora-LL/Aya)
-### Pengyi Liu,2022213512,221170881,2654753356@qq.com (Effy4869)
-### Zhengxu Li,2022213494,221170711,jp2022213494@qmul.ac.uk (ZhengxuLi96/Li)
-### Xiangwei Gong,2022213490,221170674,luofeng2333@gmail.com (VictorHugo043/Fallenwind)
-### Xinyu Shao,2022213511,221170870,2848812310@qq.com (ROOOBUE/sstarsheep)
-### Ruixuan MA,2022213514,221170906,2397451568@qq.com (MaRuixuan)
+
+| Name          | BUPT ID    | QM ID    | Email                        | Username            |
+|--------------|------------|-----------|-----------------------------|-----------------------------|
+| Zhihan Liu   | 2022213506 | 221170836 | loveyuban@gmail.com         | Nora-LL / Aya              |
+| Pengyi Liu   | 2022213512 | 221170881 | 2654753356@qq.com          | Effy4869                   |
+| Zhengxu Li   | 2022213494 | 221170711 | jp2022213494@qmul.ac.uk    | ZhengxuLi96 / Li           |
+| Xiangwei Gong| 2022213490 | 221170674 | luofeng2333@gmail.com      | VictorHugo043 / Fallenwind |
+| Xinyu Shao   | 2022213511 | 221170870 | 2848812310@qq.com         | ROOOBUE / sstarsheep       |
+| Ruixuan MA   | 2022213514 | 221170906 | 2397451568@qq.com         | MaRuixuan                  |
+
 
 ---
 
