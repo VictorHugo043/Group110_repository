@@ -229,7 +229,7 @@ public class TransactionScene {
                 return; // 停止提交过程
             }
             
-            // 检查交易类型与金额正负是否匹配
+           /*// 检查交易类型与金额正负是否匹配
             String transactionType = typeCombo.getValue();
             if ((transactionType.equals("Income") && amount <= 0) || 
                 (transactionType.equals("Expense") && amount >= 0)) {
@@ -245,7 +245,7 @@ public class TransactionScene {
                 }
                 alert.showAndWait();
                 return; // 停止提交过程
-            }
+            }*/
 
 
 

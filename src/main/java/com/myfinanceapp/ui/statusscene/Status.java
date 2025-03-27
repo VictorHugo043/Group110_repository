@@ -5,6 +5,9 @@ import com.myfinanceapp.model.User;
 import com.myfinanceapp.service.AiChatService;
 import com.myfinanceapp.service.TransactionService;
 import com.myfinanceapp.ui.common.LeftSidebarFactory;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -15,92 +18,76 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
-/**
- * Status 界面示例：包含：
- * - 顶部：折线图 + 收入/支出
- * - 中下方：左右列
- *   => 左列: CategoryProportion + RecentTransactions
- *   => 右列: AI Pane(只输入) + Suggestion(显示AI对话/历史)
- */
 public class Status {
-
-    // 当前登录用户
     private static User currentUser;
-
-    // AI 对话上下文：用 role=user/assistant, content=...
     private static final List<Map<String, String>> chatMessages = new ArrayList<>();
-
-    // Suggestion 区域：用来显示 AI 问答历史
     private static TextArea suggestionsArea;
+    private static TransactionService txService = new TransactionService();
+    private static LineChart<String, Number> lineChart;
+    private static BarChart<String, Number> barChart;
+    private static Label exLabel;
+    private static Label inLabel;
+    private static PieChart pieChart;
+    private static String currentPeriod = "This Month";
 
-    /**
-     * 生成 Status 场景
-     * @param stage 主 Stage
-     * @param width 场景宽
-     * @param height 场景高
-     * @param loggedUser 当前登录用户
-     */
     public static Scene createScene(Stage stage, double width, double height, User loggedUser) {
         Status.currentUser = loggedUser;
 
         BorderPane root = new BorderPane();
         root.setStyle("-fx-background-color: white;");
 
-        // 左侧导航栏
         VBox sideBar = LeftSidebarFactory.createLeftSidebar(stage, "Status", loggedUser);
         root.setLeft(sideBar);
 
-        // 右侧主容器: ScrollPane + VBox
         ScrollPane scrollPane = new ScrollPane();
         scrollPane.setFitToWidth(true);
+        scrollPane.setFitToHeight(true);
         root.setCenter(scrollPane);
 
         VBox mainContent = new VBox(20);
         mainContent.setPadding(new Insets(20));
         mainContent.setAlignment(Pos.TOP_CENTER);
+        mainContent.setFillWidth(true);
         scrollPane.setContent(mainContent);
 
-        // (1) 顶部圆角边框：折线图
         Pane topPane = createTopPane();
         mainContent.getChildren().add(topPane);
 
-        // (2) 中下方：左右两列
         HBox bottomArea = new HBox(20);
         bottomArea.setAlignment(Pos.TOP_CENTER);
-        bottomArea.setPrefHeight(600);
+        bottomArea.setFillHeight(true);
 
-        // 左列: Category + Recent Tx
         VBox leftColumn = new VBox(20);
         leftColumn.setAlignment(Pos.TOP_CENTER);
+        HBox.setHgrow(leftColumn, Priority.ALWAYS);
 
         Pane categoryPane = createCategoryPane();
         Pane transactionsPane = createTransactionsPane();
         leftColumn.getChildren().addAll(categoryPane, transactionsPane);
 
-        // 右列: AI(只输入) + Suggestion(显示对话)
         VBox rightColumn = new VBox(20);
         rightColumn.setAlignment(Pos.TOP_CENTER);
+        HBox.setHgrow(rightColumn, Priority.ALWAYS);
 
-        Pane aiPane = createAIPane();                // 上半: 输入
-        Pane suggestionPane = createSuggestionPane(); // 下半: AI历史
+        Pane aiPane = createAIPane();
+        Pane suggestionPane = createSuggestionPane();
         rightColumn.getChildren().addAll(aiPane, suggestionPane);
 
         bottomArea.getChildren().addAll(leftColumn, rightColumn);
-        mainContent.getChildren().add(bottomArea);
+        mainContent.getChildren().add(bottomArea); // Note: Should be bottomArea
 
         return new Scene(root, width, height);
     }
 
-    /**
-     * 顶部区域: 折线图 + 收入/支出 + Date/Chart Combo
-     */
-    private static Pane createTopPane(){
+    private static Pane createTopPane() {
         BorderPane topBorder = new BorderPane();
-        topBorder.setPrefHeight(300);
         topBorder.setStyle(
                 "-fx-border-color: #3282FA;" +
                         "-fx-border-radius: 20;" +
@@ -110,74 +97,278 @@ public class Status {
         );
         topBorder.setPadding(new Insets(15));
 
-        Label title = new Label("Income and Expenses for This Month");
+        Label title = new Label("Income and Expenses");
         title.setFont(Font.font(20));
         title.setTextFill(Color.web("#3282FA"));
+        title.setWrapText(true);
 
         VBox exInBox = new VBox(15);
         exInBox.setAlignment(Pos.TOP_LEFT);
+        exLabel = new Label();
+        inLabel = new Label();
+        updateSummaryLabels("This Month");
 
-        Label exLabel = new Label("Ex.  2000.0 CNY");
-        exLabel.setStyle("-fx-background-color: #E0F0FF; -fx-text-fill: #3282FA; -fx-border-radius: 30; -fx-background-radius: 30;"
-                + "-fx-padding: 10 20 10 20;");
-        Label inLabel = new Label("In.  3500.0 CNY");
-        inLabel.setStyle("-fx-background-color: #E0F0FF; -fx-text-fill: #3282FA; -fx-border-radius: 30; -fx-background-radius: 30;"
-                + "-fx-padding: 10 20 10 20;");
         exInBox.getChildren().addAll(exLabel, inLabel);
-
-        VBox comboBoxArea = new VBox(10);
-        comboBoxArea.setAlignment(Pos.TOP_LEFT);
 
         HBox dateBox = new HBox(5);
         Label dateLabel = new Label("Date Selection");
+        dateLabel.setWrapText(true);
         ComboBox<String> dateCombo = new ComboBox<>();
-        dateCombo.getItems().addAll("This Month", "Last Month", "Custom Range");
+        dateCombo.getItems().addAll("This Month", "Last Month", "All Transactions");
         dateCombo.setValue("This Month");
         dateBox.getChildren().addAll(dateLabel, dateCombo);
 
         HBox chartTypeBox = new HBox(5);
         Label chartTypeLabel = new Label("Chart Type");
+        chartTypeLabel.setWrapText(true);
         ComboBox<String> chartTypeCombo = new ComboBox<>();
         chartTypeCombo.getItems().addAll("Line graph", "Bar graph");
         chartTypeCombo.setValue("Line graph");
         chartTypeBox.getChildren().addAll(chartTypeLabel, chartTypeCombo);
 
-        comboBoxArea.getChildren().addAll(dateBox, chartTypeBox);
-
-        NumberAxis xAxis = new NumberAxis();
+        CategoryAxis xAxis = new CategoryAxis();
         NumberAxis yAxis = new NumberAxis();
-        xAxis.setLabel("Day");
+        xAxis.setLabel("Date");
         yAxis.setLabel("Amount");
-        LineChart<Number, Number> lineChart = new LineChart<>(xAxis, yAxis);
+
+        CategoryAxis barXAxis = new CategoryAxis();
+        NumberAxis barYAxis = new NumberAxis();
+        barXAxis.setLabel("Date");
+        barYAxis.setLabel("Amount");
+
+        lineChart = new LineChart<>(xAxis, yAxis);
         lineChart.setTitle("Ex/In Trend");
-        lineChart.setPrefSize(350, 200);
+        barChart = new BarChart<>(barXAxis, barYAxis);
+        barChart.setTitle("Ex/In Trend");
 
-        XYChart.Series<Number, Number> series = new XYChart.Series<>();
-        series.setName("Example Data");
-        series.getData().add(new XYChart.Data<>(1, 50));
-        series.getData().add(new XYChart.Data<>(2, 120));
-        series.getData().add(new XYChart.Data<>(3, 75));
-        series.getData().add(new XYChart.Data<>(4, 200));
-        series.getData().add(new XYChart.Data<>(5, 140));
-        lineChart.getData().add(series);
+        StackPane chartPane = new StackPane(lineChart);
+        HBox.setHgrow(chartPane, Priority.ALWAYS);
+        VBox.setVgrow(chartPane, Priority.ALWAYS);
 
-        VBox centerBox = new VBox(10, title);
-        centerBox.setAlignment(Pos.TOP_CENTER);
+        dateCombo.setOnAction(e -> {
+            currentPeriod = dateCombo.getValue();
+            updateCharts(dateCombo.getValue());
+            updateSummaryLabels(dateCombo.getValue());
+        });
 
-        HBox middleRow = new HBox(30, exInBox, comboBoxArea, lineChart);
-        middleRow.setAlignment(Pos.CENTER_LEFT);
+        chartTypeCombo.setOnAction(e -> {
+            chartPane.getChildren().clear();
+            if ("Line graph".equals(chartTypeCombo.getValue())) {
+                chartPane.getChildren().add(lineChart);
+            } else {
+                chartPane.getChildren().add(barChart);
+            }
+            updateCharts(dateCombo.getValue());
+        });
 
-        centerBox.getChildren().add(middleRow);
-        topBorder.setCenter(centerBox);
+        updateCharts("This Month");
+
+        VBox leftSide = new VBox(10, dateBox, chartTypeBox, exInBox);
+        leftSide.setAlignment(Pos.TOP_LEFT);
+
+        GridPane gridPane = new GridPane();
+        gridPane.setHgap(20);
+        gridPane.setVgap(10);
+        gridPane.setAlignment(Pos.CENTER);
+
+        gridPane.add(title, 0, 0, 2, 1);
+        GridPane.setHalignment(title, HPos.CENTER);
+        gridPane.add(leftSide, 0, 1);
+        gridPane.add(chartPane, 1, 1);
+        GridPane.setHgrow(chartPane, Priority.ALWAYS);
+        GridPane.setVgrow(chartPane, Priority.ALWAYS);
+
+        topBorder.setCenter(gridPane);
         return topBorder;
     }
 
-    /**
-     * 左列上方：Category Proportion
-     */
-    private static Pane createCategoryPane(){
+    private static void updateSummaryLabels(String period) {
+        List<Transaction> transactions = txService.loadTransactions(currentUser);
+        LocalDate now = LocalDate.now();
+        LocalDate startDate;
+        LocalDate endDate;
+
+        switch (period) {
+            case "Last Month":
+                startDate = now.minusMonths(1).withDayOfMonth(1);
+                endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
+                break;
+            case "All Transactions":
+                if (transactions.isEmpty()) {
+                    startDate = now.withDayOfMonth(1);
+                    endDate = now.withDayOfMonth(now.lengthOfMonth());
+                } else {
+                    startDate = transactions.stream()
+                            .map(t -> LocalDate.parse(t.getTransactionDate()))
+                            .min(LocalDate::compareTo)
+                            .orElse(now.withDayOfMonth(1));
+                    endDate = transactions.stream()
+                            .map(t -> LocalDate.parse(t.getTransactionDate()))
+                            .max(LocalDate::compareTo)
+                            .orElse(now.withDayOfMonth(now.lengthOfMonth()));
+                }
+                break;
+            default: // "This Month"
+                startDate = now.withDayOfMonth(1);
+                endDate = now.withDayOfMonth(now.lengthOfMonth());
+        }
+
+        LocalDate finalStartDate = startDate;
+        LocalDate finalEndDate = endDate;
+        transactions = transactions.stream()
+                .filter(t -> {
+                    LocalDate txDate = LocalDate.parse(t.getTransactionDate());
+                    return !txDate.isBefore(finalStartDate) && !txDate.isAfter(finalEndDate);
+                })
+                .collect(Collectors.toList());
+
+        double totalIncome = transactions.stream()
+                .filter(t -> "Income".equals(t.getTransactionType()))
+                .mapToDouble(Transaction::getAmount)
+                .sum();
+        double totalExpense = transactions.stream()
+                .filter(t -> "Expense".equals(t.getTransactionType()))
+                .mapToDouble(Transaction::getAmount)
+                .sum();
+
+        exLabel.setText(String.format("Ex.  %.2f CNY", totalExpense));
+        inLabel.setText(String.format("In.  %.2f CNY", totalIncome));
+        exLabel.setStyle("-fx-background-color: #E0F0FF; -fx-text-fill: #3282FA; -fx-border-radius: 30; -fx-background-radius: 30; -fx-padding: 10 20 10 20;");
+        inLabel.setStyle("-fx-background-color: #E0F0FF; -fx-text-fill: #3282FA; -fx-border-radius: 30; -fx-background-radius: 30; -fx-padding: 10 20 10 20;");
+    }
+
+    private static void updateCharts(String period) {
+        List<Transaction> transactions = txService.loadTransactions(currentUser);
+        LocalDate now = LocalDate.now();
+        LocalDate startDate;
+        LocalDate endDate;
+
+        switch (period) {
+            case "Last Month":
+                startDate = now.minusMonths(1).withDayOfMonth(1);
+                endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
+                break;
+            case "All Transactions":
+                if (transactions.isEmpty()) {
+                    startDate = now.withDayOfMonth(1);
+                    endDate = now.withDayOfMonth(now.lengthOfMonth());
+                } else {
+                    startDate = transactions.stream()
+                            .map(t -> LocalDate.parse(t.getTransactionDate()))
+                            .min(LocalDate::compareTo)
+                            .orElse(now.withDayOfMonth(1));
+                    endDate = transactions.stream()
+                            .map(t -> LocalDate.parse(t.getTransactionDate()))
+                            .max(LocalDate::compareTo)
+                            .orElse(now.withDayOfMonth(now.lengthOfMonth()));
+                }
+                break;
+            default: // "This Month"
+                startDate = now.withDayOfMonth(1);
+                endDate = now.withDayOfMonth(now.lengthOfMonth());
+        }
+
+        LocalDate finalStartDate = startDate;
+        LocalDate finalEndDate = endDate;
+        transactions = transactions.stream()
+                .filter(t -> {
+                    LocalDate txDate = LocalDate.parse(t.getTransactionDate());
+                    return !txDate.isBefore(finalStartDate) && !txDate.isAfter(finalEndDate);
+                })
+                .collect(Collectors.toList());
+
+        // Calculate the total number of days in the period
+        long totalDays = finalEndDate.toEpochDay() - finalStartDate.toEpochDay() + 1;
+
+        // Create a list of all dates in the period
+        List<String> allDates = new ArrayList<>();
+        LocalDate currentDate = startDate;
+        DateTimeFormatter formatter = period.equals("All Transactions") ?
+                DateTimeFormatter.ofPattern("yyyy-MM-dd") :
+                DateTimeFormatter.ofPattern("MM-dd");
+        while (!currentDate.isAfter(endDate)) {
+            allDates.add(currentDate.format(formatter));
+            currentDate = currentDate.plusDays(1);
+        }
+
+        // Aggregate transactions by date
+        Map<String, Double> incomeByDate = transactions.stream()
+                .filter(t -> "Income".equals(t.getTransactionType()))
+                .collect(Collectors.groupingBy(
+                        t -> LocalDate.parse(t.getTransactionDate()).format(formatter),
+                        Collectors.summingDouble(Transaction::getAmount)
+                ));
+
+        Map<String, Double> expenseByDate = transactions.stream()
+                .filter(t -> "Expense".equals(t.getTransactionType()))
+                .collect(Collectors.groupingBy(
+                        t -> LocalDate.parse(t.getTransactionDate()).format(formatter),
+                        Collectors.summingDouble(Transaction::getAmount)
+                ));
+
+        // Update Line Chart
+        lineChart.getData().clear();
+        CategoryAxis lineXAxis = (CategoryAxis) lineChart.getXAxis();
+        lineXAxis.getCategories().clear(); // Clear existing categories
+        lineXAxis.setCategories(FXCollections.observableArrayList(allDates));
+        lineXAxis.setLabel("Date");
+
+        XYChart.Series<String, Number> lineIncomeSeries = new XYChart.Series<>();
+        lineIncomeSeries.setName("Income");
+        XYChart.Series<String, Number> lineExpenseSeries = new XYChart.Series<>();
+        lineExpenseSeries.setName("Expense");
+
+        for (String date : allDates) {
+            double income = incomeByDate.getOrDefault(date, 0.0);
+            double expense = expenseByDate.getOrDefault(date, 0.0);
+            lineIncomeSeries.getData().add(new XYChart.Data<>(date, income));
+            lineExpenseSeries.getData().add(new XYChart.Data<>(date, expense));
+        }
+
+        lineChart.getData().addAll(lineIncomeSeries, lineExpenseSeries);
+
+        // Adjust line chart x-axis labels for better readability if the range is large
+        if (totalDays > 30) {
+            lineXAxis.setTickLabelRotation(45);
+            lineXAxis.setTickLabelsVisible(true);
+        } else {
+            lineXAxis.setTickLabelRotation(0);
+            lineXAxis.setTickLabelsVisible(true);
+        }
+
+        // Update Bar Chart
+        barChart.getData().clear();
+        CategoryAxis barXAxis = (CategoryAxis) barChart.getXAxis();
+        barXAxis.getCategories().clear(); // Clear existing categories
+        barXAxis.setCategories(FXCollections.observableArrayList(allDates));
+        barXAxis.setLabel("Date");
+
+        XYChart.Series<String, Number> barIncomeSeries = new XYChart.Series<>();
+        barIncomeSeries.setName("Income");
+        XYChart.Series<String, Number> barExpenseSeries = new XYChart.Series<>();
+        barExpenseSeries.setName("Expense");
+
+        for (String date : allDates) {
+            double income = incomeByDate.getOrDefault(date, 0.0);
+            double expense = expenseByDate.getOrDefault(date, 0.0);
+            barIncomeSeries.getData().add(new XYChart.Data<>(date, income));
+            barExpenseSeries.getData().add(new XYChart.Data<>(date, expense));
+        }
+
+        barChart.getData().addAll(barIncomeSeries, barExpenseSeries);
+
+        // Adjust bar chart x-axis labels for better readability if the range is large
+        if (totalDays > 30) {
+            barXAxis.setTickLabelRotation(45);
+            barXAxis.setTickLabelsVisible(true);
+        } else {
+            barXAxis.setTickLabelRotation(0);
+            barXAxis.setTickLabelsVisible(true);
+        }
+    }
+
+    private static Pane createCategoryPane() {
         BorderPane categoryPane = new BorderPane();
-        categoryPane.setPrefSize(400, 250);
         categoryPane.setStyle(
                 "-fx-border-color: #3282FA;" +
                         "-fx-border-radius: 20;" +
@@ -190,27 +381,75 @@ public class Status {
         Label title = new Label("Category Proportion Analysis");
         title.setFont(Font.font(16));
         title.setTextFill(Color.web("#3282FA"));
+        title.setWrapText(true);
 
-        PieChart pieChart = new PieChart();
-        pieChart.setPrefSize(300, 180);
-        PieChart.Data slice1 = new PieChart.Data("Food 100CNY", 100);
-        PieChart.Data slice2 = new PieChart.Data("Shopping 150CNY", 150);
-        PieChart.Data slice3 = new PieChart.Data("Subscription 146CNY", 146);
-        pieChart.getData().addAll(slice1, slice2, slice3);
+        pieChart = new PieChart();
+        VBox.setVgrow(pieChart, Priority.ALWAYS);
+        HBox.setHgrow(pieChart, Priority.ALWAYS);
+        updatePieChart();
 
         VBox content = new VBox(10, title, pieChart);
-        content.setAlignment(Pos.TOP_CENTER);
-
+        content.setAlignment(Pos.CENTER);
         categoryPane.setCenter(content);
         return categoryPane;
     }
 
-    /**
-     * 左列下方：Recent Transactions
-     */
-    private static Pane createTransactionsPane(){
+    private static void updatePieChart() {
+        List<Transaction> transactions = txService.loadTransactions(currentUser);
+        LocalDate now = LocalDate.now();
+        LocalDate startDate;
+        LocalDate endDate;
+
+        switch (currentPeriod) {
+            case "Last Month":
+                startDate = now.minusMonths(1).withDayOfMonth(1);
+                endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
+                break;
+            case "All Transactions":
+                if (transactions.isEmpty()) {
+                    startDate = now.withDayOfMonth(1);
+                    endDate = now.withDayOfMonth(now.lengthOfMonth());
+                } else {
+                    startDate = transactions.stream()
+                            .map(t -> LocalDate.parse(t.getTransactionDate()))
+                            .min(LocalDate::compareTo)
+                            .orElse(now.withDayOfMonth(1));
+                    endDate = transactions.stream()
+                            .map(t -> LocalDate.parse(t.getTransactionDate()))
+                            .max(LocalDate::compareTo)
+                            .orElse(now.withDayOfMonth(now.lengthOfMonth()));
+                }
+                break;
+            default: // "This Month"
+                startDate = now.withDayOfMonth(1);
+                endDate = now.withDayOfMonth(now.lengthOfMonth());
+        }
+
+        LocalDate finalStartDate = startDate;
+        LocalDate finalEndDate = endDate;
+        transactions = transactions.stream()
+                .filter(t -> {
+                    LocalDate txDate = LocalDate.parse(t.getTransactionDate());
+                    return !txDate.isBefore(finalStartDate) && !txDate.isAfter(finalEndDate);
+                })
+                .collect(Collectors.toList());
+
+        Map<String, Double> categoryTotals = transactions.stream()
+                .filter(t -> "Expense".equals(t.getTransactionType()))
+                .collect(Collectors.groupingBy(
+                        Transaction::getCategory,
+                        Collectors.summingDouble(Transaction::getAmount)
+                ));
+
+        ObservableList<PieChart.Data> pieChartData = FXCollections.observableArrayList();
+        categoryTotals.forEach((category, amount) ->
+                pieChartData.add(new PieChart.Data(category + " " + String.format("%.2f CNY", amount), amount))
+        );
+        pieChart.setData(pieChartData);
+    }
+
+    private static Pane createTransactionsPane() {
         BorderPane txPane = new BorderPane();
-        txPane.setPrefSize(400, 200);
         txPane.setStyle(
                 "-fx-border-color: #3282FA;" +
                         "-fx-border-radius: 20;" +
@@ -223,24 +462,37 @@ public class Status {
         Label title = new Label("Recent Transactions");
         title.setFont(Font.font(16));
         title.setTextFill(Color.web("#3282FA"));
+        title.setWrapText(true);
 
-        Label line1 = new Label("October 15   Electricity bill    125.75 CNY");
-        Label line2 = new Label("October 15   Mobile phone bill   49.99 CNY");
-        Label line3 = new Label("October 13   Gasoline            55.80 CNY");
+        VBox transactionsBox = new VBox(5);
+        transactionsBox.setAlignment(Pos.TOP_LEFT);
 
-        VBox vbox = new VBox(10, title, line1, line2, line3);
+        ScrollPane scrollPane = new ScrollPane(transactionsBox);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setPrefHeight(150);
+        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+
+        List<Transaction> transactions = txService.loadTransactions(currentUser);
+        transactions.stream()
+                .sorted((t1, t2) -> t2.getTransactionDate().compareTo(t1.getTransactionDate()))
+                .forEach(t -> {
+                    Label txLabel = new Label(String.format("%s   %s    %.2f CNY",
+                            t.getTransactionDate(),
+                            t.getCategory(),
+                            t.getAmount()));
+                    txLabel.setWrapText(true);
+                    transactionsBox.getChildren().add(txLabel);
+                });
+
+        VBox vbox = new VBox(10, title, scrollPane);
         vbox.setAlignment(Pos.TOP_LEFT);
-
         txPane.setCenter(vbox);
         return txPane;
     }
 
-    /**
-     * 右列上方：AI输入(不显示历史)，在发送前将 userInput + 交易数据 + 专属提示 拼接
-     */
-    private static Pane createAIPane(){
+    private static Pane createAIPane() {
         BorderPane aiPane = new BorderPane();
-        aiPane.setPrefSize(400, 200);
         aiPane.setStyle(
                 "-fx-border-color: #3282FA;" +
                         "-fx-border-radius: 20;" +
@@ -253,27 +505,23 @@ public class Status {
         Label title = new Label("Ask Your AI Assistant:");
         title.setFont(Font.font(16));
         title.setTextFill(Color.web("#3282FA"));
+        title.setWrapText(true);
 
         TextArea questionArea = new TextArea();
         questionArea.setPromptText("Type your question...");
-        questionArea.setPrefSize(250, 80);
+        VBox.setVgrow(questionArea, Priority.ALWAYS);
+        HBox.setHgrow(questionArea, Priority.ALWAYS);
 
         Button sendBtn = new Button("➤");
         sendBtn.setStyle("-fx-background-color: #A3D1FF; -fx-text-fill: white; -fx-background-radius: 15; -fx-font-weight: bold;");
 
-        // 发送事件
         sendBtn.setOnAction(e -> {
             String userInput = questionArea.getText().trim();
-            if(!userInput.isEmpty()){
+            if (!userInput.isEmpty()) {
                 questionArea.setDisable(true);
                 sendBtn.setDisable(true);
 
-                // 1) 从 transactions/<uid>.json 加载用户财务数据
-                TransactionService txService = new TransactionService();
                 List<Transaction> txList = txService.loadTransactions(currentUser);
-                // ^ 使用 currentUser, 不再是 loggedUser 变量
-
-                // 2) 拼交易数据
                 StringBuilder dataSummary = new StringBuilder();
                 dataSummary.append("以下是我的财务交易数据，每条格式：Date, Type, Currency, Amount, Category, PaymentMethod:\n");
                 for (Transaction tx : txList) {
@@ -287,16 +535,14 @@ public class Status {
                             tx.getPaymentMethod()
                     ));
                 }
-                // 3) 专属提示 + 用户数据 + 用户本次问题
                 String systemPrompt =
                         "现在你是我的专属财务管理助手，我希望你解答我有关个人财务的问题。\n" +
                                 "这是我的财务数据结构: Transaction Date(YYYY-MM-DD), Type(Income/Expense), Currency, Amount, Category, PaymentMethod.\n" +
                                 "下面是我目前的数据：\n" + dataSummary +
                                 "\n用户的问题是： " + userInput;
 
-                // 调用AiChatService
                 String answer = AiChatService.chatCompletion(chatMessages, systemPrompt);
-                if(answer != null){
+                if (answer != null) {
                     suggestionsArea.appendText("You: " + userInput + "\nAI: " + answer + "\n\n");
                 } else {
                     suggestionsArea.appendText("AI 请求失败，未能获取答复\n\n");
@@ -310,17 +556,12 @@ public class Status {
 
         VBox content = new VBox(10, title, questionArea, sendBtn);
         content.setAlignment(Pos.TOP_LEFT);
-
         aiPane.setCenter(content);
         return aiPane;
     }
 
-    /**
-     * 右列下方：Suggestion Pane（显示AI对话历史）
-     */
-    private static Pane createSuggestionPane(){
+    private static Pane createSuggestionPane() {
         BorderPane sugPane = new BorderPane();
-        sugPane.setPrefSize(400, 200);
         sugPane.setStyle(
                 "-fx-border-color: #3282FA;" +
                         "-fx-border-radius: 20;" +
@@ -333,18 +574,19 @@ public class Status {
         Label title = new Label("Suggestion");
         title.setFont(Font.font(16));
         title.setTextFill(Color.web("#3282FA"));
+        title.setWrapText(true);
 
         suggestionsArea = new TextArea();
         suggestionsArea.setEditable(false);
         suggestionsArea.setWrapText(true);
-        suggestionsArea.setPrefHeight(120);
+        VBox.setVgrow(suggestionsArea, Priority.ALWAYS);
+        HBox.setHgrow(suggestionsArea, Priority.ALWAYS);
 
         Button moreBtn = new Button("More>");
         moreBtn.setStyle("-fx-background-color: #E0F0FF; -fx-text-fill: #3282FA; -fx-background-radius: 10;");
 
         VBox vbox = new VBox(10, title, suggestionsArea, moreBtn);
         vbox.setAlignment(Pos.TOP_LEFT);
-
         sugPane.setCenter(vbox);
         return sugPane;
     }
