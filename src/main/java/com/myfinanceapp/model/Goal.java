@@ -6,6 +6,7 @@ public class Goal {
     private static final String TYPE_SAVING = "SAVING";
     private static final String TYPE_DEBT_REPAYMENT = "DEBT_REPAYMENT";
     private static final String TYPE_BUDGET_CONTROL = "BUDGET_CONTROL";
+    private static final String DEFAULT_CURRENCY = "CNY";
 
     private String id;
     private String userId;
@@ -15,6 +16,7 @@ public class Goal {
     private double currentAmount;
     private LocalDate deadline;
     private String category;
+    private String currency;
 
     // No-argument constructor
     public Goal() {}
@@ -29,6 +31,7 @@ public class Goal {
         this.currentAmount = builder.currentAmount;
         this.deadline = builder.deadline;
         this.category = builder.category;
+        this.currency = builder.currency;
     }
 
     // Getters
@@ -40,6 +43,7 @@ public class Goal {
     public double getCurrentAmount() { return currentAmount; }
     public LocalDate getDeadline() { return deadline; }
     public String getCategory() { return category; }
+    public String getCurrency() { return currency; }
 
     // Setters
     public void setId(String id) { this.id = id; }
@@ -50,6 +54,7 @@ public class Goal {
     public void setCurrentAmount(double currentAmount) { this.currentAmount = currentAmount; }
     public void setDeadline(LocalDate deadline) { this.deadline = deadline; }
     public void setCategory(String category) { this.category = category; }
+    public void setCurrency(String currency) { this.currency = currency; }
 
     // Helper methods
     public int getProgressPercentage() {
@@ -73,6 +78,7 @@ public class Goal {
         private double currentAmount;
         private LocalDate deadline;
         private String category;
+        private String currency = DEFAULT_CURRENCY;
 
         public Builder id(String id) { this.id = id; return this; }
         public Builder userId(String userId) { this.userId = userId; return this; }
@@ -82,6 +88,7 @@ public class Goal {
         public Builder currentAmount(double currentAmount) { this.currentAmount = currentAmount; return this; }
         public Builder deadline(LocalDate deadline) { this.deadline = deadline; return this; }
         public Builder category(String category) { this.category = category; return this; }
+        public Builder currency(String currency) { this.currency = currency; return this; }
 
         public Goal build() {
             return new Goal(this);
