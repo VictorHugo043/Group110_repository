@@ -245,9 +245,8 @@ public class Goals {
 
         // 添加点击事件处理
         card.setOnMouseClicked(event -> {
-            // 导航到创建目标页面
-            Scene createGoalScene = CreateGoalScene.createScene(stage, stage.getWidth(), stage.getHeight(), loggedUser);
-            stage.setScene(createGoalScene);
+            // Navigate to create goal page with consistent dimensions
+            stage.setScene(CreateGoalScene.createScene(stage, 800, 450, loggedUser));
         });
 
         return card;

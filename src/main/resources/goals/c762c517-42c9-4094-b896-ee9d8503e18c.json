@@ -1,0 +1,12 @@
+[ {
+  "id" : "d39de8cb-1322-4789-9980-de720d203c14",
+  "userId" : "c762c517-42c9-4094-b896-ee9d8503e18c",
+  "type" : "SAVING",
+  "title" : "test2",
+  "targetAmount" : 123432.0,
+  "currentAmount" : 0.0,
+  "deadline" : "2025-04-27",
+  "category" : null,
+  "completed" : false,
+  "progressPercentage" : 0
+} ]
