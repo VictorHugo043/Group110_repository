@@ -4,18 +4,24 @@ import com.myfinanceapp.model.Goal;
 import com.myfinanceapp.model.User;
 import com.myfinanceapp.ui.common.LeftSidebarFactory;
 import com.myfinanceapp.service.GoalService;
+import com.myfinanceapp.service.TransactionDataService;
+
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Arc;
+import javafx.scene.shape.ArcType;
 import javafx.scene.shape.Circle;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.geometry.Insets;
+import javafx.scene.Group;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -104,7 +110,24 @@ public class Goals {
 
         // Add the grid to the center content
         centerContent.getChildren().add(centerGrid);
-        root.setCenter(centerContent);
+        
+        // Create a ScrollPane and add the centerContent to it
+        ScrollPane scrollPane = new ScrollPane();
+        scrollPane.setContent(centerContent);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setFitToHeight(true);
+        scrollPane.setPannable(true);
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scrollPane.setStyle("-fx-background-color: transparent;");
+
+        // Fix the background color issue by making everything transparent
+        // scrollPane.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
+        // Also set the viewport's background to white to match the rest of the app
+        // scrollPane.lookup(".viewport").setStyle("-fx-background-color: white;");
+        
+        // Set the scrollPane as the center of the BorderPane instead of centerContent
+        root.setCenter(scrollPane);
         return new Scene(root, width, height);
     }
 
@@ -184,71 +207,123 @@ public class Goals {
 
         // 根据目标类型创建不同的内容
         StackPane indicatorContainer = new StackPane();
-        switch (goal.getType()) {
-            case "SAVING":
+        try {
+            TransactionDataService transactionService = new TransactionDataService(loggedUser.getUid());
+            switch (goal.getType()) {
+                case "SAVING":
+                double currentNetBalance = transactionService.calculateNetBalance();
                 Label targetAmount = new Label("Target Amount: " + goal.getTargetAmount() + " " + goal.getCurrency());
                 Label deadline = new Label("Deadline: " + goal.getDeadline().format(formatter));
-                Label currentSavings = new Label("Current Savings: " + goal.getCurrentAmount() + " " + goal.getCurrency());
+                Label currentSavings = new Label("Current Savings: " + currentNetBalance + " " + goal.getCurrency());
                 textInfo.getChildren().addAll(targetAmount, deadline, currentSavings);
 
-                // 创建进度圆形
-                Circle progressCircle = new Circle(40);
-                progressCircle.setStroke(Color.BLUE);
-                progressCircle.setFill(Color.TRANSPARENT);
-                progressCircle.setStrokeWidth(8);
-                Label progressLabel = new Label(goal.getProgressPercentage() + "%");
+                // 计算进度百分比
+                double savingProgressPercentage = 0;
+                if (goal.getTargetAmount() > 0) {
+                    savingProgressPercentage = Math.min(100, (currentNetBalance / goal.getTargetAmount()) * 100);
+                }
+                
+                // 1. 创建背景圆弧（灰色部分，表示未完成）
+                Arc backgroundArc = new Arc(0, 0, 40, 40, 90, 360); // 参数：X坐标,Y坐标,半径X,半径Y,起始角度,圆弧角度
+                backgroundArc.setType(ArcType.OPEN); // 只画弧线不填充
+                backgroundArc.setStroke(Color.LIGHTGRAY); // 灰色边框
+                backgroundArc.setFill(Color.TRANSPARENT); // 透明填充
+                backgroundArc.setStrokeWidth(8); // 线条粗细
+
+                // 2. 创建进度圆弧（蓝色部分，表示已完成）
+                Arc progressArc = new Arc(0, 0, 40, 40, 90, -360 * savingProgressPercentage / 100); // 角度为负表示顺时针
+                progressArc.setType(ArcType.OPEN);
+                progressArc.setStroke(Color.BLUE); // 蓝色边框
+                progressArc.setFill(Color.TRANSPARENT);
+                progressArc.setStrokeWidth(8);
+
+                // 3. 将两个圆弧组合起来
+                Group arcGroup = new Group(backgroundArc, progressArc);
+
+                // 4. 添加百分比文字标签
+                Label progressLabel = new Label(String.format("%.1f%%", savingProgressPercentage));
                 progressLabel.setFont(Font.font("Arial", 18));
                 progressLabel.setTextFill(Color.BLUE);
-                indicatorContainer.getChildren().addAll(progressCircle, progressLabel);
+
+                // 5. 添加到容器
+                indicatorContainer.getChildren().addAll(arcGroup, progressLabel);
                 break;
-            case "DEBT_REPAYMENT":
+
+                case "DEBT_REPAYMENT":
                 Label totalDebtAmount = new Label("Total Debt Amount: " + goal.getTargetAmount() + " " + goal.getCurrency());
                 Label repaymentDeadline = new Label("Repayment Deadline: " + goal.getDeadline().format(formatter));
                 Label amountPaid = new Label("Amount Paid: " + goal.getCurrentAmount() + " " + goal.getCurrency());
                 textInfo.getChildren().addAll(totalDebtAmount, repaymentDeadline, amountPaid);
 
-                // 创建对号/进度圆形
-                Circle checkCircle = new Circle(40);
-                if (goal.isCompleted()) {
-                    checkCircle.setStroke(Color.GREEN);
-                    Label checkLabel = new Label("\u2713");
-                    checkLabel.setFont(Font.font("Arial", 24));
-                    checkLabel.setTextFill(Color.GREEN);
-                    indicatorContainer.getChildren().addAll(checkCircle, checkLabel);
-                } else {
-                    checkCircle.setStroke(Color.BLUE);
-                    Label debtProgressLabel = new Label(goal.getProgressPercentage() + "%");
-                    debtProgressLabel.setFont(Font.font("Arial", 18));
-                    debtProgressLabel.setTextFill(Color.BLUE);
-                    indicatorContainer.getChildren().addAll(checkCircle, debtProgressLabel);
+                // 计算进度百分比
+                double debtProgressPercentage = 0;
+                if (goal.getTargetAmount() > 0) {
+                    debtProgressPercentage = Math.min(100, (goal.getCurrentAmount() / goal.getTargetAmount()) * 100);
                 }
-                checkCircle.setFill(Color.TRANSPARENT);
-                checkCircle.setStrokeWidth(8);
+
+                // 背景圆弧（灰色）
+                Arc debtBackgroundArc = new Arc(0, 0, 40, 40, 90, 360);
+                debtBackgroundArc.setType(ArcType.OPEN);
+                debtBackgroundArc.setStroke(Color.LIGHTGRAY);
+                debtBackgroundArc.setFill(Color.TRANSPARENT);
+                debtBackgroundArc.setStrokeWidth(8);
+
+                // 进度圆弧（根据完成状态选择颜色）
+                Arc debtProgressArc = new Arc(0, 0, 40, 40, 90, -360 * debtProgressPercentage / 100);
+                debtProgressArc.setType(ArcType.OPEN);
+                debtProgressArc.setStroke(goal.isCompleted() ? Color.GREEN : Color.BLUE);
+                debtProgressArc.setFill(Color.TRANSPARENT);
+                debtProgressArc.setStrokeWidth(8);
+
+                // 组合圆弧
+                Group debtArcGroup = new Group(debtBackgroundArc, debtProgressArc);
+
+                // 文字标签
+                Label debtProgressLabel = new Label(goal.isCompleted() ? "✓" : String.format("%.0f%%", debtProgressPercentage));
+                debtProgressLabel.setFont(Font.font("Arial", goal.isCompleted() ? 24 : 18));
+                debtProgressLabel.setTextFill(goal.isCompleted() ? Color.GREEN : Color.BLUE);
+                indicatorContainer.getChildren().addAll(debtArcGroup, debtProgressLabel);
                 break;
-            case "BUDGET_CONTROL":
+
+                case "BUDGET_CONTROL":
+                double currentExpense = transactionService.calculateTotalExpense();
                 Label budgetCategory = new Label("Budget Category: " + (goal.getCategory() != null ? goal.getCategory() : "General"));
                 Label budgetAmount = new Label("Budget Amount: " + goal.getTargetAmount() + " " + goal.getCurrency());
-                Label currentExpenses = new Label("Current Expenses: " + goal.getCurrentAmount() + " " + goal.getCurrency());
-                textInfo.getChildren().addAll(budgetCategory, budgetAmount, currentExpenses);
+                Label currentExpensesLabel = new Label("Current Expenses: " + currentExpense + " " + goal.getCurrency());
+                textInfo.getChildren().addAll(budgetCategory, budgetAmount, currentExpensesLabel);
 
-                // 创建指示器
-                Circle statusCircle = new Circle(40);
-                statusCircle.setFill(Color.TRANSPARENT);
-                statusCircle.setStrokeWidth(8);
-                if (goal.isCompleted()) {
-                    statusCircle.setStroke(Color.GREEN);
-                    Label checkLabel = new Label("\u2713");
-                    checkLabel.setFont(Font.font("Arial", 24));
-                    checkLabel.setTextFill(Color.GREEN);
-                    indicatorContainer.getChildren().addAll(statusCircle, checkLabel);
-                } else {
-                    statusCircle.setStroke(Color.RED);
-                    Label errorLabel = new Label("\u2717");
-                    errorLabel.setFont(Font.font("Arial", 24));
-                    errorLabel.setTextFill(Color.RED);
-                    indicatorContainer.getChildren().addAll(statusCircle, errorLabel);
-                }
+                double budgetUsagePercentage = (currentExpense / goal.getTargetAmount()) * 100;
+                boolean isOverBudget = currentExpense > goal.getTargetAmount();
+
+                // 背景圆弧（灰色）
+                Arc budgetBackgroundArc = new Arc(0, 0, 40, 40, 90, 360);
+                budgetBackgroundArc.setType(ArcType.OPEN);
+                budgetBackgroundArc.setStroke(Color.LIGHTGRAY);
+                budgetBackgroundArc.setFill(Color.TRANSPARENT);
+                budgetBackgroundArc.setStrokeWidth(8);
+
+                // 进度圆弧（超预算显示红色，否则绿色）
+                Arc budgetProgressArc = new Arc(0, 0, 40, 40, 90, -360 * Math.min(100, budgetUsagePercentage) / 100);
+                budgetProgressArc.setType(ArcType.OPEN);
+                budgetProgressArc.setStroke(isOverBudget ? Color.RED : Color.GREEN);
+                budgetProgressArc.setFill(Color.TRANSPARENT);
+                budgetProgressArc.setStrokeWidth(8);
+
+                // 组合圆弧
+                Group budgetArcGroup = new Group(budgetBackgroundArc, budgetProgressArc);
+
+                // 文字标签
+                Label budgetProgressLabel = new Label(isOverBudget ? "✗" : "✓");
+                budgetProgressLabel.setFont(Font.font("Arial", 24));
+                budgetProgressLabel.setTextFill(isOverBudget ? Color.RED : Color.GREEN);
+                    
+                indicatorContainer.getChildren().addAll(budgetArcGroup, budgetProgressLabel);
                 break;
+                }
+            } catch (IOException e) {
+                Label errorLabel = new Label("Error loading transaction data");
+                textInfo.getChildren().add(errorLabel);
+                e.printStackTrace();
         }
 
         // Create a container for the title and delete button
