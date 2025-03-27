@@ -7,6 +7,9 @@
 ### Xiangwei Gong,2022213490,221170674,luofeng2333@gmail.com (VictorHugo043/Fallenwind)
 ### Xinyu Shao,2022213511,221170870,2848812310@qq.com (ROOOBUE/sstarsheep)
 ### Ruixuan MA,2022213514,221170906,2397451568@qq.com (MaRuixuan)
+
+---
+
 ## **Finanger - Personal Finance Management Tool**
 
 **Finanger** is an intelligent AI-driven personal finance management software that helps users easily manage income, expenses, savings goals, and provides visual analytics along with AI-powered financial advice.
