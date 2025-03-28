@@ -3,7 +3,8 @@ package com.myfinanceapp.ui.loginscene;
 import com.myfinanceapp.model.User;
 import com.myfinanceapp.service.UserService;
 import com.myfinanceapp.ui.signupscene.SignUp;
-import com.myfinanceapp.ui.statusscene.Status;
+import com.myfinanceapp.ui.statusscene.StatusScene;
+import com.myfinanceapp.service.StatusService;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
@@ -17,7 +18,6 @@ import javafx.scene.shape.Polygon;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
-
 
 /**
  * 斜线分割的登录界面 (动态重排版本)
@@ -84,7 +84,6 @@ public class LoginScene {
         stage.setResizable(true);
         stage.setMinWidth(800);
         stage.setMinHeight(450);
-
 
         // 初始化 UI 节点
         initUI(stage);
@@ -173,13 +172,15 @@ public class LoginScene {
             User loggedUser = userService.loginGetUser(uname, pass);
             if (loggedUser != null) {
                 // Login successful, jump to Status scene
-                stage.setScene(Status.createScene(stage, INITIAL_WIDTH, INITIAL_HEIGHT, loggedUser));
+                StatusScene statusScene = new StatusScene(stage, INITIAL_WIDTH, INITIAL_HEIGHT, loggedUser);
+                stage.setScene(statusScene.createScene());
+                StatusService statusService = new StatusService(statusScene, loggedUser); // 初始化服务
+                stage.setTitle("Finanger - Status");
                 showAlert("Success", "Login Successful!");
             } else {
                 showAlert("Error", "Invalid username or password!");
             }
         });
-
 
         // SignUp
         Label noAccountLabel = new Label("Don't have an account?");

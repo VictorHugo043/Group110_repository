@@ -5,7 +5,8 @@ import com.myfinanceapp.service.UserService;
 import com.myfinanceapp.ui.common.LeftSidebarFactory;
 import com.myfinanceapp.ui.common.SettingsTopBarFactory;
 import com.myfinanceapp.ui.loginscene.ResetPassword;
-import com.myfinanceapp.ui.statusscene.Status;
+import com.myfinanceapp.ui.statusscene.StatusScene;
+import com.myfinanceapp.service.StatusService;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -66,7 +67,6 @@ public class UserOptions {
         );
 
         // ========== 右上角显示当前用户名 ===========
-
         Label currentUserLabel = new Label("Current Username: " + (loggedUser != null ? loggedUser.getUsername() : "N/A"));
         currentUserLabel.setStyle("-fx-text-fill: #3282FA; -fx-font-weight: bold;");
         currentUserLabel.setFont(new Font(14));
@@ -75,8 +75,6 @@ public class UserOptions {
         topRightBox.setAlignment(Pos.TOP_RIGHT);
 
         // ========== 1) Reset Username ==========
-
-        // 图标
         ImageView userIcon = new ImageView();
         userIcon.setFitWidth(24);
         userIcon.setFitHeight(24);
@@ -102,24 +100,19 @@ public class UserOptions {
         // 创建 UserService 实例
         UserService userService = new UserService();
 
-        // 点击后更新用户名
         saveUserBtn.setOnAction(e -> {
             String newU = newUsernameField.getText().trim();
             if (newU.isEmpty()) {
                 showAlert("Error", "Username cannot be empty!");
                 return;
             }
-            // 获取旧用户名
             String oldName = currentUser.getUsername();
-
-            // 调用 UserService 来更新用户名
             boolean success = userService.updateUserName(oldName, newU);
 
             if (success) {
-                // 更新当前用户对象的用户名
                 currentUser.setUsername(newU);
                 showAlert("Success", "Username updated!");
-                currentUserLabel.setText("Current Username: " + newU); // 更新 UI
+                currentUserLabel.setText("Current Username: " + newU);
             } else {
                 showAlert("Error", "Failed to update username!");
             }
@@ -129,8 +122,6 @@ public class UserOptions {
         resetUserRow.setAlignment(Pos.CENTER_LEFT);
 
         // ========== 2) Reset Security Question ==========
-
-        // 图标
         ImageView secIcon = new ImageView();
         secIcon.setFitWidth(24);
         secIcon.setFitHeight(24);
@@ -145,7 +136,6 @@ public class UserOptions {
 
         HBox resetSecHeader = new HBox(10, secIcon, resetSecLabel);
 
-        // 下拉框
         ComboBox<String> questionCombo = new ComboBox<>();
         questionCombo.getItems().addAll(
                 "What is your favorite book?",
@@ -153,9 +143,8 @@ public class UserOptions {
                 "What is your best friend's name?",
                 "What city were you born in?"
         );
-        questionCombo.setValue(currentUser.getSecurityQuestion()); // 初始显示
+        questionCombo.setValue(currentUser.getSecurityQuestion());
 
-        // 答案
         Label ansLabel = new Label("Your answer:");
         ansLabel.setStyle("-fx-text-fill: #3282FA; -fx-font-weight: bold;");
         TextField ansField = new TextField(currentUser.getSecurityAnswer());
@@ -164,7 +153,6 @@ public class UserOptions {
         saveSecBtn.setStyle("-fx-background-color: #BEE3F8; -fx-text-fill: #3282FA; -fx-font-weight: bold; " +
                 "-fx-background-radius: 10; -fx-border-radius: 10;");
 
-        // 修正：调用正确的方法更新安全问题
         saveSecBtn.setOnAction(e -> {
             String q = questionCombo.getValue();
             String a = ansField.getText().trim();
@@ -173,11 +161,9 @@ public class UserOptions {
                 return;
             }
 
-            // 调用 UserService 来更新安全问题
             boolean updated = userService.updateSecurityQuestion(currentUser.getUid(), q, a);
 
             if (updated) {
-                // 更新当前用户对象的安全问题和答案
                 currentUser.setSecurityQuestion(q);
                 currentUser.setSecurityAnswer(a);
                 showAlert("Success", "Security question updated!");
@@ -186,7 +172,6 @@ public class UserOptions {
             }
         });
 
-        // Layout
         VBox questionBox = new VBox(10);
         questionBox.getChildren().addAll(questionCombo, ansLabel, ansField);
 
@@ -194,8 +179,6 @@ public class UserOptions {
         secRow.setAlignment(Pos.CENTER_LEFT);
 
         // ========== 3) Reset Password -> (click => ResetPassword scene) ==========
-
-        // 图标
         ImageView passIcon = new ImageView();
         passIcon.setFitWidth(24);
         passIcon.setFitHeight(24);
@@ -210,18 +193,19 @@ public class UserOptions {
         HBox resetPassRow = new HBox(10, passIcon, resetPassLabel);
         resetPassRow.setAlignment(Pos.CENTER_LEFT);
 
-        // 点击 => 跳转 ResetPassword
         resetPassRow.setOnMouseClicked(e -> {
             stage.setScene(ResetPassword.createScene(stage, 800, 450));
             stage.setTitle("Reset Password");
         });
 
         // ========== Bottom: Back to Mainpage ==========
-
         Button backBtn = new Button("Back to Mainpage");
         backBtn.setStyle("-fx-background-color: #3377ff; -fx-text-fill: white; -fx-font-weight: bold;");
         backBtn.setOnAction(e -> {
-            stage.setScene(Status.createScene(stage, 800, 450, loggedUser));
+            StatusScene statusScene = new StatusScene(stage, 800, 450, loggedUser);
+            stage.setScene(statusScene.createScene());
+            StatusService statusService = new StatusService(statusScene, loggedUser); // 初始化服务
+            stage.setTitle("Finanger - Status"); // 可选：设置标题
         });
 
         // ========== 组装outerBox内容 ==========
@@ -235,7 +219,6 @@ public class UserOptions {
                 backBtn
         );
 
-        // 组合
         container.getChildren().addAll(topBar, outerBox);
         centerBox.getChildren().add(container);
         root.setCenter(centerBox);
