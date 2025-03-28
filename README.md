@@ -70,6 +70,12 @@ Finanger/
 │   │   ├── coin.png, status_icon_default.png, settings_icon_selected.png, etc.  
 │   ├── terms/                       # Legal and policy documents (PrivacyPolicy.txt, TermOfUse.txt)  
 │   ├── transaction/                  # Transaction data (1.json, users.json)  
+│── test/  
+│   ├── java/com.myfinanceapp/  
+│   │   ├── model/                  # Unit tests for data models  
+│   │   ├── service/                 # Unit tests for services  
+│   │   ├── ui/                      # UI-related tests  
+│   │   ├── FinanceAppTest           # Main application test entry  
 │── target/                          # Compiled output files  
 │── .gitignore                       # Git ignore configuration  
 │── pom.xml                          # Maven configuration file  
