@@ -47,20 +47,32 @@
 
 ## **Project Structure**
 ```bash
-Finanger/
-│── src/main/java/com.myfinanceapp/
-│   ├── model/              # Data models (User, Transaction, Goal)
-│   ├── service/            # Business logic (AiChatService, TransactionService, etc.)
-│   ├── ui/
-│   │   ├── loginscene/      # Login & password reset page
-│   │   ├── goalsscene/      # Goal management page
-│   │   ├── settingscene/    # Settings page
-│   │   ├── transactionscene # Transaction management page
-│   ├── mainwindow/         # Main application window
-│── resources/
-│   ├── pictures/           # UI-related image assets
-│   ├── transaction/        # Transaction data (JSON)
-│── pom.xml                 # Maven configuration file
-│── README.md               # Documentation
+Finanger/  
+│── src/  
+│   ├── main/  
+│   │   ├── java/com.myfinanceapp/  
+│   │   │   ├── model/              # Data models (User, Transaction, Goal)  
+│   │   │   ├── service/            # Business logic (AiChatService, TransactionService, etc.)  
+│   │   │   ├── ui/                 # User interface components  
+│   │   │   │   ├── common/         # Shared UI components (LeftSidebarFactory, SettingsTopBarFactory)  
+│   │   │   │   ├── goalsscene/     # Goal management UI (CreateGoalScene, Goals)  
+│   │   │   │   ├── loginscene/     # Authentication UI (LoginScene, ResetPassword)  
+│   │   │   │   ├── mainwindow/     # Main application window  
+│   │   │   │   ├── registrationterms/  # Legal agreement UI (PrivacyPolicy, TermOfUse)  
+│   │   │   │   ├── settingscene/   # Settings UI (About, OtherSettings, SystemSettings, UserOptions)  
+│   │   │   │   ├── signupscene/    # User registration UI (SignUp)  
+│   │   │   │   ├── statusscene/    # Status display UI (StatusScene)  
+│   │   │   │   ├── transactionscene/  # Transaction management UI (TransactionScene)  
+│   │   │   │   ├── FinanceApp      # Main application entry point  
+│── resources/  
+│   ├── goals/                      # Goal-related JSON data (1.json)  
+│   ├── pictures/                    # UI-related image assets  
+│   │   ├── coin.png, status_icon_default.png, settings_icon_selected.png, etc.  
+│   ├── terms/                       # Legal and policy documents (PrivacyPolicy.txt, TermOfUse.txt)  
+│   ├── transaction/                  # Transaction data (1.json, users.json)  
+│── target/                          # Compiled output files  
+│── .gitignore                       # Git ignore configuration  
+│── pom.xml                          # Maven configuration file  
+│── README.md                        # Project documentation  
 ```
 

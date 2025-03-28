@@ -2,9 +2,8 @@ package com.myfinanceapp.service;
 
 import com.myfinanceapp.model.Transaction;
 import com.myfinanceapp.model.User;
-import com.myfinanceapp.ui.statusscene.StatusScene; // 更新导入路径
+import com.myfinanceapp.ui.statusscene.StatusScene;
 import javafx.scene.control.Label;
-import javafx.scene.layout.StackPane;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -42,12 +41,11 @@ public class StatusService {
         });
 
         scene.chartTypeCombo.setOnAction(e -> {
-            StackPane chartPane = (StackPane) scene.lineChart.getParent();
-            chartPane.getChildren().clear();
+            scene.chartPane.getChildren().clear(); // 直接使用 scene.chartPane
             if ("Line graph".equals(scene.chartTypeCombo.getValue())) {
-                chartPane.getChildren().add(scene.lineChart);
+                scene.chartPane.getChildren().add(scene.lineChart);
             } else {
-                chartPane.getChildren().add(scene.barChart);
+                scene.chartPane.getChildren().add(scene.barChart);
             }
             chartService.updateAllCharts(currentPeriod);
         });
