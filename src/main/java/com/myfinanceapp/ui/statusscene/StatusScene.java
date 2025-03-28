@@ -31,6 +31,7 @@ public class StatusScene {
     public TextArea questionArea;
     public Button sendBtn;
     public VBox transactionsBox;
+    public StackPane chartPane; // 新增字段，用于图表切换
 
     public StatusScene(Stage stage, double width, double height, User loggedUser) {
         this.stage = stage;
@@ -81,7 +82,7 @@ public class StatusScene {
         rightColumn.getChildren().addAll(aiPane, suggestionPane);
 
         bottomArea.getChildren().addAll(leftColumn, rightColumn);
-        mainContent.getChildren().add(bottomArea);
+        mainContent.getChildren().add(bottomArea); // 修正为 bottomArea
 
         return new Scene(root, width, height);
     }
@@ -132,7 +133,7 @@ public class StatusScene {
         barChart = new BarChart<>(barXAxis, barYAxis);
         barChart.setTitle("Ex/In Trend");
 
-        StackPane chartPane = new StackPane(lineChart);
+        chartPane = new StackPane(lineChart); // 初始化 chartPane
         HBox.setHgrow(chartPane, Priority.ALWAYS);
         VBox.setVgrow(chartPane, Priority.ALWAYS);
 
