@@ -3,7 +3,8 @@ package com.myfinanceapp.ui.common;
 import com.myfinanceapp.model.User;
 import com.myfinanceapp.ui.loginscene.LoginScene;
 import com.myfinanceapp.ui.settingscene.SystemSettings;
-import com.myfinanceapp.ui.statusscene.Status;
+import com.myfinanceapp.ui.statusscene.StatusScene;
+import com.myfinanceapp.service.StatusService;
 import com.myfinanceapp.ui.goalsscene.Goals;
 import com.myfinanceapp.ui.transactionscene.TransactionScene;
 import javafx.geometry.Insets;
@@ -131,7 +132,9 @@ public class LeftSidebarFactory {
             switch (text) {
                 case "Status":
                     // 跳转 Status
-                    stage.setScene(Status.createScene(stage, 800, 450,loggedUser));
+                    StatusScene statusScene = new StatusScene(stage, 800, 450, loggedUser);
+                    stage.setScene(statusScene.createScene());
+                    StatusService statusService = new StatusService(statusScene, loggedUser); // 初始化服务
                     break;
                 case "Goals":
                     
