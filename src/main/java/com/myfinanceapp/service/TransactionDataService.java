@@ -28,7 +28,7 @@ public class TransactionDataService {
      * @return JSONArray形式的交易数据
      * @throws IOException 当文件读取失败时抛出
      */
-    private JSONArray loadTransactionData() throws IOException {
+    JSONArray loadTransactionData() throws IOException {
         String filePath = "src/main/resources/transaction/" + userUid + ".json";
         String content = new String(Files.readAllBytes(Paths.get(filePath)));
         return new JSONArray(content);
