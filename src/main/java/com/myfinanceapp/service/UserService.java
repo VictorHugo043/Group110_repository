@@ -15,7 +15,7 @@ import java.util.*;
 public class UserService {
 
     // 用户数据存储路径
-    private static final String USER_JSON_PATH = "src/main/resources/users.json";
+    static final String USER_JSON_PATH = "src/main/resources/users.json";
 
     private static final Gson gson = new Gson();
     private static final Type USER_LIST_TYPE = new TypeToken<List<User>>() {}.getType();
