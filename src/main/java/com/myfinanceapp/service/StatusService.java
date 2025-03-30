@@ -27,7 +27,7 @@ public class StatusService {
         initialize();
     }
 
-    private void initialize() {
+    void initialize() {
         // 初始化数据
         updateSummaryLabels("This Month");
         chartService.updateAllCharts("This Month");
@@ -53,7 +53,7 @@ public class StatusService {
         scene.sendBtn.setOnAction(e -> handleAIRequest());
     }
 
-    private void updateSummaryLabels(String period) {
+    void updateSummaryLabels(String period) {
         List<Transaction> transactions = txService.loadTransactions(currentUser);
         LocalDate now = LocalDate.now();
         LocalDate startDate;
@@ -108,7 +108,7 @@ public class StatusService {
         scene.inLabel.setStyle("-fx-background-color: #E0F0FF; -fx-text-fill: #3282FA; -fx-border-radius: 30; -fx-background-radius: 30; -fx-padding: 10 20 10 20;");
     }
 
-    private void updateTransactions() {
+    void updateTransactions() {
         List<Transaction> transactions = txService.loadTransactions(currentUser);
         scene.transactionsBox.getChildren().clear();
         transactions.stream()
@@ -121,7 +121,7 @@ public class StatusService {
                 });
     }
 
-    private void handleAIRequest() {
+    void handleAIRequest() {
         String userInput = scene.questionArea.getText().trim();
         if (!userInput.isEmpty()) {
             scene.questionArea.setDisable(true);
