@@ -19,12 +19,17 @@ import javafx.scene.shape.Arc;
 import javafx.scene.shape.ArcType;
 import javafx.scene.shape.Circle;
 import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 import javafx.geometry.Insets;
 import javafx.scene.Group;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.math.RoundingMode;
+import java.util.ArrayList;
 
 public class Goals {
     public static Scene createScene(Stage stage, double width, double height, User loggedUser) {
@@ -58,8 +63,11 @@ public class Goals {
         centerContent.setAlignment(Pos.TOP_CENTER);
         centerContent.getChildren().add(debugLabel);
 
-        // 动态计算每行显示的目标卡片数量
-        int maxCols = calculateMaxColumns(width);
+        // 初始化列数
+        int initialMaxCols = calculateMaxColumns(width);
+        
+        // 创建一个列表来存储所有卡片，以便后续重新布局
+        List<VBox> allCards = new ArrayList<>();
         
         // If no goals, show a message
         if (userGoals.isEmpty()) {
@@ -67,28 +75,15 @@ public class Goals {
             noGoalsLabel.setStyle("-fx-font-size: 16px; -fx-text-fill: #333333;");
             centerContent.getChildren().add(noGoalsLabel);
         } else {
-            // 动态创建目标卡片并添加到网格
-            int row = 0;
-            int col = 0;
+            // 创建所有目标卡片
             for (Goal goal : userGoals) {
                 try {
                     if (loggedUser == null || goal.getUserId() == null || 
                         loggedUser.getUid().equals(goal.getUserId())) {
                         VBox goalCard = createGoalCard(goal, stage, loggedUser);
-                        centerGrid.add(goalCard, col, row);
-                        
-                        // 绑定卡片大小到窗口大小
-                        goalCard.prefWidthProperty().bind(
-                            centerGrid.widthProperty()
-                                .subtract(centerGrid.getHgap() * (maxCols - 1))
-                                .divide(maxCols)
-                        );
-                        
-                        col++;
-                        if (col >= maxCols) {
-                            col = 0;
-                            row++;
-                        }
+                        goalCard.setMinWidth(300);
+                        goalCard.setMaxWidth(400);
+                        allCards.add(goalCard);
                     }
                 } catch (Exception e) {
                     System.err.println("Error displaying goal: " + goal.getTitle());
@@ -97,20 +92,14 @@ public class Goals {
             }
         }
 
-        // Calculate the correct position for the "Create new goal" card
-        int newGoalCol = userGoals.size() % maxCols;
-        int newGoalRow = userGoals.size() / maxCols;
-
         // 添加"创建新目标"卡片
         VBox createNewGoalCard = createCreateNewGoalCard(stage, loggedUser);
-        centerGrid.add(createNewGoalCard, newGoalCol, newGoalRow);
-        
-        // 绑定创建新目标卡片的大小
-        createNewGoalCard.prefWidthProperty().bind(
-            centerGrid.widthProperty()
-                .subtract(centerGrid.getHgap() * (maxCols - 1))
-                .divide(maxCols)
-        );
+        createNewGoalCard.setMinWidth(300);
+        createNewGoalCard.setMaxWidth(400);
+        allCards.add(createNewGoalCard);
+
+        // 初始布局所有卡片
+        layoutCards(centerGrid, allCards, initialMaxCols);
 
         // Add the grid to the center content
         centerContent.getChildren().add(centerGrid);
@@ -134,22 +123,16 @@ public class Goals {
         
         // 创建场景
         Scene scene = new Scene(root, width, height);
-        
+
         // 添加窗口大小变化监听器
         scene.widthProperty().addListener((obs, oldVal, newVal) -> {
             int newMaxCols = calculateMaxColumns(newVal.doubleValue());
-            if (newMaxCols != maxCols) {
-                // 重新创建场景以更新布局
-                Scene newScene = createScene(stage, newVal.doubleValue(), scene.getHeight(), loggedUser);
-                stage.setScene(newScene);
-            }
-        });
-
-        // 添加高度变化监听器
-        scene.heightProperty().addListener((obs, oldVal, newVal) -> {
-            // 重新创建场景以更新布局
-            Scene newScene = createScene(stage, scene.getWidth(), newVal.doubleValue(), loggedUser);
-            stage.setScene(newScene);
+            // 清除现有布局
+            centerGrid.getChildren().clear();
+            centerGrid.getColumnConstraints().clear();
+            
+            // 重新布局所有卡片
+            layoutCards(centerGrid, allCards, newMaxCols);
         });
         
         return scene;
@@ -164,11 +147,40 @@ public class Goals {
         return Math.max(1, maxCols);
     }
 
+    private static String formatNumber(double number) {
+        // 使用BigDecimal来避免科学计数法
+        BigDecimal bd = new BigDecimal(number);
+        // 使用普通的数字格式，不使用科学计数法
+        DecimalFormat df = new DecimalFormat("#,##0.00");
+        df.setRoundingMode(RoundingMode.HALF_UP);
+        return df.format(bd);
+    }
+
+    private static VBox createLabelPair(String title, String value) {
+        VBox container = new VBox(2);  // 2 pixels spacing between labels
+        container.setAlignment(Pos.CENTER_LEFT);
+        
+        // Create title label with bold font
+        Label titleLabel = new Label(title);
+        titleLabel.setFont(Font.font("Arial", FontWeight.BOLD, 14));
+        titleLabel.setTextFill(Color.GRAY);
+        
+        // Create value label with regular font
+        Label valueLabel = new Label(value);
+        valueLabel.setFont(Font.font("Arial", FontWeight.NORMAL, 14));
+        valueLabel.setTextFill(Color.BLACK);
+        valueLabel.setWrapText(true);  // Enable text wrapping for long values
+        
+        container.getChildren().addAll(titleLabel, valueLabel);
+        return container;
+    }
+
     private static VBox createGoalCard(Goal goal, Stage stage, User loggedUser) {
-        VBox card = new VBox(10);
+        VBox card = new VBox(15);
         card.setAlignment(Pos.CENTER);
         card.setMaxWidth(300);
-        card.setMaxHeight(200);
+        card.setMinHeight(200);
+        card.setPadding(new Insets(20));
         card.setStyle(
                 "-fx-border-color: #3282FA;" +
                         "-fx-border-width: 2;" +
@@ -203,7 +215,7 @@ public class Goals {
 
         // Position the delete button to the top-right
         StackPane.setAlignment(deleteButton, Pos.TOP_RIGHT);
-        StackPane.setMargin(deleteButton, new Insets(5, 5, 0, 0));
+        StackPane.setMargin(deleteButton, new Insets(0, 0, 0, 0));
         
         // Handle delete button click
         deleteButton.setOnAction(event -> {
@@ -248,8 +260,9 @@ public class Goals {
         title.setTextFill(Color.DARKBLUE);
 
         // 创建文字信息部分
-        VBox textInfo = new VBox(5);
+        VBox textInfo = new VBox(8);
         textInfo.setAlignment(Pos.CENTER_LEFT);
+        textInfo.setPrefWidth(200);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
 
         // 根据目标类型创建不同的内容
@@ -259,10 +272,13 @@ public class Goals {
             switch (goal.getType()) {
                 case "SAVING":
                 double currentNetBalance = transactionService.calculateNetBalance();
-                Label targetAmount = new Label("Target Amount: " + goal.getTargetAmount() + " " + goal.getCurrency());
-                Label deadline = new Label("Deadline: " + goal.getDeadline().format(formatter));
-                Label currentSavings = new Label("Current Savings: " + currentNetBalance + " " + goal.getCurrency());
-                textInfo.getChildren().addAll(targetAmount, deadline, currentSavings);
+                VBox targetAmountBox = createLabelPair("Target Amount", 
+                    formatNumber(goal.getTargetAmount()) + " " + goal.getCurrency());
+                VBox deadlineBox = createLabelPair("Deadline", 
+                    goal.getDeadline().format(formatter));
+                VBox currentSavingsBox = createLabelPair("Current Savings", 
+                    formatNumber(currentNetBalance) + " " + goal.getCurrency());
+                textInfo.getChildren().addAll(targetAmountBox, deadlineBox, currentSavingsBox);
 
                 // 计算进度百分比
                 double savingProgressPercentage = 0;
@@ -298,10 +314,13 @@ public class Goals {
 
                 case "DEBT_REPAYMENT":
                 double totalDebtRepayment = transactionService.calculateTotalAmountByCategory("Loan Repayment");
-                Label totalDebtAmount = new Label("Total Debt Amount: " + goal.getTargetAmount() + " " + goal.getCurrency());
-                Label repaymentDeadline = new Label("Repayment Deadline: " + goal.getDeadline().format(formatter));
-                Label amountPaid = new Label("Amount Paid: " + totalDebtRepayment + " " + goal.getCurrency());
-                textInfo.getChildren().addAll(totalDebtAmount, repaymentDeadline, amountPaid);
+                VBox totalDebtBox = createLabelPair("Total Debt Amount", 
+                    formatNumber(goal.getTargetAmount()) + " " + goal.getCurrency());
+                VBox repaymentDeadlineBox = createLabelPair("Repayment Deadline", 
+                    goal.getDeadline().format(formatter));
+                VBox amountPaidBox = createLabelPair("Amount Paid", 
+                    formatNumber(totalDebtRepayment) + " " + goal.getCurrency());
+                textInfo.getChildren().addAll(totalDebtBox, repaymentDeadlineBox, amountPaidBox);
 
                 // 计算进度百分比
                 double debtProgressPercentage = 0;
@@ -335,10 +354,13 @@ public class Goals {
 
                 case "BUDGET_CONTROL":
                 double currentExpense = transactionService.calculateTotalExpense();
-                Label budgetCategory = new Label("Budget Category: " + (goal.getCategory() != null ? goal.getCategory() : "General"));
-                Label budgetAmount = new Label("Budget Amount: " + goal.getTargetAmount() + " " + goal.getCurrency());
-                Label currentExpensesLabel = new Label("Current Expenses: " + currentExpense + " " + goal.getCurrency());
-                textInfo.getChildren().addAll(budgetCategory, budgetAmount, currentExpensesLabel);
+                VBox budgetCategoryBox = createLabelPair("Budget Category", 
+                    goal.getCategory() != null ? goal.getCategory() : "General");
+                VBox budgetAmountBox = createLabelPair("Budget Amount", 
+                    formatNumber(goal.getTargetAmount()) + " " + goal.getCurrency());
+                VBox currentExpensesBox = createLabelPair("Current Expenses", 
+                    formatNumber(currentExpense) + " " + goal.getCurrency());
+                textInfo.getChildren().addAll(budgetCategoryBox, budgetAmountBox, currentExpensesBox);
 
                 double budgetUsagePercentage = (currentExpense / goal.getTargetAmount()) * 100;
                 boolean isOverBudget = currentExpense > goal.getTargetAmount();
@@ -382,11 +404,12 @@ public class Goals {
         titleContainer.getChildren().addAll(titleBox, deleteButton);
         StackPane.setAlignment(titleBox, Pos.CENTER);
         StackPane.setAlignment(deleteButton, Pos.TOP_RIGHT);
-        StackPane.setMargin(deleteButton, new Insets(5, 5, 0, 0));
+        StackPane.setMargin(deleteButton, new Insets(0, 0, 0, 0));
         
-        // 创建左右布局的HBox
-        HBox contentLayout = new HBox(15);
-        contentLayout.setAlignment(Pos.CENTER);
+        // 创建左右布局的HBox，添加内边距
+        HBox contentLayout = new HBox(20);
+        contentLayout.setAlignment(Pos.CENTER_LEFT);
+        contentLayout.setPadding(new Insets(10, 0, 0, 0));
         contentLayout.getChildren().addAll(textInfo, indicatorContainer);
         
         // Add the title container instead of just the title
@@ -395,10 +418,11 @@ public class Goals {
     }
 
     private static VBox createCreateNewGoalCard(Stage stage, User loggedUser) {
-        VBox card = new VBox(10);
+        VBox card = new VBox(15);
         card.setAlignment(Pos.CENTER);
         card.setMaxWidth(300);
-        card.setMaxHeight(200);
+        card.setMinHeight(200);
+        card.setPadding(new Insets(20));
         card.setStyle(
                 "-fx-border-color: #3282FA;" +
                         "-fx-border-width: 2;" +
@@ -411,15 +435,17 @@ public class Goals {
         title.setFont(Font.font("Arial", 18));
         title.setTextFill(Color.GRAY);
 
-        // 创建文字信息部分
-        VBox textInfo = new VBox(5);
+        // 创建文字信息部分，添加内边距
+        VBox textInfo = new VBox(8);
         textInfo.setAlignment(Pos.CENTER_LEFT);
+        textInfo.setPadding(new Insets(10, 0, 0, 0));
         Label instructionLabel = new Label("Click to create");
         Label instructionLabel2 = new Label("a new financial goal");
         textInfo.getChildren().addAll(instructionLabel, instructionLabel2);
 
         // 创建加号圆形
         StackPane plusContainer = new StackPane();
+        plusContainer.setPadding(new Insets(0, 0, 0, 20));
         Circle plusCircle = new Circle(40);
         plusCircle.setStroke(Color.GRAY);
         plusCircle.setFill(Color.TRANSPARENT);
@@ -446,5 +472,29 @@ public class Goals {
         });
 
         return card;
+    }
+
+    // 新增辅助方法：布局卡片
+    private static void layoutCards(GridPane grid, List<VBox> cards, int maxCols) {
+        // 添加列约束
+        for (int i = 0; i < maxCols; i++) {
+            ColumnConstraints column = new ColumnConstraints();
+            column.setMinWidth(300);
+            column.setMaxWidth(400);
+            column.setHgrow(Priority.SOMETIMES);
+            grid.getColumnConstraints().add(column);
+        }
+
+        // 布局所有卡片
+        int row = 0;
+        int col = 0;
+        for (VBox card : cards) {
+            grid.add(card, col, row);
+            col++;
+            if (col >= maxCols) {
+                col = 0;
+                row++;
+            }
+        }
     }
 }
