@@ -20,7 +20,8 @@ public class StatusScene {
     private final double height;
 
     // UI 组件
-    public ComboBox<String> dateCombo;
+    public DatePicker startDatePicker;
+    public DatePicker endDatePicker;
     public ComboBox<String> chartTypeCombo;
     public Label exLabel;
     public Label inLabel;
@@ -31,7 +32,7 @@ public class StatusScene {
     public TextArea questionArea;
     public Button sendBtn;
     public VBox transactionsBox;
-    public StackPane chartPane; // 新增字段，用于图表切换
+    public StackPane chartPane;
 
     public StatusScene(Stage stage, double width, double height, User loggedUser) {
         this.stage = stage;
@@ -82,7 +83,7 @@ public class StatusScene {
         rightColumn.getChildren().addAll(aiPane, suggestionPane);
 
         bottomArea.getChildren().addAll(leftColumn, rightColumn);
-        mainContent.getChildren().add(bottomArea); // 修正为 bottomArea
+        mainContent.getChildren().add(bottomArea);
 
         return new Scene(root, width, height);
     }
@@ -97,28 +98,69 @@ public class StatusScene {
         title.setTextFill(Color.web("#3282FA"));
         title.setWrapText(true);
 
-        VBox exInBox = new VBox(15);
-        exInBox.setAlignment(Pos.TOP_LEFT);
-        exLabel = new Label();
-        inLabel = new Label();
-        exInBox.getChildren().addAll(exLabel, inLabel);
+        // 使用 GridPane 确保 Start Date, End Date, Chart Type 的控件左端对齐
+        GridPane controlGrid = new GridPane();
+        controlGrid.setVgap(5);
 
-        HBox dateBox = new HBox(5);
-        Label dateLabel = new Label("Date Selection");
-        dateLabel.setWrapText(true);
-        dateCombo = new ComboBox<>();
-        dateCombo.getItems().addAll("This Month", "Last Month", "All Transactions");
-        dateCombo.setValue("This Month");
-        dateBox.getChildren().addAll(dateLabel, dateCombo);
+        // 设置列约束，确保控件左端对齐
+        ColumnConstraints labelColumn = new ColumnConstraints();
+        labelColumn.setMinWidth(80); // 标签列宽度
+        labelColumn.setHalignment(HPos.LEFT);
+        ColumnConstraints controlColumn = new ColumnConstraints();
+        controlColumn.setMinWidth(150); // 控件列宽度，确保 DatePicker 和 ComboBox 宽度一致
+        controlColumn.setHalignment(HPos.LEFT);
+        controlGrid.getColumnConstraints().addAll(labelColumn, controlColumn);
 
-        HBox chartTypeBox = new HBox(5);
+        // Start Date
+        Label startDateLabel = new Label("Start Date");
+        startDateLabel.setWrapText(true);
+        startDatePicker = new DatePicker();
+        startDatePicker.setPromptText("Select start date");
+        startDatePicker.setPrefWidth(150);
+        controlGrid.add(startDateLabel, 0, 0);
+        controlGrid.add(startDatePicker, 1, 0);
+
+        // End Date
+        Label endDateLabel = new Label("End Date");
+        endDateLabel.setWrapText(true);
+        endDatePicker = new DatePicker();
+        endDatePicker.setPromptText("Select end date");
+        endDatePicker.setPrefWidth(150);
+        controlGrid.add(endDateLabel, 0, 1);
+        controlGrid.add(endDatePicker, 1, 1);
+
+        // Chart Type
         Label chartTypeLabel = new Label("Chart Type");
         chartTypeLabel.setWrapText(true);
         chartTypeCombo = new ComboBox<>();
         chartTypeCombo.getItems().addAll("Line graph", "Bar graph");
         chartTypeCombo.setValue("Line graph");
-        chartTypeBox.getChildren().addAll(chartTypeLabel, chartTypeCombo);
+        chartTypeCombo.setPrefWidth(150);
+        controlGrid.add(chartTypeLabel, 0, 2);
+        controlGrid.add(chartTypeCombo, 1, 2);
 
+        // Ex. 和 In. 标签
+        exLabel = new Label();
+        inLabel = new Label();
+
+        // 使用 VBox 实现均匀分布
+        VBox leftSide = new VBox();
+        leftSide.setAlignment(Pos.TOP_LEFT);
+        leftSide.setFillWidth(true);
+
+        // 添加占位符 Region，实现均匀分布
+        Region spacer1 = new Region();
+        VBox.setVgrow(spacer1, Priority.ALWAYS);
+        Region spacer2 = new Region();
+        VBox.setVgrow(spacer2, Priority.ALWAYS);
+        Region spacer3 = new Region();
+        VBox.setVgrow(spacer3, Priority.ALWAYS);
+        Region spacer4 = new Region();
+        VBox.setVgrow(spacer4, Priority.ALWAYS);
+
+        leftSide.getChildren().addAll(controlGrid, spacer1, exLabel, spacer2, inLabel, spacer3, new Region(), spacer4);
+
+        // 图表区域
         CategoryAxis xAxis = new CategoryAxis();
         NumberAxis yAxis = new NumberAxis();
         xAxis.setLabel("Date");
@@ -133,12 +175,9 @@ public class StatusScene {
         barChart = new BarChart<>(barXAxis, barYAxis);
         barChart.setTitle("Ex/In Trend");
 
-        chartPane = new StackPane(lineChart); // 初始化 chartPane
+        chartPane = new StackPane(lineChart);
         HBox.setHgrow(chartPane, Priority.ALWAYS);
         VBox.setVgrow(chartPane, Priority.ALWAYS);
-
-        VBox leftSide = new VBox(10, dateBox, chartTypeBox, exInBox);
-        leftSide.setAlignment(Pos.TOP_LEFT);
 
         GridPane gridPane = new GridPane();
         gridPane.setHgap(20);
