@@ -26,6 +26,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.testfx.api.FxToolkit;
 import org.testfx.framework.junit5.ApplicationExtension;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -107,21 +108,32 @@ public class StatusServiceTest {
         statusScene.transactionsBox = new VBox();
         statusScene.questionArea = new TextArea();
         statusScene.suggestionsArea = new TextArea();
-        statusScene.dateCombo = new ComboBox<>();
+        statusScene.startDatePicker = new javafx.scene.control.DatePicker(); // 替换 dateCombo
+        statusScene.endDatePicker = new javafx.scene.control.DatePicker();   // 替换 dateCombo
         statusScene.chartTypeCombo = new ComboBox<>();
         statusScene.chartPane = new javafx.scene.layout.StackPane();
         statusScene.sendBtn = new Button();
     }
 
     @Test
+    void testInitialize_setsDefaultDatePickerValues() {
+        LocalDate today = LocalDate.now();
+        LocalDate expectedStartDate = today.withDayOfMonth(1);
+        LocalDate expectedEndDate = today;
+
+        assertEquals(expectedStartDate, statusScene.startDatePicker.getValue());
+        assertEquals(expectedEndDate, statusScene.endDatePicker.getValue());
+    }
+
+    @Test
     void testUpdateSummaryLabels_ThisMonth() {
         List<Transaction> transactions = new ArrayList<>();
         Transaction tx1 = new Transaction();
-        tx1.setTransactionDate("2025-03-01");
+        tx1.setTransactionDate("2025-04-01");
         tx1.setTransactionType("Income");
         tx1.setAmount(1000.0);
         Transaction tx2 = new Transaction();
-        tx2.setTransactionDate("2025-03-02");
+        tx2.setTransactionDate("2025-04-02");
         tx2.setTransactionType("Expense");
         tx2.setAmount(500.0);
         transactions.add(tx1);
@@ -129,7 +141,10 @@ public class StatusServiceTest {
 
         when(transactionService.loadTransactions(testUser)).thenReturn(transactions);
 
-        statusService.updateSummaryLabels("This Month");
+        LocalDate startDate = LocalDate.of(2025, 4, 1);
+        LocalDate endDate = LocalDate.of(2025, 4, 12);
+
+        statusService.updateSummaryLabels(startDate, endDate);
 
         assertEquals("Ex.  500.00 CNY", statusScene.exLabel.getText());
         assertEquals("In.  1000.00 CNY", statusScene.inLabel.getText());
@@ -141,19 +156,22 @@ public class StatusServiceTest {
     void testUpdateTransactions() {
         List<Transaction> transactions = new ArrayList<>();
         Transaction tx1 = new Transaction();
-        tx1.setTransactionDate("2025-03-01");
+        tx1.setTransactionDate("2025-04-01");
         tx1.setCategory("Salary");
         tx1.setAmount(1000.0);
         transactions.add(tx1);
 
         when(transactionService.loadTransactions(testUser)).thenReturn(transactions);
 
-        statusService.updateTransactions();
+        LocalDate startDate = LocalDate.of(2025, 4, 1);
+        LocalDate endDate = LocalDate.of(2025, 4, 12);
+
+        statusService.updateTransactions(startDate, endDate);
 
         assertFalse(statusScene.transactionsBox.getChildren().isEmpty());
         assertEquals(1, statusScene.transactionsBox.getChildren().size());
         Label txLabel = (Label) statusScene.transactionsBox.getChildren().get(0);
-        assertEquals("2025-03-01   Salary    1000.00 CNY", txLabel.getText());
+        assertEquals("2025-04-01   Salary    1000.00 CNY", txLabel.getText());
     }
 
     @Test
@@ -161,7 +179,7 @@ public class StatusServiceTest {
         List<Transaction> transactions = new ArrayList<>();
         when(transactionService.loadTransactions(testUser)).thenReturn(transactions);
         mockStatic(AiChatService.class);
-        when(AiChatService.chatCompletion(anyList(), anyString())).thenReturn("Some response"); // 不假定具体内容
+        when(AiChatService.chatCompletion(anyList(), anyString())).thenReturn("Some response");
 
         Platform.runLater(() -> {
             statusScene.questionArea.setText("How much did I spend?");
@@ -177,30 +195,37 @@ public class StatusServiceTest {
     }
 
     @Test
-    void testDateComboAction() throws TimeoutException {
+    void testDatePickerAction() throws TimeoutException {
         List<Transaction> transactions = new ArrayList<>();
         Transaction tx1 = new Transaction();
-        tx1.setTransactionDate("2025-02-01");
+        tx1.setTransactionDate("2025-03-01");
         tx1.setTransactionType("Income");
         tx1.setAmount(2000.0);
         transactions.add(tx1);
 
         when(transactionService.loadTransactions(testUser)).thenReturn(transactions);
 
+        LocalDate startDate = LocalDate.of(2025, 3, 1);
+        LocalDate endDate = LocalDate.of(2025, 3, 31);
+
         Platform.runLater(() -> {
-            statusScene.dateCombo.setValue("Last Month");
-            statusScene.dateCombo.getOnAction().handle(null); // 触发事件
+            // 直接改变值以触发 valueProperty 监听器
+            statusScene.startDatePicker.setValue(startDate);
+            statusScene.endDatePicker.setValue(endDate);
         });
 
         FxToolkit.setupFixture(() -> {
             assertEquals("Ex.  0.00 CNY", statusScene.exLabel.getText());
             assertEquals("In.  2000.00 CNY", statusScene.inLabel.getText());
-            verify(chartService).updateAllCharts("Last Month");
+            verify(chartService).updateAllCharts(startDate, endDate);
         });
     }
 
     @Test
     void testChartTypeComboAction_LineGraph() throws TimeoutException {
+        LocalDate startDate = LocalDate.of(2025, 4, 1);
+        LocalDate endDate = LocalDate.of(2025, 4, 12);
+
         Platform.runLater(() -> {
             statusScene.chartTypeCombo.setValue("Line graph");
             statusScene.chartTypeCombo.getOnAction().handle(null); // 触发事件
@@ -209,7 +234,7 @@ public class StatusServiceTest {
         FxToolkit.setupFixture(() -> {
             assertTrue(statusScene.chartPane.getChildren().contains(statusScene.lineChart));
             assertFalse(statusScene.chartPane.getChildren().contains(statusScene.barChart));
-            verify(chartService).updateAllCharts("This Month");
+            verify(chartService).updateAllCharts(startDate, endDate);
         });
     }
 }
