@@ -40,8 +40,14 @@ public class CreateGoalScene {
     private static final double BUTTON_WIDTH = 120;
     private static final double FIELD_WIDTH = 250;
     private static final double MAIN_PADDING = 40;
+    private static final double MIN_WINDOW_WIDTH = 800;
+    private static final double MIN_WINDOW_HEIGHT = 450;
 
     public static Scene createScene(Stage stage, double width, double height, User loggedUser) {
+        // 确保窗口大小不小于最小值
+        final double finalWidth = Math.max(width, MIN_WINDOW_WIDTH);
+        final double finalHeight = Math.max(height, MIN_WINDOW_HEIGHT);
+        
         BorderPane root = new BorderPane();
         root.setStyle(BACKGROUND_STYLE);
 
@@ -53,7 +59,13 @@ public class CreateGoalScene {
         VBox mainBox = new VBox(20);
         mainBox.setAlignment(Pos.CENTER);
         mainBox.setPadding(new Insets(MAIN_PADDING));
-        mainBox.setMaxWidth(FORM_MAX_WIDTH);
+        
+        // 绑定主容器最大宽度到窗口宽度
+        mainBox.maxWidthProperty().bind(
+            root.widthProperty()
+                .subtract(sideBar.widthProperty())
+                .subtract(MAIN_PADDING * 2)
+        );
 
         // Title
         Label titleLabel = new Label("Create New Goal");
@@ -65,22 +77,30 @@ public class CreateGoalScene {
         grid.setHgap(20);
         grid.setVgap(15);
         grid.setAlignment(Pos.CENTER);
+        
+        // 绑定网格宽度到主容器宽度
+        grid.prefWidthProperty().bind(mainBox.maxWidthProperty());
 
         // Goal type selection
         ComboBox<String> typeCombo = createComboBox(GOAL_TYPES, 0, grid, "Type of your goal:", LABEL_FONT, LABEL_COLOR);
+        typeCombo.prefWidthProperty().bind(grid.widthProperty().multiply(0.6));
 
         // Goal title field
         TextField titleField = createTextField("Goal Title", 1, grid, "Goal title:", LABEL_FONT, LABEL_COLOR);
+        titleField.prefWidthProperty().bind(grid.widthProperty().multiply(0.6));
 
         // Target amount field
         TextField amountField = createTextField("Target Amount", 2, grid, "Target amount:", LABEL_FONT, LABEL_COLOR);
+        amountField.prefWidthProperty().bind(grid.widthProperty().multiply(0.6));
         
         // Currency selection
         ComboBox<String> currencyCombo = createComboBox(CURRENCIES, 3, grid, "Currency:", LABEL_FONT, LABEL_COLOR);
         currencyCombo.getSelectionModel().selectFirst();
+        currencyCombo.prefWidthProperty().bind(grid.widthProperty().multiply(0.6));
 
         // Deadline date picker
         DatePicker deadlinePicker = createDatePicker(4, grid, "Deadline:", LABEL_FONT, LABEL_COLOR);
+        deadlinePicker.prefWidthProperty().bind(grid.widthProperty().multiply(0.6));
         
         // Ensure deadline is in the future
         deadlinePicker.setDayCellFactory(picker -> new DateCell() {
@@ -93,6 +113,7 @@ public class CreateGoalScene {
 
         // Category field (only visible for budget control goals)
         TextField categoryField = createTextField("Category (for Budget Control)", 5, grid, "Category:", LABEL_FONT, LABEL_COLOR);
+        categoryField.prefWidthProperty().bind(grid.widthProperty().multiply(0.6));
         Label categoryLabel = (Label) grid.getChildren().stream()
                 .filter(node -> GridPane.getRowIndex(node) == 5 && GridPane.getColumnIndex(node) == 0)
                 .findFirst().orElse(null);
@@ -114,6 +135,7 @@ public class CreateGoalScene {
         // Buttons area
         HBox buttonBox = new HBox(15);
         buttonBox.setAlignment(Pos.CENTER);
+        buttonBox.prefWidthProperty().bind(grid.widthProperty());
 
         Button saveButton = createButton("Save Goal", SAVE_BUTTON_STYLE, event -> {
             if (validateForm(loggedUser, titleField, amountField, typeCombo, categoryField, deadlinePicker)) {
@@ -143,7 +165,7 @@ public class CreateGoalScene {
                     GoalService.addGoal(newGoal, loggedUser);
 
                     // Navigate back to goals list
-                    Scene goalsScene = Goals.createScene(stage, width, height, loggedUser);
+                    Scene goalsScene = Goals.createScene(stage, finalWidth, finalHeight, loggedUser);
                     stage.setScene(goalsScene);
                 } catch (IOException e) {
                     showErrorAlert("Failed to save goal: " + e.getMessage());
@@ -153,9 +175,13 @@ public class CreateGoalScene {
         });
 
         Button cancelButton = createButton("Cancel", null, event -> {
-            Scene goalsScene = Goals.createScene(stage, width, height, loggedUser);
+            Scene goalsScene = Goals.createScene(stage, finalWidth, finalHeight, loggedUser);
             stage.setScene(goalsScene);
         });
+
+        // 绑定按钮宽度
+        saveButton.prefWidthProperty().bind(buttonBox.widthProperty().multiply(0.2));
+        cancelButton.prefWidthProperty().bind(buttonBox.widthProperty().multiply(0.2));
 
         buttonBox.getChildren().addAll(saveButton, cancelButton);
 
@@ -167,7 +193,23 @@ public class CreateGoalScene {
         centerContainer.setAlignment(Pos.CENTER);
         root.setCenter(centerContainer);
 
-        return new Scene(root, width, height);
+        // 创建场景
+        Scene scene = new Scene(root, finalWidth, finalHeight);
+        
+        // 添加窗口大小变化监听器
+        scene.widthProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal.doubleValue() < MIN_WINDOW_WIDTH) {
+                stage.setWidth(MIN_WINDOW_WIDTH);
+            }
+        });
+        
+        scene.heightProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal.doubleValue() < MIN_WINDOW_HEIGHT) {
+                stage.setHeight(MIN_WINDOW_HEIGHT);
+            }
+        });
+
+        return scene;
     }
 
     private static boolean validateForm(User loggedUser, TextField titleField, TextField amountField, 
