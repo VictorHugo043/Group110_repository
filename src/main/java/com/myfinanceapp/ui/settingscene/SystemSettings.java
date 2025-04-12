@@ -17,8 +17,14 @@ import javafx.stage.Stage;
 import java.util.Objects;
 
 public class SystemSettings {
+    private static final double MIN_WINDOW_WIDTH = 800;
+    private static final double MIN_WINDOW_HEIGHT = 450;
 
     public static Scene createScene(Stage stage, double width, double height, User loggedUser) {
+        // 确保窗口大小不小于最小值
+        final double finalWidth = Math.max(width, MIN_WINDOW_WIDTH);
+        final double finalHeight = Math.max(height, MIN_WINDOW_HEIGHT);
+
         BorderPane root = new BorderPane();
         root.setStyle("-fx-background-color: white;");
 
@@ -51,20 +57,35 @@ public class SystemSettings {
         // 1) 顶部 Tab 栏 (与外Box同背景)
         HBox topBar = SettingsTopBarFactory.createTopBar(stage, "System Settings", loggedUser);
         // 2) 表单
-        Pane settingsForm = createSettingsForm(stage, loggedUser);
+        Pane settingsForm = createSettingsForm(stage, finalWidth, finalHeight, loggedUser);
 
         outerBox.getChildren().addAll(settingsForm);
         container.getChildren().addAll(topBar, outerBox);
         centerBox.getChildren().add(container);
         root.setCenter(centerBox);
 
-        return new Scene(root, width, height);
+        Scene scene = new Scene(root, finalWidth, finalHeight);
+        
+        // 添加窗口大小变化监听器
+        scene.widthProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal.doubleValue() < MIN_WINDOW_WIDTH) {
+                stage.setWidth(MIN_WINDOW_WIDTH);
+            }
+        });
+        
+        scene.heightProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal.doubleValue() < MIN_WINDOW_HEIGHT) {
+                stage.setHeight(MIN_WINDOW_HEIGHT);
+            }
+        });
+
+        return scene;
     }
 
     /**
      * 中心的设置表单
      */
-    private static Pane createSettingsForm(Stage stage, User loggedUser) {
+    private static Pane createSettingsForm(Stage stage, double width, double height, User loggedUser) {
         VBox container = new VBox(20);
         container.setAlignment(Pos.CENTER_LEFT);
         container.setPadding(new Insets(30));
@@ -128,14 +149,14 @@ public class SystemSettings {
         buttonBox.setAlignment(Pos.CENTER);
         Button resetBtn = new Button("Reset to Default");
         resetBtn.setStyle("-fx-background-color: #E0F0FF; -fx-text-fill: #3282FA; -fx-font-weight: bold;");
-        Button backBtn = new Button("Back to Mainpage");
+        Button backBtn = new Button("Back to Status");
         backBtn.setStyle("-fx-background-color: #E0F0FF; -fx-text-fill: #3282FA; -fx-font-weight: bold;");
         backBtn.setOnAction(e -> {
             // 回到 Status
-            StatusScene statusScene = new StatusScene(stage, 800, 450, loggedUser);
+            StatusScene statusScene = new StatusScene(stage, width, height, loggedUser);
             stage.setScene(statusScene.createScene());
-            StatusService statusService = new StatusService(statusScene, loggedUser); // 初始化服务
-            stage.setTitle("Finanger - Status"); // 可选：设置标题
+            StatusService statusService = new StatusService(statusScene, loggedUser);
+            stage.setTitle("Finanger - Status");
         });
 
         buttonBox.getChildren().addAll(resetBtn, backBtn);

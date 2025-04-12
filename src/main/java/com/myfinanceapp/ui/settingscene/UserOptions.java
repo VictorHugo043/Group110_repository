@@ -26,13 +26,18 @@ public class UserOptions {
 
     // 假设当前已登录用户信息在此记录
     private static User currentUser;
+    private static final double MIN_WINDOW_WIDTH = 800;
+    private static final double MIN_WINDOW_HEIGHT = 450;
 
     public static Scene createScene(Stage stage, double width, double height, User loggedUser) {
+        // 确保窗口大小不小于最小值
+        final double finalWidth = Math.max(width, MIN_WINDOW_WIDTH);
+        final double finalHeight = Math.max(height, MIN_WINDOW_HEIGHT);
+
         // 把当前登录用户保存，供下文使用
         currentUser = loggedUser;
         if (currentUser == null) {
             throw new IllegalStateException("No logged user!");
-            // 或 showAlert + return
         }
 
         BorderPane root = new BorderPane();
@@ -48,7 +53,7 @@ public class UserOptions {
 
         // 外部容器
         VBox container = new VBox(0);
-        container.setAlignment(Pos.TOP_CENTER);
+        container.setAlignment(Pos.CENTER);
 
         // 顶部Tab栏: "User Options" 选中
         HBox topBar = SettingsTopBarFactory.createTopBar(stage, "User Options", loggedUser);
@@ -58,6 +63,7 @@ public class UserOptions {
         outerBox.setPadding(new Insets(25));
         outerBox.setAlignment(Pos.TOP_LEFT);
         outerBox.setMaxWidth(600);
+        outerBox.setMaxHeight(400);
         outerBox.setStyle(
                 "-fx-border-color: #3282FA;" +
                         "-fx-border-width: 2;" +
@@ -194,18 +200,19 @@ public class UserOptions {
         resetPassRow.setAlignment(Pos.CENTER_LEFT);
 
         resetPassRow.setOnMouseClicked(e -> {
-            stage.setScene(ResetPassword.createScene(stage, 800, 450));
+            Scene resetScene = ResetPassword.createScene(stage, finalWidth, finalHeight);
+            stage.setScene(resetScene);
             stage.setTitle("Reset Password");
         });
 
-        // ========== Bottom: Back to Mainpage ==========
-        Button backBtn = new Button("Back to Mainpage");
+        // ========== Bottom: Back to Status ==========
+        Button backBtn = new Button("Back to Status");
         backBtn.setStyle("-fx-background-color: #3377ff; -fx-text-fill: white; -fx-font-weight: bold;");
         backBtn.setOnAction(e -> {
-            StatusScene statusScene = new StatusScene(stage, 800, 450, loggedUser);
+            StatusScene statusScene = new StatusScene(stage, finalWidth, finalHeight, loggedUser);
             stage.setScene(statusScene.createScene());
-            StatusService statusService = new StatusService(statusScene, loggedUser); // 初始化服务
-            stage.setTitle("Finanger - Status"); // 可选：设置标题
+            StatusService statusService = new StatusService(statusScene, loggedUser);
+            stage.setTitle("Finanger - Status");
         });
 
         // ========== 组装outerBox内容 ==========
@@ -223,7 +230,22 @@ public class UserOptions {
         centerBox.getChildren().add(container);
         root.setCenter(centerBox);
 
-        return new Scene(root, width, height);
+        Scene scene = new Scene(root, finalWidth, finalHeight);
+        
+        // 添加窗口大小变化监听器
+        scene.widthProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal.doubleValue() < MIN_WINDOW_WIDTH) {
+                stage.setWidth(MIN_WINDOW_WIDTH);
+            }
+        });
+        
+        scene.heightProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal.doubleValue() < MIN_WINDOW_HEIGHT) {
+                stage.setHeight(MIN_WINDOW_HEIGHT);
+            }
+        });
+
+        return scene;
     }
 
     /**
