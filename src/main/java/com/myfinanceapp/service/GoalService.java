@@ -130,4 +130,83 @@ public class GoalService {
         String fileName = user.getUid() + ".json";
         return new File(GOALS_DIRECTORY_PATH + fileName);
     }
+
+    /**
+     * 计算储蓄目标的进度百分比
+     */
+    public static double calculateSavingProgress(double currentBalance, double targetAmount) {
+        if (targetAmount <= 0) return 0;
+        return Math.min(100, (currentBalance / targetAmount) * 100);
+    }
+
+    /**
+     * 计算债务还款目标的进度百分比
+     */
+    public static double calculateDebtProgress(double amountPaid, double totalDebt) {
+        if (totalDebt <= 0) return 0;
+        return Math.min(100, (amountPaid / totalDebt) * 100);
+    }
+
+    /**
+     * 计算预算使用百分比
+     */
+    public static double calculateBudgetUsage(double currentExpense, double budgetAmount) {
+        if (budgetAmount <= 0) return 0;
+        return (currentExpense / budgetAmount) * 100;
+    }
+
+    /**
+     * 格式化数字，避免科学计数法
+     */
+    public static String formatNumber(double number) {
+        java.math.BigDecimal bd = new java.math.BigDecimal(number);
+        java.text.DecimalFormat df = new java.text.DecimalFormat("#,##0.00");
+        df.setRoundingMode(java.math.RoundingMode.HALF_UP);
+        return df.format(bd);
+    }
+
+    /**
+     * 获取目标进度指示器的颜色
+     */
+    public static javafx.scene.paint.Color getProgressColor(String goalType, double progress, boolean isCompleted) {
+        switch (goalType) {
+            case "SAVING":
+                return javafx.scene.paint.Color.BLUE;
+            case "DEBT_REPAYMENT":
+                return isCompleted ? javafx.scene.paint.Color.GREEN : javafx.scene.paint.Color.BLUE;
+            case "BUDGET_CONTROL":
+                return progress > 100 ? javafx.scene.paint.Color.RED : javafx.scene.paint.Color.GREEN;
+            default:
+                return javafx.scene.paint.Color.GRAY;
+        }
+    }
+
+    /**
+     * 获取目标进度指示器的文本
+     */
+    public static String getProgressText(String goalType, double progress, boolean isCompleted) {
+        switch (goalType) {
+            case "SAVING":
+                return String.format("%.1f%%", progress);
+            case "DEBT_REPAYMENT":
+                return isCompleted ? "✓" : String.format("%.0f%%", progress);
+            case "BUDGET_CONTROL":
+                return progress > 100 ? "✗" : "✓";
+            default:
+                return String.format("%.0f%%", progress);
+        }
+    }
+
+    /**
+     * 获取目标进度指示器的字体大小
+     */
+    public static int getProgressFontSize(String goalType, boolean isCompleted) {
+        if (goalType.equals("DEBT_REPAYMENT") && isCompleted) {
+            return 24;
+        }
+        if (goalType.equals("BUDGET_CONTROL")) {
+            return 24;
+        }
+        return 18;
+    }
 }

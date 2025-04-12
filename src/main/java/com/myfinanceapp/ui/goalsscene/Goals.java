@@ -19,12 +19,14 @@ import javafx.scene.shape.Arc;
 import javafx.scene.shape.ArcType;
 import javafx.scene.shape.Circle;
 import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 import javafx.geometry.Insets;
 import javafx.scene.Group;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.ArrayList;
 
 public class Goals {
     public static Scene createScene(Stage stage, double width, double height, User loggedUser) {
@@ -58,8 +60,11 @@ public class Goals {
         centerContent.setAlignment(Pos.TOP_CENTER);
         centerContent.getChildren().add(debugLabel);
 
-        // 动态计算每行显示的目标卡片数量
-        int maxCols = calculateMaxColumns(width);
+        // 初始化列数
+        int initialMaxCols = calculateMaxColumns(width);
+        
+        // 创建一个列表来存储所有卡片，以便后续重新布局
+        List<VBox> allCards = new ArrayList<>();
         
         // If no goals, show a message
         if (userGoals.isEmpty()) {
@@ -67,28 +72,15 @@ public class Goals {
             noGoalsLabel.setStyle("-fx-font-size: 16px; -fx-text-fill: #333333;");
             centerContent.getChildren().add(noGoalsLabel);
         } else {
-            // 动态创建目标卡片并添加到网格
-            int row = 0;
-            int col = 0;
+            // 创建所有目标卡片
             for (Goal goal : userGoals) {
                 try {
                     if (loggedUser == null || goal.getUserId() == null || 
                         loggedUser.getUid().equals(goal.getUserId())) {
                         VBox goalCard = createGoalCard(goal, stage, loggedUser);
-                        centerGrid.add(goalCard, col, row);
-                        
-                        // 绑定卡片大小到窗口大小
-                        goalCard.prefWidthProperty().bind(
-                            centerGrid.widthProperty()
-                                .subtract(centerGrid.getHgap() * (maxCols - 1))
-                                .divide(maxCols)
-                        );
-                        
-                        col++;
-                        if (col >= maxCols) {
-                            col = 0;
-                            row++;
-                        }
+                        goalCard.setMinWidth(300);
+                        goalCard.setMaxWidth(400);
+                        allCards.add(goalCard);
                     }
                 } catch (Exception e) {
                     System.err.println("Error displaying goal: " + goal.getTitle());
@@ -97,20 +89,14 @@ public class Goals {
             }
         }
 
-        // Calculate the correct position for the "Create new goal" card
-        int newGoalCol = userGoals.size() % maxCols;
-        int newGoalRow = userGoals.size() / maxCols;
-
         // 添加"创建新目标"卡片
         VBox createNewGoalCard = createCreateNewGoalCard(stage, loggedUser);
-        centerGrid.add(createNewGoalCard, newGoalCol, newGoalRow);
-        
-        // 绑定创建新目标卡片的大小
-        createNewGoalCard.prefWidthProperty().bind(
-            centerGrid.widthProperty()
-                .subtract(centerGrid.getHgap() * (maxCols - 1))
-                .divide(maxCols)
-        );
+        createNewGoalCard.setMinWidth(300);
+        createNewGoalCard.setMaxWidth(400);
+        allCards.add(createNewGoalCard);
+
+        // 初始布局所有卡片
+        layoutCards(centerGrid, allCards, initialMaxCols);
 
         // Add the grid to the center content
         centerContent.getChildren().add(centerGrid);
@@ -134,22 +120,16 @@ public class Goals {
         
         // 创建场景
         Scene scene = new Scene(root, width, height);
-        
+
         // 添加窗口大小变化监听器
         scene.widthProperty().addListener((obs, oldVal, newVal) -> {
             int newMaxCols = calculateMaxColumns(newVal.doubleValue());
-            if (newMaxCols != maxCols) {
-                // 重新创建场景以更新布局
-                Scene newScene = createScene(stage, newVal.doubleValue(), scene.getHeight(), loggedUser);
-                stage.setScene(newScene);
-            }
-        });
-
-        // 添加高度变化监听器
-        scene.heightProperty().addListener((obs, oldVal, newVal) -> {
-            // 重新创建场景以更新布局
-            Scene newScene = createScene(stage, scene.getWidth(), newVal.doubleValue(), loggedUser);
-            stage.setScene(newScene);
+            // 清除现有布局
+            centerGrid.getChildren().clear();
+            centerGrid.getColumnConstraints().clear();
+            
+            // 重新布局所有卡片
+            layoutCards(centerGrid, allCards, newMaxCols);
         });
         
         return scene;
@@ -164,11 +144,31 @@ public class Goals {
         return Math.max(1, maxCols);
     }
 
+    private static VBox createLabelPair(String title, String value) {
+        VBox container = new VBox(2);  // 2 pixels spacing between labels
+        container.setAlignment(Pos.CENTER_LEFT);
+        
+        // Create title label with bold font
+        Label titleLabel = new Label(title);
+        titleLabel.setFont(Font.font("Arial", FontWeight.BOLD, 14));
+        titleLabel.setTextFill(Color.GRAY);
+        
+        // Create value label with regular font
+        Label valueLabel = new Label(value);
+        valueLabel.setFont(Font.font("Arial", FontWeight.NORMAL, 14));
+        valueLabel.setTextFill(Color.BLACK);
+        valueLabel.setWrapText(true);  // Enable text wrapping for long values
+        
+        container.getChildren().addAll(titleLabel, valueLabel);
+        return container;
+    }
+
     private static VBox createGoalCard(Goal goal, Stage stage, User loggedUser) {
-        VBox card = new VBox(10);
+        VBox card = new VBox(15);
         card.setAlignment(Pos.CENTER);
         card.setMaxWidth(300);
-        card.setMaxHeight(200);
+        card.setMinHeight(200);
+        card.setPadding(new Insets(20));
         card.setStyle(
                 "-fx-border-color: #3282FA;" +
                         "-fx-border-width: 2;" +
@@ -200,10 +200,9 @@ public class Goals {
            deleteButton.setVisible(false);
         });
 
-
         // Position the delete button to the top-right
         StackPane.setAlignment(deleteButton, Pos.TOP_RIGHT);
-        StackPane.setMargin(deleteButton, new Insets(5, 5, 0, 0));
+        StackPane.setMargin(deleteButton, new Insets(0, 0, 0, 0));
         
         // Handle delete button click
         deleteButton.setOnAction(event -> {
@@ -248,130 +247,92 @@ public class Goals {
         title.setTextFill(Color.DARKBLUE);
 
         // 创建文字信息部分
-        VBox textInfo = new VBox(5);
+        VBox textInfo = new VBox(8);
         textInfo.setAlignment(Pos.CENTER_LEFT);
+        textInfo.setPrefWidth(200);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
 
         // 根据目标类型创建不同的内容
         StackPane indicatorContainer = new StackPane();
         try {
             TransactionDataService transactionService = new TransactionDataService(loggedUser.getUid());
+            double progress = 0;
+            boolean isCompleted = false;
+            String currency = goal.getCurrency();
+
             switch (goal.getType()) {
                 case "SAVING":
-                double currentNetBalance = transactionService.calculateNetBalance();
-                Label targetAmount = new Label("Target Amount: " + goal.getTargetAmount() + " " + goal.getCurrency());
-                Label deadline = new Label("Deadline: " + goal.getDeadline().format(formatter));
-                Label currentSavings = new Label("Current Savings: " + currentNetBalance + " " + goal.getCurrency());
-                textInfo.getChildren().addAll(targetAmount, deadline, currentSavings);
-
-                // 计算进度百分比
-                double savingProgressPercentage = 0;
-                if (goal.getTargetAmount() > 0) {
-                    savingProgressPercentage = Math.min(100, (currentNetBalance / goal.getTargetAmount()) * 100);
-                }
-                
-                // 1. 创建背景圆弧（灰色部分，表示未完成）
-                Arc backgroundArc = new Arc(0, 0, 40, 40, 90, 360); // 参数：X坐标,Y坐标,半径X,半径Y,起始角度,圆弧角度
-                backgroundArc.setType(ArcType.OPEN); // 只画弧线不填充
-                backgroundArc.setStroke(Color.LIGHTGRAY); // 灰色边框
-                backgroundArc.setFill(Color.TRANSPARENT); // 透明填充
-                backgroundArc.setStrokeWidth(8); // 线条粗细
-
-                // 2. 创建进度圆弧（蓝色部分，表示已完成）
-                Arc progressArc = new Arc(0, 0, 40, 40, 90, -360 * savingProgressPercentage / 100); // 角度为负表示顺时针
-                progressArc.setType(ArcType.OPEN);
-                progressArc.setStroke(Color.BLUE); // 蓝色边框
-                progressArc.setFill(Color.TRANSPARENT);
-                progressArc.setStrokeWidth(8);
-
-                // 3. 将两个圆弧组合起来
-                Group arcGroup = new Group(backgroundArc, progressArc);
-
-                // 4. 添加百分比文字标签
-                Label progressLabel = new Label(String.format("%.1f%%", savingProgressPercentage));
-                progressLabel.setFont(Font.font("Arial", 18));
-                progressLabel.setTextFill(Color.BLUE);
-
-                // 5. 添加到容器
-                indicatorContainer.getChildren().addAll(arcGroup, progressLabel);
-                break;
+                    double currentNetBalance = transactionService.calculateNetBalance();
+                    VBox targetAmountBox = createLabelPair("Target Amount", 
+                        GoalService.formatNumber(goal.getTargetAmount()) + " " + currency);
+                    VBox deadlineBox = createLabelPair("Deadline", 
+                        goal.getDeadline().format(formatter));
+                    VBox currentSavingsBox = createLabelPair("Current Savings", 
+                        GoalService.formatNumber(currentNetBalance) + " " + currency);
+                    textInfo.getChildren().addAll(targetAmountBox, deadlineBox, currentSavingsBox);
+                    progress = GoalService.calculateSavingProgress(currentNetBalance, goal.getTargetAmount());
+                    break;
 
                 case "DEBT_REPAYMENT":
-                double totalDebtRepayment = transactionService.calculateTotalAmountByCategory("Loan Repayment");
-                Label totalDebtAmount = new Label("Total Debt Amount: " + goal.getTargetAmount() + " " + goal.getCurrency());
-                Label repaymentDeadline = new Label("Repayment Deadline: " + goal.getDeadline().format(formatter));
-                Label amountPaid = new Label("Amount Paid: " + totalDebtRepayment + " " + goal.getCurrency());
-                textInfo.getChildren().addAll(totalDebtAmount, repaymentDeadline, amountPaid);
-
-                // 计算进度百分比
-                double debtProgressPercentage = 0;
-                if (goal.getTargetAmount() > 0) {
-                    debtProgressPercentage = Math.min(100, (totalDebtRepayment / goal.getTargetAmount()) * 100);
-                }
-
-                // 背景圆弧（灰色）
-                Arc debtBackgroundArc = new Arc(0, 0, 40, 40, 90, 360);
-                debtBackgroundArc.setType(ArcType.OPEN);
-                debtBackgroundArc.setStroke(Color.LIGHTGRAY);
-                debtBackgroundArc.setFill(Color.TRANSPARENT);
-                debtBackgroundArc.setStrokeWidth(8);
-
-                // 进度圆弧（根据完成状态选择颜色）
-                Arc debtProgressArc = new Arc(0, 0, 40, 40, 90, -360 * debtProgressPercentage / 100);
-                debtProgressArc.setType(ArcType.OPEN);
-                debtProgressArc.setStroke(goal.isCompleted() ? Color.GREEN : Color.BLUE);
-                debtProgressArc.setFill(Color.TRANSPARENT);
-                debtProgressArc.setStrokeWidth(8);
-
-                // 组合圆弧
-                Group debtArcGroup = new Group(debtBackgroundArc, debtProgressArc);
-
-                // 文字标签
-                Label debtProgressLabel = new Label(goal.isCompleted() ? "✓" : String.format("%.0f%%", debtProgressPercentage));
-                debtProgressLabel.setFont(Font.font("Arial", goal.isCompleted() ? 24 : 18));
-                debtProgressLabel.setTextFill(goal.isCompleted() ? Color.GREEN : Color.BLUE);
-                indicatorContainer.getChildren().addAll(debtArcGroup, debtProgressLabel);
-                break;
+                    double totalDebtRepayment = transactionService.calculateTotalAmountByCategory("Loan Repayment");
+                    VBox totalDebtBox = createLabelPair("Total Debt Amount", 
+                        GoalService.formatNumber(goal.getTargetAmount()) + " " + currency);
+                    VBox repaymentDeadlineBox = createLabelPair("Repayment Deadline", 
+                        goal.getDeadline().format(formatter));
+                    VBox amountPaidBox = createLabelPair("Amount Paid", 
+                        GoalService.formatNumber(totalDebtRepayment) + " " + currency);
+                    textInfo.getChildren().addAll(totalDebtBox, repaymentDeadlineBox, amountPaidBox);
+                    progress = GoalService.calculateDebtProgress(totalDebtRepayment, goal.getTargetAmount());
+                    isCompleted = progress >= 100;
+                    break;
 
                 case "BUDGET_CONTROL":
-                double currentExpense = transactionService.calculateTotalExpense();
-                Label budgetCategory = new Label("Budget Category: " + (goal.getCategory() != null ? goal.getCategory() : "General"));
-                Label budgetAmount = new Label("Budget Amount: " + goal.getTargetAmount() + " " + goal.getCurrency());
-                Label currentExpensesLabel = new Label("Current Expenses: " + currentExpense + " " + goal.getCurrency());
-                textInfo.getChildren().addAll(budgetCategory, budgetAmount, currentExpensesLabel);
+                    double currentExpense = transactionService.calculateTotalExpense();
+                    VBox budgetCategoryBox = createLabelPair("Budget Category", 
+                        goal.getCategory() != null ? goal.getCategory() : "General");
+                    VBox budgetAmountBox = createLabelPair("Budget Amount", 
+                        GoalService.formatNumber(goal.getTargetAmount()) + " " + currency);
+                    VBox currentExpensesBox = createLabelPair("Current Expenses", 
+                        GoalService.formatNumber(currentExpense) + " " + currency);
+                    textInfo.getChildren().addAll(budgetCategoryBox, budgetAmountBox, currentExpensesBox);
+                    progress = GoalService.calculateBudgetUsage(currentExpense, goal.getTargetAmount());
+                    break;
+            }
 
-                double budgetUsagePercentage = (currentExpense / goal.getTargetAmount()) * 100;
-                boolean isOverBudget = currentExpense > goal.getTargetAmount();
+            // 创建进度指示器
+            Color progressColor = GoalService.getProgressColor(goal.getType(), progress, isCompleted);
+            String progressText = GoalService.getProgressText(goal.getType(), progress, isCompleted);
+            int fontSize = GoalService.getProgressFontSize(goal.getType(), isCompleted);
 
-                // 背景圆弧（灰色）
-                Arc budgetBackgroundArc = new Arc(0, 0, 40, 40, 90, 360);
-                budgetBackgroundArc.setType(ArcType.OPEN);
-                budgetBackgroundArc.setStroke(Color.LIGHTGRAY);
-                budgetBackgroundArc.setFill(Color.TRANSPARENT);
-                budgetBackgroundArc.setStrokeWidth(8);
+            // 1. 创建背景圆弧（灰色部分，表示未完成）
+            Arc backgroundArc = new Arc(0, 0, 40, 40, 90, 360);
+            backgroundArc.setType(ArcType.OPEN);
+            backgroundArc.setStroke(Color.LIGHTGRAY);
+            backgroundArc.setFill(Color.TRANSPARENT);
+            backgroundArc.setStrokeWidth(8);
 
-                // 进度圆弧（超预算显示红色，否则绿色）
-                Arc budgetProgressArc = new Arc(0, 0, 40, 40, 90, -360 * Math.min(100, budgetUsagePercentage) / 100);
-                budgetProgressArc.setType(ArcType.OPEN);
-                budgetProgressArc.setStroke(isOverBudget ? Color.RED : Color.GREEN);
-                budgetProgressArc.setFill(Color.TRANSPARENT);
-                budgetProgressArc.setStrokeWidth(8);
+            // 2. 创建进度圆弧
+            Arc progressArc = new Arc(0, 0, 40, 40, 90, -360 * Math.min(100, progress) / 100);
+            progressArc.setType(ArcType.OPEN);
+            progressArc.setStroke(progressColor);
+            progressArc.setFill(Color.TRANSPARENT);
+            progressArc.setStrokeWidth(8);
 
-                // 组合圆弧
-                Group budgetArcGroup = new Group(budgetBackgroundArc, budgetProgressArc);
+            // 3. 将两个圆弧组合起来
+            Group arcGroup = new Group(backgroundArc, progressArc);
 
-                // 文字标签
-                Label budgetProgressLabel = new Label(isOverBudget ? "✗" : "✓");
-                budgetProgressLabel.setFont(Font.font("Arial", 24));
-                budgetProgressLabel.setTextFill(isOverBudget ? Color.RED : Color.GREEN);
-                    
-                indicatorContainer.getChildren().addAll(budgetArcGroup, budgetProgressLabel);
-                break;
-                }
-            } catch (IOException e) {
-                Label errorLabel = new Label("Error loading transaction data");
-                textInfo.getChildren().add(errorLabel);
-                e.printStackTrace();
+            // 4. 添加进度文字标签
+            Label progressLabel = new Label(progressText);
+            progressLabel.setFont(Font.font("Arial", fontSize));
+            progressLabel.setTextFill(progressColor);
+
+            // 5. 添加到容器
+            indicatorContainer.getChildren().addAll(arcGroup, progressLabel);
+
+        } catch (IOException e) {
+            Label errorLabel = new Label("Error loading transaction data");
+            textInfo.getChildren().add(errorLabel);
+            e.printStackTrace();
         }
 
         // Create a container for the title and delete button
@@ -382,11 +343,12 @@ public class Goals {
         titleContainer.getChildren().addAll(titleBox, deleteButton);
         StackPane.setAlignment(titleBox, Pos.CENTER);
         StackPane.setAlignment(deleteButton, Pos.TOP_RIGHT);
-        StackPane.setMargin(deleteButton, new Insets(5, 5, 0, 0));
+        StackPane.setMargin(deleteButton, new Insets(0, 0, 0, 0));
         
-        // 创建左右布局的HBox
-        HBox contentLayout = new HBox(15);
-        contentLayout.setAlignment(Pos.CENTER);
+        // 创建左右布局的HBox，添加内边距
+        HBox contentLayout = new HBox(20);
+        contentLayout.setAlignment(Pos.CENTER_LEFT);
+        contentLayout.setPadding(new Insets(10, 0, 0, 0));
         contentLayout.getChildren().addAll(textInfo, indicatorContainer);
         
         // Add the title container instead of just the title
@@ -395,10 +357,11 @@ public class Goals {
     }
 
     private static VBox createCreateNewGoalCard(Stage stage, User loggedUser) {
-        VBox card = new VBox(10);
+        VBox card = new VBox(15);
         card.setAlignment(Pos.CENTER);
         card.setMaxWidth(300);
-        card.setMaxHeight(200);
+        card.setMinHeight(200);
+        card.setPadding(new Insets(20));
         card.setStyle(
                 "-fx-border-color: #3282FA;" +
                         "-fx-border-width: 2;" +
@@ -411,15 +374,17 @@ public class Goals {
         title.setFont(Font.font("Arial", 18));
         title.setTextFill(Color.GRAY);
 
-        // 创建文字信息部分
-        VBox textInfo = new VBox(5);
+        // 创建文字信息部分，添加内边距
+        VBox textInfo = new VBox(8);
         textInfo.setAlignment(Pos.CENTER_LEFT);
+        textInfo.setPadding(new Insets(10, 0, 0, 0));
         Label instructionLabel = new Label("Click to create");
         Label instructionLabel2 = new Label("a new financial goal");
         textInfo.getChildren().addAll(instructionLabel, instructionLabel2);
 
         // 创建加号圆形
         StackPane plusContainer = new StackPane();
+        plusContainer.setPadding(new Insets(0, 0, 0, 20));
         Circle plusCircle = new Circle(40);
         plusCircle.setStroke(Color.GRAY);
         plusCircle.setFill(Color.TRANSPARENT);
@@ -446,5 +411,29 @@ public class Goals {
         });
 
         return card;
+    }
+
+    // 新增辅助方法：布局卡片
+    private static void layoutCards(GridPane grid, List<VBox> cards, int maxCols) {
+        // 添加列约束
+        for (int i = 0; i < maxCols; i++) {
+            ColumnConstraints column = new ColumnConstraints();
+            column.setMinWidth(300);
+            column.setMaxWidth(400);
+            column.setHgrow(Priority.SOMETIMES);
+            grid.getColumnConstraints().add(column);
+        }
+
+        // 布局所有卡片
+        int row = 0;
+        int col = 0;
+        for (VBox card : cards) {
+            grid.add(card, col, row);
+            col++;
+            if (col >= maxCols) {
+                col = 0;
+                row++;
+            }
+        }
     }
 }
