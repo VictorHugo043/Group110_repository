@@ -6,6 +6,7 @@ import com.myfinanceapp.ui.settingscene.OtherSettings;
 import com.myfinanceapp.ui.settingscene.UserOptions;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Scene;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.control.Label;
@@ -24,7 +25,7 @@ public class SettingsTopBarFactory {
      * 创建顶部Tab栏，4个选项：
      * @param activeTab 传入 "System Settings", "User Options", "Other Settings", "About" 表示哪个被选中
      */
-    public static HBox createTopBar(Stage stage,String activeTab,User loggedUser) {
+    public static HBox createTopBar(Stage stage, String activeTab, User loggedUser) {
         HBox topBar = new HBox(10);
         topBar.setPadding(new Insets(0, 0, 0, 0));
         topBar.setAlignment(Pos.BOTTOM_LEFT);
@@ -35,20 +36,27 @@ public class SettingsTopBarFactory {
         VBox otherSettingsTab  = createOneTab("Other Settings",    activeTab.equals("Other Settings"));
         VBox aboutTab          = createOneTab("About",             activeTab.equals("About"));
 
+        // 获取当前场景的尺寸
+        Scene currentScene = stage.getScene();
+        double width = currentScene.getWidth();
+        double height = currentScene.getHeight();
 
-         aboutTab.setOnMouseClicked(e -> {
-             stage.setScene(About.createScene(stage,800,450,loggedUser));});
-         systemSettingsTab.setOnMouseClicked(e ->{
-             stage.setScene(SystemSettings.createScene(stage,800,450,loggedUser));
-         });
-         userOptionsTab.setOnMouseClicked(e ->{
-             stage.setScene(UserOptions.createScene(stage, 800, 450,loggedUser));
-         });
-         otherSettingsTab.setOnMouseClicked(e->{
-             // TODO
-             //stage.setScene(OtherSettings.createScene(stage, 800, 450));
-         });
-        // etc.
+        aboutTab.setOnMouseClicked(e -> {
+            stage.setScene(About.createScene(stage, width, height, loggedUser));
+        });
+        
+        systemSettingsTab.setOnMouseClicked(e -> {
+            stage.setScene(SystemSettings.createScene(stage, width, height, loggedUser));
+        });
+        
+        userOptionsTab.setOnMouseClicked(e -> {
+            stage.setScene(UserOptions.createScene(stage, width, height, loggedUser));
+        });
+        
+        otherSettingsTab.setOnMouseClicked(e -> {
+            // TODO
+            //stage.setScene(OtherSettings.createScene(stage, width, height));
+        });
 
         topBar.getChildren().addAll(systemSettingsTab, userOptionsTab, otherSettingsTab, aboutTab);
         return topBar;

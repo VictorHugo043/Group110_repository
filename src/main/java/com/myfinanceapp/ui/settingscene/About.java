@@ -14,8 +14,14 @@ import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 public class About {
+    private static final double MIN_WINDOW_WIDTH = 800;
+    private static final double MIN_WINDOW_HEIGHT = 450;
 
     public static Scene createScene(Stage stage, double width, double height, User loggedUser) {
+        // 确保窗口大小不小于最小值
+        final double finalWidth = Math.max(width, MIN_WINDOW_WIDTH);
+        final double finalHeight = Math.max(height, MIN_WINDOW_HEIGHT);
+
         // 整体 BorderPane
         BorderPane root = new BorderPane();
         root.setStyle("-fx-background-color: white;");
@@ -48,7 +54,7 @@ public class About {
         );
 
         // 中心内容：About 文本
-        Pane aboutContent = createAboutContent(stage, loggedUser);
+        Pane aboutContent = createAboutContent(stage, finalWidth, finalHeight, loggedUser);
 
         outerBox.getChildren().addAll(aboutContent);
         container.getChildren().addAll(topBar, outerBox);
@@ -56,13 +62,28 @@ public class About {
         centerBox.getChildren().add(container);
         root.setCenter(centerBox);
 
-        return new Scene(root, width, height);
+        Scene scene = new Scene(root, finalWidth, finalHeight);
+        
+        // 添加窗口大小变化监听器
+        scene.widthProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal.doubleValue() < MIN_WINDOW_WIDTH) {
+                stage.setWidth(MIN_WINDOW_WIDTH);
+            }
+        });
+        
+        scene.heightProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal.doubleValue() < MIN_WINDOW_HEIGHT) {
+                stage.setHeight(MIN_WINDOW_HEIGHT);
+            }
+        });
+
+        return scene;
     }
 
     /**
      * 生成 About 界面的正文内容
      */
-    private static Pane createAboutContent(Stage stage, User loggedUser) {
+    private static Pane createAboutContent(Stage stage, double width, double height, User loggedUser) {
         VBox container = new VBox(20);
         container.setAlignment(Pos.TOP_CENTER);
         container.setPadding(new Insets(30));
@@ -77,30 +98,29 @@ public class About {
                         "Using smart AI, Finanger automatically categorizes your expenses, detects spending " +
                         "patterns, and suggests personalized budgets and saving tips. Of course, you stay in " +
                         "control — review and adjust any misclassifications at any time.\n\n" +
-                        "Smarter finance starts here. With Finanger, you’re not just tracking money — " +
-                        "you’re mastering it."
+                        "Smarter finance starts here. With Finanger, you're not just tracking money — " +
+                        "you're mastering it."
         );
         descLabel.setFont(new Font(14));
         descLabel.setWrapText(true);
         descLabel.setMaxWidth(500);
 
         // 按钮区
-        HBox buttonBox = new HBox(30);
+        VBox buttonBox = new VBox();
         buttonBox.setAlignment(Pos.CENTER);
-        Button resetBtn = new Button("Reset to Default");
-        resetBtn.setStyle("-fx-background-color: #E0F0FF; -fx-text-fill: #3282FA; -fx-font-weight: bold;");
+        buttonBox.setPadding(new Insets(20, 0, 0, 0));
 
-        Button backBtn = new Button("Back to Mainpage");
+        Button backBtn = new Button("Back to Status");
         backBtn.setStyle("-fx-background-color: #E0F0FF; -fx-text-fill: #3282FA; -fx-font-weight: bold;");
         backBtn.setOnAction(e -> {
             // 回到 Status 界面
-            StatusScene statusScene = new StatusScene(stage, 800, 450, loggedUser);
+            StatusScene statusScene = new StatusScene(stage, width, height, loggedUser);
             stage.setScene(statusScene.createScene());
-            StatusService statusService = new StatusService(statusScene, loggedUser); // 初始化服务
-            stage.setTitle("Finanger - Status"); // 可选：设置标题
+            StatusService statusService = new StatusService(statusScene, loggedUser);
+            stage.setTitle("Finanger - Status");
         });
 
-        buttonBox.getChildren().addAll(resetBtn, backBtn);
+        buttonBox.getChildren().add(backBtn);
 
         container.getChildren().addAll(titleLabel, descLabel, buttonBox);
         return container;
