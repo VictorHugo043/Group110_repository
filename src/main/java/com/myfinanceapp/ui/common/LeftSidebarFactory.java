@@ -20,7 +20,7 @@ import java.util.Objects;
 public class LeftSidebarFactory {
 
     /**
-     * 创建左侧边栏，支持传入一个 selectedButton 表示哪个按钮是“选中”。
+     * 创建左侧边栏，支持传入一个 selectedButton 表示哪个按钮是"选中"。
      * 可取值如 "Status", "Goals", "New", "Settings", "Logout" 等
      */
     public static VBox createLeftSidebar(Stage stage, String selectedButton, User loggedUser) {
@@ -129,22 +129,25 @@ public class LeftSidebarFactory {
 
         // 点击事件，根据按钮 text 做不同跳转
         label.setOnMouseClicked(e -> {
+            // 获取当前窗口的实际大小
+            double currentWidth = stage.getScene().getWidth();
+            double currentHeight = stage.getScene().getHeight();
+            
             switch (text) {
                 case "Status":
                     // 跳转 Status
-                    StatusScene statusScene = new StatusScene(stage, 800, 450, loggedUser);
+                    StatusScene statusScene = new StatusScene(stage, currentWidth, currentHeight, loggedUser);
                     stage.setScene(statusScene.createScene());
                     StatusService statusService = new StatusService(statusScene, loggedUser); // 初始化服务
                     break;
                 case "Goals":
-                    
-                    stage.setScene(Goals.createScene(stage, 800, 450,loggedUser));
+                    stage.setScene(Goals.createScene(stage, currentWidth, currentHeight, loggedUser));
                     break;
                 case "New":
-                    stage.setScene(TransactionScene.createScene(stage, 800, 450,loggedUser));
+                    stage.setScene(TransactionScene.createScene(stage, currentWidth, currentHeight, loggedUser));
                     break;
                 case "Settings":
-                    stage.setScene(SystemSettings.createScene(stage, 800, 450,loggedUser));
+                    stage.setScene(SystemSettings.createScene(stage, currentWidth, currentHeight, loggedUser));
                     break;
                 case "Log out":
                     Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure you want to log out?");
@@ -152,7 +155,7 @@ public class LeftSidebarFactory {
                     confirm.setTitle("Confirm Logout");
                     confirm.showAndWait().ifPresent(response -> {
                         if (response == ButtonType.OK) {
-                            stage.setScene(LoginScene.createScene(stage, 800, 450));
+                            stage.setScene(LoginScene.createScene(stage, currentWidth, currentHeight));
                             stage.setTitle("Finanger - Login");
                         }
                     });
