@@ -144,6 +144,13 @@ public class Goals {
                 stage.setScene(newScene);
             }
         });
+
+        // 添加高度变化监听器
+        scene.heightProperty().addListener((obs, oldVal, newVal) -> {
+            // 重新创建场景以更新布局
+            Scene newScene = createScene(stage, scene.getWidth(), newVal.doubleValue(), loggedUser);
+            stage.setScene(newScene);
+        });
         
         return scene;
     }
@@ -430,8 +437,12 @@ public class Goals {
 
         // 添加点击事件处理
         card.setOnMouseClicked(event -> {
-            // Navigate to create goal page with consistent dimensions
-            stage.setScene(CreateGoalScene.createScene(stage, 800, 450, loggedUser));
+            // 获取当前窗口的实际大小
+            double currentWidth = stage.getScene().getWidth();
+            double currentHeight = stage.getScene().getHeight();
+            
+            // Navigate to create goal page with current window dimensions
+            stage.setScene(CreateGoalScene.createScene(stage, currentWidth, currentHeight, loggedUser));
         });
 
         return card;
