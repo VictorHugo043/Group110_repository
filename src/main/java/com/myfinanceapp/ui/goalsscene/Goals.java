@@ -38,9 +38,9 @@ public class Goals {
         // 创建网格布局
         GridPane centerGrid = new GridPane();
         centerGrid.setAlignment(Pos.CENTER);
-        centerGrid.setHgap(20); // 水平间距
-        centerGrid.setVgap(20); // 垂直间距
-        centerGrid.setPadding(new javafx.geometry.Insets(20, 20, 20, 20));
+        centerGrid.setHgap(20);
+        centerGrid.setVgap(20);
+        centerGrid.setPadding(new Insets(20, 20, 20, 20));
 
         // 获取用户的目标列表
         List<Goal> userGoals = GoalService.getUserGoals(loggedUser);
@@ -58,9 +58,9 @@ public class Goals {
         centerContent.setAlignment(Pos.TOP_CENTER);
         centerContent.getChildren().add(debugLabel);
 
-        // Define maxCols outside the if-else block
-        int maxCols = 2; // 每行最多显示2个卡片
-
+        // 动态计算每行显示的目标卡片数量
+        int maxCols = calculateMaxColumns(width);
+        
         // If no goals, show a message
         if (userGoals.isEmpty()) {
             Label noGoalsLabel = new Label("No goals found. Create your first goal!");
@@ -72,25 +72,23 @@ public class Goals {
             int col = 0;
             for (Goal goal : userGoals) {
                 try {
-                    // 确保目标的用户ID与当前登录用户匹配
                     if (loggedUser == null || goal.getUserId() == null || 
                         loggedUser.getUid().equals(goal.getUserId())) {
                         VBox goalCard = createGoalCard(goal, stage, loggedUser);
                         centerGrid.add(goalCard, col, row);
-                        // Debug info for each goal
-                        System.out.println("Added goal: " + goal.getTitle() + 
-                                          " (User ID: " + goal.getUserId() + 
-                                          ") at position [" + col + "," + row + "]");
-                        // 更新行列位置
+                        
+                        // 绑定卡片大小到窗口大小
+                        goalCard.prefWidthProperty().bind(
+                            centerGrid.widthProperty()
+                                .subtract(centerGrid.getHgap() * (maxCols - 1))
+                                .divide(maxCols)
+                        );
+                        
                         col++;
                         if (col >= maxCols) {
                             col = 0;
                             row++;
                         }
-                    } else {
-                        System.out.println("Skipping goal: " + goal.getTitle() + 
-                                          " (belongs to user ID: " + goal.getUserId() + 
-                                          ", not current user: " + loggedUser.getUid() + ")");
                     }
                 } catch (Exception e) {
                     System.err.println("Error displaying goal: " + goal.getTitle());
@@ -103,10 +101,16 @@ public class Goals {
         int newGoalCol = userGoals.size() % maxCols;
         int newGoalRow = userGoals.size() / maxCols;
 
-        // 添加"创建新目标"卡片（始终放在最后一个位置）
+        // 添加"创建新目标"卡片
         VBox createNewGoalCard = createCreateNewGoalCard(stage, loggedUser);
         centerGrid.add(createNewGoalCard, newGoalCol, newGoalRow);
-        System.out.println("Added 'Create New Goal' card at position [" + newGoalCol + "," + newGoalRow + "]");
+        
+        // 绑定创建新目标卡片的大小
+        createNewGoalCard.prefWidthProperty().bind(
+            centerGrid.widthProperty()
+                .subtract(centerGrid.getHgap() * (maxCols - 1))
+                .divide(maxCols)
+        );
 
         // Add the grid to the center content
         centerContent.getChildren().add(centerGrid);
@@ -120,15 +124,37 @@ public class Goals {
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
         scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
         scrollPane.setStyle("-fx-background-color: transparent;");
-
-        // Fix the background color issue by making everything transparent
-        // scrollPane.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
-        // Also set the viewport's background to white to match the rest of the app
-        // scrollPane.lookup(".viewport").setStyle("-fx-background-color: white;");
         
-        // Set the scrollPane as the center of the BorderPane instead of centerContent
+        // 绑定滚动面板大小到窗口大小
+        scrollPane.prefWidthProperty().bind(root.widthProperty().subtract(sideBar.widthProperty()));
+        scrollPane.prefHeightProperty().bind(root.heightProperty());
+        
+        // Set the scrollPane as the center of the BorderPane
         root.setCenter(scrollPane);
-        return new Scene(root, width, height);
+        
+        // 创建场景
+        Scene scene = new Scene(root, width, height);
+        
+        // 添加窗口大小变化监听器
+        scene.widthProperty().addListener((obs, oldVal, newVal) -> {
+            int newMaxCols = calculateMaxColumns(newVal.doubleValue());
+            if (newMaxCols != maxCols) {
+                // 重新创建场景以更新布局
+                Scene newScene = createScene(stage, newVal.doubleValue(), scene.getHeight(), loggedUser);
+                stage.setScene(newScene);
+            }
+        });
+        
+        return scene;
+    }
+    
+    private static int calculateMaxColumns(double windowWidth) {
+        // 根据窗口宽度计算每行显示的目标卡片数量
+        // 假设每个卡片最小宽度为300px，间距为20px
+        int minCardWidth = 300;
+        int gap = 20;
+        int maxCols = (int) ((windowWidth - 100) / (minCardWidth + gap));
+        return Math.max(1, maxCols);
     }
 
     private static VBox createGoalCard(Goal goal, Stage stage, User loggedUser) {
