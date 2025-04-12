@@ -26,9 +26,6 @@ import javafx.scene.Group;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.math.BigDecimal;
-import java.text.DecimalFormat;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 
 public class Goals {
@@ -147,15 +144,6 @@ public class Goals {
         return Math.max(1, maxCols);
     }
 
-    private static String formatNumber(double number) {
-        // 使用BigDecimal来避免科学计数法
-        BigDecimal bd = new BigDecimal(number);
-        // 使用普通的数字格式，不使用科学计数法
-        DecimalFormat df = new DecimalFormat("#,##0.00");
-        df.setRoundingMode(RoundingMode.HALF_UP);
-        return df.format(bd);
-    }
-
     private static VBox createLabelPair(String title, String value) {
         VBox container = new VBox(2);  // 2 pixels spacing between labels
         container.setAlignment(Pos.CENTER_LEFT);
@@ -211,7 +199,6 @@ public class Goals {
        card.setOnMouseExited(event -> {
            deleteButton.setVisible(false);
         });
-
 
         // Position the delete button to the top-right
         StackPane.setAlignment(deleteButton, Pos.TOP_RIGHT);
@@ -269,131 +256,83 @@ public class Goals {
         StackPane indicatorContainer = new StackPane();
         try {
             TransactionDataService transactionService = new TransactionDataService(loggedUser.getUid());
+            double progress = 0;
+            boolean isCompleted = false;
+            String currency = goal.getCurrency();
+
             switch (goal.getType()) {
                 case "SAVING":
-                double currentNetBalance = transactionService.calculateNetBalance();
-                VBox targetAmountBox = createLabelPair("Target Amount", 
-                    formatNumber(goal.getTargetAmount()) + " " + goal.getCurrency());
-                VBox deadlineBox = createLabelPair("Deadline", 
-                    goal.getDeadline().format(formatter));
-                VBox currentSavingsBox = createLabelPair("Current Savings", 
-                    formatNumber(currentNetBalance) + " " + goal.getCurrency());
-                textInfo.getChildren().addAll(targetAmountBox, deadlineBox, currentSavingsBox);
-
-                // 计算进度百分比
-                double savingProgressPercentage = 0;
-                if (goal.getTargetAmount() > 0) {
-                    savingProgressPercentage = Math.min(100, (currentNetBalance / goal.getTargetAmount()) * 100);
-                }
-                
-                // 1. 创建背景圆弧（灰色部分，表示未完成）
-                Arc backgroundArc = new Arc(0, 0, 40, 40, 90, 360); // 参数：X坐标,Y坐标,半径X,半径Y,起始角度,圆弧角度
-                backgroundArc.setType(ArcType.OPEN); // 只画弧线不填充
-                backgroundArc.setStroke(Color.LIGHTGRAY); // 灰色边框
-                backgroundArc.setFill(Color.TRANSPARENT); // 透明填充
-                backgroundArc.setStrokeWidth(8); // 线条粗细
-
-                // 2. 创建进度圆弧（蓝色部分，表示已完成）
-                Arc progressArc = new Arc(0, 0, 40, 40, 90, -360 * savingProgressPercentage / 100); // 角度为负表示顺时针
-                progressArc.setType(ArcType.OPEN);
-                progressArc.setStroke(Color.BLUE); // 蓝色边框
-                progressArc.setFill(Color.TRANSPARENT);
-                progressArc.setStrokeWidth(8);
-
-                // 3. 将两个圆弧组合起来
-                Group arcGroup = new Group(backgroundArc, progressArc);
-
-                // 4. 添加百分比文字标签
-                Label progressLabel = new Label(String.format("%.1f%%", savingProgressPercentage));
-                progressLabel.setFont(Font.font("Arial", 18));
-                progressLabel.setTextFill(Color.BLUE);
-
-                // 5. 添加到容器
-                indicatorContainer.getChildren().addAll(arcGroup, progressLabel);
-                break;
+                    double currentNetBalance = transactionService.calculateNetBalance();
+                    VBox targetAmountBox = createLabelPair("Target Amount", 
+                        GoalService.formatNumber(goal.getTargetAmount()) + " " + currency);
+                    VBox deadlineBox = createLabelPair("Deadline", 
+                        goal.getDeadline().format(formatter));
+                    VBox currentSavingsBox = createLabelPair("Current Savings", 
+                        GoalService.formatNumber(currentNetBalance) + " " + currency);
+                    textInfo.getChildren().addAll(targetAmountBox, deadlineBox, currentSavingsBox);
+                    progress = GoalService.calculateSavingProgress(currentNetBalance, goal.getTargetAmount());
+                    break;
 
                 case "DEBT_REPAYMENT":
-                double totalDebtRepayment = transactionService.calculateTotalAmountByCategory("Loan Repayment");
-                VBox totalDebtBox = createLabelPair("Total Debt Amount", 
-                    formatNumber(goal.getTargetAmount()) + " " + goal.getCurrency());
-                VBox repaymentDeadlineBox = createLabelPair("Repayment Deadline", 
-                    goal.getDeadline().format(formatter));
-                VBox amountPaidBox = createLabelPair("Amount Paid", 
-                    formatNumber(totalDebtRepayment) + " " + goal.getCurrency());
-                textInfo.getChildren().addAll(totalDebtBox, repaymentDeadlineBox, amountPaidBox);
-
-                // 计算进度百分比
-                double debtProgressPercentage = 0;
-                if (goal.getTargetAmount() > 0) {
-                    debtProgressPercentage = Math.min(100, (totalDebtRepayment / goal.getTargetAmount()) * 100);
-                }
-
-                // 背景圆弧（灰色）
-                Arc debtBackgroundArc = new Arc(0, 0, 40, 40, 90, 360);
-                debtBackgroundArc.setType(ArcType.OPEN);
-                debtBackgroundArc.setStroke(Color.LIGHTGRAY);
-                debtBackgroundArc.setFill(Color.TRANSPARENT);
-                debtBackgroundArc.setStrokeWidth(8);
-
-                // 进度圆弧（根据完成状态选择颜色）
-                Arc debtProgressArc = new Arc(0, 0, 40, 40, 90, -360 * debtProgressPercentage / 100);
-                debtProgressArc.setType(ArcType.OPEN);
-                debtProgressArc.setStroke(goal.isCompleted() ? Color.GREEN : Color.BLUE);
-                debtProgressArc.setFill(Color.TRANSPARENT);
-                debtProgressArc.setStrokeWidth(8);
-
-                // 组合圆弧
-                Group debtArcGroup = new Group(debtBackgroundArc, debtProgressArc);
-
-                // 文字标签
-                Label debtProgressLabel = new Label(goal.isCompleted() ? "✓" : String.format("%.0f%%", debtProgressPercentage));
-                debtProgressLabel.setFont(Font.font("Arial", goal.isCompleted() ? 24 : 18));
-                debtProgressLabel.setTextFill(goal.isCompleted() ? Color.GREEN : Color.BLUE);
-                indicatorContainer.getChildren().addAll(debtArcGroup, debtProgressLabel);
-                break;
+                    double totalDebtRepayment = transactionService.calculateTotalAmountByCategory("Loan Repayment");
+                    VBox totalDebtBox = createLabelPair("Total Debt Amount", 
+                        GoalService.formatNumber(goal.getTargetAmount()) + " " + currency);
+                    VBox repaymentDeadlineBox = createLabelPair("Repayment Deadline", 
+                        goal.getDeadline().format(formatter));
+                    VBox amountPaidBox = createLabelPair("Amount Paid", 
+                        GoalService.formatNumber(totalDebtRepayment) + " " + currency);
+                    textInfo.getChildren().addAll(totalDebtBox, repaymentDeadlineBox, amountPaidBox);
+                    progress = GoalService.calculateDebtProgress(totalDebtRepayment, goal.getTargetAmount());
+                    isCompleted = progress >= 100;
+                    break;
 
                 case "BUDGET_CONTROL":
-                double currentExpense = transactionService.calculateTotalExpense();
-                VBox budgetCategoryBox = createLabelPair("Budget Category", 
-                    goal.getCategory() != null ? goal.getCategory() : "General");
-                VBox budgetAmountBox = createLabelPair("Budget Amount", 
-                    formatNumber(goal.getTargetAmount()) + " " + goal.getCurrency());
-                VBox currentExpensesBox = createLabelPair("Current Expenses", 
-                    formatNumber(currentExpense) + " " + goal.getCurrency());
-                textInfo.getChildren().addAll(budgetCategoryBox, budgetAmountBox, currentExpensesBox);
+                    double currentExpense = transactionService.calculateTotalExpense();
+                    VBox budgetCategoryBox = createLabelPair("Budget Category", 
+                        goal.getCategory() != null ? goal.getCategory() : "General");
+                    VBox budgetAmountBox = createLabelPair("Budget Amount", 
+                        GoalService.formatNumber(goal.getTargetAmount()) + " " + currency);
+                    VBox currentExpensesBox = createLabelPair("Current Expenses", 
+                        GoalService.formatNumber(currentExpense) + " " + currency);
+                    textInfo.getChildren().addAll(budgetCategoryBox, budgetAmountBox, currentExpensesBox);
+                    progress = GoalService.calculateBudgetUsage(currentExpense, goal.getTargetAmount());
+                    break;
+            }
 
-                double budgetUsagePercentage = (currentExpense / goal.getTargetAmount()) * 100;
-                boolean isOverBudget = currentExpense > goal.getTargetAmount();
+            // 创建进度指示器
+            Color progressColor = GoalService.getProgressColor(goal.getType(), progress, isCompleted);
+            String progressText = GoalService.getProgressText(goal.getType(), progress, isCompleted);
+            int fontSize = GoalService.getProgressFontSize(goal.getType(), isCompleted);
 
-                // 背景圆弧（灰色）
-                Arc budgetBackgroundArc = new Arc(0, 0, 40, 40, 90, 360);
-                budgetBackgroundArc.setType(ArcType.OPEN);
-                budgetBackgroundArc.setStroke(Color.LIGHTGRAY);
-                budgetBackgroundArc.setFill(Color.TRANSPARENT);
-                budgetBackgroundArc.setStrokeWidth(8);
+            // 1. 创建背景圆弧（灰色部分，表示未完成）
+            Arc backgroundArc = new Arc(0, 0, 40, 40, 90, 360);
+            backgroundArc.setType(ArcType.OPEN);
+            backgroundArc.setStroke(Color.LIGHTGRAY);
+            backgroundArc.setFill(Color.TRANSPARENT);
+            backgroundArc.setStrokeWidth(8);
 
-                // 进度圆弧（超预算显示红色，否则绿色）
-                Arc budgetProgressArc = new Arc(0, 0, 40, 40, 90, -360 * Math.min(100, budgetUsagePercentage) / 100);
-                budgetProgressArc.setType(ArcType.OPEN);
-                budgetProgressArc.setStroke(isOverBudget ? Color.RED : Color.GREEN);
-                budgetProgressArc.setFill(Color.TRANSPARENT);
-                budgetProgressArc.setStrokeWidth(8);
+            // 2. 创建进度圆弧
+            Arc progressArc = new Arc(0, 0, 40, 40, 90, -360 * Math.min(100, progress) / 100);
+            progressArc.setType(ArcType.OPEN);
+            progressArc.setStroke(progressColor);
+            progressArc.setFill(Color.TRANSPARENT);
+            progressArc.setStrokeWidth(8);
 
-                // 组合圆弧
-                Group budgetArcGroup = new Group(budgetBackgroundArc, budgetProgressArc);
+            // 3. 将两个圆弧组合起来
+            Group arcGroup = new Group(backgroundArc, progressArc);
 
-                // 文字标签
-                Label budgetProgressLabel = new Label(isOverBudget ? "✗" : "✓");
-                budgetProgressLabel.setFont(Font.font("Arial", 24));
-                budgetProgressLabel.setTextFill(isOverBudget ? Color.RED : Color.GREEN);
-                    
-                indicatorContainer.getChildren().addAll(budgetArcGroup, budgetProgressLabel);
-                break;
-                }
-            } catch (IOException e) {
-                Label errorLabel = new Label("Error loading transaction data");
-                textInfo.getChildren().add(errorLabel);
-                e.printStackTrace();
+            // 4. 添加进度文字标签
+            Label progressLabel = new Label(progressText);
+            progressLabel.setFont(Font.font("Arial", fontSize));
+            progressLabel.setTextFill(progressColor);
+
+            // 5. 添加到容器
+            indicatorContainer.getChildren().addAll(arcGroup, progressLabel);
+
+        } catch (IOException e) {
+            Label errorLabel = new Label("Error loading transaction data");
+            textInfo.getChildren().add(errorLabel);
+            e.printStackTrace();
         }
 
         // Create a container for the title and delete button
