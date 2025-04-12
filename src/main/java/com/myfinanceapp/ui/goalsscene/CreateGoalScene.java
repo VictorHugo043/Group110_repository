@@ -3,6 +3,7 @@ package com.myfinanceapp.ui.goalsscene;
 import com.myfinanceapp.model.Goal;
 import com.myfinanceapp.model.User;
 import com.myfinanceapp.service.GoalService;
+import com.myfinanceapp.service.GoalFormService;
 import com.myfinanceapp.ui.common.LeftSidebarFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,12 +23,9 @@ import javafx.event.EventHandler;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.UUID;
 
 public class CreateGoalScene {
-
     private static final Logger logger = LoggerFactory.getLogger(CreateGoalScene.class);
-    private static final String DEFAULT_GOAL_TITLE = "New Goal";
     private static final Font LABEL_FONT = Font.font("Arial", 14);
     private static final Color LABEL_COLOR = Color.DARKBLUE;
     private static final String[] GOAL_TYPES = {"Saving Goal", "Debt Repayment Goal", "Budget Control Goal"};
@@ -138,28 +136,17 @@ public class CreateGoalScene {
         buttonBox.prefWidthProperty().bind(grid.widthProperty());
 
         Button saveButton = createButton("Save Goal", SAVE_BUTTON_STYLE, event -> {
-            if (validateForm(loggedUser, titleField, amountField, typeCombo, categoryField, deadlinePicker)) {
+            if (GoalFormService.validateForm(loggedUser, titleField, amountField, typeCombo, categoryField, deadlinePicker)) {
                 try {
-                    String goalTitle = titleField.getText().isEmpty() ? DEFAULT_GOAL_TITLE : titleField.getText();
-                    String goalType = getGoalType(typeCombo.getValue());
-
-                    // Get category if it's a budget control goal
-                    String category = null;
-                    if ("BUDGET_CONTROL".equals(goalType) && categoryField.isVisible()) {
-                        category = categoryField.getText();
-                    }
-
-                    // Create new goal with userId
-                    Goal newGoal = new Goal();
-                    newGoal.setId(UUID.randomUUID().toString());
-                    newGoal.setUserId(loggedUser.getUid());
-                    newGoal.setType(goalType);
-                    newGoal.setTitle(goalTitle);
-                    newGoal.setTargetAmount(parseDouble(amountField.getText()));
-                    newGoal.setCurrentAmount(0.0); // Default current amount is 0
-                    newGoal.setDeadline(deadlinePicker.getValue());
-                    newGoal.setCategory(category);
-                    newGoal.setCurrency(currencyCombo.getValue());
+                    Goal newGoal = GoalFormService.createNewGoal(
+                        loggedUser,
+                        titleField.getText(),
+                        amountField.getText(),
+                        typeCombo.getValue(),
+                        categoryField.getText(),
+                        deadlinePicker.getValue(),
+                        currencyCombo.getValue()
+                    );
 
                     // Save the new goal to storage with user information
                     GoalService.addGoal(newGoal, loggedUser);
@@ -168,7 +155,6 @@ public class CreateGoalScene {
                     Scene goalsScene = Goals.createScene(stage, finalWidth, finalHeight, loggedUser);
                     stage.setScene(goalsScene);
                 } catch (IOException e) {
-                    showErrorAlert("Failed to save goal: " + e.getMessage());
                     logger.error("Failed to save goal", e);
                 }
             }
@@ -212,35 +198,6 @@ public class CreateGoalScene {
         return scene;
     }
 
-    private static boolean validateForm(User loggedUser, TextField titleField, TextField amountField, 
-                                      ComboBox<String> typeCombo, TextField categoryField, DatePicker deadlinePicker) {
-        // Check if user is logged in
-        if (loggedUser == null) {
-            showErrorAlert("User not logged in");
-            return false;
-        }
-        
-        // Validate amount
-        try {
-            double amount = parseDouble(amountField.getText());
-            if (amount <= 0) {
-                showErrorAlert("Amount must be greater than zero");
-                return false;
-            }
-        } catch (NumberFormatException e) {
-            showErrorAlert("Invalid amount format - please enter a valid number");
-            return false;
-        }
-        
-        // Validate deadline
-        if (deadlinePicker.getValue().isBefore(LocalDate.now())) {
-            showErrorAlert("Deadline must be in the future");
-            return false;
-        }
-        
-        return true;
-    }
-
     private static ComboBox<String> createComboBox(String[] items, int row, GridPane grid, String labelText, Font font, Color color) {
         ComboBox<String> comboBox = new ComboBox<>();
         comboBox.getItems().addAll(items);
@@ -275,33 +232,11 @@ public class CreateGoalScene {
         return button;
     }
 
-    private static String getGoalType(String selection) {
-        if (selection.startsWith("Saving")) {
-            return "SAVING";
-        } else if (selection.startsWith("Debt")) {
-            return "DEBT_REPAYMENT";
-        } else {
-            return "BUDGET_CONTROL";
-        }
-    }
-
     private static void addStyledRow(GridPane grid, int row, String labelText, Control control, Font font, Color color) {
         Label label = new Label(labelText);
         label.setFont(font);
         label.setTextFill(color);
         grid.add(label, 0, row);
         grid.add(control, 1, row);
-    }
-
-    private static void showErrorAlert(String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Input Error");
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
-    }
-
-    private static double parseDouble(String text) throws NumberFormatException {
-        return Double.parseDouble(text);
     }
 }
