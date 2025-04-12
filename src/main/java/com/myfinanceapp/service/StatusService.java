@@ -3,6 +3,8 @@ package com.myfinanceapp.service;
 import com.myfinanceapp.model.Transaction;
 import com.myfinanceapp.model.User;
 import com.myfinanceapp.ui.statusscene.StatusScene;
+import javafx.beans.value.ChangeListener;
+import javafx.scene.control.DateCell;
 import javafx.scene.control.Label;
 
 import java.time.LocalDate;
@@ -15,7 +17,8 @@ public class StatusService {
     private final User currentUser;
     private final TransactionService txService;
     private final List<Map<String, String>> chatMessages = new ArrayList<>();
-    private String currentPeriod = "This Month";
+    private LocalDate startDate;
+    private LocalDate endDate;
     private final StatusScene scene;
     private final ChartService chartService;
 
@@ -27,69 +30,77 @@ public class StatusService {
         initialize();
     }
 
-    void initialize() {
-        // 初始化数据
-        updateSummaryLabels("This Month");
-        chartService.updateAllCharts("This Month");
-        updateTransactions();
+    private void initialize() {
+        // 初始化日期为本月1日起到今天
+        LocalDate today = LocalDate.now();
+        startDate = today.withDayOfMonth(1);
+        endDate = today;
 
-        // 绑定事件
-        scene.dateCombo.setOnAction(e -> {
-            currentPeriod = scene.dateCombo.getValue();
-            updateSummaryLabels(currentPeriod);
-            chartService.updateAllCharts(currentPeriod);
+        // 设置 DatePicker 默认值
+        scene.startDatePicker.setValue(startDate);
+        scene.endDatePicker.setValue(endDate);
+
+        // 限制 DatePicker 不可选择未来日期
+        scene.startDatePicker.setDayCellFactory(picker -> new DateCell() {
+            @Override
+            public void updateItem(LocalDate date, boolean empty) {
+                super.updateItem(date, empty);
+                setDisable(empty || date.isAfter(today));
+            }
+        });
+        scene.endDatePicker.setDayCellFactory(picker -> new DateCell() {
+            @Override
+            public void updateItem(LocalDate date, boolean empty) {
+                super.updateItem(date, empty);
+                setDisable(empty || date.isAfter(today));
+            }
         });
 
+        // 初始化数据
+        updateSummaryLabels(startDate, endDate);
+        chartService.updateAllCharts(startDate, endDate);
+        updateTransactions(startDate, endDate);
+
+        // 绑定日期选择事件
+        ChangeListener<LocalDate> dateChangeListener = (obs, oldValue, newValue) -> {
+            if (scene.startDatePicker.getValue() != null && scene.endDatePicker.getValue() != null) {
+                startDate = scene.startDatePicker.getValue();
+                endDate = scene.endDatePicker.getValue();
+                if (!startDate.isAfter(endDate)) {
+                    updateSummaryLabels(startDate, endDate);
+                    chartService.updateAllCharts(startDate, endDate);
+                    updateTransactions(startDate, endDate);
+                } else {
+                    // 如果开始日期晚于结束日期，重置为旧值
+                    scene.startDatePicker.setValue(oldValue);
+                    startDate = oldValue;
+                }
+            }
+        };
+
+        scene.startDatePicker.valueProperty().addListener(dateChangeListener);
+        scene.endDatePicker.valueProperty().addListener(dateChangeListener);
+
+        // 图表类型切换
         scene.chartTypeCombo.setOnAction(e -> {
-            scene.chartPane.getChildren().clear(); // 直接使用 scene.chartPane
+            scene.chartPane.getChildren().clear();
             if ("Line graph".equals(scene.chartTypeCombo.getValue())) {
                 scene.chartPane.getChildren().add(scene.lineChart);
             } else {
                 scene.chartPane.getChildren().add(scene.barChart);
             }
-            chartService.updateAllCharts(currentPeriod);
+            chartService.updateAllCharts(startDate, endDate);
         });
 
         scene.sendBtn.setOnAction(e -> handleAIRequest());
     }
 
-    void updateSummaryLabels(String period) {
+    void updateSummaryLabels(LocalDate startDate, LocalDate endDate) {
         List<Transaction> transactions = txService.loadTransactions(currentUser);
-        LocalDate now = LocalDate.now();
-        LocalDate startDate;
-        LocalDate endDate;
-
-        switch (period) {
-            case "Last Month":
-                startDate = now.minusMonths(1).withDayOfMonth(1);
-                endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
-                break;
-            case "All Transactions":
-                if (transactions.isEmpty()) {
-                    startDate = now.withDayOfMonth(1);
-                    endDate = now.withDayOfMonth(now.lengthOfMonth());
-                } else {
-                    startDate = transactions.stream()
-                            .map(t -> LocalDate.parse(t.getTransactionDate()))
-                            .min(LocalDate::compareTo)
-                            .orElse(now.withDayOfMonth(1));
-                    endDate = transactions.stream()
-                            .map(t -> LocalDate.parse(t.getTransactionDate()))
-                            .max(LocalDate::compareTo)
-                            .orElse(now.withDayOfMonth(now.lengthOfMonth()));
-                }
-                break;
-            default: // "This Month"
-                startDate = now.withDayOfMonth(1);
-                endDate = now.withDayOfMonth(now.lengthOfMonth());
-        }
-
-        LocalDate finalStartDate = startDate;
-        LocalDate finalEndDate = endDate;
         transactions = transactions.stream()
                 .filter(t -> {
                     LocalDate txDate = LocalDate.parse(t.getTransactionDate());
-                    return !txDate.isBefore(finalStartDate) && !txDate.isAfter(finalEndDate);
+                    return !txDate.isBefore(startDate) && !txDate.isAfter(endDate);
                 })
                 .collect(Collectors.toList());
 
@@ -108,10 +119,14 @@ public class StatusService {
         scene.inLabel.setStyle("-fx-background-color: #E0F0FF; -fx-text-fill: #3282FA; -fx-border-radius: 30; -fx-background-radius: 30; -fx-padding: 10 20 10 20;");
     }
 
-    void updateTransactions() {
+    void updateTransactions(LocalDate startDate, LocalDate endDate) {
         List<Transaction> transactions = txService.loadTransactions(currentUser);
         scene.transactionsBox.getChildren().clear();
         transactions.stream()
+                .filter(t -> {
+                    LocalDate txDate = LocalDate.parse(t.getTransactionDate());
+                    return !txDate.isBefore(startDate) && !txDate.isAfter(endDate);
+                })
                 .sorted((t1, t2) -> t2.getTransactionDate().compareTo(t1.getTransactionDate()))
                 .forEach(t -> {
                     Label txLabel = new Label(String.format("%s   %s    %.2f CNY",

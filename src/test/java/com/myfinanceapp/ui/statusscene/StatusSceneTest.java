@@ -26,10 +26,10 @@ class StatusSceneTest {
 
     @Mock
     private Stage stageMock;
-    
+
     private User testUser;
     private StatusScene statusScene;
-    
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
@@ -44,19 +44,20 @@ class StatusSceneTest {
         Scene scene = statusScene.createScene();
         assertNotNull(scene);
     }
-    
+
     @Test
     void createScene_shouldSetCorrectDimensions() {
         Scene scene = statusScene.createScene();
         assertEquals(800, scene.getWidth());
         assertEquals(600, scene.getHeight());
     }
-    
+
     @Test
     void createScene_shouldInitializeUIComponents() {
         statusScene.createScene();
-        
-        assertNotNull(statusScene.dateCombo);
+
+        assertNotNull(statusScene.startDatePicker); // 替换 dateCombo
+        assertNotNull(statusScene.endDatePicker);   // 替换 dateCombo
         assertNotNull(statusScene.chartTypeCombo);
         assertNotNull(statusScene.exLabel);
         assertNotNull(statusScene.inLabel);
@@ -69,24 +70,20 @@ class StatusSceneTest {
         assertNotNull(statusScene.transactionsBox);
         assertNotNull(statusScene.chartPane);
     }
-    
+
     @Test
     void createScene_shouldSetDefaultValuesForComboBoxes() {
         statusScene.createScene();
-        
-        assertEquals("This Month", statusScene.dateCombo.getValue());
+
         assertEquals("Line graph", statusScene.chartTypeCombo.getValue());
-        assertTrue(statusScene.dateCombo.getItems().contains("This Month"));
-        assertTrue(statusScene.dateCombo.getItems().contains("Last Month"));
-        assertTrue(statusScene.dateCombo.getItems().contains("All Transactions"));
         assertTrue(statusScene.chartTypeCombo.getItems().contains("Line graph"));
         assertTrue(statusScene.chartTypeCombo.getItems().contains("Bar graph"));
     }
-    
+
     @Test
     void createScene_shouldInitializeChartPane() {
         statusScene.createScene();
-        
+
         assertNotNull(statusScene.chartPane);
         assertEquals(1, statusScene.chartPane.getChildren().size());
         assertTrue(statusScene.chartPane.getChildren().get(0) instanceof LineChart);

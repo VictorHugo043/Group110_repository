@@ -48,11 +48,14 @@ class ChartServiceTest {
     }
 
     @Test
-    void updateAllCharts_updatesAllChartsWithCorrectPeriod() {
+    void updateAllCharts_updatesAllChartsWithCorrectDateRange() {
         List<Transaction> transactions = createSampleTransactions();
         when(mockTxService.loadTransactions(mockUser)).thenReturn(transactions);
 
-        chartService.updateAllCharts("This Month");
+        LocalDate startDate = LocalDate.of(2025, 4, 1);
+        LocalDate endDate = LocalDate.of(2025, 4, 12);
+
+        chartService.updateAllCharts(startDate, endDate);
 
         assertEquals(2, lineChart.getData().size()); // Income and Expense series
         assertEquals(2, barChart.getData().size());  // Income and Expense series
@@ -63,7 +66,10 @@ class ChartServiceTest {
     void updateAllCharts_handlesEmptyTransactions() {
         when(mockTxService.loadTransactions(mockUser)).thenReturn(new ArrayList<>());
 
-        chartService.updateAllCharts("This Month");
+        LocalDate startDate = LocalDate.of(2025, 4, 1);
+        LocalDate endDate = LocalDate.of(2025, 4, 12);
+
+        chartService.updateAllCharts(startDate, endDate);
 
         assertEquals(2, lineChart.getData().size()); // Still creates empty series
         assertEquals(2, barChart.getData().size());
@@ -71,11 +77,14 @@ class ChartServiceTest {
     }
 
     @Test
-    void updateAllCharts_filtersLastMonthCorrectly() {
+    void updateAllCharts_filtersDateRangeCorrectly() {
         List<Transaction> transactions = createSampleTransactions();
         when(mockTxService.loadTransactions(mockUser)).thenReturn(transactions);
 
-        chartService.updateAllCharts("Last Month");
+        LocalDate startDate = LocalDate.of(2025, 3, 1);
+        LocalDate endDate = LocalDate.of(2025, 3, 31);
+
+        chartService.updateAllCharts(startDate, endDate);
 
         ObservableList<PieChart.Data> pieData = pieChart.getData();
         assertTrue(pieData.stream().anyMatch(d -> d.getName().contains("Rent")));
@@ -84,10 +93,9 @@ class ChartServiceTest {
 
     private List<Transaction> createSampleTransactions() {
         List<Transaction> transactions = new ArrayList<>();
-        LocalDate today = LocalDate.now();
 
         Transaction income = new Transaction();
-        income.setTransactionDate(today.toString());
+        income.setTransactionDate("2025-04-01");
         income.setTransactionType("Income");
         income.setCurrency("CNY");
         income.setAmount(1000.0);
@@ -95,7 +103,7 @@ class ChartServiceTest {
         income.setPaymentMethod("Bank Transfer");
 
         Transaction foodExpense = new Transaction();
-        foodExpense.setTransactionDate(today.minusDays(1).toString());
+        foodExpense.setTransactionDate("2025-04-11");
         foodExpense.setTransactionType("Expense");
         foodExpense.setCurrency("CNY");
         foodExpense.setAmount(50.0);
@@ -103,7 +111,7 @@ class ChartServiceTest {
         foodExpense.setPaymentMethod("Cash");
 
         Transaction rentExpense = new Transaction();
-        rentExpense.setTransactionDate(today.minusMonths(1).toString());
+        rentExpense.setTransactionDate("2025-03-01");
         rentExpense.setTransactionType("Expense");
         rentExpense.setCurrency("CNY");
         rentExpense.setAmount(500.0);

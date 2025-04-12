@@ -28,30 +28,28 @@ public class ChartService {
         this.currentUser = currentUser;
     }
 
-    public void updateAllCharts(String period) {
-        updateLineChart(period);
-        updateBarChart(period);
-        updatePieChart(period);
+    public void updateAllCharts(LocalDate startDate, LocalDate endDate) {
+        updateLineChart(startDate, endDate);
+        updateBarChart(startDate, endDate);
+        updatePieChart(startDate, endDate);
     }
 
-    private void updateLineChart(String period) {
-        List<Transaction> transactions = getFilteredTransactions(period);
-        LocalDate startDate = getStartDate(period, transactions);
-        LocalDate endDate = getEndDate(period, transactions);
+    private void updateLineChart(LocalDate startDate, LocalDate endDate) {
+        List<Transaction> transactions = getFilteredTransactions(startDate, endDate);
         long totalDays = endDate.toEpochDay() - startDate.toEpochDay() + 1;
-        List<String> allDates = generateDateList(startDate, endDate, period);
+        List<String> allDates = generateDateList(startDate, endDate);
 
         Map<String, Double> incomeByDate = transactions.stream()
                 .filter(t -> "Income".equals(t.getTransactionType()))
                 .collect(Collectors.groupingBy(
-                        t -> LocalDate.parse(t.getTransactionDate()).format(getFormatter(period)),
+                        t -> LocalDate.parse(t.getTransactionDate()).format(getFormatter(totalDays)),
                         Collectors.summingDouble(Transaction::getAmount)
                 ));
 
         Map<String, Double> expenseByDate = transactions.stream()
                 .filter(t -> "Expense".equals(t.getTransactionType()))
                 .collect(Collectors.groupingBy(
-                        t -> LocalDate.parse(t.getTransactionDate()).format(getFormatter(period)),
+                        t -> LocalDate.parse(t.getTransactionDate()).format(getFormatter(totalDays)),
                         Collectors.summingDouble(Transaction::getAmount)
                 ));
 
@@ -74,24 +72,22 @@ public class ChartService {
         adjustXAxis(xAxis, totalDays);
     }
 
-    private void updateBarChart(String period) {
-        List<Transaction> transactions = getFilteredTransactions(period);
-        LocalDate startDate = getStartDate(period, transactions);
-        LocalDate endDate = getEndDate(period, transactions);
+    private void updateBarChart(LocalDate startDate, LocalDate endDate) {
+        List<Transaction> transactions = getFilteredTransactions(startDate, endDate);
         long totalDays = endDate.toEpochDay() - startDate.toEpochDay() + 1;
-        List<String> allDates = generateDateList(startDate, endDate, period);
+        List<String> allDates = generateDateList(startDate, endDate);
 
         Map<String, Double> incomeByDate = transactions.stream()
                 .filter(t -> "Income".equals(t.getTransactionType()))
                 .collect(Collectors.groupingBy(
-                        t -> LocalDate.parse(t.getTransactionDate()).format(getFormatter(period)),
+                        t -> LocalDate.parse(t.getTransactionDate()).format(getFormatter(totalDays)),
                         Collectors.summingDouble(Transaction::getAmount)
                 ));
 
         Map<String, Double> expenseByDate = transactions.stream()
                 .filter(t -> "Expense".equals(t.getTransactionType()))
                 .collect(Collectors.groupingBy(
-                        t -> LocalDate.parse(t.getTransactionDate()).format(getFormatter(period)),
+                        t -> LocalDate.parse(t.getTransactionDate()).format(getFormatter(totalDays)),
                         Collectors.summingDouble(Transaction::getAmount)
                 ));
 
@@ -114,8 +110,8 @@ public class ChartService {
         adjustXAxis(xAxis, totalDays);
     }
 
-    private void updatePieChart(String period) {
-        List<Transaction> transactions = getFilteredTransactions(period);
+    private void updatePieChart(LocalDate startDate, LocalDate endDate) {
+        List<Transaction> transactions = getFilteredTransactions(startDate, endDate);
         Map<String, Double> categoryTotals = transactions.stream()
                 .filter(t -> "Expense".equals(t.getTransactionType()))
                 .collect(Collectors.groupingBy(Transaction::getCategory, Collectors.summingDouble(Transaction::getAmount)));
@@ -125,10 +121,8 @@ public class ChartService {
         pieChart.setData(pieChartData);
     }
 
-    private List<Transaction> getFilteredTransactions(String period) {
+    private List<Transaction> getFilteredTransactions(LocalDate startDate, LocalDate endDate) {
         List<Transaction> transactions = txService.loadTransactions(currentUser);
-        LocalDate startDate = getStartDate(period, transactions);
-        LocalDate endDate = getEndDate(period, transactions);
         return transactions.stream()
                 .filter(t -> {
                     LocalDate txDate = LocalDate.parse(t.getTransactionDate());
@@ -137,42 +131,11 @@ public class ChartService {
                 .collect(Collectors.toList());
     }
 
-    private LocalDate getStartDate(String period, List<Transaction> transactions) {
-        LocalDate now = LocalDate.now();
-        switch (period) {
-            case "Last Month":
-                return now.minusMonths(1).withDayOfMonth(1);
-            case "All Transactions":
-                return transactions.isEmpty() ? now.withDayOfMonth(1) :
-                        transactions.stream()
-                                .map(t -> LocalDate.parse(t.getTransactionDate()))
-                                .min(LocalDate::compareTo)
-                                .orElse(now.withDayOfMonth(1));
-            default: // "This Month"
-                return now.withDayOfMonth(1);
-        }
-    }
-
-    private LocalDate getEndDate(String period, List<Transaction> transactions) {
-        LocalDate now = LocalDate.now();
-        switch (period) {
-            case "Last Month":
-                return now.minusMonths(1).withDayOfMonth(now.minusMonths(1).lengthOfMonth());
-            case "All Transactions":
-                return transactions.isEmpty() ? now.withDayOfMonth(now.lengthOfMonth()) :
-                        transactions.stream()
-                                .map(t -> LocalDate.parse(t.getTransactionDate()))
-                                .max(LocalDate::compareTo)
-                                .orElse(now.withDayOfMonth(now.lengthOfMonth()));
-            default: // "This Month"
-                return now.withDayOfMonth(now.lengthOfMonth());
-        }
-    }
-
-    private List<String> generateDateList(LocalDate startDate, LocalDate endDate, String period) {
+    private List<String> generateDateList(LocalDate startDate, LocalDate endDate) {
         List<String> allDates = new ArrayList<>();
         LocalDate currentDate = startDate;
-        DateTimeFormatter formatter = getFormatter(period);
+        long totalDays = endDate.toEpochDay() - startDate.toEpochDay() + 1;
+        DateTimeFormatter formatter = getFormatter(totalDays);
         while (!currentDate.isAfter(endDate)) {
             allDates.add(currentDate.format(formatter));
             currentDate = currentDate.plusDays(1);
@@ -180,8 +143,8 @@ public class ChartService {
         return allDates;
     }
 
-    private DateTimeFormatter getFormatter(String period) {
-        return period.equals("All Transactions") ?
+    private DateTimeFormatter getFormatter(long totalDays) {
+        return totalDays > 365 ?
                 DateTimeFormatter.ofPattern("yyyy-MM-dd") :
                 DateTimeFormatter.ofPattern("MM-dd");
     }
