@@ -2,6 +2,7 @@ package com.myfinanceapp.ui.settingscene;
 
 import com.myfinanceapp.model.User;
 import com.myfinanceapp.service.ExportReportService;
+import com.myfinanceapp.service.StatusService;
 import com.myfinanceapp.service.TransactionService;
 import com.myfinanceapp.ui.common.LeftSidebarFactory;
 import com.myfinanceapp.ui.common.SettingsTopBarFactory;
@@ -105,8 +106,9 @@ public class ExportReport {
         Button backBtn = new Button("Back to Status");
         backBtn.setStyle("-fx-background-color: #3377ff; -fx-text-fill: white; -fx-font-weight: bold;");
         backBtn.setOnAction(e -> {
-            StatusScene statusScene = new StatusScene(stage, finalWidth, finalHeight, loggedUser);
+            StatusScene statusScene = new StatusScene(stage, width, height, loggedUser);
             stage.setScene(statusScene.createScene());
+            StatusService statusService = new StatusService(statusScene, loggedUser);
             stage.setTitle("Finanger - Status");
         });
 
