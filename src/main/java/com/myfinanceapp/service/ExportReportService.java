@@ -43,6 +43,7 @@ public class ExportReportService {
     private final TransactionService txService;
     private final User currentUser;
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static final DateTimeFormatter FILE_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     public ExportReportService(TransactionService txService, User currentUser) {
@@ -76,6 +77,12 @@ public class ExportReportService {
                     FileChooser fileChooser = new FileChooser();
                     fileChooser.setTitle("Save Financial Report");
                     fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF Files", "*.pdf"));
+                    // Set default filename: FinancialReport_Username_StartDate_EndDate.pdf
+                    String username = currentUser.getUsername();
+                    String startDateStr = startDate.format(FILE_DATE_FORMATTER);
+                    String endDateStr = endDate.format(FILE_DATE_FORMATTER);
+                    String defaultFileName = String.format("FinancialReport_%s_%s_%s.pdf", username, startDateStr, endDateStr);
+                    fileChooser.setInitialFileName(defaultFileName);
                     fileHolder[0] = fileChooser.showSaveDialog(stage);
                     synchronized (fileHolder) {
                         fileHolder.notify();
@@ -118,6 +125,11 @@ public class ExportReportService {
                 .setFontSize(20)
                 .setBold()
                 .setTextAlignment(TextAlignment.CENTER));
+        // Add username
+        document.add(new Paragraph("User: " + currentUser.getUsername())
+                .setFontSize(12)
+                .setTextAlignment(TextAlignment.CENTER));
+        // Date range
         document.add(new Paragraph(String.format("Date Range: %s to %s", startDate.format(DATE_FORMATTER), endDate.format(DATE_FORMATTER)))
                 .setFontSize(12)
                 .setTextAlignment(TextAlignment.CENTER));
@@ -214,29 +226,6 @@ public class ExportReportService {
         // Create a temporary scene to force rendering
         Pane tempPane = new Pane(chart);
         Scene tempScene = new Scene(tempPane, 600, 400);
-        // Removed: tempScene.getStylesheets().add("modena.css");
-
-        // Explicitly set colors to ensure they are rendered
-        if (chart instanceof LineChart) {
-            LineChart<String, Number> lc = (LineChart<String, Number>) chart;
-            for (XYChart.Series<String, Number> series : lc.getData()) {
-                if (series.getName().equals("Income")) {
-                    series.getNode().setStyle("-fx-stroke: blue;");
-                } else if (series.getName().equals("Expense")) {
-                    series.getNode().setStyle("-fx-stroke: red;");
-                }
-            }
-        } else if (chart instanceof PieChart) {
-            PieChart pc = (PieChart) chart;
-            int i = 0;
-            String[] colors = {"#FF6347", "#4682B4", "#32CD32", "#FFD700"};
-            for (PieChart.Data data : pc.getData()) {
-                String color = colors[i % colors.length];
-                String style = "-fx-pie-color: " + color + ";";
-                data.getNode().setStyle(style);
-                i++;
-            }
-        }
 
         // Take snapshot on JavaFX thread
         CompletableFuture<ByteArrayOutputStream> future = new CompletableFuture<>();
