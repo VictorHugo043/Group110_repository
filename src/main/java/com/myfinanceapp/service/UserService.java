@@ -36,7 +36,12 @@ public class UserService {
         // 生成唯一 UID
         String uid = UUID.randomUUID().toString();
 
-        users.add(new User(uid, username, password, secQuestion, secAnswer));
+        // 创建新用户时生成盐值
+        byte[] saltBytes = new byte[16];
+        new java.security.SecureRandom().nextBytes(saltBytes);
+        String salt = java.util.Base64.getEncoder().encodeToString(saltBytes);
+
+        users.add(new User(uid, username, password, secQuestion, secAnswer, salt));
         saveUsers(users);
         return true;
     }
@@ -130,7 +135,16 @@ public class UserService {
 
         try (Reader reader = new InputStreamReader(new FileInputStream(jsonFile), StandardCharsets.UTF_8)) {
             List<User> users = gson.fromJson(reader, USER_LIST_TYPE);
-            return (users != null) ? users : new ArrayList<>();
+            if (users != null) {
+                // 确保每个用户都有盐值
+                for (User user : users) {
+                    if (user.getSalt() == null) {
+                        user.setSalt(user.generateSalt());
+                    }
+                }
+                return users;
+            }
+            return new ArrayList<>();
         } catch (IOException e) {
             e.printStackTrace();
             return new ArrayList<>();

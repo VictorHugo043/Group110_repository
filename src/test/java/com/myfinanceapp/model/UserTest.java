@@ -16,7 +16,7 @@ class UserTest {
     
     @BeforeEach
     void setUp() {
-        user = new User(testUid, testUsername, testPassword, testSecurityQuestion, testSecurityAnswer);
+        user = new User(testUid, testUsername, testPassword, testSecurityQuestion, testSecurityAnswer, null);
     }
 
     @Test
@@ -91,7 +91,7 @@ class UserTest {
     
     @Test
     void testFullConstructor() {
-        User fullUser = new User(testUid, testUsername, testPassword, testSecurityQuestion, testSecurityAnswer);
+        User fullUser = new User(testUid, testUsername, testPassword, testSecurityQuestion, testSecurityAnswer, null);
         assertEquals(testUid, fullUser.getUid());
         assertEquals(testUsername, fullUser.getUsername());
         assertEquals(testPassword, fullUser.getPassword());
