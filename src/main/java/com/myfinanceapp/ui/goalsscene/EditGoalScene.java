@@ -83,7 +83,19 @@ public class EditGoalScene {
         Label typeLabel = new Label(getGoalTypeDisplay(goalToEdit.getType()));
         typeLabel.setFont(LABEL_FONT);
         typeLabel.setTextFill(LABEL_COLOR);
-        addStyledRow(grid, 0, "Type of your goal:", typeLabel, LABEL_FONT, LABEL_COLOR);
+        
+        Tooltip tooltip = new Tooltip("Goal type cannot be modified");
+        tooltip.setStyle("-fx-font-size: 12px;");
+        tooltip.setShowDelay(javafx.util.Duration.millis(100));
+        tooltip.setHideDelay(javafx.util.Duration.millis(200));
+        typeLabel.setTooltip(tooltip);
+        
+        Label typeTitleLabel = new Label("Type of your goal:");
+        typeTitleLabel.setFont(LABEL_FONT);
+        typeTitleLabel.setTextFill(LABEL_COLOR);
+        
+        grid.add(typeTitleLabel, 0, 0);
+        grid.add(typeLabel, 1, 0);
 
         // Goal title field
         TextField titleField = createTextField("Goal Title", 1, grid, "Goal title:", LABEL_FONT, LABEL_COLOR);
