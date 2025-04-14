@@ -81,7 +81,7 @@ public class ResetPassword {
 
         // 点击后回到登录界面
         backBtn.setOnAction(e->{
-            stage.setScene(LoginScene.createScene(stage, 800, 450));
+            stage.setScene(LoginScene.createScene(stage, root.getScene().getWidth(), root.getScene().getHeight()));
             stage.setTitle("Finanger - Login");
         });
         // 先把它放到root
@@ -272,7 +272,7 @@ public class ResetPassword {
         if (updated) {
             showAlert("Success", "Password reset successfully!");
             // 回到登录界面
-            stage.setScene(LoginScene.createScene(stage, INITIAL_WIDTH, INITIAL_HEIGHT));
+            stage.setScene(LoginScene.createScene(stage, root.getScene().getWidth(), root.getScene().getHeight()));
         } else {
             showAlert("Error", "Failed to reset password!");
         }

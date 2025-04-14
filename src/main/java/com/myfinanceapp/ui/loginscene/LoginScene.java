@@ -149,7 +149,7 @@ public class LoginScene {
         forgotLink.setTextFill(Color.DARKBLUE);
         forgotLink.setOnAction(e -> {
             // 跳转到 ResetPassword 界面
-            Scene resetScene = ResetPassword.createScene(stage, 800, 450);
+            Scene resetScene = ResetPassword.createScene(stage, root.getScene().getWidth(), root.getScene().getHeight());
             stage.setScene(resetScene);
             stage.setTitle("Finanger - Reset Password");
         });
@@ -172,7 +172,7 @@ public class LoginScene {
             User loggedUser = userService.loginGetUser(uname, pass);
             if (loggedUser != null) {
                 // Login successful, jump to Status scene
-                StatusScene statusScene = new StatusScene(stage, INITIAL_WIDTH, INITIAL_HEIGHT, loggedUser);
+                StatusScene statusScene = new StatusScene(stage, root.getScene().getWidth(), root.getScene().getHeight(), loggedUser);
                 stage.setScene(statusScene.createScene());
                 StatusService statusService = new StatusService(statusScene, loggedUser); // 初始化服务
                 stage.setTitle("Finanger - Status");
@@ -188,7 +188,7 @@ public class LoginScene {
         Hyperlink signUpLink = new Hyperlink("Sign Up");
         signUpLink.setTextFill(Color.DARKBLUE);
         signUpLink.setOnAction(e -> {
-            Scene signUpScene = SignUp.createScene(stage, INITIAL_WIDTH, INITIAL_HEIGHT);
+            Scene signUpScene = SignUp.createScene(stage, root.getScene().getWidth(), root.getScene().getHeight());
             stage.setScene(signUpScene);
             stage.setTitle("Finanger - Sign Up");
         });
