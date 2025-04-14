@@ -4,7 +4,7 @@ import com.myfinanceapp.model.User;
 import com.myfinanceapp.ui.settingscene.About;
 import com.myfinanceapp.ui.settingscene.SystemSettings;
 import com.myfinanceapp.ui.settingscene.UserOptions;
-import com.myfinanceapp.ui.settingscene.ExportReport; // Add this import
+import com.myfinanceapp.ui.settingscene.ExportReport;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -15,10 +15,41 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
+import javafx.beans.value.ChangeListener;
 
 public class SettingsTopBarFactory {
+    private static final double MIN_WINDOW_WIDTH = 800;
+    private static final double MIN_WINDOW_HEIGHT = 450;
+    
+    // 存储窗口大小监听器的静态引用，以便能够移除它们
+    private static ChangeListener<Number> widthListener;
+    private static ChangeListener<Number> heightListener;
 
     public static HBox createTopBar(Stage stage, String activeTab, User loggedUser) {
+        // 确保窗口有最小尺寸限制
+        stage.setMinWidth(MIN_WINDOW_WIDTH);
+        stage.setMinHeight(MIN_WINDOW_HEIGHT);
+
+        // 如果还没有设置监听器，添加监听器
+        if (widthListener == null) {
+            widthListener = (obs, oldVal, newVal) -> {
+                if (newVal.doubleValue() < MIN_WINDOW_WIDTH) {
+                    stage.setWidth(MIN_WINDOW_WIDTH);
+                }
+            };
+            stage.widthProperty().addListener(widthListener);
+        }
+
+        if (heightListener == null) {
+            heightListener = (obs, oldVal, newVal) -> {
+                if (newVal.doubleValue() < MIN_WINDOW_HEIGHT) {
+                    stage.setHeight(MIN_WINDOW_HEIGHT);
+                }
+            };
+            stage.heightProperty().addListener(heightListener);
+        }
+
+        // 创建顶部栏
         HBox topBar = new HBox(10);
         topBar.setPadding(new Insets(0, 0, 0, 0));
         topBar.setAlignment(Pos.BOTTOM_LEFT);
@@ -28,28 +59,50 @@ public class SettingsTopBarFactory {
         VBox exportReportTab = createOneTab("Export Report", activeTab.equals("Export Report"));
         VBox aboutTab = createOneTab("About", activeTab.equals("About"));
 
-        Scene currentScene = stage.getScene();
-        double width = currentScene.getWidth();
-        double height = currentScene.getHeight();
+        // 获取当前窗口尺寸
+        double currentWidth = Math.max(stage.getWidth(), MIN_WINDOW_WIDTH);
+        double currentHeight = Math.max(stage.getHeight(), MIN_WINDOW_HEIGHT);
 
+        // 设置点击事件
         aboutTab.setOnMouseClicked(e -> {
-            stage.setScene(About.createScene(stage, width, height, loggedUser));
+            Scene newScene = About.createScene(stage, currentWidth, currentHeight, loggedUser);
+            switchScene(stage, newScene);
         });
 
         systemSettingsTab.setOnMouseClicked(e -> {
-            stage.setScene(SystemSettings.createScene(stage, width, height, loggedUser));
+            Scene newScene = SystemSettings.createScene(stage, currentWidth, currentHeight, loggedUser);
+            switchScene(stage, newScene);
         });
 
         userOptionsTab.setOnMouseClicked(e -> {
-            stage.setScene(UserOptions.createScene(stage, width, height, loggedUser));
+            Scene newScene = UserOptions.createScene(stage, currentWidth, currentHeight, loggedUser);
+            switchScene(stage, newScene);
         });
 
         exportReportTab.setOnMouseClicked(e -> {
-            stage.setScene(ExportReport.createScene(stage, width, height, loggedUser));
+            Scene newScene = ExportReport.createScene(stage, currentWidth, currentHeight, loggedUser);
+            switchScene(stage, newScene);
         });
 
         topBar.getChildren().addAll(systemSettingsTab, userOptionsTab, exportReportTab, aboutTab);
         return topBar;
+    }
+
+    private static void switchScene(Stage stage, Scene newScene) {
+        // 保存当前尺寸
+        double width = stage.getWidth();
+        double height = stage.getHeight();
+        
+        // 先设置窗口尺寸
+        stage.setWidth(width);
+        stage.setHeight(height);
+        
+        // 然后设置新场景
+        stage.setScene(newScene);
+        
+        // 再次确保窗口尺寸
+        stage.setWidth(width);
+        stage.setHeight(height);
     }
 
     private static VBox createOneTab(String text, boolean isActive) {

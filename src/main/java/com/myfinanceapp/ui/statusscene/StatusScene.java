@@ -59,12 +59,16 @@ public class StatusScene {
         ScrollPane scrollPane = new ScrollPane();
         scrollPane.setFitToWidth(true);
         scrollPane.setFitToHeight(true);
+        // 设置主 ScrollPane 背景为白色，解决颜色不一致问题
+        scrollPane.setStyle("-fx-background-color: white; -fx-background: white;");
+        scrollPane.getStyleClass().add("white-bg-scroll-pane");
         root.setCenter(scrollPane);
 
         VBox mainContent = new VBox(20);
         mainContent.setPadding(new Insets(20));
         mainContent.setAlignment(Pos.TOP_CENTER);
         mainContent.setFillWidth(true);
+        mainContent.setStyle("-fx-background-color: white;");
         scrollPane.setContent(mainContent);
 
         Pane topPane = createTopPane();
@@ -95,7 +99,14 @@ public class StatusScene {
         bottomArea.getChildren().addAll(leftColumn, rightColumn);
         mainContent.getChildren().add(bottomArea);
 
-        return new Scene(root, width, height);
+        Scene scene = new Scene(root, width, height);
+
+        // 添加全局CSS样式，确保所有 ScrollPane 的视口背景是白色
+        scene.getStylesheets().add("data:text/css," + 
+                                 ".white-bg-scroll-pane .viewport {-fx-background-color: white;}" +
+                                 ".white-bg-scroll-pane {-fx-background: white; -fx-background-color: white;}");
+
+        return scene;
     }
 
     private Pane createTopPane() {
