@@ -12,12 +12,20 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
+import javafx.scene.web.WebView;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 
 public class StatusScene {
     private final User currentUser;
     private final Stage stage;
     private final double width;
     private final double height;
+    public List<Map<String, String>> chatHistory = new ArrayList<>();
+    private Button moreBtn;
 
     // UI 组件
     public DatePicker startDatePicker;
@@ -28,7 +36,7 @@ public class StatusScene {
     public LineChart<String, Number> lineChart;
     public BarChart<String, Number> barChart;
     public PieChart pieChart;
-    public TextArea suggestionsArea;
+    public WebView suggestionsWebView;
     public TextArea questionArea;
     public Button sendBtn;
     public VBox transactionsBox;
@@ -80,6 +88,8 @@ public class StatusScene {
 
         Pane aiPane = createAIPane();
         Pane suggestionPane = createSuggestionPane();
+        VBox.setVgrow(aiPane, Priority.NEVER); // AI问题框不自动增长
+        VBox.setVgrow(suggestionPane, Priority.ALWAYS); // 建议框可以占据所有剩余空间
         rightColumn.getChildren().addAll(aiPane, suggestionPane);
 
         bottomArea.getChildren().addAll(leftColumn, rightColumn);
@@ -251,7 +261,9 @@ public class StatusScene {
 
         questionArea = new TextArea();
         questionArea.setPromptText("Type your question...");
-        VBox.setVgrow(questionArea, Priority.ALWAYS);
+        questionArea.setPrefHeight(80); // 设置较小的高度
+        questionArea.setWrapText(true); // 设置文本自动换行
+        VBox.setVgrow(questionArea, Priority.NEVER); // 防止垂直伸展
         HBox.setHgrow(questionArea, Priority.ALWAYS);
 
         sendBtn = new Button("➤");
@@ -265,7 +277,8 @@ public class StatusScene {
 
     private Pane createSuggestionPane() {
         BorderPane sugPane = new BorderPane();
-        sugPane.setStyle("-fx-border-color: #3282FA; -fx-border-radius: 20; -fx-background-radius: 20; -fx-border-width: 2; -fx-background-color: white;");
+        sugPane.setStyle("-fx-border-color: #3282FA; -fx-border-radius: 20; "
+                + "-fx-background-radius: 20; -fx-border-width: 2; -fx-background-color: white;");
         sugPane.setPadding(new Insets(15));
 
         Label title = new Label("Suggestion");
@@ -273,18 +286,59 @@ public class StatusScene {
         title.setTextFill(Color.web("#3282FA"));
         title.setWrapText(true);
 
-        suggestionsArea = new TextArea();
-        suggestionsArea.setEditable(false);
-        suggestionsArea.setWrapText(true);
-        VBox.setVgrow(suggestionsArea, Priority.ALWAYS);
-        HBox.setHgrow(suggestionsArea, Priority.ALWAYS);
+        suggestionsWebView = new WebView();
+        suggestionsWebView.setPrefHeight(250);
+        VBox.setVgrow(suggestionsWebView, Priority.ALWAYS); // 允许垂直伸展
+        // 不可编辑, 只显示 HTML
+        suggestionsWebView.getEngine().setUserStyleSheetLocation(
+                getClass().getResource("/css/markdown.css").toExternalForm()
+        );
+        // 上面 /css/markdown.css 你可自定义样式
 
-        Button moreBtn = new Button("More>");
+        moreBtn = new Button("More>");
         moreBtn.setStyle("-fx-background-color: #E0F0FF; -fx-text-fill: #3282FA; -fx-background-radius: 10;");
+        moreBtn.setOnAction(e -> showChatHistory());
 
-        VBox vbox = new VBox(10, title, suggestionsArea, moreBtn);
+        VBox vbox = new VBox(10, title, suggestionsWebView, moreBtn);
         vbox.setAlignment(Pos.TOP_LEFT);
         sugPane.setCenter(vbox);
         return sugPane;
     }
+    private void showChatHistory() {
+        Stage historyStage = new Stage();
+        historyStage.setTitle("Chat History");
+
+        WebView historyView = new WebView();
+        historyView.setPrefSize(600, 400);
+        historyView.getEngine().setUserStyleSheetLocation(
+                getClass().getResource("/css/markdown.css").toExternalForm()
+        );
+
+        // 构建HTML聊天记录
+        StringBuilder htmlContent = new StringBuilder("<div class='chat-history'>");
+        for (Map<String, String> message : chatHistory) {
+            String role = message.get("role");
+            String content = message.get("content");
+
+            if ("user".equals(role)) {
+                htmlContent.append("<div class='user-message'>")
+                        .append("<strong>You:</strong> ")
+                        .append(content)
+                        .append("</div>");
+            } else if ("assistant".equals(role)) {
+                htmlContent.append("<div class='assistant-message'>")
+                        .append("<strong>Assistant:</strong> ")
+                        .append(content)
+                        .append("</div>");
+            }
+        }
+        htmlContent.append("</div>");
+
+        historyView.getEngine().loadContent(htmlContent.toString());
+
+        Scene scene = new Scene(new StackPane(historyView), 600, 400);
+        historyStage.setScene(scene);
+        historyStage.show();
+    }
+
 }

@@ -23,14 +23,24 @@ public class AiChatService {
      *   messages.add(Map.of("role","user","content","你好"));
      *   messages.add(Map.of("role","assistant","content","你好呀"));
      */
-    public static String chatCompletion(List<Map<String, String>> messages, String userInput) {
+    public static String chatCompletion(List<Map<String, String>> messages, String systemPrompt) {
         // 1) 先把用户这句话加入对话历史
-        messages.add(Map.of("role", "user", "content", userInput));
+        //messages.add(Map.of("role", "user", "content", userInput));
+        // 避免修改原始消息列表
+        List<Map<String, String>> tempMessages = new ArrayList<>(messages);
+
+        // 添加系统消息
+        if (systemPrompt != null && !systemPrompt.isEmpty()) {
+            Map<String, String> sysMsg = new HashMap<>();
+            sysMsg.put("role", "system");
+            sysMsg.put("content", systemPrompt);
+            tempMessages.add(sysMsg);
+        }
 
         // 2) 准备请求体
         Map<String, Object> payload = new HashMap<>();
         payload.put("model", MODEL);
-        payload.put("messages", messages);
+        payload.put("messages", tempMessages);
         payload.put("temperature", 0.7);
         payload.put("max_tokens", 1024);
         payload.put("response_format", Map.of("type","text"));
@@ -76,7 +86,7 @@ public class AiChatService {
                         String content = msgObj.get("content").getAsString();
 
                         // 把 AI 回答也加入 messages
-                        messages.add(Map.of("role","assistant","content", content));
+                        //messages.add(Map.of("role","assistant","content", content));
                         return content;
                     }
                 }

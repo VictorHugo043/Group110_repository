@@ -107,7 +107,7 @@ public class StatusServiceTest {
         statusScene.inLabel = new Label();
         statusScene.transactionsBox = new VBox();
         statusScene.questionArea = new TextArea();
-        statusScene.suggestionsArea = new TextArea();
+        statusScene.suggestionsWebView = new javafx.scene.web.WebView();
         statusScene.startDatePicker = new javafx.scene.control.DatePicker(); // 替换 dateCombo
         statusScene.endDatePicker = new javafx.scene.control.DatePicker();   // 替换 dateCombo
         statusScene.chartTypeCombo = new ComboBox<>();
@@ -187,7 +187,8 @@ public class StatusServiceTest {
         });
 
         FxToolkit.setupFixture(() -> {
-            assertFalse(statusScene.suggestionsArea.getText().isEmpty(), "Suggestions area should contain a response");
+            assertFalse(statusScene.suggestionsWebView.getEngine().getDocument().getDocumentElement().getTextContent().isEmpty(),
+                    "Suggestions area should contain a response");
             assertTrue(statusScene.questionArea.getText().isEmpty(), "Question area should be cleared");
             assertFalse(statusScene.questionArea.isDisable(), "Question area should be enabled");
             assertFalse(statusScene.sendBtn.isDisable(), "Send button should be enabled");
