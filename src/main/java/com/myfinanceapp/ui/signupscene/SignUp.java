@@ -181,7 +181,7 @@ public class SignUp {
             if (success) {
                 showAlert("Success", "User registered successfully!");
                 // Redirect to UserManual scene instead of LoginScene
-                stage.setScene(UserManual.createScene(stage, INITIAL_WIDTH, INITIAL_HEIGHT));
+                stage.setScene(UserManual.createScene(stage, root.getScene().getWidth(), root.getScene().getHeight()));
                 stage.setTitle("Finanger - User Manual");
             } else {
                 showAlert("Error", "Username already exists!");
@@ -192,7 +192,7 @@ public class SignUp {
         termsLink.setFont(Font.font("Arial", 11));
         termsLink.setTextFill(Color.DARKBLUE);
         termsLink.setOnAction(e -> {
-            Scene termsScene = TermofUse.createScene(stage, INITIAL_WIDTH, INITIAL_HEIGHT);
+            Scene termsScene = TermofUse.createScene(stage, root.getScene().getWidth(), root.getScene().getHeight());
             stage.setScene(termsScene);
             stage.setTitle("Terms of Use");
         });
@@ -201,7 +201,7 @@ public class SignUp {
         privacyLink.setFont(Font.font("Arial", 11));
         privacyLink.setTextFill(Color.DARKBLUE);
         privacyLink.setOnAction(e -> {
-            Scene policyScene = PrivacyPolicy.createScene(stage, INITIAL_WIDTH, INITIAL_HEIGHT);
+            Scene policyScene = PrivacyPolicy.createScene(stage, root.getScene().getWidth(), root.getScene().getHeight());
             stage.setScene(policyScene);
             stage.setTitle("Privacy Policy");
         });
@@ -216,7 +216,7 @@ public class SignUp {
         Hyperlink alreadyLink = new Hyperlink("Already have an account?");
         alreadyLink.setTextFill(Color.DARKBLUE);
         alreadyLink.setOnAction(e -> {
-            Scene loginScene = LoginScene.createScene(stage, INITIAL_WIDTH, INITIAL_HEIGHT);
+            Scene loginScene = LoginScene.createScene(stage, root.getScene().getWidth(), root.getScene().getHeight());
             stage.setScene(loginScene);
             stage.setTitle("Finanger - Login");
         });

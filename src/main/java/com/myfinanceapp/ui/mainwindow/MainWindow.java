@@ -30,7 +30,7 @@ public class MainWindow extends Application {
     private Label sloganLabel;
     private Button arrowButton;
 
-    // =========== 各节点的原始“比率”数据 ===========
+    // =========== 各节点的原始"比率"数据 ===========
 
     // 白色多边形 (4个顶点)，原先坐标: (0,0)->(500,0)->(300,450)->(0,450)
     // 转化为 (xFrac,yFrac)
@@ -118,7 +118,7 @@ public class MainWindow extends Application {
                 + " -fx-background-color: #FFFFFF44;");
 
         arrowButton.setOnAction(e -> {
-            Scene loginScene = LoginScene.createScene(stage, INITIAL_WIDTH, INITIAL_HEIGHT);
+            Scene loginScene = LoginScene.createScene(stage, root.getScene().getWidth(), root.getScene().getHeight());
             stage.setScene(loginScene);
             stage.setTitle("Finanger - Login");
         });
