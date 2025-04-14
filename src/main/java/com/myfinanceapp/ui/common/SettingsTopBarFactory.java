@@ -16,6 +16,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 import javafx.beans.value.ChangeListener;
+import com.myfinanceapp.ui.common.SceneManager;
 
 public class SettingsTopBarFactory {
     private static final double MIN_WINDOW_WIDTH = 800;
@@ -66,43 +67,26 @@ public class SettingsTopBarFactory {
         // 设置点击事件
         aboutTab.setOnMouseClicked(e -> {
             Scene newScene = About.createScene(stage, currentWidth, currentHeight, loggedUser);
-            switchScene(stage, newScene);
+            SceneManager.switchScene(stage, newScene);
         });
 
         systemSettingsTab.setOnMouseClicked(e -> {
             Scene newScene = SystemSettings.createScene(stage, currentWidth, currentHeight, loggedUser);
-            switchScene(stage, newScene);
+            SceneManager.switchScene(stage, newScene);
         });
 
         userOptionsTab.setOnMouseClicked(e -> {
             Scene newScene = UserOptions.createScene(stage, currentWidth, currentHeight, loggedUser);
-            switchScene(stage, newScene);
+            SceneManager.switchScene(stage, newScene);
         });
 
         exportReportTab.setOnMouseClicked(e -> {
             Scene newScene = ExportReport.createScene(stage, currentWidth, currentHeight, loggedUser);
-            switchScene(stage, newScene);
+            SceneManager.switchScene(stage, newScene);
         });
 
         topBar.getChildren().addAll(systemSettingsTab, userOptionsTab, exportReportTab, aboutTab);
         return topBar;
-    }
-
-    private static void switchScene(Stage stage, Scene newScene) {
-        // 保存当前尺寸
-        double width = stage.getWidth();
-        double height = stage.getHeight();
-        
-        // 先设置窗口尺寸
-        stage.setWidth(width);
-        stage.setHeight(height);
-        
-        // 然后设置新场景
-        stage.setScene(newScene);
-        
-        // 再次确保窗口尺寸
-        stage.setWidth(width);
-        stage.setHeight(height);
     }
 
     private static VBox createOneTab(String text, boolean isActive) {

@@ -5,6 +5,7 @@ import com.myfinanceapp.model.User;
 import com.myfinanceapp.ui.common.LeftSidebarFactory;
 import com.myfinanceapp.service.GoalService;
 import com.myfinanceapp.service.TransactionDataService;
+import com.myfinanceapp.ui.common.SceneManager;
 
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -357,6 +358,17 @@ public class Goals {
         
         // Add the title container instead of just the title
         card.getChildren().addAll(titleContainer, contentLayout);
+
+        // Add click handler for editing
+        card.setOnMouseClicked(event -> {
+            if (!event.isConsumed()) {  // Only handle if not already consumed by delete button
+                double currentWidth = stage.getScene().getWidth();
+                double currentHeight = stage.getScene().getHeight();
+                Scene editScene = EditGoalScene.createScene(stage, currentWidth, currentHeight, loggedUser, goal);
+                SceneManager.switchScene(stage, editScene);
+            }
+        });
+
         return card;
     }
 
@@ -411,7 +423,8 @@ public class Goals {
             double currentHeight = stage.getScene().getHeight();
             
             // Navigate to create goal page with current window dimensions
-            stage.setScene(CreateGoalScene.createScene(stage, currentWidth, currentHeight, loggedUser));
+            Scene createScene = CreateGoalScene.createScene(stage, currentWidth, currentHeight, loggedUser);
+            SceneManager.switchScene(stage, createScene);
         });
 
         return card;

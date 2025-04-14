@@ -75,12 +75,25 @@ public class GoalService {
     /**
      * 更新目标
      */
-    public static void updateGoal(Goal updatedGoal, User user) throws IOException {
-        List<Goal> existingGoals = getAllGoals(user);
-        existingGoals = existingGoals.stream()
-                .map(goal -> goal.getId().equals(updatedGoal.getId()) ? updatedGoal : goal)
-                .collect(Collectors.toList());
-        saveGoals(existingGoals, user);
+    public static void updateGoal(Goal goal, User loggedUser) throws IOException {
+        // Validate user permissions
+        if (!goal.getUserId().equals(loggedUser.getUid())) {
+            throw new SecurityException("User not authorized to update this goal");
+        }
+
+        // Get all goals
+        List<Goal> goals = getUserGoals(loggedUser);
+
+        // Find and update the goal
+        for (int i = 0; i < goals.size(); i++) {
+            if (goals.get(i).getId().equals(goal.getId())) {
+                goals.set(i, goal);
+                break;
+            }
+        }
+
+        // Save updated goals list
+        saveGoals(goals, loggedUser);
     }
 
     /**

@@ -25,11 +25,10 @@ import javafx.event.EventHandler;
 import java.io.IOException;
 import java.time.LocalDate;
 
-public class CreateGoalScene {
-    private static final Logger logger = LoggerFactory.getLogger(CreateGoalScene.class);
+public class EditGoalScene {
+    private static final Logger logger = LoggerFactory.getLogger(EditGoalScene.class);
     private static final Font LABEL_FONT = Font.font("Arial", 14);
     private static final Color LABEL_COLOR = Color.DARKBLUE;
-    private static final String[] GOAL_TYPES = {"Saving Goal", "Debt Repayment Goal", "Budget Control Goal"};
     private static final String[] CURRENCIES = {"CNY", "USD", "EUR", "JPY", "GBP"};
     
     // UI Constants
@@ -42,7 +41,7 @@ public class CreateGoalScene {
     private static final double MIN_WINDOW_WIDTH = 800;
     private static final double MIN_WINDOW_HEIGHT = 450;
 
-    public static Scene createScene(Stage stage, double width, double height, User loggedUser) {
+    public static Scene createScene(Stage stage, double width, double height, User loggedUser, Goal goalToEdit) {
         // 确保窗口大小不小于最小值
         final double finalWidth = Math.max(width, MIN_WINDOW_WIDTH);
         final double finalHeight = Math.max(height, MIN_WINDOW_HEIGHT);
@@ -67,7 +66,7 @@ public class CreateGoalScene {
         );
 
         // Title
-        Label titleLabel = new Label("Create New Goal");
+        Label titleLabel = new Label("Edit Goal");
         titleLabel.setFont(Font.font("Arial", 24));
         titleLabel.setTextFill(Color.DARKBLUE);
 
@@ -80,25 +79,30 @@ public class CreateGoalScene {
         // 绑定网格宽度到主容器宽度
         grid.prefWidthProperty().bind(mainBox.maxWidthProperty());
 
-        // Goal type selection
-        ComboBox<String> typeCombo = createComboBox(GOAL_TYPES, 0, grid, "Type of your goal:", LABEL_FONT, LABEL_COLOR);
-        typeCombo.prefWidthProperty().bind(grid.widthProperty().multiply(0.6));
+        // Goal type label (disabled)
+        Label typeLabel = new Label(getGoalTypeDisplay(goalToEdit.getType()));
+        typeLabel.setFont(LABEL_FONT);
+        typeLabel.setTextFill(LABEL_COLOR);
+        addStyledRow(grid, 0, "Type of your goal:", typeLabel, LABEL_FONT, LABEL_COLOR);
 
         // Goal title field
         TextField titleField = createTextField("Goal Title", 1, grid, "Goal title:", LABEL_FONT, LABEL_COLOR);
+        titleField.setText(goalToEdit.getTitle());
         titleField.prefWidthProperty().bind(grid.widthProperty().multiply(0.6));
 
         // Target amount field
         TextField amountField = createTextField("Target Amount", 2, grid, "Target amount:", LABEL_FONT, LABEL_COLOR);
+        amountField.setText(String.valueOf(goalToEdit.getTargetAmount()));
         amountField.prefWidthProperty().bind(grid.widthProperty().multiply(0.6));
         
         // Currency selection
         ComboBox<String> currencyCombo = createComboBox(CURRENCIES, 3, grid, "Currency:", LABEL_FONT, LABEL_COLOR);
-        currencyCombo.getSelectionModel().selectFirst();
+        currencyCombo.setValue(goalToEdit.getCurrency());
         currencyCombo.prefWidthProperty().bind(grid.widthProperty().multiply(0.6));
 
         // Deadline date picker
         DatePicker deadlinePicker = createDatePicker(4, grid, "Deadline:", LABEL_FONT, LABEL_COLOR);
+        deadlinePicker.setValue(goalToEdit.getDeadline());
         deadlinePicker.prefWidthProperty().bind(grid.widthProperty().multiply(0.6));
         
         // Ensure deadline is in the future
@@ -117,46 +121,41 @@ public class CreateGoalScene {
                 .filter(node -> GridPane.getRowIndex(node) == 5 && GridPane.getColumnIndex(node) == 0)
                 .findFirst().orElse(null);
         
+        // Show category field only for budget control goals
+        boolean isBudgetControl = goalToEdit.getType().equals("BUDGET_CONTROL");
         if (categoryLabel != null) {
-            categoryLabel.setVisible(false);
+            categoryLabel.setVisible(isBudgetControl);
         }
-        categoryField.setVisible(false);
-
-        // Show/hide category field based on selected goal type
-        typeCombo.setOnAction(e -> {
-            boolean isBudgetControl = typeCombo.getValue().equals(GOAL_TYPES[2]); // "Budget Control Goal"
-            categoryField.setVisible(isBudgetControl);
-            if (categoryLabel != null) {
-                categoryLabel.setVisible(isBudgetControl);
-            }
-        });
+        categoryField.setVisible(isBudgetControl);
+        if (isBudgetControl) {
+            categoryField.setText(goalToEdit.getCategory());
+        }
 
         // Buttons area
         HBox buttonBox = new HBox(15);
         buttonBox.setAlignment(Pos.CENTER);
         buttonBox.prefWidthProperty().bind(grid.widthProperty());
 
-        Button saveButton = createButton("Save Goal", SAVE_BUTTON_STYLE, event -> {
-            if (GoalFormService.validateForm(loggedUser, titleField, amountField, typeCombo, categoryField, deadlinePicker)) {
+        Button saveButton = createButton("Save Changes", SAVE_BUTTON_STYLE, event -> {
+            if (GoalFormService.validateForm(loggedUser, titleField, amountField, null, categoryField, deadlinePicker)) {
                 try {
-                    Goal newGoal = GoalFormService.createNewGoal(
-                        loggedUser,
-                        titleField.getText(),
-                        amountField.getText(),
-                        typeCombo.getValue(),
-                        categoryField.getText(),
-                        deadlinePicker.getValue(),
-                        currencyCombo.getValue()
-                    );
+                    // Update the existing goal
+                    goalToEdit.setTitle(titleField.getText());
+                    goalToEdit.setTargetAmount(Double.parseDouble(amountField.getText()));
+                    goalToEdit.setDeadline(deadlinePicker.getValue());
+                    goalToEdit.setCurrency(currencyCombo.getValue());
+                    if (isBudgetControl) {
+                        goalToEdit.setCategory(categoryField.getText());
+                    }
 
-                    // Save the new goal to storage with user information
-                    GoalService.addGoal(newGoal, loggedUser);
+                    // Save the updated goal
+                    GoalService.updateGoal(goalToEdit, loggedUser);
 
                     // Navigate back to goals list
                     Scene goalsScene = Goals.createScene(stage, stage.getScene().getWidth(), stage.getScene().getHeight(), loggedUser);
                     SceneManager.switchScene(stage, goalsScene);
                 } catch (IOException e) {
-                    logger.error("Failed to save goal", e);
+                    logger.error("Failed to update goal", e);
                 }
             }
         });
@@ -200,10 +199,22 @@ public class CreateGoalScene {
         return scene;
     }
 
+    private static String getGoalTypeDisplay(String type) {
+        switch (type) {
+            case "SAVING":
+                return "Saving Goal";
+            case "DEBT_REPAYMENT":
+                return "Debt Repayment Goal";
+            case "BUDGET_CONTROL":
+                return "Budget Control Goal";
+            default:
+                return type;
+        }
+    }
+
     private static ComboBox<String> createComboBox(String[] items, int row, GridPane grid, String labelText, Font font, Color color) {
         ComboBox<String> comboBox = new ComboBox<>();
         comboBox.getItems().addAll(items);
-        comboBox.getSelectionModel().selectFirst();
         comboBox.setPrefWidth(FIELD_WIDTH);
         addStyledRow(grid, row, labelText, comboBox, font, color);
         return comboBox;
@@ -218,7 +229,7 @@ public class CreateGoalScene {
     }
 
     private static DatePicker createDatePicker(int row, GridPane grid, String labelText, Font font, Color color) {
-        DatePicker datePicker = new DatePicker(LocalDate.now().plusMonths(1));
+        DatePicker datePicker = new DatePicker();
         datePicker.setPrefWidth(FIELD_WIDTH);
         addStyledRow(grid, row, labelText, datePicker, font, color);
         return datePicker;
@@ -241,4 +252,4 @@ public class CreateGoalScene {
         grid.add(label, 0, row);
         grid.add(control, 1, row);
     }
-}
+} 
