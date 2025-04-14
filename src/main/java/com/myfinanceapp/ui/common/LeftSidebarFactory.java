@@ -14,6 +14,8 @@ import javafx.scene.image.*;
 import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
+import com.myfinanceapp.ui.common.SceneManager;
+import javafx.scene.Scene;
 
 import java.util.Objects;
 
@@ -137,17 +139,21 @@ public class LeftSidebarFactory {
                 case "Status":
                     // 跳转 Status
                     StatusScene statusScene = new StatusScene(stage, currentWidth, currentHeight, loggedUser);
-                    stage.setScene(statusScene.createScene());
+                    Scene newStatusScene = statusScene.createScene();
+                    SceneManager.switchScene(stage, newStatusScene);
                     StatusService statusService = new StatusService(statusScene, loggedUser); // 初始化服务
                     break;
                 case "Goals":
-                    stage.setScene(Goals.createScene(stage, currentWidth, currentHeight, loggedUser));
+                    Scene goalsScene = Goals.createScene(stage, currentWidth, currentHeight, loggedUser);
+                    SceneManager.switchScene(stage, goalsScene);
                     break;
                 case "New":
-                    stage.setScene(TransactionScene.createScene(stage, currentWidth, currentHeight, loggedUser));
+                    Scene transactionScene = TransactionScene.createScene(stage, currentWidth, currentHeight, loggedUser);
+                    SceneManager.switchScene(stage, transactionScene);
                     break;
                 case "Settings":
-                    stage.setScene(SystemSettings.createScene(stage, currentWidth, currentHeight, loggedUser));
+                    Scene settingsScene = SystemSettings.createScene(stage, currentWidth, currentHeight, loggedUser);
+                    SceneManager.switchScene(stage, settingsScene);
                     break;
                 case "Log out":
                     Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure you want to log out?");
@@ -155,7 +161,8 @@ public class LeftSidebarFactory {
                     confirm.setTitle("Confirm Logout");
                     confirm.showAndWait().ifPresent(response -> {
                         if (response == ButtonType.OK) {
-                            stage.setScene(LoginScene.createScene(stage, currentWidth, currentHeight));
+                            Scene loginScene = LoginScene.createScene(stage, currentWidth, currentHeight);
+                            SceneManager.switchScene(stage, loginScene);
                             stage.setTitle("Finanger - Login");
                         }
                     });
