@@ -109,7 +109,14 @@ public class Goals {
         scrollPane.setPannable(true);
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
         scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
-        scrollPane.setStyle("-fx-background-color: transparent;");
+        
+        // 修复背景颜色问题，确保一致的白色背景
+        scrollPane.setStyle("-fx-background-color: white; -fx-background: white;");
+        // 设置 ScrollPane 的内容区域背景为白色
+        centerContent.setStyle("-fx-background-color: white;");
+        
+        // 使用CSS样式类设置视口背景颜色
+        scrollPane.getStyleClass().add("white-bg-scroll-pane");
         
         // 绑定滚动面板大小到窗口大小
         scrollPane.prefWidthProperty().bind(root.widthProperty().subtract(sideBar.widthProperty()));
@@ -120,6 +127,11 @@ public class Goals {
         
         // 创建场景
         Scene scene = new Scene(root, width, height);
+        
+        // 添加全局CSS样式，确保视口背景是白色
+        scene.getStylesheets().add("data:text/css," + 
+                                 ".white-bg-scroll-pane .viewport {-fx-background-color: white;}" +
+                                 ".white-bg-scroll-pane {-fx-background: white; -fx-background-color: white;}");
 
         // 添加窗口大小变化监听器
         scene.widthProperty().addListener((obs, oldVal, newVal) -> {
