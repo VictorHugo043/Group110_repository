@@ -56,7 +56,7 @@ public class StatusServiceTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        testUser = new User("test-uid", "testUser", "password", "question", "answer");
+        testUser = new User("test-uid", "testUser", "password", "question", "answer", null);
 
         CountDownLatch latch = new CountDownLatch(1);
 
