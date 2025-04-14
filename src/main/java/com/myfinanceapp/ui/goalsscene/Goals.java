@@ -47,18 +47,9 @@ public class Goals {
         // 获取用户的目标列表
         List<Goal> userGoals = GoalService.getUserGoals(loggedUser);
 
-        // Add debugging label to show how many goals were loaded
-        String debugText = "Found " + userGoals.size() + " goals for user";
-        if (loggedUser != null) {
-            debugText += " (ID: " + loggedUser.getUid() + ")";
-        }
-        Label debugLabel = new Label(debugText);
-        debugLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #666666;");
-
-        // VBox to hold the debug info and grid
+        // VBox to hold the grid
         VBox centerContent = new VBox(10);
         centerContent.setAlignment(Pos.TOP_CENTER);
-        centerContent.getChildren().add(debugLabel);
 
         // 初始化列数
         int initialMaxCols = calculateMaxColumns(width);
@@ -110,28 +101,29 @@ public class Goals {
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
         scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
         
-        // 修复背景颜色问题，确保一致的白色背景
-        scrollPane.setStyle("-fx-background-color: white; -fx-background: white;");
-        // 设置 ScrollPane 的内容区域背景为白色
+        // Set proper background colors and styling
+        scrollPane.setStyle("-fx-background: white; -fx-background-color: white; -fx-border-width: 0;");
         centerContent.setStyle("-fx-background-color: white;");
         
-        // 使用CSS样式类设置视口背景颜色
-        scrollPane.getStyleClass().add("white-bg-scroll-pane");
+        // Remove any padding that might affect the layout
+        scrollPane.setPadding(new Insets(0));
         
-        // 绑定滚动面板大小到窗口大小
+        // Bind scroll pane size to window size
         scrollPane.prefWidthProperty().bind(root.widthProperty().subtract(sideBar.widthProperty()));
         scrollPane.prefHeightProperty().bind(root.heightProperty());
         
-        // Set the scrollPane as the center of the BorderPane
+        // Set the scrollPane as the center of the BorderPane with proper alignment
+        BorderPane.setAlignment(scrollPane, Pos.CENTER);
         root.setCenter(scrollPane);
         
-        // 创建场景
+        // Create scene
         Scene scene = new Scene(root, width, height);
         
-        // 添加全局CSS样式，确保视口背景是白色
+        // Add global CSS styles for consistent appearance
         scene.getStylesheets().add("data:text/css," + 
-                                 ".white-bg-scroll-pane .viewport {-fx-background-color: white;}" +
-                                 ".white-bg-scroll-pane {-fx-background: white; -fx-background-color: white;}");
+                                 ".scroll-pane { -fx-background-insets: 0; -fx-padding: 0; }" +
+                                 ".scroll-pane > .viewport { -fx-background-color: white; }" +
+                                 ".scroll-pane > .corner { -fx-background-color: white; }");
 
         // 添加窗口大小变化监听器
         scene.widthProperty().addListener((obs, oldVal, newVal) -> {
