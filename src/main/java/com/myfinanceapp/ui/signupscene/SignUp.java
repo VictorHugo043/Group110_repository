@@ -1,8 +1,8 @@
 package com.myfinanceapp.ui.signupscene;
 
-
 import com.myfinanceapp.ui.registrationterms.PrivacyPolicy;
 import com.myfinanceapp.ui.registrationterms.TermofUse;
+import com.myfinanceapp.ui.usermanual.UserManual; // Import the new UserManual scene
 import com.myfinanceapp.ui.loginscene.LoginScene;
 import com.myfinanceapp.service.UserService;
 import javafx.geometry.Insets;
@@ -19,7 +19,6 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 import java.util.Objects;
-
 
 public class SignUp {
 
@@ -168,20 +167,22 @@ public class SignUp {
             String user = usernameField.getText();
             String pass = passwordField.getText();
             String secQuestion = securityQuestionCombo.getValue();
-            String secAnswer   = securityAnswerField.getText();
+            String secAnswer = securityAnswerField.getText();
             if (!agreeCheckBox.isSelected()) {
                 showAlert("Error", "You must agree to the Terms of use and Privacy Policy to register!");
                 return;
             }
-            if (user.isEmpty() || pass.isEmpty()|| secAnswer.isEmpty()) {
+            if (user.isEmpty() || pass.isEmpty() || secAnswer.isEmpty()) {
                 showAlert("Error", "Fields cannot be empty!");
                 return;
             }
             UserService userService = new UserService();
-            boolean success = userService.registerUser(user, pass,secQuestion,secAnswer);
+            boolean success = userService.registerUser(user, pass, secQuestion, secAnswer);
             if (success) {
                 showAlert("Success", "User registered successfully!");
-                stage.setScene(LoginScene.createScene(stage, INITIAL_WIDTH, INITIAL_HEIGHT));
+                // Redirect to UserManual scene instead of LoginScene
+                stage.setScene(UserManual.createScene(stage, INITIAL_WIDTH, INITIAL_HEIGHT));
+                stage.setTitle("Finanger - User Manual");
             } else {
                 showAlert("Error", "Username already exists!");
             }
