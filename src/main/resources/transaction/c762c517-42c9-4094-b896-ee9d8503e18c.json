@@ -1,1 +1,407 @@
-[{"transactionDate":"2025-01-01","transactionType":"Expense","currency":"CNY","amount":1.0,"category":"1","paymentMethod":"1"}]
+[
+  {
+    "transactionDate": "2025-02-04",
+    "transactionType": "Expense",
+    "currency": "CNY",
+    "amount": 214.25,
+    "category": "Housing",
+    "paymentMethod": "Cash",
+    "description": "Apartment rent"
+  },
+  {
+    "transactionDate": "2025-02-06",
+    "transactionType": "Expense",
+    "currency": "CNY",
+    "amount": 2890.21,
+    "category": "Shopping",
+    "paymentMethod": "Alipay",
+    "description": "New clothes"
+  },
+  {
+    "transactionDate": "2025-02-09",
+    "transactionType": "Income",
+    "currency": "CNY",
+    "amount": 9255.43,
+    "category": "Gift",
+    "paymentMethod": "Credit Card",
+    "description": "Cash gift"
+  },
+  {
+    "transactionDate": "2025-02-13",
+    "transactionType": "Expense",
+    "currency": "CNY",
+    "amount": 699.79,
+    "category": "Food & Drink",
+    "paymentMethod": "Credit Card",
+    "description": "Quick meal"
+  },
+  {
+    "transactionDate": "2025-02-14",
+    "transactionType": "Expense",
+    "currency": "CNY",
+    "amount": 2011.5,
+    "category": "Housing",
+    "paymentMethod": "WeChat Pay",
+    "description": "Apartment rent"
+  },
+  {
+    "transactionDate": "2025-02-14",
+    "transactionType": "Income",
+    "currency": "CNY",
+    "amount": 4381.43,
+    "category": "Freelance",
+    "paymentMethod": "WeChat Pay",
+    "description": "Freelance job"
+  },
+  {
+    "transactionDate": "2025-02-15",
+    "transactionType": "Expense",
+    "currency": "CNY",
+    "amount": 392.89,
+    "category": "Food & Drink",
+    "paymentMethod": "Cash",
+    "description": "Quick meal"
+  },
+  {
+    "transactionDate": "2025-02-16",
+    "transactionType": "Expense",
+    "currency": "CNY",
+    "amount": 2485.82,
+    "category": "Transport",
+    "paymentMethod": "Alipay",
+    "description": "Ride fare"
+  },
+  {
+    "transactionDate": "2025-02-20",
+    "transactionType": "Expense",
+    "currency": "CNY",
+    "amount": 2518.52,
+    "category": "Groceries",
+    "paymentMethod": "Credit Card",
+    "description": "Supermarket run"
+  },
+  {
+    "transactionDate": "2025-02-21",
+    "transactionType": "Expense",
+    "currency": "CNY",
+    "amount": 2644.01,
+    "category": "Debt",
+    "paymentMethod": "Cash",
+    "description": "Loan payback"
+  },
+  {
+    "transactionDate": "2025-02-22",
+    "transactionType": "Expense",
+    "currency": "CNY",
+    "amount": 2529.26,
+    "category": "Leisure",
+    "paymentMethod": "Bank Transfer",
+    "description": "Streaming or movie"
+  },
+  {
+    "transactionDate": "2025-02-25",
+    "transactionType": "Income",
+    "currency": "CNY",
+    "amount": 7082.08,
+    "category": "Freelance",
+    "paymentMethod": "Alipay",
+    "description": "Freelance job"
+  },
+  {
+    "transactionDate": "2025-03-02",
+    "transactionType": "Expense",
+    "currency": "CNY",
+    "amount": 233.42,
+    "category": "Housing",
+    "paymentMethod": "WeChat Pay",
+    "description": "Apartment rent"
+  },
+  {
+    "transactionDate": "2025-03-04",
+    "transactionType": "Expense",
+    "currency": "CNY",
+    "amount": 1199.91,
+    "category": "Debt",
+    "paymentMethod": "Credit Card",
+    "description": "Loan payback"
+  },
+  {
+    "transactionDate": "2025-03-05",
+    "transactionType": "Expense",
+    "currency": "CNY",
+    "amount": 2216.89,
+    "category": "Food & Drink",
+    "paymentMethod": "WeChat Pay",
+    "description": "Quick meal"
+  },
+  {
+    "transactionDate": "2025-03-09",
+    "transactionType": "Expense",
+    "currency": "CNY",
+    "amount": 1624.5,
+    "category": "Healthcare",
+    "paymentMethod": "Cash",
+    "description": "Clinic visit"
+  },
+  {
+    "transactionDate": "2025-03-12",
+    "transactionType": "Expense",
+    "currency": "CNY",
+    "amount": 2343.25,
+    "category": "Leisure",
+    "paymentMethod": "WeChat Pay",
+    "description": "Streaming or movie"
+  },
+  {
+    "transactionDate": "2025-03-14",
+    "transactionType": "Expense",
+    "currency": "CNY",
+    "amount": 594.85,
+    "category": "Shopping",
+    "paymentMethod": "Alipay",
+    "description": "New clothes"
+  },
+  {
+    "transactionDate": "2025-03-14",
+    "transactionType": "Expense",
+    "currency": "CNY",
+    "amount": 2730.57,
+    "category": "Groceries",
+    "paymentMethod": "Bank Transfer",
+    "description": "Supermarket run"
+  },
+  {
+    "transactionDate": "2025-03-15",
+    "transactionType": "Expense",
+    "currency": "CNY",
+    "amount": 1315.12,
+    "category": "Groceries",
+    "paymentMethod": "Cash",
+    "description": "Supermarket run"
+  },
+  {
+    "transactionDate": "2025-03-16",
+    "transactionType": "Expense",
+    "currency": "CNY",
+    "amount": 1402.28,
+    "category": "Utilities",
+    "paymentMethod": "Credit Card",
+    "description": "Monthly utilities"
+  },
+  {
+    "transactionDate": "2025-03-21",
+    "transactionType": "Income",
+    "currency": "CNY",
+    "amount": 5133.72,
+    "category": "Investment",
+    "paymentMethod": "Credit Card",
+    "description": "Investment income"
+  },
+  {
+    "transactionDate": "2025-03-23",
+    "transactionType": "Income",
+    "currency": "CNY",
+    "amount": 4589.77,
+    "category": "Bonus",
+    "paymentMethod": "Cash",
+    "description": "Annual bonus"
+  },
+  {
+    "transactionDate": "2025-03-25",
+    "transactionType": "Income",
+    "currency": "CNY",
+    "amount": 4901.09,
+    "category": "Investment",
+    "paymentMethod": "WeChat Pay",
+    "description": "Investment income"
+  },
+  {
+    "transactionDate": "2025-03-25",
+    "transactionType": "Expense",
+    "currency": "CNY",
+    "amount": 1727.3,
+    "category": "Debt",
+    "paymentMethod": "Bank Transfer",
+    "description": "Loan payback"
+  },
+  {
+    "transactionDate": "2025-03-26",
+    "transactionType": "Expense",
+    "currency": "CNY",
+    "amount": 2543.3,
+    "category": "Utilities",
+    "paymentMethod": "Cash",
+    "description": "Monthly utilities"
+  },
+  {
+    "transactionDate": "2025-03-27",
+    "transactionType": "Expense",
+    "currency": "CNY",
+    "amount": 2536.53,
+    "category": "Transport",
+    "paymentMethod": "WeChat Pay",
+    "description": "Ride fare"
+  },
+  {
+    "transactionDate": "2025-03-29",
+    "transactionType": "Expense",
+    "currency": "CNY",
+    "amount": 443.27,
+    "category": "Shopping",
+    "paymentMethod": "Bank Transfer",
+    "description": "New clothes"
+  },
+  {
+    "transactionDate": "2025-03-30",
+    "transactionType": "Expense",
+    "currency": "CNY",
+    "amount": 901.26,
+    "category": "Debt",
+    "paymentMethod": "Credit Card",
+    "description": "Loan payback"
+  },
+  {
+    "transactionDate": "2025-03-31",
+    "transactionType": "Expense",
+    "currency": "CNY",
+    "amount": 2706.95,
+    "category": "Healthcare",
+    "paymentMethod": "WeChat Pay",
+    "description": "Clinic visit"
+  },
+  {
+    "transactionDate": "2025-04-02",
+    "transactionType": "Income",
+    "currency": "CNY",
+    "amount": 3039.22,
+    "category": "Freelance",
+    "paymentMethod": "Credit Card",
+    "description": "Freelance job"
+  },
+  {
+    "transactionDate": "2025-04-02",
+    "transactionType": "Income",
+    "currency": "CNY",
+    "amount": 1261.42,
+    "category": "Salary",
+    "paymentMethod": "Cash",
+    "description": "Monthly salary"
+  },
+  {
+    "transactionDate": "2025-04-06",
+    "transactionType": "Expense",
+    "currency": "CNY",
+    "amount": 674.82,
+    "category": "Food & Drink",
+    "paymentMethod": "Credit Card",
+    "description": "Quick meal"
+  },
+  {
+    "transactionDate": "2025-04-07",
+    "transactionType": "Expense",
+    "currency": "CNY",
+    "amount": 1842.49,
+    "category": "Transport",
+    "paymentMethod": "Bank Transfer",
+    "description": "Ride fare"
+  },
+  {
+    "transactionDate": "2025-04-08",
+    "transactionType": "Expense",
+    "currency": "CNY",
+    "amount": 879.21,
+    "category": "Shopping",
+    "paymentMethod": "Alipay",
+    "description": "New clothes"
+  },
+  {
+    "transactionDate": "2025-04-11",
+    "transactionType": "Income",
+    "currency": "CNY",
+    "amount": 4394.44,
+    "category": "Gift",
+    "paymentMethod": "Alipay",
+    "description": "Cash gift"
+  },
+  {
+    "transactionDate": "2025-04-14",
+    "transactionType": "Expense",
+    "currency": "CNY",
+    "amount": 457.66,
+    "category": "Housing",
+    "paymentMethod": "Credit Card",
+    "description": "Apartment rent"
+  },
+  {
+    "transactionDate": "2025-04-14",
+    "transactionType": "Income",
+    "currency": "CNY",
+    "amount": 598.07,
+    "category": "Bonus",
+    "paymentMethod": "Cash",
+    "description": "Annual bonus"
+  },
+  {
+    "transactionDate": "2025-04-15",
+    "transactionType": "Expense",
+    "currency": "CNY",
+    "amount": 942.3,
+    "category": "Shopping",
+    "paymentMethod": "Bank Transfer",
+    "description": "New clothes"
+  },
+  {
+    "transactionDate": "2025-04-17",
+    "transactionType": "Expense",
+    "currency": "CNY",
+    "amount": 1071.6,
+    "category": "Food & Drink",
+    "paymentMethod": "Alipay",
+    "description": "Quick meal"
+  },
+  {
+    "transactionDate": "2025-04-21",
+    "transactionType": "Income",
+    "currency": "CNY",
+    "amount": 4040.67,
+    "category": "Investment",
+    "paymentMethod": "Credit Card",
+    "description": "Investment income"
+  },
+  {
+    "transactionDate": "2025-04-23",
+    "transactionType": "Expense",
+    "currency": "CNY",
+    "amount": 168.51,
+    "category": "Utilities",
+    "paymentMethod": "Bank Transfer",
+    "description": "Monthly utilities"
+  },
+  {
+    "transactionDate": "2025-04-25",
+    "transactionType": "Expense",
+    "currency": "CNY",
+    "amount": 1878.68,
+    "category": "Shopping",
+    "paymentMethod": "Bank Transfer",
+    "description": "New clothes"
+  },
+  {
+    "transactionDate": "2025-04-28",
+    "transactionType": "Expense",
+    "currency": "CNY",
+    "amount": 2582.21,
+    "category": "Healthcare",
+    "paymentMethod": "Cash",
+    "description": "Clinic visit"
+  },
+  {
+    "transactionDate": "2025-04-29",
+    "transactionType": "Income",
+    "currency": "CNY",
+    "amount": 3319.06,
+    "category": "Gift",
+    "paymentMethod": "Cash",
+    "description": "Cash gift"
+  }
+]
