@@ -107,10 +107,8 @@ public class ExportReportService {
                 System.err.println("Error during export: ");
                 e.printStackTrace();
                 throw new RuntimeException("Failed to export report: " + e.getMessage(), e);
-            } finally {
-                // Shut down the executor after each export
-                shutdownExecutor();
             }
+            // 移除 finally 块，不在每次导出后关闭线程池
         }, executorService);
     }
 
