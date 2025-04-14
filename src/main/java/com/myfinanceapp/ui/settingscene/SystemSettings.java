@@ -17,14 +17,7 @@ import javafx.stage.Stage;
 import java.util.Objects;
 
 public class SystemSettings {
-    private static final double MIN_WINDOW_WIDTH = 800;
-    private static final double MIN_WINDOW_HEIGHT = 450;
-
     public static Scene createScene(Stage stage, double width, double height, User loggedUser) {
-        // 确保窗口大小不小于最小值
-        final double finalWidth = Math.max(width, MIN_WINDOW_WIDTH);
-        final double finalHeight = Math.max(height, MIN_WINDOW_HEIGHT);
-
         BorderPane root = new BorderPane();
         root.setStyle("-fx-background-color: white;");
 
@@ -57,29 +50,14 @@ public class SystemSettings {
         // 1) 顶部 Tab 栏 (与外Box同背景)
         HBox topBar = SettingsTopBarFactory.createTopBar(stage, "System Settings", loggedUser);
         // 2) 表单
-        Pane settingsForm = createSettingsForm(stage, finalWidth, finalHeight, loggedUser);
+        Pane settingsForm = createSettingsForm(stage, width, height, loggedUser);
 
         outerBox.getChildren().addAll(settingsForm);
         container.getChildren().addAll(topBar, outerBox);
         centerBox.getChildren().add(container);
         root.setCenter(centerBox);
 
-        Scene scene = new Scene(root, finalWidth, finalHeight);
-        
-        // 添加窗口大小变化监听器
-        scene.widthProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal.doubleValue() < MIN_WINDOW_WIDTH) {
-                stage.setWidth(MIN_WINDOW_WIDTH);
-            }
-        });
-        
-        scene.heightProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal.doubleValue() < MIN_WINDOW_HEIGHT) {
-                stage.setHeight(MIN_WINDOW_HEIGHT);
-            }
-        });
-
-        return scene;
+        return new Scene(root, width, height);
     }
 
     /**
