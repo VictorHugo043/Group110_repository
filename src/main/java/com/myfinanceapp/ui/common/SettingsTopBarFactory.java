@@ -93,10 +93,14 @@ public class SettingsTopBarFactory {
         double width = stage.getWidth();
         double height = stage.getHeight();
         
-        // 设置新场景
+        // 先设置窗口尺寸
+        stage.setWidth(width);
+        stage.setHeight(height);
+        
+        // 然后设置新场景
         stage.setScene(newScene);
         
-        // 保持窗口尺寸不变
+        // 再次确保窗口尺寸
         stage.setWidth(width);
         stage.setHeight(height);
     }
