@@ -147,7 +147,7 @@ public class UserManual {
     }
 
     // Improved Markdown to HTML conversion
-    private static String convertMarkdownToHtml(String markdown) {
+    static String convertMarkdownToHtml(String markdown) {
         // Split the markdown into lines
         String[] lines = markdown.split("\n");
         StringBuilder html = new StringBuilder();
