@@ -57,7 +57,7 @@ public class TransactionScene {
         dateField.setPrefWidth(150); // 确保输入框宽度为 120
 
         //dateField.setPrefWidth(150);
-        //dateField.setFocusTraversable(false); // 防止自动获取焦点
+        dateField.setFocusTraversable(false); // 防止自动获取焦点
 
         VBox dateBox = new VBox(dateLabel, dateField);
         dateBox.setAlignment(Pos.CENTER);
