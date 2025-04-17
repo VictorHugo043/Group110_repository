@@ -9,9 +9,16 @@ import javafx.scene.control.Label;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import com.vladsch.flexmark.util.ast.Node;
+import com.vladsch.flexmark.parser.Parser;
+import com.vladsch.flexmark.html.HtmlRenderer;
+import javafx.scene.web.WebView;
+import javafx.application.Platform;
 
 public class StatusService {
     private final User currentUser;
@@ -21,6 +28,9 @@ public class StatusService {
     private LocalDate endDate;
     private final StatusScene scene;
     private final ChartService chartService;
+    private final Parser mdParser = Parser.builder().build();
+    private final HtmlRenderer mdRenderer = HtmlRenderer.builder().build();
+
 
     public StatusService(StatusScene scene, User currentUser) {
         this.scene = scene;
@@ -28,7 +38,9 @@ public class StatusService {
         this.txService = new TransactionService();
         this.chartService = new ChartService(scene.lineChart, scene.barChart, scene.pieChart, txService, currentUser);
         initialize();
+
     }
+
 
     private void initialize() {
         // 初始化日期为本月1日起到今天
@@ -93,6 +105,26 @@ public class StatusService {
         });
 
         scene.sendBtn.setOnAction(e -> handleAIRequest());
+
+        // 添加初始化欢迎消息
+        initializeWelcomeMessage();
+    }
+    private void initializeWelcomeMessage() {
+        String welcomeMsg = "欢迎使用财务助手，有任何财务问题请随时提问。";
+
+        // 添加到聊天历史
+        Map<String, String> aiMsg = new HashMap<>();
+        aiMsg.put("role", "assistant");
+        aiMsg.put("content", welcomeMsg);
+        chatMessages.add(aiMsg);
+
+        // 更新StatusScene的聊天历史
+        scene.chatHistory = chatMessages;
+
+        // 显示欢迎消息
+        Node doc = mdParser.parse(welcomeMsg);
+        String welcomeHtml = mdRenderer.render(doc);
+        updateWebView(welcomeHtml);
     }
 
     void updateSummaryLabels(LocalDate startDate, LocalDate endDate) {
@@ -142,6 +174,12 @@ public class StatusService {
             scene.questionArea.setDisable(true);
             scene.sendBtn.setDisable(true);
 
+            // 保存用户问题到聊天历史
+            Map<String, String> userMsg = new HashMap<>();
+            userMsg.put("role", "user");
+            userMsg.put("content", userInput);
+            chatMessages.add(userMsg);
+
             List<Transaction> txList = txService.loadTransactions(currentUser);
             StringBuilder dataSummary = new StringBuilder();
             dataSummary.append("以下是我的财务交易数据，每条格式：Date, Type, Currency, Amount, Category, PaymentMethod:\n");
@@ -155,16 +193,76 @@ public class StatusService {
                     "下面是我目前的数据：\n" + dataSummary +
                     "\n用户的问题是： " + userInput;
 
+
+
             String answer = AiChatService.chatCompletion(chatMessages, systemPrompt);
-            if (answer != null) {
-                scene.suggestionsArea.appendText("You: " + userInput + "\nAI: " + answer + "\n\n");
+            if(answer != null){
+                // 保存AI回答到聊天历史
+                Map<String, String> aiMsg = new HashMap<>();
+                aiMsg.put("role", "assistant");
+                aiMsg.put("content", answer);
+                chatMessages.add(aiMsg);
+                // 更新StatusScene的聊天历史
+                scene.chatHistory = chatMessages;
+                // 清空webview
+                updateWebView("");
+
+                /// 使用统一的分块处理方式
+                new Thread(() -> {
+                    try {
+                        // 使用渐进式显示
+                        int chunkSize = 100;
+                        StringBuilder partialBuilder = new StringBuilder();
+
+                        for (int i = 0; i <= answer.length(); i += chunkSize) {
+                            int end = Math.min(i + chunkSize, answer.length());
+                            String currentChunk = answer.substring(0, end);
+
+                            Node doc = mdParser.parse(currentChunk);
+                            String partialHtml = mdRenderer.render(doc);
+
+                            final String html = partialHtml;
+                            Platform.runLater(() -> updateWebView(html));
+
+                            try { Thread.sleep(50); } catch(InterruptedException e){}
+                        }
+
+                        // 最后完整显示一次，确保全部内容都显示出来
+                        Node finalDoc = mdParser.parse(answer);
+                        String finalHtml = mdRenderer.render(finalDoc);
+                        Platform.runLater(() -> updateWebView(finalHtml));
+                    } finally {
+                        Platform.runLater(() -> {
+                            scene.questionArea.setDisable(false);
+                            scene.sendBtn.setDisable(false);
+                        });
+                    }
+                }).start();
             } else {
-                scene.suggestionsArea.appendText("AI 请求失败，未能获取答复\n\n");
+                // 出错
+                Node doc = mdParser.parse("AI 请求失败，未能获取答复");
+                String failHtml = mdRenderer.render(doc);
+                updateWebView(failHtml);
+
+                scene.questionArea.setDisable(false);
+                scene.sendBtn.setDisable(false);
             }
 
             scene.questionArea.clear();
-            scene.questionArea.setDisable(false);
-            scene.sendBtn.setDisable(false);
         }
     }
+
+    private void updateWebView(String html) {
+        scene.suggestionsWebView.getEngine().loadContent(html);
+
+        // 使用JavaScript滚动到底部
+        scene.suggestionsWebView.getEngine().getLoadWorker().stateProperty().addListener((obs, oldState, newState) -> {
+            if (newState == javafx.concurrent.Worker.State.SUCCEEDED) {
+                scene.suggestionsWebView.getEngine().executeScript(
+                        "window.scrollTo(0, document.body.scrollHeight);"
+                );
+            }
+        });
+    }
+
 }

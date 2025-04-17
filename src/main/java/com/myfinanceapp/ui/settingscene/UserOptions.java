@@ -26,14 +26,8 @@ public class UserOptions {
 
     // 假设当前已登录用户信息在此记录
     private static User currentUser;
-    private static final double MIN_WINDOW_WIDTH = 800;
-    private static final double MIN_WINDOW_HEIGHT = 450;
 
     public static Scene createScene(Stage stage, double width, double height, User loggedUser) {
-        // 确保窗口大小不小于最小值
-        final double finalWidth = Math.max(width, MIN_WINDOW_WIDTH);
-        final double finalHeight = Math.max(height, MIN_WINDOW_HEIGHT);
-
         // 把当前登录用户保存，供下文使用
         currentUser = loggedUser;
         if (currentUser == null) {
@@ -200,7 +194,7 @@ public class UserOptions {
         resetPassRow.setAlignment(Pos.CENTER_LEFT);
 
         resetPassRow.setOnMouseClicked(e -> {
-            Scene resetScene = ResetPassword.createScene(stage, finalWidth, finalHeight);
+            Scene resetScene = ResetPassword.createScene(stage, width, height);
             stage.setScene(resetScene);
             stage.setTitle("Reset Password");
         });
@@ -209,7 +203,7 @@ public class UserOptions {
         Button backBtn = new Button("Back to Status");
         backBtn.setStyle("-fx-background-color: #3377ff; -fx-text-fill: white; -fx-font-weight: bold;");
         backBtn.setOnAction(e -> {
-            StatusScene statusScene = new StatusScene(stage, finalWidth, finalHeight, loggedUser);
+            StatusScene statusScene = new StatusScene(stage, width, height, loggedUser);
             stage.setScene(statusScene.createScene());
             StatusService statusService = new StatusService(statusScene, loggedUser);
             stage.setTitle("Finanger - Status");
@@ -230,22 +224,7 @@ public class UserOptions {
         centerBox.getChildren().add(container);
         root.setCenter(centerBox);
 
-        Scene scene = new Scene(root, finalWidth, finalHeight);
-        
-        // 添加窗口大小变化监听器
-        scene.widthProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal.doubleValue() < MIN_WINDOW_WIDTH) {
-                stage.setWidth(MIN_WINDOW_WIDTH);
-            }
-        });
-        
-        scene.heightProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal.doubleValue() < MIN_WINDOW_HEIGHT) {
-                stage.setHeight(MIN_WINDOW_HEIGHT);
-            }
-        });
-
-        return scene;
+        return new Scene(root, width, height);
     }
 
     /**

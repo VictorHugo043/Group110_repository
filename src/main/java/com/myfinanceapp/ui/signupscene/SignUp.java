@@ -1,8 +1,8 @@
 package com.myfinanceapp.ui.signupscene;
 
-
 import com.myfinanceapp.ui.registrationterms.PrivacyPolicy;
 import com.myfinanceapp.ui.registrationterms.TermofUse;
+import com.myfinanceapp.ui.usermanual.UserManual; // Import the new UserManual scene
 import com.myfinanceapp.ui.loginscene.LoginScene;
 import com.myfinanceapp.service.UserService;
 import javafx.geometry.Insets;
@@ -19,7 +19,6 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 import java.util.Objects;
-
 
 public class SignUp {
 
@@ -168,20 +167,22 @@ public class SignUp {
             String user = usernameField.getText();
             String pass = passwordField.getText();
             String secQuestion = securityQuestionCombo.getValue();
-            String secAnswer   = securityAnswerField.getText();
+            String secAnswer = securityAnswerField.getText();
             if (!agreeCheckBox.isSelected()) {
                 showAlert("Error", "You must agree to the Terms of use and Privacy Policy to register!");
                 return;
             }
-            if (user.isEmpty() || pass.isEmpty()|| secAnswer.isEmpty()) {
+            if (user.isEmpty() || pass.isEmpty() || secAnswer.isEmpty()) {
                 showAlert("Error", "Fields cannot be empty!");
                 return;
             }
             UserService userService = new UserService();
-            boolean success = userService.registerUser(user, pass,secQuestion,secAnswer);
+            boolean success = userService.registerUser(user, pass, secQuestion, secAnswer);
             if (success) {
                 showAlert("Success", "User registered successfully!");
-                stage.setScene(LoginScene.createScene(stage, INITIAL_WIDTH, INITIAL_HEIGHT));
+                // Redirect to UserManual scene instead of LoginScene
+                stage.setScene(UserManual.createScene(stage, root.getScene().getWidth(), root.getScene().getHeight()));
+                stage.setTitle("Finanger - User Manual");
             } else {
                 showAlert("Error", "Username already exists!");
             }
@@ -191,7 +192,7 @@ public class SignUp {
         termsLink.setFont(Font.font("Arial", 11));
         termsLink.setTextFill(Color.DARKBLUE);
         termsLink.setOnAction(e -> {
-            Scene termsScene = TermofUse.createScene(stage, INITIAL_WIDTH, INITIAL_HEIGHT);
+            Scene termsScene = TermofUse.createScene(stage, root.getScene().getWidth(), root.getScene().getHeight());
             stage.setScene(termsScene);
             stage.setTitle("Terms of Use");
         });
@@ -200,7 +201,7 @@ public class SignUp {
         privacyLink.setFont(Font.font("Arial", 11));
         privacyLink.setTextFill(Color.DARKBLUE);
         privacyLink.setOnAction(e -> {
-            Scene policyScene = PrivacyPolicy.createScene(stage, INITIAL_WIDTH, INITIAL_HEIGHT);
+            Scene policyScene = PrivacyPolicy.createScene(stage, root.getScene().getWidth(), root.getScene().getHeight());
             stage.setScene(policyScene);
             stage.setTitle("Privacy Policy");
         });
@@ -215,7 +216,7 @@ public class SignUp {
         Hyperlink alreadyLink = new Hyperlink("Already have an account?");
         alreadyLink.setTextFill(Color.DARKBLUE);
         alreadyLink.setOnAction(e -> {
-            Scene loginScene = LoginScene.createScene(stage, INITIAL_WIDTH, INITIAL_HEIGHT);
+            Scene loginScene = LoginScene.createScene(stage, root.getScene().getWidth(), root.getScene().getHeight());
             stage.setScene(loginScene);
             stage.setTitle("Finanger - Login");
         });

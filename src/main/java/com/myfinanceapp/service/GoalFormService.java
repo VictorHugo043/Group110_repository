@@ -53,6 +53,7 @@ public class GoalFormService {
     public static Goal createNewGoal(User loggedUser, String title, String amount, String type, 
                                    String category, LocalDate deadline, String currency) {
         Goal newGoal = new Goal();
+        newGoal.setId(java.util.UUID.randomUUID().toString());
         newGoal.setUserId(loggedUser.getUid());
         newGoal.setType(getGoalType(type));
         newGoal.setTitle(title.isEmpty() ? DEFAULT_GOAL_TITLE : title);

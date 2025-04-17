@@ -3,23 +3,22 @@ package com.myfinanceapp.ui.transactionscene;
 import com.myfinanceapp.model.Transaction;
 import com.myfinanceapp.model.User;
 import com.myfinanceapp.service.TransactionService;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javafx.scene.Scene;
-import javafx.scene.layout.VBox;
-import javafx.scene.control.*;
+import javafx.scene.text.Font;
 import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
-import javafx.geometry.Insets;
 import com.myfinanceapp.ui.common.LeftSidebarFactory;
 import com.myfinanceapp.service.AISortingService;
+
 
 public class TransactionScene {
     public static Scene createScene(Stage stage, double width, double height, User loggedUser) {
@@ -36,17 +35,20 @@ public class TransactionScene {
                         "-fx-border-width: 2;" +
                         "-fx-border-radius: 15;" +
                         "-fx-background-color: white;" +
-                        "-fx-padding: 20;" // 为右侧栏添加内边距，避免内容与边框紧贴
+                        "-fx-padding: 20;" 
+
         );
+        centerBox.setPadding(new Insets(20, 20, 40, 20));
+        // 新增：允许垂直扩展
+        centerBox.setMaxHeight(Double.MAX_VALUE);
+        VBox.setVgrow(centerBox, Priority.ALWAYS);
+
         Label topicLabel = new Label("Manual Import:");
         topicLabel.setTextFill(Color.DARKBLUE);
-
-        // 设置 topicLabel 和后续内容之间的间距
         topicLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
         // VBox.setMargin(topicLabel, new Insets(5, 0, 5, 0)); // 上下边距
 
-        // 页面一开始光标就focus在date框里面，需要改一下
-        // 修改这里：确保初始时文本框不自动获得焦点
+      
         Label dateLabel = new Label("Transition Date");
         dateLabel.setTextFill(Color.DARKBLUE);
         TextField dateField = new TextField();
@@ -54,10 +56,9 @@ public class TransactionScene {
 
         dateField.setMaxWidth(200); // 设置输入框的最大宽度为 120
         dateField.setPrefWidth(150); // 确保输入框宽度为 120
+        dateField.setFocusTraversable(false); // 防止自动获取焦点
 
-        // dateField.setPrefWidth(150);
-        // dateField.setFocusTraversable(false); // 防止自动获取焦点
-
+      
         VBox dateBox = new VBox(dateLabel, dateField);
         dateBox.setAlignment(Pos.CENTER);
 
@@ -92,6 +93,7 @@ public class TransactionScene {
         VBox amountBox = new VBox(amountLabel, amountField);
         amountBox.setAlignment(Pos.CENTER);
 
+      
         // 添加描述框和自动分类按钮
         Label descriptionLabel = new Label("Description");
         descriptionLabel.setTextFill(Color.DARKBLUE);
@@ -172,7 +174,6 @@ public class TransactionScene {
 
         submitManualBtn.setOnAction(event -> {
 
-            // ！ 传入数据错误的判断及处理（日期是否符合格式要求）
             // 检查所有字段是否已填写
             if (dateField.getText().isEmpty() ||
                     amountField.getText().isEmpty() ||
@@ -272,7 +273,7 @@ public class TransactionScene {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle("Invalid Amount");
                 alert.setHeaderText(null);
-                alert.setContentText("please type in a valid number");
+                alert.setContentText("Please type in a valid number");
                 alert.showAndWait();
                 return; // 停止提交过程
             }
@@ -297,17 +298,17 @@ public class TransactionScene {
              * }
              */
 
-            Transaction transaction = new Transaction();
 
+            Transaction transaction = new Transaction();
             transaction.setTransactionDate(dateField.getText());
             transaction.setTransactionType(typeCombo.getValue());
             transaction.setCurrency(currencyCombo.getValue());
-            transaction.setAmount(Double.parseDouble(amountField.getText()));
+            transaction.setAmount(amount);
             transaction.setCategory(categoryField.getText());
             transaction.setPaymentMethod(methodField.getText());
 
             TransactionService service = new TransactionService();
-            service.addTransaction(loggedUser, transaction); // 传入 username
+            service.addTransaction(loggedUser, transaction); // 传入 loggedUser
 
             // 提交后清空输入框内容
             dateField.clear(); // 清空日期文本框
@@ -317,6 +318,7 @@ public class TransactionScene {
             categoryField.clear(); // 清空类别文本框
             methodField.clear(); // 清空支付方式文本框
             descriptionField.clear();
+
 
             // 提交成功后弹出一个提示框，通知用户交易已成功保存
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -335,21 +337,31 @@ public class TransactionScene {
                 descriptionBox,
                 categoryBox,
                 methodBox,
-                submitManualBtn);
-        centerBox.setSpacing(10); // 增加整个区域内的元素间距，以确保文本与下一个输入框有空隙
-        centerBox.setAlignment(Pos.CENTER); // 让整个 centerBox 内的元素居中
 
+                submitManualBtn
+        );
+        centerBox.setSpacing(10);  // 增加整个区域内的元素间距
+        centerBox.setAlignment(Pos.CENTER);  // 让整个 centerBox 内的元素居中
+
+      
         // 右侧传输csv文件部分
+        // 修改rightBar的VBox设置
         VBox rightBar = new VBox();
         rightBar.setStyle(
                 "-fx-border-color: #3282FA;" +
                         "-fx-border-width: 2;" +
                         "-fx-border-radius: 15;" +
                         "-fx-background-color: white;" +
-                        "-fx-padding: 20;" // 为右侧栏添加内边距，避免内容与边框紧贴
+                        "-fx-padding: 20;"
+
         );
+        rightBar.setPadding(new Insets(20, 20, 20, 20));
+        // 新增：允许垂直扩展
+        rightBar.setMaxHeight(Double.MAX_VALUE);
+        VBox.setVgrow(rightBar, Priority.ALWAYS);
+
         Label promptLabel = new Label("File Import:");
-        VBox.setMargin(promptLabel, new Insets(10, 0, 10, 0)); // 增加与下方内容的间距
+        VBox.setMargin(promptLabel, new Insets(10, 0, 0, 0)); // 增加与下方内容的间距
         promptLabel.setTextFill(Color.DARKBLUE);
         promptLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
         Button importCSVButton = new Button("Select a file");
@@ -359,6 +371,7 @@ public class TransactionScene {
                 "-fx-border-radius: 15;"); // 新增：按钮的背景色，文本颜色，字体粗细和圆角
 
         importCSVButton.setOnAction(event -> {
+          
             // FileChooser 是 JavaFX 提供的一个用于选择文件的控件。fileChooser 会弹出一个文件选择对话框，允许用户浏览文件系统并选择文件。
             FileChooser fileChooser = new FileChooser();
             // 通过 getExtensionFilters() 为 FileChooser 添加文件扩展名过滤器。它只允许用户选择 CSV 文件
@@ -372,7 +385,7 @@ public class TransactionScene {
 
         Label formatLabel = new Label("Your .CSV file should\ncontain the following columns:\n\n" +
                 "Transaction Date\n" +
-                "(format: YYYY–MM–DD, e.g. 2025–03–15)\n\n" +
+                "(format: YYYY-MM-DD, e.g. 2025-03-15)\n\n" +
                 "Transaction Type\n" +
                 "(only: Income / Expense)\n\n" +
                 "Currency\n" +
@@ -385,26 +398,48 @@ public class TransactionScene {
                 "(payment method)");
         formatLabel.setFont(new Font(11));
         formatLabel.setTextFill(Color.DARKBLUE);
-        // 设定按钮和文本之间的间距
-        VBox.setMargin(formatLabel, new Insets(10, 0, 0, 0)); // 为文本上方添加10的间距
-        // 设置所有组件的居中对齐
-        rightBar.setAlignment(Pos.CENTER); // 将右侧栏内容居中
-        formatLabel.setAlignment(Pos.CENTER);
-        importCSVButton.setAlignment(Pos.CENTER); // 设置按钮居中
+        VBox.setMargin(formatLabel, new Insets(10, 0, 20, 0)); // 增加与下方内容的间距
 
         rightBar.getChildren().addAll(
                 promptLabel,
                 importCSVButton,
-                formatLabel);
+                formatLabel
+        );
+      
+        rightBar.setSpacing(10);  // 增加整个区域内的元素间距
+        rightBar.setAlignment(Pos.CENTER);  // 让整个 rightBar 内的元素居中
 
-        // 使用 HBox 来确保中间和右侧的区域均分
-        HBox centerAndRight = new HBox(centerBox, rightBar);
-        centerAndRight.setSpacing(20); // 设置两者之间的间距
-        centerBox.setPrefWidth(width / 2); // 手动输入区域占宽度的一半
-        rightBar.setPrefWidth(width / 2); // 文件上传区域占宽度的一半
+        // 使用 GridPane 来确保两个模块大小一致，并且在窗口拉伸时一起变化
+        GridPane centerAndRight = new GridPane();
+        centerAndRight.setPadding(new Insets(20, 20, 20, 20));
+        centerAndRight.setHgap(20);  // 设置两个模块之间的水平间距
 
-        root.setCenter(centerAndRight); // 设置为中心区域
+        // 添加列约束，确保两列在窗口大小变化时均匀分配空间
+        ColumnConstraints column1 = new ColumnConstraints();
+        column1.setPercentWidth(50);  // 占据 50% 的宽度
+        column1.setFillWidth(true);  // 设置列填充整个宽度
+
+        ColumnConstraints column2 = new ColumnConstraints();
+        column2.setPercentWidth(50);  // 占据 50% 的宽度
+        column2.setFillWidth(true);  // 设置列填充整个宽度
+
+        centerAndRight.getColumnConstraints().addAll(column1, column2);
+
+        // 修改GridPane的行约束
+        RowConstraints rowConstraint = new RowConstraints();
+        rowConstraint.setVgrow(Priority.ALWAYS); // 允许行垂直扩展
+        rowConstraint.setFillHeight(true);
+        centerAndRight.getRowConstraints().add(rowConstraint);
+        // 确保内部元素不会限制VBox扩展
+        centerBox.setAlignment(Pos.TOP_CENTER); // 顶部居中，允许下方空间扩展
+        rightBar.setAlignment(Pos.TOP_CENTER);
+        // 将 centerBox 和 rightBar 添加到 GridPane 中
+        centerAndRight.add(centerBox, 0, 0);  // centerBox 放在第 0 列
+        centerAndRight.add(rightBar, 1, 0);   // rightBar 放在第 1 列
+
+        root.setCenter(centerAndRight);  // 将 GridPane 设置为 BorderPane 的中心区域
 
         return new Scene(root, width, height);
     }
 }
+

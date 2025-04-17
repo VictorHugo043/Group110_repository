@@ -14,14 +14,7 @@ import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 public class About {
-    private static final double MIN_WINDOW_WIDTH = 800;
-    private static final double MIN_WINDOW_HEIGHT = 450;
-
     public static Scene createScene(Stage stage, double width, double height, User loggedUser) {
-        // 确保窗口大小不小于最小值
-        final double finalWidth = Math.max(width, MIN_WINDOW_WIDTH);
-        final double finalHeight = Math.max(height, MIN_WINDOW_HEIGHT);
-
         // 整体 BorderPane
         BorderPane root = new BorderPane();
         root.setStyle("-fx-background-color: white;");
@@ -54,7 +47,7 @@ public class About {
         );
 
         // 中心内容：About 文本
-        Pane aboutContent = createAboutContent(stage, finalWidth, finalHeight, loggedUser);
+        Pane aboutContent = createAboutContent(stage, width, height, loggedUser);
 
         outerBox.getChildren().addAll(aboutContent);
         container.getChildren().addAll(topBar, outerBox);
@@ -62,22 +55,7 @@ public class About {
         centerBox.getChildren().add(container);
         root.setCenter(centerBox);
 
-        Scene scene = new Scene(root, finalWidth, finalHeight);
-        
-        // 添加窗口大小变化监听器
-        scene.widthProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal.doubleValue() < MIN_WINDOW_WIDTH) {
-                stage.setWidth(MIN_WINDOW_WIDTH);
-            }
-        });
-        
-        scene.heightProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal.doubleValue() < MIN_WINDOW_HEIGHT) {
-                stage.setHeight(MIN_WINDOW_HEIGHT);
-            }
-        });
-
-        return scene;
+        return new Scene(root, width, height);
     }
 
     /**

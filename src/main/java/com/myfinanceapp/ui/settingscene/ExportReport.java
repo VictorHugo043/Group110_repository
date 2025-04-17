@@ -2,6 +2,7 @@ package com.myfinanceapp.ui.settingscene;
 
 import com.myfinanceapp.model.User;
 import com.myfinanceapp.service.ExportReportService;
+import com.myfinanceapp.service.StatusService;
 import com.myfinanceapp.service.TransactionService;
 import com.myfinanceapp.ui.common.LeftSidebarFactory;
 import com.myfinanceapp.ui.common.SettingsTopBarFactory;
@@ -24,15 +25,9 @@ import java.util.Objects;
 public class ExportReport {
 
     private static User currentUser;
-    private static final double MIN_WINDOW_WIDTH = 800;
-    private static final double MIN_WINDOW_HEIGHT = 450;
-    private static ExportReportService reportService; // Store as a static field to access in close handler
+    private static ExportReportService reportService;
 
     public static Scene createScene(Stage stage, double width, double height, User loggedUser) {
-        // Ensure window size is not less than minimum
-        final double finalWidth = Math.max(width, MIN_WINDOW_WIDTH);
-        final double finalHeight = Math.max(height, MIN_WINDOW_HEIGHT);
-
         // Store current logged-in user
         currentUser = loggedUser;
         if (currentUser == null) {
@@ -105,8 +100,9 @@ public class ExportReport {
         Button backBtn = new Button("Back to Status");
         backBtn.setStyle("-fx-background-color: #3377ff; -fx-text-fill: white; -fx-font-weight: bold;");
         backBtn.setOnAction(e -> {
-            StatusScene statusScene = new StatusScene(stage, finalWidth, finalHeight, loggedUser);
+            StatusScene statusScene = new StatusScene(stage, width, height, loggedUser);
             stage.setScene(statusScene.createScene());
+            StatusService statusService = new StatusService(statusScene, loggedUser);
             stage.setTitle("Finanger - Status");
         });
 
@@ -151,22 +147,7 @@ public class ExportReport {
         centerBox.getChildren().add(container);
         root.setCenter(centerBox);
 
-        Scene scene = new Scene(root, finalWidth, finalHeight);
-
-        // Add window size change listeners
-        scene.widthProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal.doubleValue() < MIN_WINDOW_WIDTH) {
-                stage.setWidth(MIN_WINDOW_WIDTH);
-            }
-        });
-
-        scene.heightProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal.doubleValue() < MIN_WINDOW_HEIGHT) {
-                stage.setHeight(MIN_WINDOW_HEIGHT);
-            }
-        });
-
-        return scene;
+        return new Scene(root, width, height);
     }
 
     /**

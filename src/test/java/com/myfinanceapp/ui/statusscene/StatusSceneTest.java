@@ -2,14 +2,7 @@ package com.myfinanceapp.ui.statusscene;
 
 import com.myfinanceapp.model.User;
 import javafx.scene.Scene;
-import javafx.scene.chart.BarChart;
 import javafx.scene.chart.LineChart;
-import javafx.scene.chart.PieChart;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.TextArea;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,7 +12,6 @@ import org.mockito.MockitoAnnotations;
 import org.testfx.framework.junit5.ApplicationExtension;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(ApplicationExtension.class)
 class StatusSceneTest {
@@ -64,7 +56,7 @@ class StatusSceneTest {
         assertNotNull(statusScene.lineChart);
         assertNotNull(statusScene.barChart);
         assertNotNull(statusScene.pieChart);
-        assertNotNull(statusScene.suggestionsArea);
+        assertNotNull(statusScene.suggestionsWebView);
         assertNotNull(statusScene.questionArea);
         assertNotNull(statusScene.sendBtn);
         assertNotNull(statusScene.transactionsBox);

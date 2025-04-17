@@ -6,6 +6,7 @@ import com.myfinanceapp.service.AISortingService;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -70,10 +71,11 @@ class TransactionSceneTest {
         Scene scene = TransactionScene.createScene(stageMock, 800, 600, testUser);
         BorderPane root = (BorderPane) scene.getRoot();
         assertNotNull(root.getCenter());
-        assertTrue(root.getCenter() instanceof HBox);
+        // 修改：确保centerAndRight是GridPane
+        assertTrue(root.getCenter() instanceof GridPane);
 
-        HBox centerAndRight = (HBox) root.getCenter();
-        assertEquals(2, centerAndRight.getChildren().size());
+        GridPane centerAndRight = (GridPane) root.getCenter();
+        assertEquals(2, centerAndRight.getChildren().size()); // GridPane有两个列
         assertTrue(centerAndRight.getChildren().get(0) instanceof VBox); // centerBox
         assertTrue(centerAndRight.getChildren().get(1) instanceof VBox); // rightBar
     }
@@ -82,7 +84,7 @@ class TransactionSceneTest {
     void createScene_shouldInitializeManualInputControls() {
         Scene scene = TransactionScene.createScene(stageMock, 800, 600, testUser);
         BorderPane root = (BorderPane) scene.getRoot();
-        HBox centerAndRight = (HBox) root.getCenter();
+        GridPane centerAndRight = (GridPane) root.getCenter(); // 修改为GridPane
         VBox centerBox = (VBox) centerAndRight.getChildren().get(0);
 
         // Find manual input form controls
@@ -136,6 +138,7 @@ class TransactionSceneTest {
         assertEquals("Expense", typeCombo.getValue());
         assertEquals("CNY", currencyCombo.getValue());
     }
+
 
     @Test
     void createScene_shouldInitializeAutoSortingButton() {
@@ -196,11 +199,12 @@ class TransactionSceneTest {
         assertTrue(descriptionArea.isWrapText());
     }
 
+
     @Test
     void createScene_shouldInitializeFileImportControls() {
         Scene scene = TransactionScene.createScene(stageMock, 800, 600, testUser);
         BorderPane root = (BorderPane) scene.getRoot();
-        HBox centerAndRight = (HBox) root.getCenter();
+        GridPane centerAndRight = (GridPane) root.getCenter(); // 修改为GridPane
         VBox rightBar = (VBox) centerAndRight.getChildren().get(1);
 
         // Find file import button and instructions
@@ -222,3 +226,4 @@ class TransactionSceneTest {
     }
 
 }
+

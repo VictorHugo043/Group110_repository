@@ -7,9 +7,13 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.myfinanceapp.model.Goal;
 import com.myfinanceapp.model.User;
+import com.myfinanceapp.security.EncryptionService;
+import com.myfinanceapp.security.EncryptionService.EncryptedData;
+import com.myfinanceapp.security.EncryptionService.EncryptionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.crypto.SecretKey;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
@@ -25,6 +29,7 @@ public class GoalService {
             .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     private static final Logger logger = LoggerFactory.getLogger(GoalService.class);
+    private static final String FIXED_KEY = "MyFinanceAppSecretKey1234567890";  // 固定密钥
 
     /**
      * 获取用户的目标列表
@@ -70,12 +75,25 @@ public class GoalService {
     /**
      * 更新目标
      */
-    public static void updateGoal(Goal updatedGoal, User user) throws IOException {
-        List<Goal> existingGoals = getAllGoals(user);
-        existingGoals = existingGoals.stream()
-                .map(goal -> goal.getId().equals(updatedGoal.getId()) ? updatedGoal : goal)
-                .collect(Collectors.toList());
-        saveGoals(existingGoals, user);
+    public static void updateGoal(Goal goal, User loggedUser) throws IOException {
+        // Validate user permissions
+        if (!goal.getUserId().equals(loggedUser.getUid())) {
+            throw new SecurityException("User not authorized to update this goal");
+        }
+
+        // Get all goals
+        List<Goal> goals = getUserGoals(loggedUser);
+
+        // Find and update the goal
+        for (int i = 0; i < goals.size(); i++) {
+            if (goals.get(i).getId().equals(goal.getId())) {
+                goals.set(i, goal);
+                break;
+            }
+        }
+
+        // Save updated goals list
+        saveGoals(goals, loggedUser);
     }
 
     /**
@@ -96,10 +114,14 @@ public class GoalService {
             return new ArrayList<>();
         }
         try {
-            return objectMapper.readValue(goalsFile, objectMapper.getTypeFactory().constructCollectionType(List.class, Goal.class));
+            String encryptedContent = new String(java.nio.file.Files.readAllBytes(goalsFile.toPath()));
+            EncryptedData encryptedData = objectMapper.readValue(encryptedContent, EncryptedData.class);
+            SecretKey key = getEncryptionKey(user);
+            String decryptedContent = EncryptionService.decrypt(encryptedData, key);
+            return objectMapper.readValue(decryptedContent, 
+                objectMapper.getTypeFactory().constructCollectionType(List.class, Goal.class));
         } catch (Exception e) {
             logger.error("Error parsing goals file: " + e.getMessage(), e);
-            // If there's a parsing error, return an empty list
             return new ArrayList<>();
         }
     }
@@ -110,7 +132,16 @@ public class GoalService {
     public static void saveGoals(List<Goal> goals, User user) throws IOException {
         ensureDirectoryExists();
         File goalsFile = getGoalsFile(user);
-        objectMapper.writerWithDefaultPrettyPrinter().writeValue(goalsFile, goals);
+        try {
+            String content = objectMapper.writeValueAsString(goals);
+            SecretKey key = getEncryptionKey(user);
+            EncryptedData encryptedData = EncryptionService.encrypt(content, key);
+            String encryptedContent = objectMapper.writeValueAsString(encryptedData);
+            java.nio.file.Files.write(goalsFile.toPath(), encryptedContent.getBytes());
+        } catch (EncryptionException e) {
+            logger.error("Error encrypting goals: " + e.getMessage(), e);
+            throw new IOException("Failed to encrypt goals", e);
+        }
     }
 
     /**
@@ -129,6 +160,15 @@ public class GoalService {
     private static File getGoalsFile(User user) {
         String fileName = user.getUid() + ".json";
         return new File(GOALS_DIRECTORY_PATH + fileName);
+    }
+
+    /**
+     * 获取加密密钥
+     */
+    private static SecretKey getEncryptionKey(User user) throws EncryptionException {
+        // 使用固定密钥和用户ID派生加密密钥
+        byte[] salt = user.getUid().getBytes();  // 使用用户ID作为盐值
+        return EncryptionService.deriveKey(FIXED_KEY, salt);
     }
 
     /**
