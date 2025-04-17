@@ -43,7 +43,7 @@ public class PrivacyPolicy {
         Button backBtn = new Button("back");
         backBtn.setStyle("-fx-background-color: #BEE3F8; -fx-text-fill: black;");
         backBtn.setOnAction(e -> {
-            Scene signUpScene = SignUp.createScene(stage, INITIAL_WIDTH, INITIAL_HEIGHT);
+            Scene signUpScene = SignUp.createScene(stage, root.getScene().getWidth(), root.getScene().getHeight());
             stage.setScene(signUpScene);
             stage.setTitle("Sign Up");
         });

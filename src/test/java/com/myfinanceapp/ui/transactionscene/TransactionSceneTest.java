@@ -5,6 +5,7 @@ import com.myfinanceapp.service.TransactionService;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -23,7 +24,7 @@ class TransactionSceneTest {
 
     @Mock
     private Stage stageMock;
-    
+
     private User testUser;
 
     @BeforeEach
@@ -39,20 +40,20 @@ class TransactionSceneTest {
         Scene scene = TransactionScene.createScene(stageMock, 800, 600, testUser);
         assertNotNull(scene);
     }
-    
+
     @Test
     void createScene_shouldHaveCorrectDimensions() {
         Scene scene = TransactionScene.createScene(stageMock, 800, 600, testUser);
         assertEquals(800, scene.getWidth());
         assertEquals(600, scene.getHeight());
     }
-    
+
     @Test
     void createScene_shouldContainBorderPaneAsRoot() {
         Scene scene = TransactionScene.createScene(stageMock, 800, 600, testUser);
         assertTrue(scene.getRoot() instanceof BorderPane);
     }
-    
+
     @Test
     void createScene_shouldContainLeftSidebar() {
         Scene scene = TransactionScene.createScene(stageMock, 800, 600, testUser);
@@ -60,27 +61,28 @@ class TransactionSceneTest {
         assertNotNull(root.getLeft());
         assertTrue(root.getLeft() instanceof VBox);
     }
-    
+
     @Test
     void createScene_shouldContainCenterAndRightBoxes() {
         Scene scene = TransactionScene.createScene(stageMock, 800, 600, testUser);
         BorderPane root = (BorderPane) scene.getRoot();
         assertNotNull(root.getCenter());
-        assertTrue(root.getCenter() instanceof HBox);
-        
-        HBox centerAndRight = (HBox) root.getCenter();
-        assertEquals(2, centerAndRight.getChildren().size());
+        // 修改：确保centerAndRight是GridPane
+        assertTrue(root.getCenter() instanceof GridPane);
+
+        GridPane centerAndRight = (GridPane) root.getCenter();
+        assertEquals(2, centerAndRight.getChildren().size()); // GridPane有两个列
         assertTrue(centerAndRight.getChildren().get(0) instanceof VBox); // centerBox
         assertTrue(centerAndRight.getChildren().get(1) instanceof VBox); // rightBar
     }
-    
+
     @Test
     void createScene_shouldInitializeManualInputControls() {
         Scene scene = TransactionScene.createScene(stageMock, 800, 600, testUser);
         BorderPane root = (BorderPane) scene.getRoot();
-        HBox centerAndRight = (HBox) root.getCenter();
+        GridPane centerAndRight = (GridPane) root.getCenter(); // 修改为GridPane
         VBox centerBox = (VBox) centerAndRight.getChildren().get(0);
-        
+
         // Find manual input form controls
         TextField dateField = null;
         ComboBox<String> typeCombo = null;
@@ -89,7 +91,7 @@ class TransactionSceneTest {
         TextField categoryField = null;
         TextField methodField = null;
         Button submitButton = null;
-        
+
         for (int i = 0; i < centerBox.getChildren().size(); i++) {
             if (centerBox.getChildren().get(i) instanceof VBox) {
                 VBox item = (VBox) centerBox.getChildren().get(i);
@@ -118,7 +120,7 @@ class TransactionSceneTest {
                 submitButton = (Button) centerBox.getChildren().get(i);
             }
         }
-        
+
         assertNotNull(dateField, "Date field should exist");
         assertNotNull(typeCombo, "Type combo box should exist");
         assertNotNull(currencyCombo, "Currency combo box should exist");
@@ -126,32 +128,32 @@ class TransactionSceneTest {
         assertNotNull(categoryField, "Category field should exist");
         assertNotNull(methodField, "Method field should exist");
         assertNotNull(submitButton, "Submit button should exist");
-        
+
         // Verify default values
         assertEquals("Expense", typeCombo.getValue());
         assertEquals("CNY", currencyCombo.getValue());
     }
-    
+
     @Test
     void createScene_shouldInitializeFileImportControls() {
         Scene scene = TransactionScene.createScene(stageMock, 800, 600, testUser);
         BorderPane root = (BorderPane) scene.getRoot();
-        HBox centerAndRight = (HBox) root.getCenter();
+        GridPane centerAndRight = (GridPane) root.getCenter(); // 修改为GridPane
         VBox rightBar = (VBox) centerAndRight.getChildren().get(1);
-        
+
         // Find file import button and instructions
         Button importButton = null;
         Label instructionsLabel = null;
-        
+
         for (int i = 0; i < rightBar.getChildren().size(); i++) {
             if (rightBar.getChildren().get(i) instanceof Button) {
                 importButton = (Button) rightBar.getChildren().get(i);
-            } else if (rightBar.getChildren().get(i) instanceof Label 
+            } else if (rightBar.getChildren().get(i) instanceof Label
                     && ((Label) rightBar.getChildren().get(i)).getText().contains("Your .CSV file")) {
                 instructionsLabel = (Label) rightBar.getChildren().get(i);
             }
         }
-        
+
         assertNotNull(importButton, "Import button should exist");
         assertNotNull(instructionsLabel, "CSV instructions label should exist");
         assertEquals("Select a file", importButton.getText());

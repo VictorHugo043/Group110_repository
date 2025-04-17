@@ -110,7 +110,7 @@ public class UserManual {
         proceedButton.setPrefWidth(180);
         proceedButton.setStyle("-fx-background-color: #3377ff; -fx-text-fill: white; -fx-font-weight: bold;");
         proceedButton.setOnAction(e -> {
-            stage.setScene(LoginScene.createScene(stage, INITIAL_WIDTH, INITIAL_HEIGHT));
+            stage.setScene(LoginScene.createScene(stage, root.getScene().getWidth(), root.getScene().getHeight()));
             stage.setTitle("Finanger - Login");
         });
         HBox buttonBox = new HBox(proceedButton);
@@ -147,7 +147,7 @@ public class UserManual {
     }
 
     // Improved Markdown to HTML conversion
-    private static String convertMarkdownToHtml(String markdown) {
+    static String convertMarkdownToHtml(String markdown) {
         // Split the markdown into lines
         String[] lines = markdown.split("\n");
         StringBuilder html = new StringBuilder();
@@ -287,7 +287,7 @@ public class UserManual {
                 "   - [About (Subpage)](#about-subpage)\n" +
                 "6. [Log Out](#log-out)\n\n" +
                 "## 1. Overview of the Interface {#overview-of-the-interface}\n" +
-                "After logging into Finager, you’ll see a motivational message on the left sidebar (e.g., \"WELCOME BACK!\"). The interface is divided into two main sections:\n" +
+                "After logging into Finager, you'll see a motivational message on the left sidebar (e.g., \"WELCOME BACK!\"). The interface is divided into two main sections:\n" +
                 "- **Left Sidebar**: Contains the main navigation options in the following order:\n" +
                 "  - Status\n" +
                 "  - Goals\n" +
@@ -384,6 +384,6 @@ public class UserManual {
                 "## 6. Log Out {#log-out}\n" +
                 "1. From the left sidebar, click on **Log out**.\n" +
                 "2. You will be logged out of Finager and returned to the login screen.\n\n" +
-                "With Finager, you’re on your way to smarter financial management. Follow the structure of the sidebar and its subpages to navigate the application seamlessly. If you have any questions, use the AI Assistant feature on the Status page or refer to this manual for guidance. Happy budgeting!";
+                "With Finager, you're on your way to smarter financial management. Follow the structure of the sidebar and its subpages to navigate the application seamlessly. If you have any questions, use the AI Assistant feature on the Status page or refer to this manual for guidance. Happy budgeting!";
     }
 }
