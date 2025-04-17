@@ -17,6 +17,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
 import com.myfinanceapp.ui.common.LeftSidebarFactory;
+import com.myfinanceapp.service.AISortingService;
+
 
 public class TransactionScene {
     public static Scene createScene(Stage stage, double width, double height, User loggedUser) {
@@ -33,7 +35,8 @@ public class TransactionScene {
                         "-fx-border-width: 2;" +
                         "-fx-border-radius: 15;" +
                         "-fx-background-color: white;" +
-                        "-fx-padding: 20;"
+                        "-fx-padding: 20;" 
+
         );
         centerBox.setPadding(new Insets(20, 20, 40, 20));
         // 新增：允许垂直扩展
@@ -43,18 +46,19 @@ public class TransactionScene {
         Label topicLabel = new Label("Manual Import:");
         topicLabel.setTextFill(Color.DARKBLUE);
         topicLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
-        VBox.setMargin(topicLabel, new Insets(10, 0, 10, 0)); // 增加与下方内容的间距
+        // VBox.setMargin(topicLabel, new Insets(5, 0, 5, 0)); // 上下边距
 
+      
         Label dateLabel = new Label("Transition Date");
         dateLabel.setTextFill(Color.DARKBLUE);
         TextField dateField = new TextField();
         dateField.setPromptText("yyyy-MM-dd");
 
-        dateField.setMaxWidth(200);  // 设置输入框的最大宽度为 120
+        dateField.setMaxWidth(200); // 设置输入框的最大宽度为 120
         dateField.setPrefWidth(150); // 确保输入框宽度为 120
-
         dateField.setFocusTraversable(false); // 防止自动获取焦点
 
+      
         VBox dateBox = new VBox(dateLabel, dateField);
         dateBox.setAlignment(Pos.CENTER);
 
@@ -64,7 +68,7 @@ public class TransactionScene {
         typeCombo.getItems().addAll("Income", "Expense");
         typeCombo.setMaxWidth(200);
         typeCombo.setPrefWidth(150);
-        typeCombo.setValue("Expense");  // Set default value
+        typeCombo.setValue("Expense"); // Set default value
         typeCombo.setFocusTraversable(false); // 防止自动获取焦点
         VBox typeBox = new VBox(typeLabel, typeCombo);
         typeBox.setAlignment(Pos.CENTER);
@@ -74,7 +78,7 @@ public class TransactionScene {
         currencyCombo.getItems().addAll("CNY", "USD", "EUR");
         currencyCombo.setMaxWidth(200);
         currencyCombo.setPrefWidth(150);
-        currencyCombo.setValue("CNY");  // Set default value
+        currencyCombo.setValue("CNY"); // Set default value
         currencyCombo.setFocusTraversable(false); // 防止自动获取焦点
         VBox currencyBox = new VBox(currencyLabel, currencyCombo);
         currencyBox.setAlignment(Pos.CENTER);
@@ -89,14 +93,40 @@ public class TransactionScene {
         VBox amountBox = new VBox(amountLabel, amountField);
         amountBox.setAlignment(Pos.CENTER);
 
+      
+        // 添加描述框和自动分类按钮
+        Label descriptionLabel = new Label("Description");
+        descriptionLabel.setTextFill(Color.DARKBLUE);
+        TextArea descriptionField = new TextArea();
+        descriptionField.setPromptText("Enter transaction description");
+        descriptionField.setMaxWidth(200);
+        descriptionField.setPrefWidth(150);
+        descriptionField.setPrefRowCount(3);
+        descriptionField.setWrapText(true);
+        descriptionField.setFocusTraversable(false);
+        VBox descriptionBox = new VBox(descriptionLabel, descriptionField);
+        descriptionBox.setAlignment(Pos.CENTER);
+
+        Button autoSortButton = new Button("Auto-sorting");
+        autoSortButton.setStyle("-fx-background-color: #E0F0FF; " +
+                "-fx-text-fill: #3282FA; -fx-font-weight: bold; " +
+                "-fx-border-radius: 15;");
+        autoSortButton.setMaxWidth(100);
+        autoSortButton.setPrefWidth(100);
+
+        // 修改分类框的布局，将自动分类按钮放在category输入框右边
         Label categoryLabel = new Label("Category");
         categoryLabel.setTextFill(Color.DARKBLUE);
         TextField categoryField = new TextField();
         categoryField.setPromptText("e.g., Salary, Rent, Utilities");
         categoryField.setMaxWidth(200);
         categoryField.setPrefWidth(150);
-        categoryField.setFocusTraversable(false); // 防止自动获取焦点
-        VBox categoryBox = new VBox(categoryLabel, categoryField);
+        categoryField.setFocusTraversable(false);
+
+        HBox categoryAndButton = new HBox(categoryField, autoSortButton);
+        categoryAndButton.setSpacing(5);
+        categoryAndButton.setAlignment(Pos.CENTER);
+        VBox categoryBox = new VBox(categoryLabel, categoryAndButton);
         categoryBox.setAlignment(Pos.CENTER);
 
         Label methodLabel = new Label("Payment Method");
@@ -109,16 +139,41 @@ public class TransactionScene {
         VBox methodBox = new VBox(methodLabel, methodField);
         methodBox.setAlignment(Pos.CENTER);
 
+        // 按下自动分类按钮后调用AI进行自动分类
+        autoSortButton.setOnAction(event -> {
+            String description = descriptionField.getText();
+            if (description.isEmpty()) {
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Warning");
+                alert.setHeaderText(null);
+                alert.setContentText("Please enter a description first");
+                alert.showAndWait();
+                return;
+            }
+
+            try {
+                String category = AISortingService.sort(description);
+                categoryField.setText(category);
+            } catch (Exception e) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Error");
+                alert.setHeaderText(null);
+                alert.setContentText("Failed to auto-sort category: " + e.getMessage());
+                alert.showAndWait();
+            }
+        });
+
         Button submitManualBtn = new Button("Submit");
         submitManualBtn.setMaxWidth(150);
         submitManualBtn.setPrefWidth(100);
         submitManualBtn.setStyle("-fx-background-color: #E0F0FF; " +
                 "-fx-text-fill: #3282FA; -fx-font-weight: bold; " +
-                "-fx-border-radius: 15;"); // 新增：按钮的背景色，文本颜色，字体粗细和圆角
+                "-fx-border-radius: 15;");
+        VBox.setMargin(submitManualBtn, new Insets(10, 0, 0, 0));
+        submitManualBtn.setAlignment(Pos.CENTER);
 
-        VBox.setMargin(submitManualBtn, new Insets(20, 0, 0, 0));
-        submitManualBtn.setAlignment(Pos.CENTER); // 将按钮居中对齐
         submitManualBtn.setOnAction(event -> {
+
             // 检查所有字段是否已填写
             if (dateField.getText().isEmpty() ||
                     amountField.getText().isEmpty() ||
@@ -160,7 +215,10 @@ public class TransactionScene {
                     // 检查特定月份的天数上限
                     int maxDays;
                     switch (month) {
-                        case 4: case 6: case 9: case 11:
+                        case 4:
+                        case 6:
+                        case 9:
+                        case 11:
                             maxDays = 30;
                             break;
                         case 2:
@@ -220,6 +278,27 @@ public class TransactionScene {
                 return; // 停止提交过程
             }
 
+            /*
+             * // 检查交易类型与金额正负是否匹配
+             * String transactionType = typeCombo.getValue();
+             * if ((transactionType.equals("Income") && amount <= 0) ||
+             * (transactionType.equals("Expense") && amount >= 0)) {
+             *
+             * // 弹出提示窗口，告知金额与交易类型不匹配
+             * Alert alert = new Alert(Alert.AlertType.ERROR);
+             * alert.setTitle("Invalid Amount");
+             * alert.setHeaderText(null);
+             * if (transactionType.equals("Income")) {
+             * alert.setContentText("Income must be a postive number.");
+             * } else {
+             * alert.setContentText("Expense must be a negative number.");
+             * }
+             * alert.showAndWait();
+             * return; // 停止提交过程
+             * }
+             */
+
+
             Transaction transaction = new Transaction();
             transaction.setTransactionDate(dateField.getText());
             transaction.setTransactionType(typeCombo.getValue());
@@ -232,10 +311,14 @@ public class TransactionScene {
             service.addTransaction(loggedUser, transaction); // 传入 loggedUser
 
             // 提交后清空输入框内容
-            dateField.clear();
-            amountField.clear();
-            categoryField.clear();
-            methodField.clear();
+            dateField.clear(); // 清空日期文本框
+            // typeCombo.setValue(null); // 清空类型选择框
+            // currencyCombo.setValue(null); // 清空货币选择框
+            amountField.clear(); // 清空金额文本框
+            categoryField.clear(); // 清空类别文本框
+            methodField.clear(); // 清空支付方式文本框
+            descriptionField.clear();
+
 
             // 提交成功后弹出一个提示框，通知用户交易已成功保存
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -251,13 +334,16 @@ public class TransactionScene {
                 typeBox,
                 currencyBox,
                 amountBox,
+                descriptionBox,
                 categoryBox,
                 methodBox,
+
                 submitManualBtn
         );
         centerBox.setSpacing(10);  // 增加整个区域内的元素间距
         centerBox.setAlignment(Pos.CENTER);  // 让整个 centerBox 内的元素居中
 
+      
         // 右侧传输csv文件部分
         // 修改rightBar的VBox设置
         VBox rightBar = new VBox();
@@ -267,6 +353,7 @@ public class TransactionScene {
                         "-fx-border-radius: 15;" +
                         "-fx-background-color: white;" +
                         "-fx-padding: 20;"
+
         );
         rightBar.setPadding(new Insets(20, 20, 20, 20));
         // 新增：允许垂直扩展
@@ -284,7 +371,10 @@ public class TransactionScene {
                 "-fx-border-radius: 15;"); // 新增：按钮的背景色，文本颜色，字体粗细和圆角
 
         importCSVButton.setOnAction(event -> {
+          
+            // FileChooser 是 JavaFX 提供的一个用于选择文件的控件。fileChooser 会弹出一个文件选择对话框，允许用户浏览文件系统并选择文件。
             FileChooser fileChooser = new FileChooser();
+            // 通过 getExtensionFilters() 为 FileChooser 添加文件扩展名过滤器。它只允许用户选择 CSV 文件
             fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV Files", "*.csv"));
             File file = fileChooser.showOpenDialog(stage);
             if (file != null) {
@@ -315,6 +405,7 @@ public class TransactionScene {
                 importCSVButton,
                 formatLabel
         );
+      
         rightBar.setSpacing(10);  // 增加整个区域内的元素间距
         rightBar.setAlignment(Pos.CENTER);  // 让整个 rightBar 内的元素居中
 
@@ -351,3 +442,4 @@ public class TransactionScene {
         return new Scene(root, width, height);
     }
 }
+
