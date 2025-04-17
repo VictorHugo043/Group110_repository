@@ -144,7 +144,7 @@ public class TransactionService {
     
 
 //将用户的交易记录保存到一个 JSON 文件中
-    private void saveTransactions(User user, List<Transaction> transactions) {
+public void saveTransactions(User user, List<Transaction> transactions) {
         File dir = new File(TRANSACTION_DIR);
         if(!dir.exists()){
             dir.mkdirs();

@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 import com.vladsch.flexmark.util.ast.Node;
 import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.html.HtmlRenderer;
-import javafx.scene.web.WebView;
 import javafx.application.Platform;
 
 public class StatusService {
@@ -219,9 +218,8 @@ public class StatusService {
                             String currentChunk = answer.substring(0, end);
 
                             Node doc = mdParser.parse(currentChunk);
-                            String partialHtml = mdRenderer.render(doc);
 
-                            final String html = partialHtml;
+                            final String html = mdRenderer.render(doc);
                             Platform.runLater(() -> updateWebView(html));
 
                             try { Thread.sleep(50); } catch(InterruptedException e){}

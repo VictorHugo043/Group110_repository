@@ -2,6 +2,7 @@ package com.myfinanceapp.ui.statusscene;
 
 import com.myfinanceapp.model.User;
 import com.myfinanceapp.ui.common.LeftSidebarFactory;
+import com.myfinanceapp.ui.transactionscene.TransactionManagementScene;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -248,6 +249,15 @@ public class StatusScene {
         title.setTextFill(Color.web("#3282FA"));
         title.setWrapText(true);
 
+        // 添加管理按钮
+        Button manageBtn = new Button("Manage All Transactions");
+        manageBtn.setStyle("-fx-background-color: #E0F0FF; -fx-text-fill: #3282FA; -fx-background-radius: 10;");
+        manageBtn.setOnAction(e -> openTransactionManagement());
+
+        HBox titleBar = new HBox(10, title, manageBtn);
+        titleBar.setAlignment(Pos.CENTER_LEFT);
+        HBox.setHgrow(title, Priority.ALWAYS);
+
         transactionsBox = new VBox(5);
         transactionsBox.setAlignment(Pos.TOP_LEFT);
 
@@ -257,10 +267,19 @@ public class StatusScene {
         scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
 
-        VBox vbox = new VBox(10, title, scrollPane);
+        VBox vbox = new VBox(10, titleBar, scrollPane);
         vbox.setAlignment(Pos.TOP_LEFT);
         txPane.setCenter(vbox);
         return txPane;
+    }
+
+    private void openTransactionManagement() {
+        // 获取当前窗口的实际大小
+        double currentWidth = stage.getWidth();
+        double currentHeight = stage.getHeight();
+        TransactionManagementScene txManagementScene = new TransactionManagementScene(stage, currentWidth, currentHeight, currentUser);
+        Scene scene = txManagementScene.createScene();
+        stage.setScene(scene);
     }
 
     private Pane createAIPane() {
