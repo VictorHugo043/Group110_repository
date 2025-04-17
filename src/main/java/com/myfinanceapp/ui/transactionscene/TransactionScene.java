@@ -49,8 +49,11 @@ public class TransactionScene {
         dateLabel.setTextFill(Color.DARKBLUE);
         TextField dateField = new TextField();
         dateField.setPromptText("yyyy-MM-dd");
-        dateField.setMaxWidth(200);
-        dateField.setPrefWidth(150);
+
+        dateField.setMaxWidth(200);  // 设置输入框的最大宽度为 120
+        dateField.setPrefWidth(150); // 确保输入框宽度为 120
+
+        dateField.setFocusTraversable(false); // 防止自动获取焦点
 
         VBox dateBox = new VBox(dateLabel, dateField);
         dateBox.setAlignment(Pos.CENTER);
