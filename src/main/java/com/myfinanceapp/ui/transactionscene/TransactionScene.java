@@ -12,18 +12,18 @@ import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.scene.text.Font;
-import java.io.File;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 
 import com.myfinanceapp.ui.common.LeftSidebarFactory;
 import com.myfinanceapp.service.AISortingService;
 
+import java.io.File;
+import java.time.LocalDate;
+import java.text.ParseException;
 
 public class TransactionScene {
     public static Scene createScene(Stage stage, double width, double height, User loggedUser) {
         BorderPane root = new BorderPane();
-        root.setStyle("-fx-background-color: white;");
+        root.setStyle("-fx-background-color: white; -fx-text-fill: darkblue;");
 
         VBox sideBar = LeftSidebarFactory.createLeftSidebar(stage, "New", loggedUser);
         root.setLeft(sideBar);
@@ -31,11 +31,11 @@ public class TransactionScene {
         // 中间手动输入部分
         VBox centerBox = new VBox();
         centerBox.setStyle(
-                "-fx-border-color: #3282FA;" +
+                "-fx-border-color: #3282fa;" +
                         "-fx-border-width: 2;" +
                         "-fx-border-radius: 15;" +
                         "-fx-background-color: white;" +
-                        "-fx-padding: 20;" 
+                        "-fx-padding: 20;"
 
         );
         centerBox.setPadding(new Insets(20, 20, 40, 20));
@@ -48,18 +48,37 @@ public class TransactionScene {
         topicLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
         // VBox.setMargin(topicLabel, new Insets(5, 0, 5, 0)); // 上下边距
 
-      
-        Label dateLabel = new Label("Transition Date");
+        // 日期选择器部分
+        Label dateLabel = new Label("Transaction Date");
         dateLabel.setTextFill(Color.DARKBLUE);
-        TextField dateField = new TextField();
-        dateField.setPromptText("yyyy-MM-dd");
 
-        dateField.setMaxWidth(200); // 设置输入框的最大宽度为 120
-        dateField.setPrefWidth(150); // 确保输入框宽度为 120
-        dateField.setFocusTraversable(false); // 防止自动获取焦点
+        // 创建DatePicker并设置提示文本
+        DatePicker datePicker = new DatePicker();
+        datePicker.setPromptText("Select date");
 
-      
-        VBox dateBox = new VBox(dateLabel, dateField);
+        // 设置日期选择器的最大和最小宽度
+        datePicker.setMaxWidth(200);
+        datePicker.setPrefWidth(150);
+
+        datePicker.setDayCellFactory(picker -> new DateCell() {
+            @Override
+            public void updateItem(LocalDate date, boolean empty) {
+                super.updateItem(date, empty);
+                // 禁用未来的日期
+                boolean isFuture = date.isAfter(LocalDate.now());
+                setDisable(isFuture);
+
+                // 仅修改文字颜色
+                if (isFuture) {
+                    setStyle("-fx-text-fill: #808080;"); // 灰色文字
+                } else {
+                    setStyle(""); // 恢复默认样式
+                }
+            }
+        });
+
+        // 将日期选择器放入VBox中
+        VBox dateBox = new VBox(dateLabel, datePicker);
         dateBox.setAlignment(Pos.CENTER);
 
         Label typeLabel = new Label("Transition Type");
@@ -74,6 +93,7 @@ public class TransactionScene {
         typeBox.setAlignment(Pos.CENTER);
 
         Label currencyLabel = new Label("Currency");
+        currencyLabel.setTextFill(Color.DARKBLUE);
         ComboBox<String> currencyCombo = new ComboBox<>();
         currencyCombo.getItems().addAll("CNY", "USD", "EUR");
         currencyCombo.setMaxWidth(200);
@@ -93,7 +113,6 @@ public class TransactionScene {
         VBox amountBox = new VBox(amountLabel, amountField);
         amountBox.setAlignment(Pos.CENTER);
 
-      
         // 添加描述框和自动分类按钮
         Label descriptionLabel = new Label("Description");
         descriptionLabel.setTextFill(Color.DARKBLUE);
@@ -173,13 +192,13 @@ public class TransactionScene {
         submitManualBtn.setAlignment(Pos.CENTER);
 
         submitManualBtn.setOnAction(event -> {
+            // 获取日期选择器的值
+            String selectedDate = datePicker.getValue() != null ? datePicker.getValue().toString() : null;
 
-            // 检查所有字段是否已填写
-            if (dateField.getText().isEmpty() ||
+            if (selectedDate == null || selectedDate.isEmpty() ||
                     amountField.getText().isEmpty() ||
                     categoryField.getText().isEmpty() ||
                     methodField.getText().isEmpty()) {
-
                 // 弹出提示窗口，要求填写所有字段
                 Alert alert = new Alert(Alert.AlertType.WARNING);
                 alert.setTitle("Missing Information");
@@ -188,17 +207,12 @@ public class TransactionScene {
                 alert.showAndWait();
                 return; // 停止提交过程
             }
+
             // 验证日期格式和范围
             try {
-                // 首先检查基本格式
-                String dateText = dateField.getText();
-                String datePattern = "yyyy-MM-dd";
-                SimpleDateFormat dateFormat = new SimpleDateFormat(datePattern);
-                dateFormat.setLenient(false);
-                dateFormat.parse(dateText);
-
-                // 额外检查月份和日期范围
-                String[] dateParts = dateText.split("-");
+                // 此时selectedDate已经是正确格式，无需再次验证
+                // 只需检查年月日是否有效
+                String[] dateParts = selectedDate.split("-");
                 if (dateParts.length == 3) {
                     int year = Integer.parseInt(dateParts[0]);
                     int month = Integer.parseInt(dateParts[1]);
@@ -278,29 +292,8 @@ public class TransactionScene {
                 return; // 停止提交过程
             }
 
-            /*
-             * // 检查交易类型与金额正负是否匹配
-             * String transactionType = typeCombo.getValue();
-             * if ((transactionType.equals("Income") && amount <= 0) ||
-             * (transactionType.equals("Expense") && amount >= 0)) {
-             *
-             * // 弹出提示窗口，告知金额与交易类型不匹配
-             * Alert alert = new Alert(Alert.AlertType.ERROR);
-             * alert.setTitle("Invalid Amount");
-             * alert.setHeaderText(null);
-             * if (transactionType.equals("Income")) {
-             * alert.setContentText("Income must be a postive number.");
-             * } else {
-             * alert.setContentText("Expense must be a negative number.");
-             * }
-             * alert.showAndWait();
-             * return; // 停止提交过程
-             * }
-             */
-
-
             Transaction transaction = new Transaction();
-            transaction.setTransactionDate(dateField.getText());
+            transaction.setTransactionDate(selectedDate);  // 使用选定的日期
             transaction.setTransactionType(typeCombo.getValue());
             transaction.setCurrency(currencyCombo.getValue());
             transaction.setAmount(amount);
@@ -311,14 +304,11 @@ public class TransactionScene {
             service.addTransaction(loggedUser, transaction); // 传入 loggedUser
 
             // 提交后清空输入框内容
-            dateField.clear(); // 清空日期文本框
-            // typeCombo.setValue(null); // 清空类型选择框
-            // currencyCombo.setValue(null); // 清空货币选择框
+            datePicker.setValue(null); // 清空日期选择器
             amountField.clear(); // 清空金额文本框
             categoryField.clear(); // 清空类别文本框
             methodField.clear(); // 清空支付方式文本框
-            descriptionField.clear();
-
+            descriptionField.clear(); // 清空描述框
 
             // 提交成功后弹出一个提示框，通知用户交易已成功保存
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -343,7 +333,6 @@ public class TransactionScene {
         centerBox.setSpacing(10);  // 增加整个区域内的元素间距
         centerBox.setAlignment(Pos.CENTER);  // 让整个 centerBox 内的元素居中
 
-      
         // 右侧传输csv文件部分
         // 修改rightBar的VBox设置
         VBox rightBar = new VBox();
@@ -361,9 +350,10 @@ public class TransactionScene {
         VBox.setVgrow(rightBar, Priority.ALWAYS);
 
         Label promptLabel = new Label("File Import:");
-        VBox.setMargin(promptLabel, new Insets(10, 0, 0, 0)); // 增加与下方内容的间距
         promptLabel.setTextFill(Color.DARKBLUE);
         promptLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+        VBox.setMargin(promptLabel, new Insets(10, 0, 0, 0)); // 增加与下方内容的间距
+
         Button importCSVButton = new Button("Select a file");
         importCSVButton.setPrefWidth(100);
         importCSVButton.setStyle("-fx-background-color: #E0F0FF; " +
@@ -371,7 +361,7 @@ public class TransactionScene {
                 "-fx-border-radius: 15;"); // 新增：按钮的背景色，文本颜色，字体粗细和圆角
 
         importCSVButton.setOnAction(event -> {
-          
+
             // FileChooser 是 JavaFX 提供的一个用于选择文件的控件。fileChooser 会弹出一个文件选择对话框，允许用户浏览文件系统并选择文件。
             FileChooser fileChooser = new FileChooser();
             // 通过 getExtensionFilters() 为 FileChooser 添加文件扩展名过滤器。它只允许用户选择 CSV 文件
@@ -405,7 +395,7 @@ public class TransactionScene {
                 importCSVButton,
                 formatLabel
         );
-      
+
         rightBar.setSpacing(10);  // 增加整个区域内的元素间距
         rightBar.setAlignment(Pos.CENTER);  // 让整个 rightBar 内的元素居中
 
@@ -437,9 +427,31 @@ public class TransactionScene {
         centerAndRight.add(centerBox, 0, 0);  // centerBox 放在第 0 列
         centerAndRight.add(rightBar, 1, 0);   // rightBar 放在第 1 列
 
-        root.setCenter(centerAndRight);  // 将 GridPane 设置为 BorderPane 的中心区域
+        // 新增滚动面板
+        ScrollPane scrollPane = new ScrollPane();
+        scrollPane.setContent(centerAndRight);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scrollPane.setStyle(
+                "-fx-background: white;" +
+                        "-fx-border-color: transparent;" +
+                        "-fx-control-inner-background: white;" +
+                        "-fx-text-fill: transparent;"
+        );
+        scrollPane.setPadding(new Insets(0)); // 移除内边距
 
-        return new Scene(root, width, height);
+        // 保持滚动面板的扩展性
+        scrollPane.setMaxHeight(Double.MAX_VALUE);
+        scrollPane.setMaxWidth(Double.MAX_VALUE);
+        BorderPane.setMargin(scrollPane, new Insets(0));
+
+        root.setCenter(scrollPane);
+        Scene scene = new Scene(root, width, height);
+
+        // 添加一条全局样式：所有 Label 默认为 darkblue
+        scene.getStylesheets().add("data:,Label { -fx-text-fill: darkblue; }");
+
+        return scene;
+
     }
 }
-
