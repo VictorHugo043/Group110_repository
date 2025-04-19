@@ -5,6 +5,7 @@ import com.myfinanceapp.ui.common.LeftSidebarFactory;
 import com.myfinanceapp.ui.common.SettingsTopBarFactory;
 import com.myfinanceapp.ui.statusscene.StatusScene;
 import com.myfinanceapp.service.StatusService;
+import com.myfinanceapp.service.ThemeService;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -14,13 +15,18 @@ import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 public class About {
+    // 重载方法，兼容旧的调用方式
     public static Scene createScene(Stage stage, double width, double height, User loggedUser) {
+        return createScene(stage, width, height, loggedUser, new ThemeService());
+    }
+
+    public static Scene createScene(Stage stage, double width, double height, User loggedUser, ThemeService themeService) {
         // 整体 BorderPane
         BorderPane root = new BorderPane();
-        root.setStyle("-fx-background-color: white;");
+        root.setStyle(themeService.getCurrentThemeStyle());
 
         // 左侧边栏: Settings选中 (与 SystemSettings 相同)
-        VBox sideBar = LeftSidebarFactory.createLeftSidebar(stage, "Settings", loggedUser);
+        VBox sideBar = LeftSidebarFactory.createLeftSidebar(stage, "Settings", loggedUser, themeService);
         root.setLeft(sideBar);
 
         // 中心容器: 垂直组合 (topBar, outerBox)，放入 centerBox
@@ -31,7 +37,7 @@ public class About {
         container.setAlignment(Pos.CENTER);
 
         // Tab栏: About 选中
-        HBox topBar = SettingsTopBarFactory.createTopBar(stage, "About", loggedUser);
+        HBox topBar = SettingsTopBarFactory.createTopBar(stage, "About", loggedUser, themeService);
 
         // outerBox: 下方圆角容器
         VBox outerBox = new VBox(0);
@@ -43,11 +49,11 @@ public class About {
                         "-fx-border-width: 2;" +
                         "-fx-border-radius: 0 0 12 12;" +
                         "-fx-background-radius: 0 0 12 12;" +
-                        "-fx-background-color: white;"
+                        themeService.getCurrentFormBackgroundStyle()
         );
 
         // 中心内容：About 文本
-        Pane aboutContent = createAboutContent(stage, width, height, loggedUser);
+        Pane aboutContent = createAboutContent(stage, width, height, loggedUser, themeService);
 
         outerBox.getChildren().addAll(aboutContent);
         container.getChildren().addAll(topBar, outerBox);
@@ -61,13 +67,14 @@ public class About {
     /**
      * 生成 About 界面的正文内容
      */
-    private static Pane createAboutContent(Stage stage, double width, double height, User loggedUser) {
+    private static Pane createAboutContent(Stage stage, double width, double height, User loggedUser, ThemeService themeService) {
         VBox container = new VBox(20);
         container.setAlignment(Pos.TOP_CENTER);
         container.setPadding(new Insets(30));
 
         Label titleLabel = new Label("About Finanger");
         titleLabel.setFont(new Font(20));
+        titleLabel.setStyle(themeService.getTextColorStyle());
 
         Label descLabel = new Label(
                 "Finanger is an AI-powered personal finance manager designed to help you take control " +
@@ -82,6 +89,13 @@ public class About {
         descLabel.setFont(new Font(14));
         descLabel.setWrapText(true);
         descLabel.setMaxWidth(500);
+        descLabel.setStyle(themeService.getTextColorStyle());
+
+        // Wrap descLabel in a ScrollPane to enable scrolling
+        ScrollPane scrollPane = new ScrollPane(descLabel);
+        scrollPane.setFitToWidth(true); // Ensure the content fits the width of the ScrollPane
+        scrollPane.setPrefViewportHeight(250); // Set a reasonable height for the viewport
+        scrollPane.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
 
         // 按钮区
         VBox buttonBox = new VBox();
@@ -89,7 +103,7 @@ public class About {
         buttonBox.setPadding(new Insets(20, 0, 0, 0));
 
         Button backBtn = new Button("Back to Status");
-        backBtn.setStyle("-fx-background-color: #E0F0FF; -fx-text-fill: #3282FA; -fx-font-weight: bold;");
+        backBtn.setStyle(themeService.getButtonStyle());
         backBtn.setOnAction(e -> {
             // 回到 Status 界面
             StatusScene statusScene = new StatusScene(stage, width, height, loggedUser);
@@ -100,7 +114,7 @@ public class About {
 
         buttonBox.getChildren().add(backBtn);
 
-        container.getChildren().addAll(titleLabel, descLabel, buttonBox);
+        container.getChildren().addAll(titleLabel, scrollPane, buttonBox);
         return container;
     }
 }

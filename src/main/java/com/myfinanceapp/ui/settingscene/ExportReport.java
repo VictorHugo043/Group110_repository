@@ -7,6 +7,7 @@ import com.myfinanceapp.service.TransactionService;
 import com.myfinanceapp.ui.common.LeftSidebarFactory;
 import com.myfinanceapp.ui.common.SettingsTopBarFactory;
 import com.myfinanceapp.ui.statusscene.StatusScene;
+import com.myfinanceapp.service.ThemeService;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -27,7 +28,12 @@ public class ExportReport {
     private static User currentUser;
     private static ExportReportService reportService;
 
+    // 重载方法，兼容旧的调用方式
     public static Scene createScene(Stage stage, double width, double height, User loggedUser) {
+        return createScene(stage, width, height, loggedUser, new ThemeService());
+    }
+
+    public static Scene createScene(Stage stage, double width, double height, User loggedUser, ThemeService themeService) {
         // Store current logged-in user
         currentUser = loggedUser;
         if (currentUser == null) {
@@ -35,10 +41,10 @@ public class ExportReport {
         }
 
         BorderPane root = new BorderPane();
-        root.setStyle("-fx-background-color: white;");
+        root.setStyle(themeService.getCurrentThemeStyle());
 
         // Left sidebar: "Settings" selected
-        VBox sideBar = LeftSidebarFactory.createLeftSidebar(stage, "Settings", loggedUser);
+        VBox sideBar = LeftSidebarFactory.createLeftSidebar(stage, "Settings", loggedUser, themeService);
         root.setLeft(sideBar);
 
         // Center content
@@ -50,7 +56,7 @@ public class ExportReport {
         container.setAlignment(Pos.CENTER);
 
         // Top tab bar: "Export Report" selected
-        HBox topBar = SettingsTopBarFactory.createTopBar(stage, "Export Report", loggedUser);
+        HBox topBar = SettingsTopBarFactory.createTopBar(stage, "Export Report", loggedUser, themeService);
 
         // Bottom rounded container
         VBox outerBox = new VBox(20);
@@ -63,7 +69,7 @@ public class ExportReport {
                         "-fx-border-width: 2;" +
                         "-fx-border-radius: 0 0 12 12;" +
                         "-fx-background-radius: 0 0 12 12;" +
-                        "-fx-background-color: white;"
+                        themeService.getCurrentFormBackgroundStyle()
         );
 
         // Date range selection
@@ -78,7 +84,11 @@ public class ExportReport {
         }
 
         Label dateRangeLabel = new Label("Select Date Range");
-        dateRangeLabel.setStyle("-fx-text-fill: #3282FA; -fx-font-size: 16; -fx-font-weight: bold;");
+        dateRangeLabel.setStyle(
+                "-fx-text-fill: #3282FA;" +
+                        "-fx-font-size: 16;" +
+                        "-fx-font-weight: bold;"
+        );
 
         HBox dateRangeHeader = new HBox(10, calendarIcon, dateRangeLabel);
         dateRangeHeader.setAlignment(Pos.CENTER_LEFT);
@@ -93,12 +103,11 @@ public class ExportReport {
 
         // Export button
         Button exportButton = new Button("Export Report");
-        exportButton.setStyle("-fx-background-color: #BEE3F8; -fx-text-fill: #3282FA; -fx-font-weight: bold; " +
-                "-fx-background-radius: 10; -fx-border-radius: 10;");
+        exportButton.setStyle(themeService.getButtonStyle());
 
         // Back to Status button
         Button backBtn = new Button("Back to Status");
-        backBtn.setStyle("-fx-background-color: #3377ff; -fx-text-fill: white; -fx-font-weight: bold;");
+        backBtn.setStyle(themeService.getButtonStyle());
         backBtn.setOnAction(e -> {
             StatusScene statusScene = new StatusScene(stage, width, height, loggedUser);
             stage.setScene(statusScene.createScene());

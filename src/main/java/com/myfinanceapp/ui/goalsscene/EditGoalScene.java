@@ -6,6 +6,7 @@ import com.myfinanceapp.service.GoalService;
 import com.myfinanceapp.service.GoalFormService;
 import com.myfinanceapp.ui.common.LeftSidebarFactory;
 import com.myfinanceapp.ui.common.SceneManager;
+import com.myfinanceapp.service.ThemeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import javafx.geometry.Insets;
@@ -16,7 +17,6 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.event.ActionEvent;
@@ -28,12 +28,9 @@ import java.time.LocalDate;
 public class EditGoalScene {
     private static final Logger logger = LoggerFactory.getLogger(EditGoalScene.class);
     private static final Font LABEL_FONT = Font.font("Arial", 14);
-    private static final Color LABEL_COLOR = Color.DARKBLUE;
     private static final String[] CURRENCIES = {"CNY", "USD", "EUR", "JPY", "GBP"};
-    
+
     // UI Constants
-    private static final String BACKGROUND_STYLE = "-fx-background-color: white;";
-    private static final String SAVE_BUTTON_STYLE = "-fx-background-color: #3282FA; -fx-text-fill: white;";
     private static final double FORM_MAX_WIDTH = 600;
     private static final double BUTTON_WIDTH = 120;
     private static final double FIELD_WIDTH = 250;
@@ -41,82 +38,87 @@ public class EditGoalScene {
     private static final double MIN_WINDOW_WIDTH = 800;
     private static final double MIN_WINDOW_HEIGHT = 450;
 
+    // 重载方法，兼容旧的调用方式
     public static Scene createScene(Stage stage, double width, double height, User loggedUser, Goal goalToEdit) {
+        return createScene(stage, width, height, loggedUser, goalToEdit, new ThemeService());
+    }
+
+    public static Scene createScene(Stage stage, double width, double height, User loggedUser, Goal goalToEdit, ThemeService themeService) {
         // 确保窗口大小不小于最小值
         final double finalWidth = Math.max(width, MIN_WINDOW_WIDTH);
         final double finalHeight = Math.max(height, MIN_WINDOW_HEIGHT);
-        
+
         BorderPane root = new BorderPane();
-        root.setStyle(BACKGROUND_STYLE);
+        root.setStyle(themeService.getCurrentThemeStyle());
 
         // Left sidebar
-        VBox sideBar = LeftSidebarFactory.createLeftSidebar(stage, "Goals", loggedUser);
+        VBox sideBar = LeftSidebarFactory.createLeftSidebar(stage, "Goals", loggedUser, themeService);
         root.setLeft(sideBar);
 
         // Main container
         VBox mainBox = new VBox(20);
         mainBox.setAlignment(Pos.CENTER);
         mainBox.setPadding(new Insets(MAIN_PADDING));
-        
+
         // 绑定主容器最大宽度到窗口宽度
         mainBox.maxWidthProperty().bind(
-            root.widthProperty()
-                .subtract(sideBar.widthProperty())
-                .subtract(MAIN_PADDING * 2)
+                root.widthProperty()
+                        .subtract(sideBar.widthProperty())
+                        .subtract(MAIN_PADDING * 2)
         );
 
         // Title
         Label titleLabel = new Label("Edit Goal");
         titleLabel.setFont(Font.font("Arial", 24));
-        titleLabel.setTextFill(Color.DARKBLUE);
+        titleLabel.setStyle(themeService.getTextColorStyle());
 
         // Form container
         GridPane grid = new GridPane();
         grid.setHgap(20);
         grid.setVgap(15);
         grid.setAlignment(Pos.CENTER);
-        
+
         // 绑定网格宽度到主容器宽度
         grid.prefWidthProperty().bind(mainBox.maxWidthProperty());
 
         // Goal type label (disabled)
         Label typeLabel = new Label(getGoalTypeDisplay(goalToEdit.getType()));
         typeLabel.setFont(LABEL_FONT);
-        typeLabel.setTextFill(LABEL_COLOR);
-        
+        typeLabel.setStyle(themeService.getTextColorStyle());
+
         Tooltip tooltip = new Tooltip("Goal type cannot be modified");
-        tooltip.setStyle("-fx-font-size: 12px;");
+        tooltip.setStyle("-fx-font-size: 12px;" + themeService.getTextColorStyle());
         tooltip.setShowDelay(javafx.util.Duration.millis(100));
         tooltip.setHideDelay(javafx.util.Duration.millis(200));
         typeLabel.setTooltip(tooltip);
-        
+
         Label typeTitleLabel = new Label("Type of your goal:");
         typeTitleLabel.setFont(LABEL_FONT);
-        typeTitleLabel.setTextFill(LABEL_COLOR);
-        
+        typeTitleLabel.setStyle(themeService.getTextColorStyle());
+
         grid.add(typeTitleLabel, 0, 0);
         grid.add(typeLabel, 1, 0);
 
         // Goal title field
-        TextField titleField = createTextField("Goal Title", 1, grid, "Goal title:", LABEL_FONT, LABEL_COLOR);
+        TextField titleField = createTextField("Goal Title", 1, grid, "Goal title:", LABEL_FONT, themeService);
         titleField.setText(goalToEdit.getTitle());
         titleField.prefWidthProperty().bind(grid.widthProperty().multiply(0.6));
 
         // Target amount field
-        TextField amountField = createTextField("Target Amount", 2, grid, "Target amount:", LABEL_FONT, LABEL_COLOR);
+        TextField amountField = createTextField("Target Amount", 2, grid, "Target amount:", LABEL_FONT, themeService);
         amountField.setText(String.valueOf(goalToEdit.getTargetAmount()));
         amountField.prefWidthProperty().bind(grid.widthProperty().multiply(0.6));
-        
+
         // Currency selection
-        ComboBox<String> currencyCombo = createComboBox(CURRENCIES, 3, grid, "Currency:", LABEL_FONT, LABEL_COLOR);
+        ComboBox<String> currencyCombo = createComboBox(CURRENCIES, 3, grid, "Currency:", LABEL_FONT, themeService);
         currencyCombo.setValue(goalToEdit.getCurrency());
         currencyCombo.prefWidthProperty().bind(grid.widthProperty().multiply(0.6));
 
         // Deadline date picker
-        DatePicker deadlinePicker = createDatePicker(4, grid, "Deadline:", LABEL_FONT, LABEL_COLOR);
+        DatePicker deadlinePicker = createDatePicker(4, grid, "Deadline:", LABEL_FONT, themeService);
         deadlinePicker.setValue(goalToEdit.getDeadline());
         deadlinePicker.prefWidthProperty().bind(grid.widthProperty().multiply(0.6));
-        
+
         // Ensure deadline is in the future
         deadlinePicker.setDayCellFactory(picker -> new DateCell() {
             @Override
@@ -127,12 +129,12 @@ public class EditGoalScene {
         });
 
         // Category field (only visible for budget control goals)
-        TextField categoryField = createTextField("Category (for Budget Control)", 5, grid, "Category:", LABEL_FONT, LABEL_COLOR);
+        TextField categoryField = createTextField("Category (for Budget Control)", 5, grid, "Category:", LABEL_FONT, themeService);
         categoryField.prefWidthProperty().bind(grid.widthProperty().multiply(0.6));
         Label categoryLabel = (Label) grid.getChildren().stream()
                 .filter(node -> GridPane.getRowIndex(node) == 5 && GridPane.getColumnIndex(node) == 0)
                 .findFirst().orElse(null);
-        
+
         // Show category field only for budget control goals
         boolean isBudgetControl = goalToEdit.getType().equals("BUDGET_CONTROL");
         if (categoryLabel != null) {
@@ -148,7 +150,7 @@ public class EditGoalScene {
         buttonBox.setAlignment(Pos.CENTER);
         buttonBox.prefWidthProperty().bind(grid.widthProperty());
 
-        Button saveButton = createButton("Save Changes", SAVE_BUTTON_STYLE, event -> {
+        Button saveButton = createButton("Save Changes", themeService.getButtonStyle(), event -> {
             if (GoalFormService.validateForm(loggedUser, titleField, amountField, null, categoryField, deadlinePicker)) {
                 try {
                     // Update the existing goal
@@ -164,7 +166,7 @@ public class EditGoalScene {
                     GoalService.updateGoal(goalToEdit, loggedUser);
 
                     // Navigate back to goals list
-                    Scene goalsScene = Goals.createScene(stage, stage.getScene().getWidth(), stage.getScene().getHeight(), loggedUser);
+                    Scene goalsScene = Goals.createScene(stage, stage.getScene().getWidth(), stage.getScene().getHeight(), loggedUser, themeService);
                     SceneManager.switchScene(stage, goalsScene);
                 } catch (IOException e) {
                     logger.error("Failed to update goal", e);
@@ -172,9 +174,9 @@ public class EditGoalScene {
             }
         });
 
-        Button cancelButton = createButton("Cancel", null, event -> {
+        Button cancelButton = createButton("Cancel", themeService.getButtonStyle(), event -> {
             // Navigate back to goals list
-            Scene goalsScene = Goals.createScene(stage, stage.getScene().getWidth(), stage.getScene().getHeight(), loggedUser);
+            Scene goalsScene = Goals.createScene(stage, stage.getScene().getWidth(), stage.getScene().getHeight(), loggedUser, themeService);
             SceneManager.switchScene(stage, goalsScene);
         });
 
@@ -194,14 +196,14 @@ public class EditGoalScene {
 
         // 创建场景
         Scene scene = new Scene(root, finalWidth, finalHeight);
-        
+
         // 添加窗口大小变化监听器
         scene.widthProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal.doubleValue() < MIN_WINDOW_WIDTH) {
                 stage.setWidth(MIN_WINDOW_WIDTH);
             }
         });
-        
+
         scene.heightProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal.doubleValue() < MIN_WINDOW_HEIGHT) {
                 stage.setHeight(MIN_WINDOW_HEIGHT);
@@ -224,26 +226,26 @@ public class EditGoalScene {
         }
     }
 
-    private static ComboBox<String> createComboBox(String[] items, int row, GridPane grid, String labelText, Font font, Color color) {
+    private static ComboBox<String> createComboBox(String[] items, int row, GridPane grid, String labelText, Font font, ThemeService themeService) {
         ComboBox<String> comboBox = new ComboBox<>();
         comboBox.getItems().addAll(items);
         comboBox.setPrefWidth(FIELD_WIDTH);
-        addStyledRow(grid, row, labelText, comboBox, font, color);
+        addStyledRow(grid, row, labelText, comboBox, font, themeService);
         return comboBox;
     }
 
-    private static TextField createTextField(String promptText, int row, GridPane grid, String labelText, Font font, Color color) {
+    private static TextField createTextField(String promptText, int row, GridPane grid, String labelText, Font font, ThemeService themeService) {
         TextField textField = new TextField();
         textField.setPromptText(promptText);
         textField.setPrefWidth(FIELD_WIDTH);
-        addStyledRow(grid, row, labelText, textField, font, color);
+        addStyledRow(grid, row, labelText, textField, font, themeService);
         return textField;
     }
 
-    private static DatePicker createDatePicker(int row, GridPane grid, String labelText, Font font, Color color) {
+    private static DatePicker createDatePicker(int row, GridPane grid, String labelText, Font font, ThemeService themeService) {
         DatePicker datePicker = new DatePicker();
         datePicker.setPrefWidth(FIELD_WIDTH);
-        addStyledRow(grid, row, labelText, datePicker, font, color);
+        addStyledRow(grid, row, labelText, datePicker, font, themeService);
         return datePicker;
     }
 
@@ -257,11 +259,11 @@ public class EditGoalScene {
         return button;
     }
 
-    private static void addStyledRow(GridPane grid, int row, String labelText, Control control, Font font, Color color) {
+    private static void addStyledRow(GridPane grid, int row, String labelText, Control control, Font font, ThemeService themeService) {
         Label label = new Label(labelText);
         label.setFont(font);
-        label.setTextFill(color);
+        label.setStyle(themeService.getTextColorStyle());
         grid.add(label, 0, row);
         grid.add(control, 1, row);
     }
-} 
+}

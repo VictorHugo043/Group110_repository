@@ -3,6 +3,7 @@ package com.myfinanceapp.ui.statusscene;
 import com.myfinanceapp.model.User;
 import com.myfinanceapp.ui.common.LeftSidebarFactory;
 import com.myfinanceapp.ui.transactionscene.TransactionManagementScene;
+import com.myfinanceapp.service.ThemeService;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -10,7 +11,6 @@ import javafx.scene.Scene;
 import javafx.scene.chart.*;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.scene.web.WebView;
@@ -18,7 +18,6 @@ import javafx.scene.web.WebView;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
 
 public class StatusScene {
     private final User currentUser;
@@ -42,6 +41,7 @@ public class StatusScene {
     public Button sendBtn;
     public VBox transactionsBox;
     public StackPane chartPane;
+    private ThemeService themeService; // Store ThemeService instance
 
     public StatusScene(Stage stage, double width, double height, User loggedUser) {
         this.stage = stage;
@@ -50,19 +50,26 @@ public class StatusScene {
         this.currentUser = loggedUser;
     }
 
+    // Overloaded method for backward compatibility
     public Scene createScene() {
-        BorderPane root = new BorderPane();
-        root.setStyle("-fx-background-color: white;");
+        return createScene(new ThemeService());
+    }
 
-        VBox sideBar = LeftSidebarFactory.createLeftSidebar(stage, "Status", currentUser);
+    public Scene createScene(ThemeService themeService) {
+        this.themeService = themeService; // Store the ThemeService instance
+        BorderPane root = new BorderPane();
+        root.setStyle(themeService.getCurrentThemeStyle());
+
+        VBox sideBar = LeftSidebarFactory.createLeftSidebar(stage, "Status", currentUser, themeService);
         root.setLeft(sideBar);
 
         ScrollPane scrollPane = new ScrollPane();
         scrollPane.setFitToWidth(true);
         scrollPane.setFitToHeight(true);
         // Set proper background colors and styling
-        scrollPane.setStyle("-fx-background: white; -fx-background-color: white; -fx-border-width: 0;");
-        
+        String backgroundColor = themeService.isDayMode() ? "white" : "#2A2A2A";
+        scrollPane.setStyle("-fx-background: " + backgroundColor + "; -fx-background-color: " + backgroundColor + "; -fx-border-width: 0;");
+
         // Remove any padding that might affect the layout
         scrollPane.setPadding(new Insets(0));
         root.setCenter(scrollPane);
@@ -71,7 +78,7 @@ public class StatusScene {
         mainContent.setPadding(new Insets(20));
         mainContent.setAlignment(Pos.TOP_CENTER);
         mainContent.setFillWidth(true);
-        mainContent.setStyle("-fx-background-color: white;");
+        mainContent.setStyle("-fx-background-color: " + backgroundColor + ";");
         scrollPane.setContent(mainContent);
 
         Pane topPane = createTopPane();
@@ -105,22 +112,22 @@ public class StatusScene {
         Scene scene = new Scene(root, width, height);
 
         // Add global CSS styles for consistent appearance
-        scene.getStylesheets().add("data:text/css," + 
-                                 ".scroll-pane { -fx-background-insets: 0; -fx-padding: 0; }" +
-                                 ".scroll-pane > .viewport { -fx-background-color: white; }" +
-                                 ".scroll-pane > .corner { -fx-background-color: white; }");
+        scene.getStylesheets().add("data:text/css," +
+                ".scroll-pane { -fx-background-insets: 0; -fx-padding: 0; }" +
+                ".scroll-pane > .viewport { -fx-background-color: " + backgroundColor + "; }" +
+                ".scroll-pane > .corner { -fx-background-color: " + backgroundColor + "; }");
 
         return scene;
     }
 
     private Pane createTopPane() {
         BorderPane topBorder = new BorderPane();
-        topBorder.setStyle("-fx-border-color: #3282FA; -fx-border-radius: 20; -fx-background-radius: 20; -fx-border-width: 2; -fx-background-color: white;");
+        topBorder.setStyle("-fx-border-color: #3282FA; -fx-border-radius: 20; -fx-background-radius: 20; -fx-border-width: 2;" + themeService.getCurrentFormBackgroundStyle());
         topBorder.setPadding(new Insets(15));
 
         Label title = new Label("Income and Expenses");
         title.setFont(Font.font(20));
-        title.setTextFill(Color.web("#3282FA"));
+        title.setStyle(themeService.getTextColorStyle());
         title.setWrapText(true);
 
         // 使用 GridPane 确保 Start Date, End Date, Chart Type 的控件左端对齐
@@ -139,6 +146,7 @@ public class StatusScene {
         // Start Date
         Label startDateLabel = new Label("Start Date");
         startDateLabel.setWrapText(true);
+        startDateLabel.setStyle(themeService.getTextColorStyle());
         startDatePicker = new DatePicker();
         startDatePicker.setPromptText("Select start date");
         startDatePicker.setPrefWidth(150);
@@ -148,6 +156,7 @@ public class StatusScene {
         // End Date
         Label endDateLabel = new Label("End Date");
         endDateLabel.setWrapText(true);
+        endDateLabel.setStyle(themeService.getTextColorStyle());
         endDatePicker = new DatePicker();
         endDatePicker.setPromptText("Select end date");
         endDatePicker.setPrefWidth(150);
@@ -157,6 +166,7 @@ public class StatusScene {
         // Chart Type
         Label chartTypeLabel = new Label("Chart Type");
         chartTypeLabel.setWrapText(true);
+        chartTypeLabel.setStyle(themeService.getTextColorStyle());
         chartTypeCombo = new ComboBox<>();
         chartTypeCombo.getItems().addAll("Line graph", "Bar graph");
         chartTypeCombo.setValue("Line graph");
@@ -166,7 +176,9 @@ public class StatusScene {
 
         // Ex. 和 In. 标签
         exLabel = new Label();
+        exLabel.setStyle(themeService.getTextColorStyle());
         inLabel = new Label();
+        inLabel.setStyle(themeService.getTextColorStyle());
 
         // 使用 VBox 实现均匀分布
         VBox leftSide = new VBox();
@@ -221,12 +233,12 @@ public class StatusScene {
 
     private Pane createCategoryPane() {
         BorderPane categoryPane = new BorderPane();
-        categoryPane.setStyle("-fx-border-color: #3282FA; -fx-border-radius: 20; -fx-background-radius: 20; -fx-border-width: 2; -fx-background-color: white;");
+        categoryPane.setStyle("-fx-border-color: #3282FA; -fx-border-radius: 20; -fx-background-radius: 20; -fx-border-width: 2;" + themeService.getCurrentFormBackgroundStyle());
         categoryPane.setPadding(new Insets(15));
 
         Label title = new Label("Category Proportion Analysis");
         title.setFont(Font.font(16));
-        title.setTextFill(Color.web("#3282FA"));
+        title.setStyle(themeService.getTextColorStyle());
         title.setWrapText(true);
 
         pieChart = new PieChart();
@@ -241,17 +253,17 @@ public class StatusScene {
 
     private Pane createTransactionsPane() {
         BorderPane txPane = new BorderPane();
-        txPane.setStyle("-fx-border-color: #3282FA; -fx-border-radius: 20; -fx-background-radius: 20; -fx-border-width: 2; -fx-background-color: white;");
+        txPane.setStyle("-fx-border-color: #3282FA; -fx-border-radius: 20; -fx-background-radius: 20; -fx-border-width: 2;" + themeService.getCurrentFormBackgroundStyle());
         txPane.setPadding(new Insets(15));
 
         Label title = new Label("Recent Transactions");
         title.setFont(Font.font(16));
-        title.setTextFill(Color.web("#3282FA"));
+        title.setStyle(themeService.getTextColorStyle());
         title.setWrapText(true);
 
         // 添加管理按钮
         Button manageBtn = new Button("Manage All Transactions");
-        manageBtn.setStyle("-fx-background-color: #E0F0FF; -fx-text-fill: #3282FA; -fx-background-radius: 10;");
+        manageBtn.setStyle(themeService.getButtonStyle());
         manageBtn.setOnAction(e -> openTransactionManagement());
 
         HBox titleBar = new HBox(10, title, manageBtn);
@@ -278,18 +290,18 @@ public class StatusScene {
         double currentWidth = stage.getWidth();
         double currentHeight = stage.getHeight();
         TransactionManagementScene txManagementScene = new TransactionManagementScene(stage, currentWidth, currentHeight, currentUser);
-        Scene scene = txManagementScene.createScene();
+        Scene scene = txManagementScene.createScene(themeService); // Pass themeService
         stage.setScene(scene);
     }
 
     private Pane createAIPane() {
         BorderPane aiPane = new BorderPane();
-        aiPane.setStyle("-fx-border-color: #3282FA; -fx-border-radius: 20; -fx-background-radius: 20; -fx-border-width: 2; -fx-background-color: white;");
+        aiPane.setStyle("-fx-border-color: #3282FA; -fx-border-radius: 20; -fx-background-radius: 20; -fx-border-width: 2;" + themeService.getCurrentFormBackgroundStyle());
         aiPane.setPadding(new Insets(15));
 
         Label title = new Label("Ask Your AI Assistant:");
         title.setFont(Font.font(16));
-        title.setTextFill(Color.web("#3282FA"));
+        title.setStyle(themeService.getTextColorStyle());
         title.setWrapText(true);
 
         questionArea = new TextArea();
@@ -300,7 +312,7 @@ public class StatusScene {
         HBox.setHgrow(questionArea, Priority.ALWAYS);
 
         sendBtn = new Button("➤");
-        sendBtn.setStyle("-fx-background-color: #A3D1FF; -fx-text-fill: white; -fx-background-radius: 15; -fx-font-weight: bold;");
+        sendBtn.setStyle(themeService.getButtonStyle() + "-fx-font-weight: bold;");
 
         VBox content = new VBox(10, title, questionArea, sendBtn);
         content.setAlignment(Pos.TOP_LEFT);
@@ -310,26 +322,23 @@ public class StatusScene {
 
     private Pane createSuggestionPane() {
         BorderPane sugPane = new BorderPane();
-        sugPane.setStyle("-fx-border-color: #3282FA; -fx-border-radius: 20; "
-                + "-fx-background-radius: 20; -fx-border-width: 2; -fx-background-color: white;");
+        sugPane.setStyle("-fx-border-color: #3282FA; -fx-border-radius: 20; -fx-background-radius: 20; -fx-border-width: 2;" + themeService.getCurrentFormBackgroundStyle());
         sugPane.setPadding(new Insets(15));
 
         Label title = new Label("Suggestion");
         title.setFont(Font.font(16));
-        title.setTextFill(Color.web("#3282FA"));
+        title.setStyle(themeService.getTextColorStyle());
         title.setWrapText(true);
 
         suggestionsWebView = new WebView();
         suggestionsWebView.setPrefHeight(250);
         VBox.setVgrow(suggestionsWebView, Priority.ALWAYS); // 允许垂直伸展
-        // 不可编辑, 只显示 HTML
         suggestionsWebView.getEngine().setUserStyleSheetLocation(
                 getClass().getResource("/css/markdown.css").toExternalForm()
         );
-        // 上面 /css/markdown.css 你可自定义样式
 
         moreBtn = new Button("More>");
-        moreBtn.setStyle("-fx-background-color: #E0F0FF; -fx-text-fill: #3282FA; -fx-background-radius: 10;");
+        moreBtn.setStyle(themeService.getButtonStyle());
         moreBtn.setOnAction(e -> showChatHistory());
 
         VBox vbox = new VBox(10, title, suggestionsWebView, moreBtn);
@@ -337,6 +346,7 @@ public class StatusScene {
         sugPane.setCenter(vbox);
         return sugPane;
     }
+
     private void showChatHistory() {
         Stage historyStage = new Stage();
         historyStage.setTitle("Chat History");
@@ -373,5 +383,4 @@ public class StatusScene {
         historyStage.setScene(scene);
         historyStage.show();
     }
-
 }

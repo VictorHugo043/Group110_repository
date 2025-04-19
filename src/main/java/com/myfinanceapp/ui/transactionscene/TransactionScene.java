@@ -3,12 +3,12 @@ package com.myfinanceapp.ui.transactionscene;
 import com.myfinanceapp.model.Transaction;
 import com.myfinanceapp.model.User;
 import com.myfinanceapp.service.TransactionService;
+import com.myfinanceapp.service.ThemeService;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.scene.text.Font;
@@ -21,11 +21,16 @@ import java.time.LocalDate;
 import java.text.ParseException;
 
 public class TransactionScene {
+    // Overloaded method for backward compatibility
     public static Scene createScene(Stage stage, double width, double height, User loggedUser) {
-        BorderPane root = new BorderPane();
-        root.setStyle("-fx-background-color: white; -fx-text-fill: darkblue;");
+        return createScene(stage, width, height, loggedUser, new ThemeService());
+    }
 
-        VBox sideBar = LeftSidebarFactory.createLeftSidebar(stage, "New", loggedUser);
+    public static Scene createScene(Stage stage, double width, double height, User loggedUser, ThemeService themeService) {
+        BorderPane root = new BorderPane();
+        root.setStyle(themeService.getCurrentThemeStyle());
+
+        VBox sideBar = LeftSidebarFactory.createLeftSidebar(stage, "New", loggedUser, themeService);
         root.setLeft(sideBar);
 
         // 中间手动输入部分
@@ -34,9 +39,8 @@ public class TransactionScene {
                 "-fx-border-color: #3282fa;" +
                         "-fx-border-width: 2;" +
                         "-fx-border-radius: 15;" +
-                        "-fx-background-color: white;" +
+                        themeService.getCurrentFormBackgroundStyle() +
                         "-fx-padding: 20;"
-
         );
         centerBox.setPadding(new Insets(20, 20, 40, 20));
         // 新增：允许垂直扩展
@@ -44,13 +48,12 @@ public class TransactionScene {
         VBox.setVgrow(centerBox, Priority.ALWAYS);
 
         Label topicLabel = new Label("Manual Import:");
-        topicLabel.setTextFill(Color.DARKBLUE);
-        topicLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+        topicLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;" + themeService.getTextColorStyle());
         // VBox.setMargin(topicLabel, new Insets(5, 0, 5, 0)); // 上下边距
 
         // 日期选择器部分
         Label dateLabel = new Label("Transaction Date");
-        dateLabel.setTextFill(Color.DARKBLUE);
+        dateLabel.setStyle(themeService.getTextColorStyle());
 
         // 创建DatePicker并设置提示文本
         DatePicker datePicker = new DatePicker();
@@ -82,7 +85,7 @@ public class TransactionScene {
         dateBox.setAlignment(Pos.CENTER);
 
         Label typeLabel = new Label("Transition Type");
-        typeLabel.setTextFill(Color.DARKBLUE);
+        typeLabel.setStyle(themeService.getTextColorStyle());
         ComboBox<String> typeCombo = new ComboBox<>();
         typeCombo.getItems().addAll("Income", "Expense");
         typeCombo.setMaxWidth(200);
@@ -93,7 +96,7 @@ public class TransactionScene {
         typeBox.setAlignment(Pos.CENTER);
 
         Label currencyLabel = new Label("Currency");
-        currencyLabel.setTextFill(Color.DARKBLUE);
+        currencyLabel.setStyle(themeService.getTextColorStyle());
         ComboBox<String> currencyCombo = new ComboBox<>();
         currencyCombo.getItems().addAll("CNY", "USD", "EUR");
         currencyCombo.setMaxWidth(200);
@@ -104,7 +107,7 @@ public class TransactionScene {
         currencyBox.setAlignment(Pos.CENTER);
 
         Label amountLabel = new Label("Amount");
-        amountLabel.setTextFill(Color.DARKBLUE);
+        amountLabel.setStyle(themeService.getTextColorStyle());
         TextField amountField = new TextField();
         amountField.setPromptText("Please enter amount");
         amountField.setMaxWidth(200);
@@ -115,7 +118,7 @@ public class TransactionScene {
 
         // 添加描述框和自动分类按钮
         Label descriptionLabel = new Label("Description");
-        descriptionLabel.setTextFill(Color.DARKBLUE);
+        descriptionLabel.setStyle(themeService.getTextColorStyle());
         TextArea descriptionField = new TextArea();
         descriptionField.setPromptText("Enter transaction description");
         descriptionField.setMaxWidth(200);
@@ -127,15 +130,13 @@ public class TransactionScene {
         descriptionBox.setAlignment(Pos.CENTER);
 
         Button autoSortButton = new Button("Auto-sorting");
-        autoSortButton.setStyle("-fx-background-color: #E0F0FF; " +
-                "-fx-text-fill: #3282FA; -fx-font-weight: bold; " +
-                "-fx-border-radius: 15;");
+        autoSortButton.setStyle(themeService.getButtonStyle() + "-fx-font-weight: bold; " + "-fx-border-radius: 15;");
         autoSortButton.setMaxWidth(100);
         autoSortButton.setPrefWidth(100);
 
         // 修改分类框的布局，将自动分类按钮放在category输入框右边
         Label categoryLabel = new Label("Category");
-        categoryLabel.setTextFill(Color.DARKBLUE);
+        categoryLabel.setStyle(themeService.getTextColorStyle());
         TextField categoryField = new TextField();
         categoryField.setPromptText("e.g., Salary, Rent, Utilities");
         categoryField.setMaxWidth(200);
@@ -149,7 +150,7 @@ public class TransactionScene {
         categoryBox.setAlignment(Pos.CENTER);
 
         Label methodLabel = new Label("Payment Method");
-        methodLabel.setTextFill(Color.DARKBLUE);
+        methodLabel.setStyle(themeService.getTextColorStyle());
         TextField methodField = new TextField();
         methodField.setPromptText("e.g., Cash, PayPal, Bank Transfer");
         methodField.setMaxWidth(200);
@@ -185,9 +186,7 @@ public class TransactionScene {
         Button submitManualBtn = new Button("Submit");
         submitManualBtn.setMaxWidth(150);
         submitManualBtn.setPrefWidth(100);
-        submitManualBtn.setStyle("-fx-background-color: #E0F0FF; " +
-                "-fx-text-fill: #3282FA; -fx-font-weight: bold; " +
-                "-fx-border-radius: 15;");
+        submitManualBtn.setStyle(themeService.getButtonStyle() + "-fx-font-weight: bold; " + "-fx-border-radius: 15;");
         VBox.setMargin(submitManualBtn, new Insets(10, 0, 0, 0));
         submitManualBtn.setAlignment(Pos.CENTER);
 
@@ -327,7 +326,6 @@ public class TransactionScene {
                 descriptionBox,
                 categoryBox,
                 methodBox,
-
                 submitManualBtn
         );
         centerBox.setSpacing(10);  // 增加整个区域内的元素间距
@@ -340,9 +338,8 @@ public class TransactionScene {
                 "-fx-border-color: #3282FA;" +
                         "-fx-border-width: 2;" +
                         "-fx-border-radius: 15;" +
-                        "-fx-background-color: white;" +
+                        themeService.getCurrentFormBackgroundStyle() +
                         "-fx-padding: 20;"
-
         );
         rightBar.setPadding(new Insets(20, 20, 20, 20));
         // 新增：允许垂直扩展
@@ -350,18 +347,14 @@ public class TransactionScene {
         VBox.setVgrow(rightBar, Priority.ALWAYS);
 
         Label promptLabel = new Label("File Import:");
-        promptLabel.setTextFill(Color.DARKBLUE);
-        promptLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+        promptLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;" + themeService.getTextColorStyle());
         VBox.setMargin(promptLabel, new Insets(10, 0, 0, 0)); // 增加与下方内容的间距
 
         Button importCSVButton = new Button("Select a file");
         importCSVButton.setPrefWidth(100);
-        importCSVButton.setStyle("-fx-background-color: #E0F0FF; " +
-                "-fx-text-fill: #3282FA; -fx-font-weight: bold; " +
-                "-fx-border-radius: 15;"); // 新增：按钮的背景色，文本颜色，字体粗细和圆角
+        importCSVButton.setStyle(themeService.getButtonStyle() + "-fx-font-weight: bold; " + "-fx-border-radius: 15;");
 
         importCSVButton.setOnAction(event -> {
-
             // FileChooser 是 JavaFX 提供的一个用于选择文件的控件。fileChooser 会弹出一个文件选择对话框，允许用户浏览文件系统并选择文件。
             FileChooser fileChooser = new FileChooser();
             // 通过 getExtensionFilters() 为 FileChooser 添加文件扩展名过滤器。它只允许用户选择 CSV 文件
@@ -387,7 +380,7 @@ public class TransactionScene {
                 "Payment Method\n" +
                 "(payment method)");
         formatLabel.setFont(new Font(11));
-        formatLabel.setTextFill(Color.DARKBLUE);
+        formatLabel.setStyle(themeService.getTextColorStyle());
         VBox.setMargin(formatLabel, new Insets(10, 0, 20, 0)); // 增加与下方内容的间距
 
         rightBar.getChildren().addAll(
@@ -432,10 +425,11 @@ public class TransactionScene {
         scrollPane.setContent(centerAndRight);
         scrollPane.setFitToWidth(true);
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        String backgroundColor = themeService.isDayMode() ? "white" : "#2A2A2A";
         scrollPane.setStyle(
-                "-fx-background: white;" +
+                "-fx-background: " + backgroundColor + ";" +
                         "-fx-border-color: transparent;" +
-                        "-fx-control-inner-background: white;" +
+                        "-fx-control-inner-background: " + backgroundColor + ";" +
                         "-fx-text-fill: transparent;"
         );
         scrollPane.setPadding(new Insets(0)); // 移除内边距
@@ -448,10 +442,10 @@ public class TransactionScene {
         root.setCenter(scrollPane);
         Scene scene = new Scene(root, width, height);
 
-        // 添加一条全局样式：所有 Label 默认为 darkblue
-        scene.getStylesheets().add("data:,Label { -fx-text-fill: darkblue; }");
+        // 添加一条全局样式：所有 Label 默认为动态颜色
+        String labelColor = themeService.isDayMode() ? "darkblue" : "white";
+        scene.getStylesheets().add("data:,Label { -fx-text-fill: " + labelColor + "; }");
 
         return scene;
-
     }
 }

@@ -6,6 +6,7 @@ import com.myfinanceapp.ui.common.LeftSidebarFactory;
 import com.myfinanceapp.service.GoalService;
 import com.myfinanceapp.service.TransactionDataService;
 import com.myfinanceapp.ui.common.SceneManager;
+import com.myfinanceapp.service.ThemeService;
 
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -30,12 +31,17 @@ import java.util.List;
 import java.util.ArrayList;
 
 public class Goals {
+    // 重载方法，兼容旧的调用方式
     public static Scene createScene(Stage stage, double width, double height, User loggedUser) {
+        return createScene(stage, width, height, loggedUser, new ThemeService());
+    }
+
+    public static Scene createScene(Stage stage, double width, double height, User loggedUser, ThemeService themeService) {
         BorderPane root = new BorderPane();
-        root.setStyle("-fx-background-color: white;");
+        root.setStyle(themeService.getCurrentThemeStyle());
 
         // 左侧导航栏
-        VBox sideBar = LeftSidebarFactory.createLeftSidebar(stage, "Goals", loggedUser);
+        VBox sideBar = LeftSidebarFactory.createLeftSidebar(stage, "Goals", loggedUser, themeService);
         root.setLeft(sideBar);
 
         // 创建网格布局
@@ -54,22 +60,22 @@ public class Goals {
 
         // 初始化列数
         int initialMaxCols = calculateMaxColumns(width);
-        
+
         // 创建一个列表来存储所有卡片，以便后续重新布局
         List<VBox> allCards = new ArrayList<>();
-        
+
         // If no goals, show a message
         if (userGoals.isEmpty()) {
             Label noGoalsLabel = new Label("No goals found. Create your first goal!");
-            noGoalsLabel.setStyle("-fx-font-size: 16px; -fx-text-fill: #333333;");
+            noGoalsLabel.setStyle("-fx-font-size: 16px;" + themeService.getTextColorStyle());
             centerContent.getChildren().add(noGoalsLabel);
         } else {
             // 创建所有目标卡片
             for (Goal goal : userGoals) {
                 try {
-                    if (loggedUser == null || goal.getUserId() == null || 
-                        loggedUser.getUid().equals(goal.getUserId())) {
-                        VBox goalCard = createGoalCard(goal, stage, loggedUser);
+                    if (loggedUser == null || goal.getUserId() == null ||
+                            loggedUser.getUid().equals(goal.getUserId())) {
+                        VBox goalCard = createGoalCard(goal, stage, loggedUser, themeService);
                         goalCard.setMinWidth(300);
                         goalCard.setMaxWidth(400);
                         allCards.add(goalCard);
@@ -82,7 +88,7 @@ public class Goals {
         }
 
         // 添加"创建新目标"卡片
-        VBox createNewGoalCard = createCreateNewGoalCard(stage, loggedUser);
+        VBox createNewGoalCard = createCreateNewGoalCard(stage, loggedUser, themeService);
         createNewGoalCard.setMinWidth(300);
         createNewGoalCard.setMaxWidth(400);
         allCards.add(createNewGoalCard);
@@ -92,7 +98,7 @@ public class Goals {
 
         // Add the grid to the center content
         centerContent.getChildren().add(centerGrid);
-        
+
         // Create a ScrollPane and add the centerContent to it
         ScrollPane scrollPane = new ScrollPane();
         scrollPane.setContent(centerContent);
@@ -101,30 +107,31 @@ public class Goals {
         scrollPane.setPannable(true);
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
         scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
-        
+
         // Set proper background colors and styling
-        scrollPane.setStyle("-fx-background: white; -fx-background-color: white; -fx-border-width: 0;");
-        centerContent.setStyle("-fx-background-color: white;");
-        
+        String backgroundColor = themeService.isDayMode() ? "white" : "#2A2A2A";
+        scrollPane.setStyle("-fx-background: " + backgroundColor + "; -fx-background-color: " + backgroundColor + "; -fx-border-width: 0;");
+        centerContent.setStyle("-fx-background-color: " + backgroundColor + ";");
+
         // Remove any padding that might affect the layout
         scrollPane.setPadding(new Insets(0));
-        
+
         // Bind scroll pane size to window size
         scrollPane.prefWidthProperty().bind(root.widthProperty().subtract(sideBar.widthProperty()));
         scrollPane.prefHeightProperty().bind(root.heightProperty());
-        
+
         // Set the scrollPane as the center of the BorderPane with proper alignment
         BorderPane.setAlignment(scrollPane, Pos.CENTER);
         root.setCenter(scrollPane);
-        
+
         // Create scene
         Scene scene = new Scene(root, width, height);
-        
+
         // Add global CSS styles for consistent appearance
-        scene.getStylesheets().add("data:text/css," + 
-                                 ".scroll-pane { -fx-background-insets: 0; -fx-padding: 0; }" +
-                                 ".scroll-pane > .viewport { -fx-background-color: white; }" +
-                                 ".scroll-pane > .corner { -fx-background-color: white; }");
+        scene.getStylesheets().add("data:text/css," +
+                ".scroll-pane { -fx-background-insets: 0; -fx-padding: 0; }" +
+                ".scroll-pane > .viewport { -fx-background-color: " + backgroundColor + "; }" +
+                ".scroll-pane > .corner { -fx-background-color: " + backgroundColor + "; }");
 
         // 添加窗口大小变化监听器
         scene.widthProperty().addListener((obs, oldVal, newVal) -> {
@@ -132,14 +139,14 @@ public class Goals {
             // 清除现有布局
             centerGrid.getChildren().clear();
             centerGrid.getColumnConstraints().clear();
-            
+
             // 重新布局所有卡片
             layoutCards(centerGrid, allCards, newMaxCols);
         });
-        
+
         return scene;
     }
-    
+
     private static int calculateMaxColumns(double windowWidth) {
         // 根据窗口宽度计算每行显示的目标卡片数量
         // 假设每个卡片最小宽度为300px，间距为20px
@@ -149,26 +156,26 @@ public class Goals {
         return Math.max(1, maxCols);
     }
 
-    private static VBox createLabelPair(String title, String value) {
+    private static VBox createLabelPair(String title, String value, ThemeService themeService) {
         VBox container = new VBox(2);  // 2 pixels spacing between labels
         container.setAlignment(Pos.CENTER_LEFT);
-        
+
         // Create title label with bold font
         Label titleLabel = new Label(title);
         titleLabel.setFont(Font.font("Arial", FontWeight.BOLD, 14));
         titleLabel.setTextFill(Color.GRAY);
-        
+
         // Create value label with regular font
         Label valueLabel = new Label(value);
         valueLabel.setFont(Font.font("Arial", FontWeight.NORMAL, 14));
-        valueLabel.setTextFill(Color.BLACK);
+        valueLabel.setStyle(themeService.getTextColorStyle());
         valueLabel.setWrapText(true);  // Enable text wrapping for long values
-        
+
         container.getChildren().addAll(titleLabel, valueLabel);
         return container;
     }
 
-    private static VBox createGoalCard(Goal goal, Stage stage, User loggedUser) {
+    private static VBox createGoalCard(Goal goal, Stage stage, User loggedUser, ThemeService themeService) {
         VBox card = new VBox(15);
         card.setAlignment(Pos.CENTER);
         card.setMaxWidth(300);
@@ -179,36 +186,36 @@ public class Goals {
                         "-fx-border-width: 2;" +
                         "-fx-border-radius: 12;" +
                         "-fx-background-radius: 12;" +
-                        "-fx-background-color: white;"
+                        themeService.getCurrentFormBackgroundStyle()
         );
 
         // Create delete button
         Button deleteButton = new Button("×");
         deleteButton.setStyle(
                 "-fx-background-color: transparent;" +
-                "-fx-text-fill: #FF5252;" +
-                "-fx-font-size: 16px;" +
-                "-fx-font-weight: bold;" +
-                "-fx-cursor: hand;"
+                        "-fx-text-fill: #FF5252;" +
+                        "-fx-font-size: 16px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-cursor: hand;"
         );
-        
-       // Initially hide the delete button
-       deleteButton.setVisible(false);
-    
-       // Show delete button on mouse enter
-       card.setOnMouseEntered(event -> {
-           deleteButton.setVisible(true);
+
+        // Initially hide the delete button
+        deleteButton.setVisible(false);
+
+        // Show delete button on mouse enter
+        card.setOnMouseEntered(event -> {
+            deleteButton.setVisible(true);
         });
-    
-       // Hide delete button on mouse exit
-       card.setOnMouseExited(event -> {
-           deleteButton.setVisible(false);
+
+        // Hide delete button on mouse exit
+        card.setOnMouseExited(event -> {
+            deleteButton.setVisible(false);
         });
 
         // Position the delete button to the top-right
         StackPane.setAlignment(deleteButton, Pos.TOP_RIGHT);
         StackPane.setMargin(deleteButton, new Insets(0, 0, 0, 0));
-        
+
         // Handle delete button click
         deleteButton.setOnAction(event -> {
             // Confirm deletion with alert
@@ -216,7 +223,7 @@ public class Goals {
             confirmation.setTitle("Delete Goal");
             confirmation.setHeaderText("Delete \"" + goal.getTitle() + "\"");
             confirmation.setContentText("Are you sure you want to delete this goal? This action cannot be undone.");
-            
+
             // Show dialog and wait for user response
             confirmation.showAndWait().ifPresent(response -> {
                 if (response == ButtonType.OK) {
@@ -224,12 +231,12 @@ public class Goals {
                         // Store original window dimensions
                         double originalWidth = stage.getScene().getWidth();
                         double originalHeight = stage.getScene().getHeight();
-                        
+
                         // Delete the goal
                         GoalService.deleteGoal(goal.getId(), loggedUser);
-                        
+
                         // Refresh the goals scene with the exact original dimensions
-                        Scene newScene = createScene(stage, originalWidth, originalHeight, loggedUser);
+                        Scene newScene = createScene(stage, originalWidth, originalHeight, loggedUser, themeService);
                         stage.setScene(newScene);
                     } catch (IOException e) {
                         // Show error message
@@ -242,14 +249,14 @@ public class Goals {
                     }
                 }
             });
-            
+
             // Prevent event from bubbling up to the card click handler
             event.consume();
         });
 
         Label title = new Label(goal.getTitle());
         title.setFont(Font.font("Arial", 16));
-        title.setTextFill(Color.DARKBLUE);
+        title.setStyle(themeService.getTextColorStyle());
 
         // 创建文字信息部分
         VBox textInfo = new VBox(8);
@@ -268,24 +275,24 @@ public class Goals {
             switch (goal.getType()) {
                 case "SAVING":
                     double currentNetBalance = transactionService.calculateNetBalance();
-                    VBox targetAmountBox = createLabelPair("Target Amount", 
-                        GoalService.formatNumber(goal.getTargetAmount()) + " " + currency);
-                    VBox deadlineBox = createLabelPair("Deadline", 
-                        goal.getDeadline().format(formatter));
-                    VBox currentSavingsBox = createLabelPair("Current Savings", 
-                        GoalService.formatNumber(currentNetBalance) + " " + currency);
+                    VBox targetAmountBox = createLabelPair("Target Amount",
+                            GoalService.formatNumber(goal.getTargetAmount()) + " " + currency, themeService);
+                    VBox deadlineBox = createLabelPair("Deadline",
+                            goal.getDeadline().format(formatter), themeService);
+                    VBox currentSavingsBox = createLabelPair("Current Savings",
+                            GoalService.formatNumber(currentNetBalance) + " " + currency, themeService);
                     textInfo.getChildren().addAll(targetAmountBox, deadlineBox, currentSavingsBox);
                     progress = GoalService.calculateSavingProgress(currentNetBalance, goal.getTargetAmount());
                     break;
 
                 case "DEBT_REPAYMENT":
                     double totalDebtRepayment = transactionService.calculateTotalAmountByCategory("Debt");
-                    VBox totalDebtBox = createLabelPair("Total Debt Amount", 
-                        GoalService.formatNumber(goal.getTargetAmount()) + " " + currency);
-                    VBox repaymentDeadlineBox = createLabelPair("Repayment Deadline", 
-                        goal.getDeadline().format(formatter));
-                    VBox amountPaidBox = createLabelPair("Amount Paid", 
-                        GoalService.formatNumber(totalDebtRepayment) + " " + currency);
+                    VBox totalDebtBox = createLabelPair("Total Debt Amount",
+                            GoalService.formatNumber(goal.getTargetAmount()) + " " + currency, themeService);
+                    VBox repaymentDeadlineBox = createLabelPair("Repayment Deadline",
+                            goal.getDeadline().format(formatter), themeService);
+                    VBox amountPaidBox = createLabelPair("Amount Paid",
+                            GoalService.formatNumber(totalDebtRepayment) + " " + currency, themeService);
                     textInfo.getChildren().addAll(totalDebtBox, repaymentDeadlineBox, amountPaidBox);
                     progress = GoalService.calculateDebtProgress(totalDebtRepayment, goal.getTargetAmount());
                     isCompleted = progress >= 100;
@@ -293,12 +300,12 @@ public class Goals {
 
                 case "BUDGET_CONTROL":
                     double currentExpense = transactionService.calculateTotalExpense();
-                    VBox budgetCategoryBox = createLabelPair("Budget Category", 
-                        goal.getCategory() != null ? goal.getCategory() : "General");
-                    VBox budgetAmountBox = createLabelPair("Budget Amount", 
-                        GoalService.formatNumber(goal.getTargetAmount()) + " " + currency);
-                    VBox currentExpensesBox = createLabelPair("Current Expenses", 
-                        GoalService.formatNumber(currentExpense) + " " + currency);
+                    VBox budgetCategoryBox = createLabelPair("Budget Category",
+                            goal.getCategory() != null ? goal.getCategory() : "General", themeService);
+                    VBox budgetAmountBox = createLabelPair("Budget Amount",
+                            GoalService.formatNumber(goal.getTargetAmount()) + " " + currency, themeService);
+                    VBox currentExpensesBox = createLabelPair("Current Expenses",
+                            GoalService.formatNumber(currentExpense) + " " + currency, themeService);
                     textInfo.getChildren().addAll(budgetCategoryBox, budgetAmountBox, currentExpensesBox);
                     progress = GoalService.calculateBudgetUsage(currentExpense, goal.getTargetAmount());
                     break;
@@ -336,6 +343,7 @@ public class Goals {
 
         } catch (IOException e) {
             Label errorLabel = new Label("Error loading transaction data");
+            errorLabel.setStyle(themeService.getTextColorStyle());
             textInfo.getChildren().add(errorLabel);
             e.printStackTrace();
         }
@@ -349,13 +357,13 @@ public class Goals {
         StackPane.setAlignment(titleBox, Pos.CENTER);
         StackPane.setAlignment(deleteButton, Pos.TOP_RIGHT);
         StackPane.setMargin(deleteButton, new Insets(0, 0, 0, 0));
-        
+
         // 创建左右布局的HBox，添加内边距
         HBox contentLayout = new HBox(20);
         contentLayout.setAlignment(Pos.CENTER_LEFT);
         contentLayout.setPadding(new Insets(10, 0, 0, 0));
         contentLayout.getChildren().addAll(textInfo, indicatorContainer);
-        
+
         // Add the title container instead of just the title
         card.getChildren().addAll(titleContainer, contentLayout);
 
@@ -364,7 +372,7 @@ public class Goals {
             if (!event.isConsumed()) {  // Only handle if not already consumed by delete button
                 double currentWidth = stage.getScene().getWidth();
                 double currentHeight = stage.getScene().getHeight();
-                Scene editScene = EditGoalScene.createScene(stage, currentWidth, currentHeight, loggedUser, goal);
+                Scene editScene = EditGoalScene.createScene(stage, currentWidth, currentHeight, loggedUser, goal, themeService);
                 SceneManager.switchScene(stage, editScene);
             }
         });
@@ -372,7 +380,7 @@ public class Goals {
         return card;
     }
 
-    private static VBox createCreateNewGoalCard(Stage stage, User loggedUser) {
+    private static VBox createCreateNewGoalCard(Stage stage, User loggedUser, ThemeService themeService) {
         VBox card = new VBox(15);
         card.setAlignment(Pos.CENTER);
         card.setMaxWidth(300);
@@ -383,7 +391,7 @@ public class Goals {
                         "-fx-border-width: 2;" +
                         "-fx-border-radius: 12;" +
                         "-fx-background-radius: 12;" +
-                        "-fx-background-color: white;"
+                        themeService.getCurrentFormBackgroundStyle()
         );
 
         Label title = new Label("Create a new goal");
@@ -396,18 +404,20 @@ public class Goals {
         textInfo.setPadding(new Insets(10, 0, 0, 0));
         Label instructionLabel = new Label("Click to create");
         Label instructionLabel2 = new Label("a new financial goal");
+        instructionLabel.setStyle(themeService.getTextColorStyle());
+        instructionLabel2.setStyle(themeService.getTextColorStyle());
         textInfo.getChildren().addAll(instructionLabel, instructionLabel2);
 
         // 创建加号圆形
         StackPane plusContainer = new StackPane();
         plusContainer.setPadding(new Insets(0, 0, 0, 20));
         Circle plusCircle = new Circle(40);
-        plusCircle.setStroke(Color.GRAY);
+        plusCircle.setStroke(themeService.isDayMode() ? Color.GRAY : Color.LIGHTGRAY);
         plusCircle.setFill(Color.TRANSPARENT);
         plusCircle.setStrokeWidth(8);
         Label plusLabel = new Label("+");
         plusLabel.setFont(Font.font("Arial", 24));
-        plusLabel.setTextFill(Color.GRAY);
+        plusLabel.setTextFill(themeService.isDayMode() ? Color.GRAY : Color.LIGHTGRAY);
         plusContainer.getChildren().addAll(plusCircle, plusLabel);
 
         // 创建左右布局的HBox
@@ -421,9 +431,9 @@ public class Goals {
             // 获取当前窗口的实际大小
             double currentWidth = stage.getScene().getWidth();
             double currentHeight = stage.getScene().getHeight();
-            
+
             // Navigate to create goal page with current window dimensions
-            Scene createScene = CreateGoalScene.createScene(stage, currentWidth, currentHeight, loggedUser);
+            Scene createScene = CreateGoalScene.createScene(stage, currentWidth, currentHeight, loggedUser, themeService);
             SceneManager.switchScene(stage, createScene);
         });
 
