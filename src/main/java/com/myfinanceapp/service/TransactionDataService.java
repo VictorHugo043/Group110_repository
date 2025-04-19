@@ -2,11 +2,19 @@ package com.myfinanceapp.service;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import com.myfinanceapp.security.EncryptionService;
+import com.myfinanceapp.security.EncryptionService.EncryptedData;
+import com.myfinanceapp.security.EncryptionService.EncryptionException;
+import com.google.gson.Gson;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 
 /**
  * 交易数据服务类，提供对用户交易数据的统计和分析功能
@@ -14,6 +22,9 @@ import java.util.Map;
  */
 public class TransactionDataService {
     private final String userUid;
+    private static final Gson gson = new Gson();
+    private static final String FIXED_KEY = "MyFinanceAppSecretKey1234567890";  // 固定密钥
+    private static final String TRANSACTION_DIR = "src/main/resources/transaction";
 
     /**
      * 构造函数
@@ -29,9 +40,37 @@ public class TransactionDataService {
      * @throws IOException 当文件读取失败时抛出
      */
     JSONArray loadTransactionData() throws IOException {
-        String filePath = "src/main/resources/transaction/" + userUid + ".json";
-        String content = new String(Files.readAllBytes(Paths.get(filePath)));
-        return new JSONArray(content);
+        Path filePath = Paths.get(TRANSACTION_DIR, userUid + ".json");
+        
+        // 如果文件不存在，返回空数组
+        if (!Files.exists(filePath)) {
+            return new JSONArray();
+        }
+        
+        String content = new String(Files.readAllBytes(filePath), StandardCharsets.UTF_8);
+        
+        try {
+            // Parse encrypted data from JSON
+            EncryptedData encryptedData = gson.fromJson(content, EncryptedData.class);
+            
+            // Get encryption key derived from user ID
+            SecretKey key = getEncryptionKey();
+            
+            // Decrypt the content
+            String decryptedContent = EncryptionService.decrypt(encryptedData, key);
+            return new JSONArray(decryptedContent);
+        } catch (EncryptionException e) {
+            throw new IOException("Failed to decrypt transaction data", e);
+        }
+    }
+
+    /**
+     * 获取加密密钥
+     */
+    private SecretKey getEncryptionKey() throws EncryptionException {
+        // 使用固定密钥和用户ID派生加密密钥
+        byte[] salt = userUid.getBytes();  // 使用用户ID作为盐值
+        return EncryptionService.deriveKey(FIXED_KEY, salt);
     }
 
     /**

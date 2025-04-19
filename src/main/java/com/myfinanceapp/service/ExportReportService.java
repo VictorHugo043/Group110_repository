@@ -10,6 +10,12 @@ import com.itextpdf.layout.element.Image;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.properties.TextAlignment;
+import com.myfinanceapp.security.EncryptionService;
+import com.myfinanceapp.security.EncryptionService.EncryptedData;
+import com.myfinanceapp.security.EncryptionService.EncryptionException;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
 import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.Scene;
@@ -25,6 +31,11 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -34,6 +45,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import javax.crypto.SecretKey;
 
 /**
  * Service class for handling financial report export functionality.
@@ -44,11 +56,43 @@ public class ExportReportService {
     private final User currentUser;
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private static final DateTimeFormatter FILE_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
+    private static final Gson gson = new Gson();
+    private static final String FIXED_KEY = "MyFinanceAppSecretKey1234567890";  // 固定密钥
     final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     public ExportReportService(TransactionService txService, User currentUser) {
         this.txService = txService;
         this.currentUser = currentUser;
+    }
+
+    /**
+     * 获取加密密钥
+     */
+    private SecretKey getEncryptionKey() throws EncryptionException {
+        // 使用固定密钥和用户ID派生加密密钥
+        byte[] salt = currentUser.getUid().getBytes();  // 使用用户ID作为盐值
+        return EncryptionService.deriveKey(FIXED_KEY, salt);
+    }
+
+    /**
+     * 加载并解析交易数据
+     */
+    private List<Transaction> loadTransactions() throws IOException, EncryptionException {
+        String filePath = "src/main/resources/transaction/" + currentUser.getUid() + ".json";
+        String content = new String(Files.readAllBytes(Paths.get(filePath)), StandardCharsets.UTF_8);
+        
+        // Parse encrypted data from JSON
+        EncryptedData encryptedData = gson.fromJson(content, EncryptedData.class);
+        
+        // Get encryption key derived from user ID
+        SecretKey key = getEncryptionKey();
+        
+        // Decrypt the content
+        String decryptedContent = EncryptionService.decrypt(encryptedData, key);
+        
+        // Parse the decrypted content into List<Transaction>
+        Type listType = new TypeToken<List<Transaction>>() {}.getType();
+        return gson.fromJson(decryptedContent, listType);
     }
 
     /**
@@ -108,7 +152,6 @@ public class ExportReportService {
                 e.printStackTrace();
                 throw new RuntimeException("Failed to export report: " + e.getMessage(), e);
             }
-            // 移除 finally 块，不在每次导出后关闭线程池
         }, executorService);
     }
 
