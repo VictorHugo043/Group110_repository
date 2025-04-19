@@ -279,7 +279,7 @@ public class Goals {
                     break;
 
                 case "DEBT_REPAYMENT":
-                    double totalDebtRepayment = transactionService.calculateTotalAmountByCategory("Loan Repayment");
+                    double totalDebtRepayment = transactionService.calculateTotalAmountByCategory("Debt");
                     VBox totalDebtBox = createLabelPair("Total Debt Amount", 
                         GoalService.formatNumber(goal.getTargetAmount()) + " " + currency);
                     VBox repaymentDeadlineBox = createLabelPair("Repayment Deadline", 

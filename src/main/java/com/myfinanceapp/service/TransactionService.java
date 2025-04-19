@@ -1,22 +1,27 @@
 package com.myfinanceapp.service;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;     // <-- import
+import com.google.gson.reflect.TypeToken;
 import com.myfinanceapp.model.Transaction;
 import com.myfinanceapp.model.User;
+import com.myfinanceapp.security.EncryptionService;
+import com.myfinanceapp.security.EncryptionService.EncryptedData;
+import com.myfinanceapp.security.EncryptionService.EncryptionException;
 
 import javafx.scene.control.Alert;
 
 import java.io.*;
-import java.lang.reflect.Type;               // <-- import
+import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import javax.crypto.SecretKey;
+import java.nio.file.Files;
 
 public class TransactionService {
-
     private static final String TRANSACTION_DIR = "src/main/resources/transaction/";
     private static final Gson gson = new Gson();
+    private static final String FIXED_KEY = "MyFinanceAppSecretKey1234567890";  // 固定密钥
 
     public boolean addTransaction(User user, Transaction newTx) {
         List<Transaction> allTxs = loadTransactions(user);
@@ -33,7 +38,7 @@ public class TransactionService {
     /**
      * 读取 <UID>.json 文件：其中存的格式是 JSON数组 [ {...}, {...} ]
      */
-    public List<Transaction> loadTransactions(User user){
+    public List<Transaction> loadTransactions(User user) {
         File dir = new File(TRANSACTION_DIR);
         if (!dir.exists()) {
             dir.mkdirs();
@@ -43,18 +48,27 @@ public class TransactionService {
             return new ArrayList<>();
         }
 
-        try (Reader reader = new FileReader(jsonFile, StandardCharsets.UTF_8)) {
-            // 这里 TypeToken
+        try {
+            // Read the entire file content
+            String content = new String(Files.readAllBytes(jsonFile.toPath()), StandardCharsets.UTF_8);
+            EncryptedData encryptedData = gson.fromJson(content, EncryptedData.class);
+            
+            // Get encryption key derived from user ID
+            SecretKey key = getEncryptionKey(user);
+            
+            // Decrypt the content
+            String decryptedContent = EncryptionService.decrypt(encryptedData, key);
+
             Type listType = new TypeToken<List<Transaction>>() {}.getType();
-            // 显式泛型可避免编译冲突
-            List<Transaction> txList = gson.<List<Transaction>>fromJson(reader, listType);
+            List<Transaction> txList = gson.<List<Transaction>>fromJson(decryptedContent, listType);
 
             return (txList != null) ? txList : new ArrayList<>();
-        } catch (IOException e){
+        } catch (IOException | EncryptionException e) {
             e.printStackTrace();
             return new ArrayList<>();
         }
     }
+
     public void importTransactionsFromCSV(User user, File csvFile) {
         List<Transaction> allTxs = loadTransactions(user);
         try (BufferedReader br = new BufferedReader(new FileReader(csvFile))) {
@@ -86,7 +100,13 @@ public class TransactionService {
                 if (parts.length == 6) {
                     // 创建新的交易记录对象
                     Transaction tx = new Transaction();
-                    tx.setTransactionDate(parts[0].trim());
+                    // 转换日期格式从 YYYY/M/D 到 YYYY-MM-DD
+                    String[] dateParts = parts[0].trim().split("/");
+                    String formattedDate = String.format("%s-%02d-%02d", 
+                        dateParts[0], 
+                        Integer.parseInt(dateParts[1]), 
+                        Integer.parseInt(dateParts[2]));
+                    tx.setTransactionDate(formattedDate);
                     tx.setTransactionType(parts[1].trim());
                     tx.setCurrency(parts[2].trim());
                     try {
@@ -146,16 +166,35 @@ public class TransactionService {
 //将用户的交易记录保存到一个 JSON 文件中
 public void saveTransactions(User user, List<Transaction> transactions) {
         File dir = new File(TRANSACTION_DIR);
-        if(!dir.exists()){
+        if (!dir.exists()) {
             dir.mkdirs();
         }
         File jsonFile = new File(dir, user.getUid() + ".json");
 
-        // 覆盖写 => JSON数组
-        try (Writer writer = new FileWriter(jsonFile, StandardCharsets.UTF_8, false)) {
-            gson.toJson(transactions, writer);
-        } catch(IOException e){
+        try {
+            // Convert transactions to JSON string
+            String jsonContent = gson.toJson(transactions);
+            
+            // Get encryption key derived from user ID
+            SecretKey key = getEncryptionKey(user);
+            
+            // Encrypt the content
+            EncryptedData encryptedData = EncryptionService.encrypt(jsonContent, key);
+            
+            // Save encrypted content as JSON
+            String content = gson.toJson(encryptedData);
+            Files.write(jsonFile.toPath(), content.getBytes(StandardCharsets.UTF_8));
+        } catch (IOException | EncryptionException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * 获取加密密钥
+     */
+    private static SecretKey getEncryptionKey(User user) throws EncryptionException {
+        // 使用固定密钥和用户ID派生加密密钥
+        byte[] salt = user.getUid().getBytes();  // 使用用户ID作为盐值
+        return EncryptionService.deriveKey(FIXED_KEY, salt);
     }
 }
