@@ -6,6 +6,7 @@ import com.myfinanceapp.service.StatusService;
 import com.myfinanceapp.service.TransactionService;
 import com.myfinanceapp.ui.common.LeftSidebarFactory;
 import com.myfinanceapp.ui.statusscene.StatusScene;
+import com.myfinanceapp.service.ThemeService;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -35,6 +36,7 @@ public class TransactionManagementScene {
     private ObservableList<Transaction> allTransactions;
     private FilteredList<Transaction> filteredTransactions;
     private TableView<Transaction> transactionTable;
+    private ThemeService themeService; // Store ThemeService instance
 
     // 筛选控件
     private ComboBox<String> dateFilter;
@@ -51,12 +53,18 @@ public class TransactionManagementScene {
         this.txService = new TransactionService();
     }
 
+    // Overloaded method for backward compatibility
     public Scene createScene() {
+        return createScene(new ThemeService());
+    }
+
+    public Scene createScene(ThemeService themeService) {
+        this.themeService = themeService; // Store the ThemeService instance
         BorderPane root = new BorderPane();
-        root.setStyle("-fx-background-color: white;");
+        root.setStyle(themeService.getCurrentThemeStyle());
 
         // 使用相同的侧边栏
-        VBox sideBar = LeftSidebarFactory.createLeftSidebar(stage, "Transactions", currentUser);
+        VBox sideBar = LeftSidebarFactory.createLeftSidebar(stage, "Transactions", currentUser, themeService);
         root.setLeft(sideBar);
 
         // 主内容区
@@ -64,6 +72,7 @@ public class TransactionManagementScene {
         mainContent.setPadding(new Insets(20));
         mainContent.setAlignment(Pos.TOP_CENTER);
         mainContent.setFillWidth(true);
+        mainContent.setStyle(themeService.getCurrentThemeStyle());
 
         // 页面标题
         HBox headerBox = createHeader();
@@ -76,14 +85,14 @@ public class TransactionManagementScene {
 
         // 返回按钮
         Button backButton = new Button("Back to Status");
-        backButton.setStyle("-fx-background-color: #3282FA; -fx-text-fill: white; -fx-background-radius: 5;");
+        backButton.setStyle(themeService.getButtonStyle());
         backButton.setOnAction(e -> {
             // 获取当前窗口的实际大小
             double currentWidth = stage.getWidth();
             double currentHeight = stage.getHeight();
             // 回到 Status 界面
             StatusScene statusScene = new StatusScene(stage, currentWidth, currentHeight, currentUser);
-            stage.setScene(statusScene.createScene());
+            stage.setScene(statusScene.createScene(themeService));
             StatusService statusService = new StatusService(statusScene, currentUser);
             stage.setTitle("Finanger - Status");
         });
@@ -96,7 +105,7 @@ public class TransactionManagementScene {
 
     private HBox createHeader() {
         Label title = new Label("Transaction Management");
-        title.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #3282FA;");
+        title.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;" + themeService.getTextColorStyle());
 
         HBox header = new HBox(title);
         header.setAlignment(Pos.CENTER_LEFT);
@@ -138,10 +147,13 @@ public class TransactionManagementScene {
 
         // 重置按钮
         Button resetButton = new Button("Reset Filters");
-        resetButton.setStyle("-fx-background-color: #E0F0FF; -fx-text-fill: #3282FA;");
+        resetButton.setStyle(themeService.getButtonStyle());
         resetButton.setOnAction(e -> resetFilters());
 
-        HBox filterBox = new HBox(10, new Label("Filter:"),
+        Label filterLabel = new Label("Filter:");
+        filterLabel.setStyle(themeService.getTextColorStyle());
+
+        HBox filterBox = new HBox(10, filterLabel,
                 dateFilter, typeFilter, currencyFilter, categoryFilter, paymentMethodFilter, resetButton);
         filterBox.setPadding(new Insets(10));
         filterBox.setAlignment(Pos.CENTER_LEFT);

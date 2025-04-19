@@ -5,6 +5,7 @@ import com.myfinanceapp.ui.settingscene.About;
 import com.myfinanceapp.ui.settingscene.SystemSettings;
 import com.myfinanceapp.ui.settingscene.UserOptions;
 import com.myfinanceapp.ui.settingscene.ExportReport;
+import com.myfinanceapp.service.ThemeService;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -21,12 +22,17 @@ import com.myfinanceapp.ui.common.SceneManager;
 public class SettingsTopBarFactory {
     private static final double MIN_WINDOW_WIDTH = 800;
     private static final double MIN_WINDOW_HEIGHT = 450;
-    
+
     // 存储窗口大小监听器的静态引用，以便能够移除它们
     private static ChangeListener<Number> widthListener;
     private static ChangeListener<Number> heightListener;
 
+    // 重载方法，兼容旧的调用方式
     public static HBox createTopBar(Stage stage, String activeTab, User loggedUser) {
+        return createTopBar(stage, activeTab, loggedUser, new ThemeService());
+    }
+
+    public static HBox createTopBar(Stage stage, String activeTab, User loggedUser, ThemeService themeService) {
         // 确保窗口有最小尺寸限制
         stage.setMinWidth(MIN_WINDOW_WIDTH);
         stage.setMinHeight(MIN_WINDOW_HEIGHT);
@@ -55,10 +61,10 @@ public class SettingsTopBarFactory {
         topBar.setPadding(new Insets(0, 0, 0, 0));
         topBar.setAlignment(Pos.BOTTOM_LEFT);
 
-        VBox systemSettingsTab = createOneTab("System Settings", activeTab.equals("System Settings"));
-        VBox userOptionsTab = createOneTab("User Options", activeTab.equals("User Options"));
-        VBox exportReportTab = createOneTab("Export Report", activeTab.equals("Export Report"));
-        VBox aboutTab = createOneTab("About", activeTab.equals("About"));
+        VBox systemSettingsTab = createOneTab("System Settings", activeTab.equals("System Settings"), themeService);
+        VBox userOptionsTab = createOneTab("User Options", activeTab.equals("User Options"), themeService);
+        VBox exportReportTab = createOneTab("Export Report", activeTab.equals("Export Report"), themeService);
+        VBox aboutTab = createOneTab("About", activeTab.equals("About"), themeService);
 
         // 获取当前窗口尺寸
         double currentWidth = Math.max(stage.getWidth(), MIN_WINDOW_WIDTH);
@@ -66,7 +72,7 @@ public class SettingsTopBarFactory {
 
         // 设置点击事件
         aboutTab.setOnMouseClicked(e -> {
-            Scene newScene = About.createScene(stage, currentWidth, currentHeight, loggedUser);
+            Scene newScene = About.createScene(stage, currentWidth, currentHeight, loggedUser, themeService);
             SceneManager.switchScene(stage, newScene);
         });
 
@@ -76,12 +82,12 @@ public class SettingsTopBarFactory {
         });
 
         userOptionsTab.setOnMouseClicked(e -> {
-            Scene newScene = UserOptions.createScene(stage, currentWidth, currentHeight, loggedUser);
+            Scene newScene = UserOptions.createScene(stage, currentWidth, currentHeight, loggedUser, themeService);
             SceneManager.switchScene(stage, newScene);
         });
 
         exportReportTab.setOnMouseClicked(e -> {
-            Scene newScene = ExportReport.createScene(stage, currentWidth, currentHeight, loggedUser);
+            Scene newScene = ExportReport.createScene(stage, currentWidth, currentHeight, loggedUser, themeService);
             SceneManager.switchScene(stage, newScene);
         });
 
@@ -89,10 +95,10 @@ public class SettingsTopBarFactory {
         return topBar;
     }
 
-    private static VBox createOneTab(String text, boolean isActive) {
+    private static VBox createOneTab(String text, boolean isActive, ThemeService themeService) {
         Label arrow = new Label("\u25BC");
         arrow.setVisible(isActive);
-        arrow.setTextFill(Color.web("#3282FA"));
+        arrow.setTextFill(Color.web(themeService.isDayMode() ? "#3282FA" : "#E0F0FF")); // Blue in Daytime, Light Blue in Nighttime for visibility
         arrow.setStyle("-fx-font-size: 14;");
 
         Label tabLabel = new Label(text);
@@ -109,8 +115,8 @@ public class SettingsTopBarFactory {
             );
         } else {
             tabLabel.setStyle(
-                    "-fx-background-color: #E0F0FF;" +
-                            "-fx-text-fill: #3282FA;" +
+                    "-fx-background-color: " + (themeService.isDayMode() ? "#E0F0FF" : "#4A6FA5") + ";" +
+                            themeService.getTextColorStyle() +
                             "-fx-border-radius: 8 8 0 0;" +
                             "-fx-background-radius: 8 8 0 0;"
             );

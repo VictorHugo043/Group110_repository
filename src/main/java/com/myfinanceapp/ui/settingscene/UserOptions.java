@@ -7,6 +7,7 @@ import com.myfinanceapp.ui.common.SettingsTopBarFactory;
 import com.myfinanceapp.ui.loginscene.ResetPassword;
 import com.myfinanceapp.ui.statusscene.StatusScene;
 import com.myfinanceapp.service.StatusService;
+import com.myfinanceapp.service.ThemeService;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -27,7 +28,12 @@ public class UserOptions {
     // 假设当前已登录用户信息在此记录
     private static User currentUser;
 
+    // 重载方法，兼容旧的调用方式
     public static Scene createScene(Stage stage, double width, double height, User loggedUser) {
+        return createScene(stage, width, height, loggedUser, new ThemeService());
+    }
+
+    public static Scene createScene(Stage stage, double width, double height, User loggedUser, ThemeService themeService) {
         // 把当前登录用户保存，供下文使用
         currentUser = loggedUser;
         if (currentUser == null) {
@@ -35,10 +41,10 @@ public class UserOptions {
         }
 
         BorderPane root = new BorderPane();
-        root.setStyle("-fx-background-color: white;");
+        root.setStyle(themeService.getCurrentThemeStyle());
 
         // 左侧边栏: "Settings" 选中
-        VBox sideBar = LeftSidebarFactory.createLeftSidebar(stage, "Settings", loggedUser);
+        VBox sideBar = LeftSidebarFactory.createLeftSidebar(stage, "Settings", loggedUser, themeService);
         root.setLeft(sideBar);
 
         // 中心：与 SystemSettings/ About 等相同
@@ -50,7 +56,7 @@ public class UserOptions {
         container.setAlignment(Pos.CENTER);
 
         // 顶部Tab栏: "User Options" 选中
-        HBox topBar = SettingsTopBarFactory.createTopBar(stage, "User Options", loggedUser);
+        HBox topBar = SettingsTopBarFactory.createTopBar(stage, "User Options", loggedUser, themeService);
 
         // 下部圆角容器
         VBox outerBox = new VBox(20);
@@ -63,7 +69,7 @@ public class UserOptions {
                         "-fx-border-width: 2;" +
                         "-fx-border-radius: 0 0 12 12;" +
                         "-fx-background-radius: 0 0 12 12;" +
-                        "-fx-background-color: white;"
+                        themeService.getCurrentFormBackgroundStyle()
         );
 
         // ========== 右上角显示当前用户名 ===========
@@ -85,7 +91,11 @@ public class UserOptions {
             // fallback: do nothing
         }
         Label resetUserLabel = new Label("Reset Username");
-        resetUserLabel.setStyle("-fx-text-fill: #3282FA; -fx-font-size: 16; -fx-font-weight: bold;");
+        resetUserLabel.setStyle(
+                "-fx-text-fill: #3282FA;" +
+                        "-fx-font-size: 16;" +
+                        "-fx-font-weight: bold;"
+        );
 
         HBox resetUserHeader = new HBox(10, userIcon, resetUserLabel);
         resetUserHeader.setAlignment(Pos.CENTER_LEFT);
@@ -94,8 +104,7 @@ public class UserOptions {
         newUsernameField.setPromptText("New username");
 
         Button saveUserBtn = new Button("save");
-        saveUserBtn.setStyle("-fx-background-color: #BEE3F8; -fx-text-fill: #3282FA; -fx-font-weight: bold; " +
-                "-fx-background-radius: 10; -fx-border-radius: 10;");
+        saveUserBtn.setStyle(themeService.getButtonStyle());
 
         // 创建 UserService 实例
         UserService userService = new UserService();
@@ -132,7 +141,11 @@ public class UserOptions {
             // fallback
         }
         Label resetSecLabel = new Label("Reset Security Question");
-        resetSecLabel.setStyle("-fx-text-fill: #3282FA; -fx-font-size: 16; -fx-font-weight: bold;");
+        resetSecLabel.setStyle(
+                "-fx-text-fill: #3282FA;" +
+                        "-fx-font-size: 16;" +
+                        "-fx-font-weight: bold;"
+        );
 
         HBox resetSecHeader = new HBox(10, secIcon, resetSecLabel);
 
@@ -147,11 +160,11 @@ public class UserOptions {
 
         Label ansLabel = new Label("Your answer:");
         ansLabel.setStyle("-fx-text-fill: #3282FA; -fx-font-weight: bold;");
+
         TextField ansField = new TextField(currentUser.getSecurityAnswer());
 
         Button saveSecBtn = new Button("save");
-        saveSecBtn.setStyle("-fx-background-color: #BEE3F8; -fx-text-fill: #3282FA; -fx-font-weight: bold; " +
-                "-fx-background-radius: 10; -fx-border-radius: 10;");
+        saveSecBtn.setStyle(themeService.getButtonStyle());
 
         saveSecBtn.setOnAction(e -> {
             String q = questionCombo.getValue();
@@ -189,7 +202,11 @@ public class UserOptions {
         }
 
         Label resetPassLabel = new Label("Reset Password ➜");
-        resetPassLabel.setStyle("-fx-text-fill: #3282FA; -fx-font-size: 16; -fx-font-weight: bold;");
+        resetPassLabel.setStyle(
+                "-fx-text-fill: #3282FA;" +
+                        "-fx-font-size: 16;" +
+                        "-fx-font-weight: bold;"
+        );
         HBox resetPassRow = new HBox(10, passIcon, resetPassLabel);
         resetPassRow.setAlignment(Pos.CENTER_LEFT);
 
@@ -201,7 +218,7 @@ public class UserOptions {
 
         // ========== Bottom: Back to Status ==========
         Button backBtn = new Button("Back to Status");
-        backBtn.setStyle("-fx-background-color: #3377ff; -fx-text-fill: white; -fx-font-weight: bold;");
+        backBtn.setStyle(themeService.getButtonStyle());
         backBtn.setOnAction(e -> {
             StatusScene statusScene = new StatusScene(stage, width, height, loggedUser);
             stage.setScene(statusScene.createScene());
