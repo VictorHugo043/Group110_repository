@@ -30,7 +30,8 @@ class TransactionServiceTest {
         }
     }
 
-    private Transaction createTransaction(String date, String type, String currency, double amount, String category, String paymentMethod) {
+    private Transaction createTransaction(String date, String type, String currency, double amount, String category,
+            String paymentMethod) {
         Transaction tx = new Transaction();
         tx.setTransactionDate(date);
         tx.setTransactionType(type);
@@ -38,6 +39,7 @@ class TransactionServiceTest {
         tx.setAmount(amount);
         tx.setCategory(category);
         tx.setPaymentMethod(paymentMethod);
+        tx.setDescription("Test description");
         return tx;
     }
 

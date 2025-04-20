@@ -144,8 +144,10 @@ public class StatusService {
 
         scene.exLabel.setText(String.format("Ex.  %.2f CNY", totalExpense));
         scene.inLabel.setText(String.format("In.  %.2f CNY", totalIncome));
-        scene.exLabel.setStyle("-fx-background-color: #E0F0FF; -fx-text-fill: #3282FA; -fx-border-radius: 30; -fx-background-radius: 30; -fx-padding: 10 20 10 20;");
-        scene.inLabel.setStyle("-fx-background-color: #E0F0FF; -fx-text-fill: #3282FA; -fx-border-radius: 30; -fx-background-radius: 30; -fx-padding: 10 20 10 20;");
+        scene.exLabel.setStyle(
+                "-fx-background-color: #E0F0FF; -fx-text-fill: #3282FA; -fx-border-radius: 30; -fx-background-radius: 30; -fx-padding: 10 20 10 20;");
+        scene.inLabel.setStyle(
+                "-fx-background-color: #E0F0FF; -fx-text-fill: #3282FA; -fx-border-radius: 30; -fx-background-radius: 30; -fx-padding: 10 20 10 20;");
     }
 
     void updateTransactions(LocalDate startDate, LocalDate endDate) {
@@ -158,6 +160,7 @@ public class StatusService {
                 })
                 .sorted((t1, t2) -> t2.getTransactionDate().compareTo(t1.getTransactionDate()))
                 .forEach(t -> {
+                    // 移除了 description 部分
                     Label txLabel = new Label(String.format("%s   %s    %.2f CNY",
                             t.getTransactionDate(), t.getCategory(), t.getAmount()));
                     txLabel.setWrapText(true);
@@ -186,7 +189,8 @@ public class StatusService {
                         tx.getAmount(), tx.getCategory(), tx.getPaymentMethod()));
             }
             String systemPrompt = "现在你是我的专属财务管理助手，我希望你解答我有关个人财务的问题。\n" +
-                    "这是我的财务数据结构: Transaction Date(YYYY-MM-DD), Type(Income/Expense), Currency, Amount, Category, PaymentMethod.\n" +
+                    "这是我的财务数据结构: Transaction Date(YYYY-MM-DD), Type(Income/Expense), Currency, Amount, Category, PaymentMethod.\n"
+                    +
                     "下面是我目前的数据：\n" + dataSummary +
                     "\n用户的问题是： " + userInput;
 
@@ -218,7 +222,10 @@ public class StatusService {
                             final String html = mdRenderer.render(doc);
                             Platform.runLater(() -> updateWebView(html));
 
-                            try { Thread.sleep(50); } catch(InterruptedException e){}
+                            try {
+                                Thread.sleep(50);
+                            } catch (InterruptedException e) {
+                            }
                         }
 
                         // 最后完整显示一次，确保全部内容都显示出来
@@ -264,8 +271,7 @@ public class StatusService {
         scene.suggestionsWebView.getEngine().getLoadWorker().stateProperty().addListener((obs, oldState, newState) -> {
             if (newState == javafx.concurrent.Worker.State.SUCCEEDED) {
                 scene.suggestionsWebView.getEngine().executeScript(
-                        "window.scrollTo(0, document.body.scrollHeight);"
-                );
+                        "window.scrollTo(0, document.body.scrollHeight);");
             }
         });
     }

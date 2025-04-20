@@ -6,9 +6,9 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class TransactionTest {
-    
+
     private Transaction transaction;
-    
+
     @BeforeEach
     void setUp() {
         transaction = new Transaction();
@@ -18,6 +18,7 @@ class TransactionTest {
         transaction.setAmount(100.50);
         transaction.setCategory("Food");
         transaction.setPaymentMethod("Cash");
+        transaction.setDescription("Test description");
     }
 
     @Test
@@ -87,6 +88,17 @@ class TransactionTest {
     }
 
     @Test
+    void getDescription() {
+        assertEquals("Test description", transaction.getDescription());
+    }
+
+    @Test
+    void setDescription() {
+        transaction.setDescription("Updated description");
+        assertEquals("Updated description", transaction.getDescription());
+    }
+
+    @Test
     void testEquals() {
         // Create an identical transaction object
         Transaction identical = new Transaction();
@@ -96,20 +108,21 @@ class TransactionTest {
         identical.setAmount(100.50);
         identical.setCategory("Food");
         identical.setPaymentMethod("Cash");
-        
+        identical.setDescription("Test description");
+
         // Test equality of identical objects
         assertTrue(transaction.equals(identical));
         assertTrue(identical.equals(transaction));
-        
+
         // Test equality with self
         assertTrue(transaction.equals(transaction));
-        
+
         // Test inequality with null
         assertFalse(transaction.equals(null));
-        
+
         // Test inequality with different type
         assertFalse(transaction.equals("Not a transaction"));
-        
+
         // Test inequality with different fields
         Transaction different = new Transaction();
         different.setTransactionDate("2023-05-15");
@@ -118,9 +131,10 @@ class TransactionTest {
         different.setAmount(100.50);
         different.setCategory("Food");
         different.setPaymentMethod("Cash");
-        
+        different.setDescription("Test description");
+
         assertFalse(transaction.equals(different));
-        
+
         // Test with different date
         different = new Transaction();
         different.setTransactionDate("2023-05-16"); // Different date
@@ -129,9 +143,10 @@ class TransactionTest {
         different.setAmount(100.50);
         different.setCategory("Food");
         different.setPaymentMethod("Cash");
-        
+        different.setDescription("Test description");
+
         assertFalse(transaction.equals(different));
-        
+
         // Test with different amount
         different = new Transaction();
         different.setTransactionDate("2023-05-15");
@@ -140,9 +155,10 @@ class TransactionTest {
         different.setAmount(200.00); // Different amount
         different.setCategory("Food");
         different.setPaymentMethod("Cash");
-        
+        different.setDescription("Test description");
+
         assertFalse(transaction.equals(different));
-        
+
         // Test with different currency
         different = new Transaction();
         different.setTransactionDate("2023-05-15");
@@ -151,9 +167,10 @@ class TransactionTest {
         different.setAmount(100.50);
         different.setCategory("Food");
         different.setPaymentMethod("Cash");
-        
+        different.setDescription("Test description");
+
         assertFalse(transaction.equals(different));
-        
+
         // Test with different category
         different = new Transaction();
         different.setTransactionDate("2023-05-15");
@@ -162,9 +179,10 @@ class TransactionTest {
         different.setAmount(100.50);
         different.setCategory("Transport"); // Different category
         different.setPaymentMethod("Cash");
-        
+        different.setDescription("Test description");
+
         assertFalse(transaction.equals(different));
-        
+
         // Test with different payment method
         different = new Transaction();
         different.setTransactionDate("2023-05-15");
@@ -173,7 +191,20 @@ class TransactionTest {
         different.setAmount(100.50);
         different.setCategory("Food");
         different.setPaymentMethod("Credit Card"); // Different payment method
-        
+        different.setDescription("Test description");
+
+        assertFalse(transaction.equals(different));
+
+        // Test with different description
+        different = new Transaction();
+        different.setTransactionDate("2023-05-15");
+        different.setTransactionType("EXPENSE");
+        different.setCurrency("CNY");
+        different.setAmount(100.50);
+        different.setCategory("Food");
+        different.setPaymentMethod("Cash");
+        different.setDescription("Different description"); // Different description
+
         assertFalse(transaction.equals(different));
     }
 }

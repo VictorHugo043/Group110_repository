@@ -7,24 +7,40 @@ public class AISortingServiceTest {
 
     @Test
     public void testSort_ValidInput() {
+        // Define valid categories
+        String[] validCategories = {"Housing", "Shopping", "Gift", "Food & Drink", "Freelance",
+                "Transport", "Groceries", "Debt", "Leisure", "Healthcare",
+                "Utilities", "Investment", "Bonus", "Salary", "Others"};
+
         // Test case 1: Salary income
         String description1 = "Received monthly salary from company";
         String result1 = AISortingService.sort(description1);
         assertNotNull(result1, "Return value should not be null");
-        assertTrue(isValidWordCount(result1), "Return value should be one or two English words");
+        assertTrue(isValidCategory(result1, validCategories), "Return value should be one of the valid categories");
 
         // Test case 2: Transportation expense
         String description2 = "Took subway to work";
         String result2 = AISortingService.sort(description2);
         assertNotNull(result2, "Return value should not be null");
-        assertTrue(isValidWordCount(result2), "Return value should be one or two English words");
+        assertTrue(isValidCategory(result2, validCategories), "Return value should be one of the valid categories");
 
         // Test case 3: Food expense
         String description3 = "Had lunch at restaurant";
         String result3 = AISortingService.sort(description3);
         assertNotNull(result3, "Return value should not be null");
-        assertTrue(isValidWordCount(result3), "Return value should be one or two English words");
+        assertTrue(isValidCategory(result3, validCategories), "Return value should be one of the valid categories");
     }
+
+    // Helper method to check if the result is one of the valid categories
+    private boolean isValidCategory(String result, String[] validCategories) {
+        for (String category : validCategories) {
+            if (category.equals(result)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 
     @Test
     public void testSort_InvalidInput() {

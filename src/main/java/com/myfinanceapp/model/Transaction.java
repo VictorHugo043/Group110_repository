@@ -11,6 +11,7 @@ public class Transaction {
     private double amount;
     private String category;
     private String paymentMethod;
+    private String description;
 
     // Getters and Setters
     public String getTransactionDate() {
@@ -61,7 +62,15 @@ public class Transaction {
         this.paymentMethod = paymentMethod;
     }
 
-    //重写写一个equals方法，确保交易记录是通过其内容（每一个属性的值一一比较）进行比较判断。
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    // 重写写一个equals方法，确保交易记录是通过其内容（每一个属性的值一一比较）进行比较判断。
     public boolean equals(Object obj) {
         if (this == obj) {
             return true; // 同一个对象，返回true
@@ -70,7 +79,7 @@ public class Transaction {
             return false; // 如果是不同类或者obj为空，返回false
         }
         Transaction other = (Transaction) obj;
-        return Double.compare(other.amount, amount) == 0 &&  // 比较金额，注意使用Double.compare避免精度问题
+        return Double.compare(other.amount, amount) == 0 && // 比较金额，注意使用Double.compare避免精度问题
                 Objects.equals(transactionDate, other.transactionDate) &&
                 Objects.equals(transactionType, other.transactionType) &&
                 Objects.equals(currency, other.currency) &&
