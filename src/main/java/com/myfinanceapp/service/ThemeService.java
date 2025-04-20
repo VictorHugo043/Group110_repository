@@ -53,9 +53,9 @@ public class ThemeService {
      */
     public String getButtonStyle() {
         if (isDayMode) {
-            return "-fx-background-color: #E0F0FF; -fx-font-weight: bold;";
+            return "-fx-background-color: #E0F0FF; -fx-text-fill: #3282FA; -fx-font-weight: bold;";
         } else {
-            return "-fx-background-color: #4A6FA5; -fx-font-weight: bold;";
+            return "-fx-background-color: #4A6FA5; -fx-text-fill: white; -fx-font-weight: bold;";
         }
     }
 }

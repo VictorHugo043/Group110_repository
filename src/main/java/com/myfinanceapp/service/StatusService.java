@@ -109,7 +109,7 @@ public class StatusService {
         initializeWelcomeMessage();
     }
     private void initializeWelcomeMessage() {
-        String welcomeMsg = "欢迎使用财务助手，有任何财务问题请随时提问。";
+        String welcomeMsg = "Welcome to use the financial assistant. Please feel free to ask any financial questions you have.";
 
         // 添加到聊天历史
         Map<String, String> aiMsg = new HashMap<>();

@@ -105,9 +105,8 @@ public class About {
         Button backBtn = new Button("Back to Status");
         backBtn.setStyle(themeService.getButtonStyle());
         backBtn.setOnAction(e -> {
-            // 回到 Status 界面
             StatusScene statusScene = new StatusScene(stage, width, height, loggedUser);
-            stage.setScene(statusScene.createScene());
+            stage.setScene(statusScene.createScene(themeService));
             StatusService statusService = new StatusService(statusScene, loggedUser);
             stage.setTitle("Finanger - Status");
         });
