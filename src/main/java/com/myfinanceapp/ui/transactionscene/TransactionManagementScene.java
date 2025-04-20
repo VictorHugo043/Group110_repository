@@ -252,10 +252,33 @@ public class TransactionManagementScene {
             tx.setDescription(e.getNewValue());
             updateTransaction(tx);
         });
+        // 添加删除操作列
+        TableColumn<Transaction, Void> actionCol = new TableColumn<>("Action");
+        actionCol.setPrefWidth(100);
+        actionCol.setCellFactory(param -> new TableCell<>() {
+            private final Button deleteButton = new Button("Delete");
+            {
+                deleteButton.setStyle(themeService.getButtonStyle() + "-fx-font-size: 12px;");
+                deleteButton.setOnAction(event -> {
+                    Transaction tx = getTableView().getItems().get(getIndex());
+                    deleteTransaction(tx);
+                });
+            }
+
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    setGraphic(deleteButton);
+                }
+            }
+        });
 
         // 设置列宽和表格属性
         transactionTable.getColumns().addAll(dateCol, typeCol, currencyCol, amountCol, categoryCol, paymentCol,
-                descriptionCol);
+                descriptionCol,actionCol);
         transactionTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         transactionTable.setPrefHeight(500);
 
@@ -269,19 +292,24 @@ public class TransactionManagementScene {
 
     private void applyFilters() {
         Predicate<Transaction> filter = transaction -> {
-            boolean dateMatch = dateFilter.getValue().startsWith("All") ||
+            boolean dateMatch = dateFilter.getValue() == null ||
+                    dateFilter.getValue().startsWith("All") ||
                     transaction.getTransactionDate().equals(dateFilter.getValue());
 
-            boolean typeMatch = typeFilter.getValue().startsWith("All") ||
+            boolean typeMatch = typeFilter.getValue() == null ||
+                    typeFilter.getValue().startsWith("All") ||
                     transaction.getTransactionType().equals(typeFilter.getValue());
 
-            boolean currencyMatch = currencyFilter.getValue().startsWith("All") ||
+            boolean currencyMatch = currencyFilter.getValue() == null ||
+                    currencyFilter.getValue().startsWith("All") ||
                     transaction.getCurrency().equals(currencyFilter.getValue());
 
-            boolean categoryMatch = categoryFilter.getValue().startsWith("All") ||
+            boolean categoryMatch = categoryFilter.getValue() == null ||
+                    categoryFilter.getValue().startsWith("All") ||
                     transaction.getCategory().equals(categoryFilter.getValue());
 
-            boolean paymentMatch = paymentMethodFilter.getValue().startsWith("All") ||
+            boolean paymentMatch = paymentMethodFilter.getValue() == null ||
+                    paymentMethodFilter.getValue().startsWith("All") ||
                     transaction.getPaymentMethod().equals(paymentMethodFilter.getValue());
 
             return dateMatch && typeMatch && currencyMatch && categoryMatch && paymentMatch;
@@ -298,6 +326,93 @@ public class TransactionManagementScene {
         paymentMethodFilter.setValue("All Payment Method");
         filteredTransactions.setPredicate(null);
     }
+    private void refreshFilterOptions() {
+        // 临时保存当前筛选值
+        String dateValue = dateFilter.getValue();
+        String typeValue = typeFilter.getValue();
+        String currencyValue = currencyFilter.getValue();
+        String categoryValue = categoryFilter.getValue();
+        String paymentMethodValue = paymentMethodFilter.getValue();
+
+        // 更新各个筛选下拉框的选项
+        updateComboBox(dateFilter, "Date", transaction -> transaction.getTransactionDate());
+        updateComboBox(typeFilter, "Type", transaction -> transaction.getTransactionType());
+        updateComboBox(currencyFilter, "Currency", transaction -> transaction.getCurrency());
+        updateComboBox(categoryFilter, "Category", transaction -> transaction.getCategory());
+        updateComboBox(paymentMethodFilter, "Payment Method", transaction -> transaction.getPaymentMethod());
+
+        // 还原之前的筛选值，如果之前的值不再存在于选项中，则设为"All"
+        setComboBoxValueSafely(dateFilter, dateValue, "All Date");
+        setComboBoxValueSafely(typeFilter, typeValue, "All Type");
+        setComboBoxValueSafely(currencyFilter, currencyValue, "All Currency");
+        setComboBoxValueSafely(categoryFilter, categoryValue, "All Category");
+        setComboBoxValueSafely(paymentMethodFilter, paymentMethodValue, "All Payment Method");
+
+        // 重新应用筛选
+        applyFilters();
+    }
+    private <T> void updateComboBox(ComboBox<String> comboBox, String name,
+                                    java.util.function.Function<Transaction, String> extractor) {
+        String currentValue = comboBox.getValue();
+        comboBox.getItems().clear();
+
+        Set<String> uniqueValues = allTransactions.stream()
+                .map(extractor)
+                .collect(Collectors.toSet());
+
+        List<String> items = new ArrayList<>();
+        items.add("All " + name);
+        items.addAll(uniqueValues);
+
+        comboBox.getItems().addAll(items);
+        setComboBoxValueSafely(comboBox, currentValue, "All " + name);
+    }
+
+    private void setComboBoxValueSafely(ComboBox<String> comboBox, String value, String defaultValue) {
+        // 安全设置ComboBox的值，避免设置不存在的值导致异常
+        if (value != null && comboBox.getItems().contains(value)) {
+            comboBox.setValue(value);
+        } else {
+            comboBox.setValue(defaultValue);
+        }
+    }
+
+    private void deleteTransaction(Transaction transaction) {
+        // 显示确认对话框
+        Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmAlert.setTitle("Confirm Delete");
+        confirmAlert.setHeaderText("Are you sure you want to delete this transaction?");
+        confirmAlert.setContentText("Date: " + transaction.getTransactionDate() +
+                "\nType: " + transaction.getTransactionType() +
+                "\nAmount: " + transaction.getAmount() + " " + transaction.getCurrency() +
+                "\nCategory: " + transaction.getCategory());
+
+        Optional<ButtonType> result = confirmAlert.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            // 获取所有交易
+            List<Transaction> transactions = txService.loadTransactions(currentUser);
+
+            // 找到并移除要删除的交易
+            transactions.removeIf(tx -> tx.equals(transaction));
+
+            // 保存回文件
+            txService.saveTransactions(currentUser, transactions);
+
+            // 从当前表格中移除
+            allTransactions.remove(transaction);
+
+            // 更新筛选选项
+            refreshFilterOptions();
+
+            // 显示删除成功消息
+            Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
+            successAlert.setTitle("Delete Successful");
+            successAlert.setHeaderText(null);
+            successAlert.setContentText("Transaction has been successfully deleted!");
+            successAlert.showAndWait();
+        }
+    }
+
 
     private void updateTransaction(Transaction transaction) {
         // 获取所有交易
@@ -325,56 +440,4 @@ public class TransactionManagementScene {
         applyFilters();
     }
 
-    private void refreshFilterOptions() {
-        List<Transaction> transactions = txService.loadTransactions(currentUser);
-        allTransactions.setAll(transactions);
-
-        // 保存当前选择的值
-        String currentDateFilter = dateFilter.getValue();
-        String currentTypeFilter = typeFilter.getValue();
-        String currentCurrencyFilter = currencyFilter.getValue();
-        String currentCategoryFilter = categoryFilter.getValue();
-        String currentPaymentFilter = paymentMethodFilter.getValue();
-
-        // 获取新的唯一值
-        Set<String> dates = transactions.stream()
-                .map(Transaction::getTransactionDate)
-                .collect(Collectors.toCollection(TreeSet::new));
-
-        Set<String> types = transactions.stream()
-                .map(Transaction::getTransactionType)
-                .collect(Collectors.toSet());
-
-        Set<String> currencies = transactions.stream()
-                .map(Transaction::getCurrency)
-                .collect(Collectors.toSet());
-
-        Set<String> categories = transactions.stream()
-                .map(Transaction::getCategory)
-                .collect(Collectors.toSet());
-
-        Set<String> paymentMethods = transactions.stream()
-                .map(Transaction::getPaymentMethod)
-                .collect(Collectors.toSet());
-
-        // 更新下拉框
-        updateComboBox(dateFilter, dates, currentDateFilter, "Date");
-        updateComboBox(typeFilter, types, currentTypeFilter, "Type");
-        updateComboBox(currencyFilter, currencies, currentCurrencyFilter, "Currency");
-        updateComboBox(categoryFilter, categories, currentCategoryFilter, "Category");
-        updateComboBox(paymentMethodFilter, paymentMethods, currentPaymentFilter, "Payment Method");
-    }
-
-    private void updateComboBox(ComboBox<String> comboBox, Set<String> items, String currentValue, String name) {
-        comboBox.getItems().clear();
-        comboBox.getItems().add("All " + name);
-        comboBox.getItems().addAll(items);
-
-        // 尝试保持当前选择
-        if (comboBox.getItems().contains(currentValue)) {
-            comboBox.setValue(currentValue);
-        } else {
-            comboBox.setValue("All " + name);
-        }
-    }
 }
