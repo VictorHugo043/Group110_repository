@@ -7,6 +7,7 @@ import com.myfinanceapp.service.ThemeService;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.geometry.Side;
 import javafx.scene.Scene;
 import javafx.scene.chart.*;
 import javafx.scene.control.*;
@@ -14,6 +15,9 @@ import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.scene.web.WebView;
+import javafx.scene.text.Text;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +45,8 @@ public class StatusScene {
     public Button sendBtn;
     public VBox transactionsBox;
     public StackPane chartPane;
-    public ThemeService themeService; // Store ThemeService instance
+    public ThemeService themeService;
+    private ScrollPane pieChartScrollPane;
 
     public StatusScene(Stage stage, double width, double height, User loggedUser) {
         this.stage = stage;
@@ -50,13 +55,12 @@ public class StatusScene {
         this.currentUser = loggedUser;
     }
 
-    // Overloaded method for backward compatibility
     public Scene createScene() {
         return createScene(new ThemeService());
     }
 
     public Scene createScene(ThemeService themeService) {
-        this.themeService = themeService; // Store the ThemeService instance
+        this.themeService = themeService;
         BorderPane root = new BorderPane();
         root.setStyle(themeService.getCurrentThemeStyle());
 
@@ -66,11 +70,9 @@ public class StatusScene {
         ScrollPane scrollPane = new ScrollPane();
         scrollPane.setFitToWidth(true);
         scrollPane.setFitToHeight(true);
-        // Set proper background colors and styling
         String backgroundColor = themeService.isDayMode() ? "white" : "#2A2A2A";
         scrollPane.setStyle("-fx-background: " + backgroundColor + "; -fx-background-color: " + backgroundColor + "; -fx-border-width: 0;");
 
-        // Remove any padding that might affect the layout
         scrollPane.setPadding(new Insets(0));
         root.setCenter(scrollPane);
 
@@ -102,8 +104,8 @@ public class StatusScene {
 
         Pane aiPane = createAIPane();
         Pane suggestionPane = createSuggestionPane();
-        VBox.setVgrow(aiPane, Priority.NEVER); // AI问题框不自动增长
-        VBox.setVgrow(suggestionPane, Priority.ALWAYS); // 建议框可以占据所有剩余空间
+        VBox.setVgrow(aiPane, Priority.NEVER);
+        VBox.setVgrow(suggestionPane, Priority.ALWAYS);
         rightColumn.getChildren().addAll(aiPane, suggestionPane);
 
         bottomArea.getChildren().addAll(leftColumn, rightColumn);
@@ -111,7 +113,7 @@ public class StatusScene {
 
         Scene scene = new Scene(root, width, height);
 
-        // Add global CSS styles for consistent appearance
+        scene.getStylesheets().add(getClass().getResource("/css/chart-styles.css").toExternalForm());
         scene.getStylesheets().add("data:text/css," +
                 ".scroll-pane { -fx-background-insets: 0; -fx-padding: 0; }" +
                 ".scroll-pane > .viewport { -fx-background-color: " + backgroundColor + "; }" +
@@ -130,20 +132,17 @@ public class StatusScene {
         title.setStyle(themeService.getTextColorStyle());
         title.setWrapText(true);
 
-        // 使用 GridPane 确保 Start Date, End Date, Chart Type 的控件左端对齐
         GridPane controlGrid = new GridPane();
         controlGrid.setVgap(5);
 
-        // 设置列约束，确保控件左端对齐
         ColumnConstraints labelColumn = new ColumnConstraints();
-        labelColumn.setMinWidth(80); // 标签列宽度
+        labelColumn.setMinWidth(80);
         labelColumn.setHalignment(HPos.LEFT);
         ColumnConstraints controlColumn = new ColumnConstraints();
-        controlColumn.setMinWidth(150); // 控件列宽度，确保 DatePicker 和 ComboBox 宽度一致
+        controlColumn.setMinWidth(150);
         controlColumn.setHalignment(HPos.LEFT);
         controlGrid.getColumnConstraints().addAll(labelColumn, controlColumn);
 
-        // Start Date
         Label startDateLabel = new Label("Start Date");
         startDateLabel.setWrapText(true);
         startDateLabel.setStyle(themeService.getTextColorStyle());
@@ -153,7 +152,6 @@ public class StatusScene {
         controlGrid.add(startDateLabel, 0, 0);
         controlGrid.add(startDatePicker, 1, 0);
 
-        // End Date
         Label endDateLabel = new Label("End Date");
         endDateLabel.setWrapText(true);
         endDateLabel.setStyle(themeService.getTextColorStyle());
@@ -163,7 +161,6 @@ public class StatusScene {
         controlGrid.add(endDateLabel, 0, 1);
         controlGrid.add(endDatePicker, 1, 1);
 
-        // Chart Type
         Label chartTypeLabel = new Label("Chart Type");
         chartTypeLabel.setWrapText(true);
         chartTypeLabel.setStyle(themeService.getTextColorStyle());
@@ -174,18 +171,15 @@ public class StatusScene {
         controlGrid.add(chartTypeLabel, 0, 2);
         controlGrid.add(chartTypeCombo, 1, 2);
 
-        // Ex. 和 In. 标签
         exLabel = new Label();
         exLabel.setStyle(themeService.getTextColorStyle());
         inLabel = new Label();
         inLabel.setStyle(themeService.getTextColorStyle());
 
-        // 使用 VBox 实现均匀分布
         VBox leftSide = new VBox();
         leftSide.setAlignment(Pos.TOP_LEFT);
         leftSide.setFillWidth(true);
 
-        // 添加占位符 Region，实现均匀分布
         Region spacer1 = new Region();
         VBox.setVgrow(spacer1, Priority.ALWAYS);
         Region spacer2 = new Region();
@@ -197,7 +191,7 @@ public class StatusScene {
 
         leftSide.getChildren().addAll(controlGrid, spacer1, exLabel, spacer2, inLabel, spacer3, new Region(), spacer4);
 
-        // 图表区域
+        // Create LineChart
         CategoryAxis xAxis = new CategoryAxis();
         NumberAxis yAxis = new NumberAxis();
         xAxis.setLabel("Date");
@@ -205,6 +199,7 @@ public class StatusScene {
         lineChart = new LineChart<>(xAxis, yAxis);
         lineChart.setTitle("Ex/In Trend");
 
+        // Create BarChart
         CategoryAxis barXAxis = new CategoryAxis();
         NumberAxis barYAxis = new NumberAxis();
         barXAxis.setLabel("Date");
@@ -212,9 +207,75 @@ public class StatusScene {
         barChart = new BarChart<>(barXAxis, barYAxis);
         barChart.setTitle("Ex/In Trend");
 
+        // Reduce spacing between chart and "Date" label
+        barXAxis.setTickLabelGap(5); // Reduce gap between tick labels
+        barXAxis.setStyle("-fx-padding: 0 0 5 0;"); // Minimize padding below the axis label
+        barChart.setStyle("-fx-padding: 0;"); // Remove padding around the chart itself
+
+        // Rotate x-axis labels for bar chart to prevent overlap
+        barXAxis.setTickLabelRotation(45);
+        barChart.setBarGap(2);
+        barChart.setCategoryGap(10);
+
+        // Wrap the bar chart in a ScrollPane to enable horizontal scrolling
+        ScrollPane barChartScrollPane = new ScrollPane(barChart);
+        barChartScrollPane.setFitToHeight(true);
+        barChartScrollPane.setFitToWidth(false); // Allow horizontal scrolling
+        barChartScrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        barChartScrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+
+        // Dynamically adjust the number of visible labels based on chart width
+        barChartScrollPane.widthProperty().addListener((obs, oldWidth, newWidth) -> {
+            double width = newWidth.doubleValue();
+            int labelCount = barXAxis.getCategories().size();
+            if (labelCount > 0) {
+                int maxLabels = (int) (width / 60); // Assuming 60px per label for readability
+                if (maxLabels < 1) maxLabels = 1;
+                int skip = Math.max(1, labelCount / maxLabels);
+                barXAxis.setTickLabelRotation(45);
+                barXAxis.setTickLabelGap(5);
+                barXAxis.getCategories().forEach(category -> {
+                    int index = barXAxis.getCategories().indexOf(category);
+                    barXAxis.lookupAll(".axis-tick-mark").forEach(tick -> {
+                        if (tick.getUserData() != null && tick.getUserData().equals(category)) {
+                            tick.setVisible(index % skip == 0);
+                        }
+                    });
+                    barXAxis.lookupAll(".axis-tick-label").forEach(node -> {
+                        if (node instanceof Text) {
+                            Text label = (Text) node;
+                            if (label.getText().equals(category)) {
+                                label.setVisible(index % skip == 0);
+                            }
+                        }
+                    });
+                });
+            }
+        });
+
+        // Set up chartPane with dynamic resizing
         chartPane = new StackPane(lineChart);
+        chartPane.setMinHeight(300); // Set a minimum height to prevent compression
+        chartPane.setPrefHeight(400); // Set a preferred height
         HBox.setHgrow(chartPane, Priority.ALWAYS);
         VBox.setVgrow(chartPane, Priority.ALWAYS);
+
+        // Add a listener to dynamically adjust chart height based on parent container
+        chartPane.heightProperty().addListener((obs, oldHeight, newHeight) -> {
+            double chartHeight = newHeight.doubleValue();
+            barChart.setPrefHeight(chartHeight);
+            lineChart.setPrefHeight(chartHeight);
+        });
+
+        // Switch between line and bar chart based on selection
+        chartTypeCombo.setOnAction(e -> {
+            chartPane.getChildren().clear();
+            if ("Bar graph".equals(chartTypeCombo.getValue())) {
+                chartPane.getChildren().add(barChartScrollPane);
+            } else {
+                chartPane.getChildren().add(lineChart);
+            }
+        });
 
         GridPane gridPane = new GridPane();
         gridPane.setHgap(20);
@@ -242,10 +303,55 @@ public class StatusScene {
         title.setWrapText(true);
 
         pieChart = new PieChart();
-        VBox.setVgrow(pieChart, Priority.ALWAYS);
-        HBox.setHgrow(pieChart, Priority.ALWAYS);
+        pieChart.setLabelsVisible(false); // Disable indicator labels next to pie slices
+        pieChart.setLegendVisible(true); // Ensure legend is visible by default
 
-        VBox content = new VBox(10, title, pieChart);
+        // Create a container to hold the pie chart and its legends
+        VBox pieChartContainer = new VBox(10); // Use VBox to stack pie chart and legends vertically
+        pieChartContainer.setAlignment(Pos.CENTER);
+        pieChartContainer.getChildren().add(pieChart);
+
+        pieChartScrollPane = new ScrollPane(pieChartContainer);
+        pieChartScrollPane.setFitToWidth(true); // Ensure the container fits the width of the ScrollPane
+        pieChartScrollPane.setFitToHeight(false);
+        pieChartScrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        pieChartScrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER); // Disable horizontal scrolling
+        pieChartScrollPane.getStyleClass().add("pie-chart-container");
+
+        // Adjust legend position based on container width
+        pieChartScrollPane.widthProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                double width = newValue.doubleValue();
+                pieChart.getStyleClass().removeAll("pie-chart-legend-side", "pie-chart-legend-bottom");
+                pieChartContainer.getChildren().clear();
+
+                if (width < 500) { // Threshold for small window (legends at bottom)
+                    pieChart.setLegendSide(Side.BOTTOM);
+                    pieChart.setLegendVisible(true);
+                    pieChart.getStyleClass().add("pie-chart-legend-bottom");
+                    pieChartContainer.getChildren().setAll(pieChart);
+                } else { // Larger window (legends on right)
+                    pieChart.setLegendSide(Side.RIGHT);
+                    pieChart.setLegendVisible(true);
+                    pieChart.getStyleClass().add("pie-chart-legend-side");
+                    pieChartContainer.getChildren().setAll(pieChart);
+                }
+            }
+        });
+
+        // Ensure initial legend positioning
+        if (pieChartScrollPane.getWidth() < 500 || pieChartScrollPane.getWidth() == 0) {
+            pieChart.setLegendSide(Side.BOTTOM);
+            pieChart.getStyleClass().add("pie-chart-legend-bottom");
+            pieChartContainer.getChildren().setAll(pieChart);
+        } else {
+            pieChart.setLegendSide(Side.RIGHT);
+            pieChart.getStyleClass().add("pie-chart-legend-side");
+            pieChartContainer.getChildren().setAll(pieChart);
+        }
+
+        VBox content = new VBox(10, title, pieChartScrollPane);
         content.setAlignment(Pos.CENTER);
         categoryPane.setCenter(content);
         return categoryPane;
@@ -261,7 +367,6 @@ public class StatusScene {
         title.setStyle(themeService.getTextColorStyle());
         title.setWrapText(true);
 
-        // 添加管理按钮
         Button manageBtn = new Button("Manage All Transactions");
         manageBtn.setStyle(themeService.getButtonStyle());
         manageBtn.setOnAction(e -> openTransactionManagement());
@@ -286,11 +391,10 @@ public class StatusScene {
     }
 
     private void openTransactionManagement() {
-        // 获取当前窗口的实际大小
         double currentWidth = stage.getWidth();
         double currentHeight = stage.getHeight();
         TransactionManagementScene txManagementScene = new TransactionManagementScene(stage, currentWidth, currentHeight, currentUser);
-        Scene scene = txManagementScene.createScene(themeService); // Pass themeService
+        Scene scene = txManagementScene.createScene(themeService);
         stage.setScene(scene);
     }
 
@@ -306,9 +410,8 @@ public class StatusScene {
 
         questionArea = new TextArea();
         questionArea.setPromptText("Type your question...");
-        questionArea.setPrefHeight(80); // 设置较小的高度
-        questionArea.setWrapText(true); // 设置文本自动换行
-        // Apply theme-based styling to the TextArea
+        questionArea.setPrefHeight(80);
+        questionArea.setWrapText(true);
         String backgroundColor = themeService.isDayMode() ? "white" : "#3C3C3C";
         String textColor = themeService.isDayMode() ? "black" : "white";
         String promptTextColor = themeService.isDayMode() ? "#555555" : "#CCCCCC";
@@ -319,10 +422,8 @@ public class StatusScene {
                         "-fx-prompt-text-fill: %s;",
                 backgroundColor, backgroundColor, textColor, promptTextColor
         );
-        // Log the theme mode and applied style for debugging
-        System.out.println("Applying TextArea style in " + (themeService.isDayMode() ? "day mode" : "night mode") + ": " + textAreaStyle);
         questionArea.setStyle(textAreaStyle);
-        VBox.setVgrow(questionArea, Priority.NEVER); // 防止垂直伸展
+        VBox.setVgrow(questionArea, Priority.NEVER);
         HBox.setHgrow(questionArea, Priority.ALWAYS);
 
         sendBtn = new Button("➤");
@@ -346,18 +447,14 @@ public class StatusScene {
 
         suggestionsWebView = new WebView();
         suggestionsWebView.setPrefHeight(250);
-        // Set WebView background color based on theme
         String webViewBgColor = themeService.isDayMode() ? "white" : "#3C3C3C";
         suggestionsWebView.setStyle("-fx-background-color: " + webViewBgColor + ";");
-        VBox.setVgrow(suggestionsWebView, Priority.ALWAYS); // 允许垂直伸展
+        VBox.setVgrow(suggestionsWebView, Priority.ALWAYS);
 
-        // Apply the appropriate CSS based on the theme
         String cssFile = themeService.isDayMode() ? "/css/markdown-day.css" : "/css/markdown-night.css";
         if (getClass().getResource(cssFile) != null) {
-            System.out.println("Loading CSS file: " + cssFile + " at " + getClass().getResource(cssFile).toExternalForm());
             suggestionsWebView.getEngine().setUserStyleSheetLocation(getClass().getResource(cssFile).toExternalForm());
         } else {
-            System.out.println("CSS file not found: " + cssFile + ". Using fallback CSS.");
             suggestionsWebView.getEngine().setUserStyleSheetLocation("data:text/css," + getDefaultMarkdownCss(themeService.isDayMode()));
         }
 
@@ -371,7 +468,6 @@ public class StatusScene {
         return sugPane;
     }
 
-    // Fallback CSS if the external file is not found
     private String getDefaultMarkdownCss(boolean isDayMode) {
         if (isDayMode) {
             return "body { background-color: white; color: black; margin: 0; padding: 0; } " +
@@ -394,17 +490,13 @@ public class StatusScene {
 
         WebView historyView = new WebView();
         historyView.setPrefSize(600, 400);
-        // Apply the same theme-based CSS to the chat history WebView
         String cssFile = themeService.isDayMode() ? "/css/markdown-day.css" : "/css/markdown-night.css";
         if (getClass().getResource(cssFile) != null) {
-            System.out.println("Loading CSS file for chat history: " + cssFile + " at " + getClass().getResource(cssFile).toExternalForm());
             historyView.getEngine().setUserStyleSheetLocation(getClass().getResource(cssFile).toExternalForm());
         } else {
-            System.out.println("CSS file not found for chat history: " + cssFile + ". Using fallback CSS.");
             historyView.getEngine().setUserStyleSheetLocation("data:text/css," + getDefaultMarkdownCss(themeService.isDayMode()));
         }
 
-        // 构建HTML聊天记录
         StringBuilder htmlContent = new StringBuilder("<!DOCTYPE html><html><head>");
         htmlContent.append("<meta charset='UTF-8'>");
         htmlContent.append("</head><body style='background-color: ")

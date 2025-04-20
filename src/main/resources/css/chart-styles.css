@@ -1,0 +1,45 @@
+.chart {
+    -fx-background-color: transparent;
+}
+
+.chart-pie-label {
+    -fx-font-size: 12px;
+}
+
+.pie-chart-container {
+    -fx-max-height: 400px;
+    -fx-overflow-y: auto;
+    -fx-background-color: transparent;
+}
+
+.pie-chart-legend-side .chart-legend {
+    -fx-wrap-text: true;
+    -fx-max-width: 200px;
+    -fx-font-size: 12px;
+    -fx-padding: 10px;
+    -fx-background-color: transparent;
+}
+
+.pie-chart-legend-bottom .chart-legend {
+    -fx-wrap-text: true;
+    -fx-font-size: 12px;
+    -fx-padding: 10px;
+    -fx-background-color: transparent;
+    -fx-alignment: center;
+}
+
+.pie-chart-legend-bottom .legend-item {
+    -fx-pref-width: 120px;
+    -fx-wrap-text: true;
+    -fx-padding: 5px;
+    -fx-alignment: center;
+}
+
+.pie-chart {
+    -fx-pref-width: 200px; /* Reduced width to fit smaller windows */
+    -fx-max-width: 200px;
+}
+
+.bar-chart .chart-bar {
+    -fx-bar-width: 10px;
+}
