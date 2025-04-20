@@ -1,3 +1,10 @@
+body {
+    background-color: white;
+    color: black;
+    margin: 0;
+    padding: 0;
+}
+
 .chat-history {
     padding: 10px;
     font-family: Arial, sans-serif;
@@ -9,6 +16,7 @@
     padding: 8px 12px;
     margin: 8px 0;
     max-width: 90%;
+    color: black;
 }
 
 .assistant-message {
@@ -17,6 +25,7 @@
     padding: 8px 12px;
     margin: 8px 0;
     max-width: 90%;
+    color: black;
 }
 
 /* 修复过长内容溢出问题 */

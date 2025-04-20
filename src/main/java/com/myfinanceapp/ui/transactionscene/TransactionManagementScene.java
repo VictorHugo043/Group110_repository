@@ -183,6 +183,12 @@ public class TransactionManagementScene {
         transactionTable = new TableView<>();
         transactionTable.setEditable(true);
 
+        // 应用表格样式（包括单元格和行）
+        transactionTable.getStylesheets().add("data:text/css," + themeService.getTableStyle());
+
+        // 应用表头样式（包括表头标签的文字颜色）
+        transactionTable.getStylesheets().add("data:text/css," + themeService.getTableHeaderStyle());
+
         // 创建表格列
         TableColumn<Transaction, String> dateCol = new TableColumn<>("Date");
         dateCol.setCellValueFactory(new PropertyValueFactory<>("transactionDate"));

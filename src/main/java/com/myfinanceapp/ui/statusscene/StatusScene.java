@@ -41,7 +41,7 @@ public class StatusScene {
     public Button sendBtn;
     public VBox transactionsBox;
     public StackPane chartPane;
-    private ThemeService themeService; // Store ThemeService instance
+    public ThemeService themeService; // Store ThemeService instance
 
     public StatusScene(Stage stage, double width, double height, User loggedUser) {
         this.stage = stage;
@@ -308,6 +308,20 @@ public class StatusScene {
         questionArea.setPromptText("Type your question...");
         questionArea.setPrefHeight(80); // 设置较小的高度
         questionArea.setWrapText(true); // 设置文本自动换行
+        // Apply theme-based styling to the TextArea
+        String backgroundColor = themeService.isDayMode() ? "white" : "#3C3C3C";
+        String textColor = themeService.isDayMode() ? "black" : "white";
+        String promptTextColor = themeService.isDayMode() ? "#555555" : "#CCCCCC";
+        String textAreaStyle = String.format(
+                "-fx-background-color: %s; " +
+                        "-fx-control-inner-background: %s; " +
+                        "-fx-text-fill: %s; " +
+                        "-fx-prompt-text-fill: %s;",
+                backgroundColor, backgroundColor, textColor, promptTextColor
+        );
+        // Log the theme mode and applied style for debugging
+        System.out.println("Applying TextArea style in " + (themeService.isDayMode() ? "day mode" : "night mode") + ": " + textAreaStyle);
+        questionArea.setStyle(textAreaStyle);
         VBox.setVgrow(questionArea, Priority.NEVER); // 防止垂直伸展
         HBox.setHgrow(questionArea, Priority.ALWAYS);
 
@@ -332,10 +346,20 @@ public class StatusScene {
 
         suggestionsWebView = new WebView();
         suggestionsWebView.setPrefHeight(250);
+        // Set WebView background color based on theme
+        String webViewBgColor = themeService.isDayMode() ? "white" : "#3C3C3C";
+        suggestionsWebView.setStyle("-fx-background-color: " + webViewBgColor + ";");
         VBox.setVgrow(suggestionsWebView, Priority.ALWAYS); // 允许垂直伸展
-        suggestionsWebView.getEngine().setUserStyleSheetLocation(
-                getClass().getResource("/css/markdown.css").toExternalForm()
-        );
+
+        // Apply the appropriate CSS based on the theme
+        String cssFile = themeService.isDayMode() ? "/css/markdown-day.css" : "/css/markdown-night.css";
+        if (getClass().getResource(cssFile) != null) {
+            System.out.println("Loading CSS file: " + cssFile + " at " + getClass().getResource(cssFile).toExternalForm());
+            suggestionsWebView.getEngine().setUserStyleSheetLocation(getClass().getResource(cssFile).toExternalForm());
+        } else {
+            System.out.println("CSS file not found: " + cssFile + ". Using fallback CSS.");
+            suggestionsWebView.getEngine().setUserStyleSheetLocation("data:text/css," + getDefaultMarkdownCss(themeService.isDayMode()));
+        }
 
         moreBtn = new Button("More>");
         moreBtn.setStyle(themeService.getButtonStyle());
@@ -347,18 +371,48 @@ public class StatusScene {
         return sugPane;
     }
 
+    // Fallback CSS if the external file is not found
+    private String getDefaultMarkdownCss(boolean isDayMode) {
+        if (isDayMode) {
+            return "body { background-color: white; color: black; margin: 0; padding: 0; } " +
+                    ".chat-history { padding: 10px; font-family: Arial, sans-serif; } " +
+                    ".user-message { background-color: #E1F5FE; border-radius: 10px; padding: 8px 12px; margin: 8px 0; max-width: 90%; color: black; } " +
+                    ".assistant-message { background-color: #F1F8E9; border-radius: 10px; padding: 8px 12px; margin: 8px 0; max-width: 90%; color: black; } " +
+                    ".user-message, .assistant-message { word-wrap: break-word; overflow-wrap: break-word; }";
+        } else {
+            return "body { background-color: #3C3C3C; color: white; margin: 0; padding: 0; } " +
+                    ".chat-history { padding: 10px; font-family: Arial, sans-serif; } " +
+                    ".user-message { background-color: #4A6FA5; border-radius: 10px; padding: 8px 12px; margin: 8px 0; max-width: 90%; color: white; } " +
+                    ".assistant-message { background-color: #3C3C3C; border-radius: 10px; padding: 8px 12px; margin: 8px 0; max-width: 90%; color: white; } " +
+                    ".user-message, .assistant-message { word-wrap: break-word; overflow-wrap: break-word; }";
+        }
+    }
+
     private void showChatHistory() {
         Stage historyStage = new Stage();
         historyStage.setTitle("Chat History");
 
         WebView historyView = new WebView();
         historyView.setPrefSize(600, 400);
-        historyView.getEngine().setUserStyleSheetLocation(
-                getClass().getResource("/css/markdown.css").toExternalForm()
-        );
+        // Apply the same theme-based CSS to the chat history WebView
+        String cssFile = themeService.isDayMode() ? "/css/markdown-day.css" : "/css/markdown-night.css";
+        if (getClass().getResource(cssFile) != null) {
+            System.out.println("Loading CSS file for chat history: " + cssFile + " at " + getClass().getResource(cssFile).toExternalForm());
+            historyView.getEngine().setUserStyleSheetLocation(getClass().getResource(cssFile).toExternalForm());
+        } else {
+            System.out.println("CSS file not found for chat history: " + cssFile + ". Using fallback CSS.");
+            historyView.getEngine().setUserStyleSheetLocation("data:text/css," + getDefaultMarkdownCss(themeService.isDayMode()));
+        }
 
         // 构建HTML聊天记录
-        StringBuilder htmlContent = new StringBuilder("<div class='chat-history'>");
+        StringBuilder htmlContent = new StringBuilder("<!DOCTYPE html><html><head>");
+        htmlContent.append("<meta charset='UTF-8'>");
+        htmlContent.append("</head><body style='background-color: ")
+                .append(themeService.isDayMode() ? "white" : "#3C3C3C")
+                .append("; color: ")
+                .append(themeService.isDayMode() ? "black" : "white")
+                .append("; margin: 0; padding: 0;'>");
+        htmlContent.append("<div class='chat-history'>");
         for (Map<String, String> message : chatHistory) {
             String role = message.get("role");
             String content = message.get("content");
@@ -375,7 +429,7 @@ public class StatusScene {
                         .append("</div>");
             }
         }
-        htmlContent.append("</div>");
+        htmlContent.append("</div></body></html>");
 
         historyView.getEngine().loadContent(htmlContent.toString());
 

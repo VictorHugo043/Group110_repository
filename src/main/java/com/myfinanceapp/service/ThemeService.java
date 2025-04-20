@@ -58,4 +58,34 @@ public class ThemeService {
             return "-fx-background-color: #4A6FA5; -fx-text-fill: white; -fx-font-weight: bold;";
         }
     }
+
+    /**
+     * Gets the table style based on the current theme.
+     * @return CSS style string for the table
+     */
+    public String getTableStyle() {
+        if (isDayMode) {
+            return ".table-view { -fx-background-color: white; } " +
+                    ".table-view .table-cell { -fx-text-fill: black; -fx-background-color: white; -fx-border-color: #D3D3D3; } " +
+                    ".table-row-cell { -fx-background-color: white; }";
+        } else {
+            return ".table-view { -fx-background-color: #3C3C3C; } " +
+                    ".table-view .table-cell { -fx-text-fill: white; -fx-background-color: #3C3C3C; -fx-border-color: #555555; } " +
+                    ".table-row-cell { -fx-background-color: #3C3C3C; }";
+        }
+    }
+
+    /**
+     * Gets the table header style based on the current theme.
+     * @return CSS style string for the table header
+     */
+    public String getTableHeaderStyle() {
+        if (isDayMode) {
+            return ".table-view .column-header { -fx-background-color: #F0F0F0; -fx-border-color: #D3D3D3; } " +
+                    ".table-view .column-header .label { -fx-text-fill: black; }";
+        } else {
+            return ".table-view .column-header { -fx-background-color: #4A4A4A; -fx-border-color: #555555; } " +
+                    ".table-view .column-header .label { -fx-text-fill: white; }";
+        }
+    }
 }
