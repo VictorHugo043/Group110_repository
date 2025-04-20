@@ -30,16 +30,13 @@ public class StatusService {
     private final Parser mdParser = Parser.builder().build();
     private final HtmlRenderer mdRenderer = HtmlRenderer.builder().build();
 
-
     public StatusService(StatusScene scene, User currentUser) {
         this.scene = scene;
         this.currentUser = currentUser;
         this.txService = new TransactionService();
         this.chartService = new ChartService(scene.lineChart, scene.barChart, scene.pieChart, txService, currentUser);
         initialize();
-
     }
-
 
     private void initialize() {
         // 初始化日期为本月1日起到今天
@@ -108,6 +105,7 @@ public class StatusService {
         // 添加初始化欢迎消息
         initializeWelcomeMessage();
     }
+
     private void initializeWelcomeMessage() {
         String welcomeMsg = "Welcome to use the financial assistant. Please feel free to ask any financial questions you have.";
 
@@ -192,10 +190,8 @@ public class StatusService {
                     "下面是我目前的数据：\n" + dataSummary +
                     "\n用户的问题是： " + userInput;
 
-
-
             String answer = AiChatService.chatCompletion(chatMessages, systemPrompt);
-            if(answer != null){
+            if (answer != null) {
                 // 保存AI回答到聊天历史
                 Map<String, String> aiMsg = new HashMap<>();
                 aiMsg.put("role", "assistant");
@@ -206,7 +202,7 @@ public class StatusService {
                 // 清空webview
                 updateWebView("");
 
-                /// 使用统一的分块处理方式
+                // 使用统一的分块处理方式
                 new Thread(() -> {
                     try {
                         // 使用渐进式显示
@@ -251,7 +247,18 @@ public class StatusService {
     }
 
     private void updateWebView(String html) {
-        scene.suggestionsWebView.getEngine().loadContent(html);
+        // Wrap the HTML content in a proper HTML structure with a theme-based body
+        String wrappedHtml = "<!DOCTYPE html><html><head>" +
+                "<meta charset='UTF-8'>" +
+                "</head><body style='background-color: " +
+                (scene.themeService.isDayMode() ? "white" : "#3C3C3C") +
+                "; color: " +
+                (scene.themeService.isDayMode() ? "black" : "white") +
+                "; margin: 0; padding: 0;'>" +
+                "<div class='chat-history'>" +
+                html +
+                "</div></body></html>";
+        scene.suggestionsWebView.getEngine().loadContent(wrappedHtml);
 
         // 使用JavaScript滚动到底部
         scene.suggestionsWebView.getEngine().getLoadWorker().stateProperty().addListener((obs, oldState, newState) -> {
@@ -262,5 +269,4 @@ public class StatusService {
             }
         });
     }
-
 }

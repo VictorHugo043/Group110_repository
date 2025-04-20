@@ -117,7 +117,7 @@ Finanger/
 │   │   └── FinanceApp                # Main application entry point
 │
 ├── resources/
-│   ├── css/                          # Stylesheets (manual-style.css, markdown.css)
+│   ├── css/                          # Stylesheets (manual-style.css, markdown-day.css)
 │   ├── goals/                        # Goal-related JSON data (1.json, additional JSON files)
 │   ├── pictures/                     # UI image assets (icons, backgrounds, etc.)
 │   ├── terms/                        # Legal and policy documents (PrivacyPolicy.txt, TermOfUse.txt)

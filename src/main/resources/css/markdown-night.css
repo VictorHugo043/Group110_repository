@@ -1,0 +1,35 @@
+body {
+    background-color: #3C3C3C;
+    color: white;
+    margin: 0;
+    padding: 0;
+}
+
+.chat-history {
+    padding: 10px;
+    font-family: Arial, sans-serif;
+}
+
+.user-message {
+    background-color: #4A6FA5;
+    border-radius: 10px;
+    padding: 8px 12px;
+    margin: 8px 0;
+    max-width: 90%;
+    color: white;
+}
+
+.assistant-message {
+    background-color: #3C3C3C;
+    border-radius: 10px;
+    padding: 8px 12px;
+    margin: 8px 0;
+    max-width: 90%;
+    color: white;
+}
+
+/* 修复过长内容溢出问题 */
+.user-message, .assistant-message {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
