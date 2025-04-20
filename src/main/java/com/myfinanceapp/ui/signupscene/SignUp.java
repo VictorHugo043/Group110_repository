@@ -1,5 +1,6 @@
 package com.myfinanceapp.ui.signupscene;
 
+import com.myfinanceapp.ui.common.SceneManager;
 import com.myfinanceapp.ui.registrationterms.PrivacyPolicy;
 import com.myfinanceapp.ui.registrationterms.TermofUse;
 import com.myfinanceapp.ui.usermanual.UserManual; // Import the new UserManual scene
@@ -181,7 +182,8 @@ public class SignUp {
             if (success) {
                 showAlert("Success", "User registered successfully!");
                 // Redirect to UserManual scene instead of LoginScene
-                stage.setScene(UserManual.createScene(stage, root.getScene().getWidth(), root.getScene().getHeight()));
+                Scene userManualScene = UserManual.createScene(stage, root.getScene().getWidth(), root.getScene().getHeight());
+                SceneManager.switchScene(stage, userManualScene);  // 使用SceneManager替代直接设置
                 stage.setTitle("Finanger - User Manual");
             } else {
                 showAlert("Error", "Username already exists!");

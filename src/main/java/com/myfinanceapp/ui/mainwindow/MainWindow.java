@@ -1,5 +1,6 @@
 package com.myfinanceapp.ui.mainwindow;
 
+import com.myfinanceapp.ui.common.SceneManager;
 import com.myfinanceapp.ui.loginscene.LoginScene;
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
@@ -64,7 +65,7 @@ public class MainWindow extends Application {
     @Override
     public void start(Stage stage) {
         root = new Group();
-        Scene scene = new Scene(root, INITIAL_WIDTH, INITIAL_HEIGHT);
+        Scene scene = new Scene(root, 1600, 900);
 
         stage.setTitle("Finanger - Welcome");
         stage.setScene(scene);
@@ -119,7 +120,7 @@ public class MainWindow extends Application {
 
         arrowButton.setOnAction(e -> {
             Scene loginScene = LoginScene.createScene(stage, root.getScene().getWidth(), root.getScene().getHeight());
-            stage.setScene(loginScene);
+            SceneManager.switchScene(stage, loginScene);  // 使用SceneManager替代直接设置
             stage.setTitle("Finanger - Login");
         });
 
