@@ -189,6 +189,15 @@ public class TransactionManagementScene {
         // 应用表头样式（包括表头标签的文字颜色）
         transactionTable.getStylesheets().add("data:text/css," + themeService.getTableHeaderStyle());
 
+        // 允许表格进行排序
+        transactionTable.setSortPolicy(tableView -> {
+            if (tableView.getComparator() != null) {
+                // 对 FilteredList 进行排序
+                FXCollections.sort(filteredTransactions.getSource(), tableView.getComparator());
+            }
+            return true;
+        });
+
         // 创建表格列
         TableColumn<Transaction, String> dateCol = new TableColumn<>("Date");
         dateCol.setCellValueFactory(new PropertyValueFactory<>("transactionDate"));
@@ -198,6 +207,15 @@ public class TransactionManagementScene {
             tx.setTransactionDate(e.getNewValue());
             updateTransaction(tx);
         });
+        // 添加日期排序比较器
+        dateCol.setComparator((date1, date2) -> {
+            try {
+                return date1.compareTo(date2);
+            } catch (Exception e) {
+                return 0;
+            }
+        });
+        dateCol.setSortable(true);
 
         TableColumn<Transaction, String> typeCol = new TableColumn<>("Type");
         typeCol.setCellValueFactory(new PropertyValueFactory<>("transactionType"));
@@ -207,6 +225,7 @@ public class TransactionManagementScene {
             tx.setTransactionType(e.getNewValue());
             updateTransaction(tx);
         });
+        typeCol.setSortable(true);
 
         TableColumn<Transaction, String> currencyCol = new TableColumn<>("Currency");
         currencyCol.setCellValueFactory(new PropertyValueFactory<>("currency"));
@@ -216,6 +235,7 @@ public class TransactionManagementScene {
             tx.setCurrency(e.getNewValue());
             updateTransaction(tx);
         });
+        currencyCol.setSortable(true);
 
         TableColumn<Transaction, Double> amountCol = new TableColumn<>("Amount");
         amountCol.setCellValueFactory(new PropertyValueFactory<>("amount"));
@@ -225,6 +245,7 @@ public class TransactionManagementScene {
             tx.setAmount(e.getNewValue());
             updateTransaction(tx);
         });
+        amountCol.setSortable(true);
 
         TableColumn<Transaction, String> categoryCol = new TableColumn<>("Category");
         categoryCol.setCellValueFactory(new PropertyValueFactory<>("category"));
@@ -234,6 +255,7 @@ public class TransactionManagementScene {
             tx.setCategory(e.getNewValue());
             updateTransaction(tx);
         });
+        categoryCol.setSortable(true);
 
         TableColumn<Transaction, String> paymentCol = new TableColumn<>("Payment Method");
         paymentCol.setCellValueFactory(new PropertyValueFactory<>("paymentMethod"));
@@ -243,6 +265,7 @@ public class TransactionManagementScene {
             tx.setPaymentMethod(e.getNewValue());
             updateTransaction(tx);
         });
+        paymentCol.setSortable(true);
 
         TableColumn<Transaction, String> descriptionCol = new TableColumn<>("Description");
         descriptionCol.setCellValueFactory(new PropertyValueFactory<>("description"));
@@ -252,6 +275,7 @@ public class TransactionManagementScene {
             tx.setDescription(e.getNewValue());
             updateTransaction(tx);
         });
+        descriptionCol.setSortable(false);
         // 添加删除操作列
         TableColumn<Transaction, Void> actionCol = new TableColumn<>("Action");
         actionCol.setPrefWidth(100);
@@ -275,6 +299,7 @@ public class TransactionManagementScene {
                 }
             }
         });
+        actionCol.setSortable(false); // 操作列不需要排序
 
         // 设置列宽和表格属性
         transactionTable.getColumns().addAll(dateCol, typeCol, currencyCol, amountCol, categoryCol, paymentCol,
@@ -316,6 +341,12 @@ public class TransactionManagementScene {
         };
 
         filteredTransactions.setPredicate(filter);
+
+        // 保持当前排序
+        if (transactionTable.getSortOrder().size() > 0) {
+            TableColumn<Transaction, ?> sortColumn = transactionTable.getSortOrder().get(0);
+            transactionTable.sort();
+        }
     }
 
     private void resetFilters() {
@@ -325,6 +356,11 @@ public class TransactionManagementScene {
         categoryFilter.setValue("All Category");
         paymentMethodFilter.setValue("All Payment Method");
         filteredTransactions.setPredicate(null);
+        // 保持当前排序
+        if (transactionTable.getSortOrder().size() > 0) {
+            TableColumn<Transaction, ?> sortColumn = transactionTable.getSortOrder().get(0);
+            transactionTable.sort();
+        }
     }
     private void refreshFilterOptions() {
         // 临时保存当前筛选值
