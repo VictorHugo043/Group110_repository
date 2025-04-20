@@ -238,8 +238,18 @@ public class TransactionManagementScene {
             updateTransaction(tx);
         });
 
+        TableColumn<Transaction, String> descriptionCol = new TableColumn<>("Description");
+        descriptionCol.setCellValueFactory(new PropertyValueFactory<>("description"));
+        descriptionCol.setCellFactory(TextFieldTableCell.forTableColumn());
+        descriptionCol.setOnEditCommit(e -> {
+            Transaction tx = e.getTableView().getItems().get(e.getTablePosition().getRow());
+            tx.setDescription(e.getNewValue());
+            updateTransaction(tx);
+        });
+
         // 设置列宽和表格属性
-        transactionTable.getColumns().addAll(dateCol, typeCol, currencyCol, amountCol, categoryCol, paymentCol);
+        transactionTable.getColumns().addAll(dateCol, typeCol, currencyCol, amountCol, categoryCol, paymentCol,
+                descriptionCol);
         transactionTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         transactionTable.setPrefHeight(500);
 

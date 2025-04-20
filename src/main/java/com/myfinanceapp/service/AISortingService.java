@@ -24,7 +24,7 @@ public class AISortingService {
             connection.setDoOutput(true);
 
             String prompt = description
-                    + " 根据以上对一次交易的描述区分一下交易类型（如Salary,Transport,Loan Repayment等等），你的所有回答仅需包含1~2个英文单词。";
+                    + " 根据以上对一次交易的描述区分一下交易类型，供你选择的交易类型有：Housing, Shopping, Gift, Food & Drink, Freelance, Transport, Groceries, Debt, Leisure, Healthcare, Utilities, Investment, Bonus, Salary, Others. 你的所有回答只需包含你判定的类型就够了";
 
             // 构建请求的 JSON 数据
             String jsonInputString = "{\n" +

@@ -26,7 +26,8 @@ public class TransactionScene {
         return createScene(stage, width, height, loggedUser, new ThemeService());
     }
 
-    public static Scene createScene(Stage stage, double width, double height, User loggedUser, ThemeService themeService) {
+    public static Scene createScene(Stage stage, double width, double height, User loggedUser,
+            ThemeService themeService) {
         BorderPane root = new BorderPane();
         root.setStyle(themeService.getCurrentThemeStyle());
 
@@ -40,8 +41,7 @@ public class TransactionScene {
                         "-fx-border-width: 2;" +
                         "-fx-border-radius: 15;" +
                         themeService.getCurrentFormBackgroundStyle() +
-                        "-fx-padding: 20;"
-        );
+                        "-fx-padding: 20;");
         centerBox.setPadding(new Insets(20, 20, 40, 20));
         // 新增：允许垂直扩展
         centerBox.setMaxHeight(Double.MAX_VALUE);
@@ -292,12 +292,13 @@ public class TransactionScene {
             }
 
             Transaction transaction = new Transaction();
-            transaction.setTransactionDate(selectedDate);  // 使用选定的日期
+            transaction.setTransactionDate(selectedDate); // 使用选定的日期
             transaction.setTransactionType(typeCombo.getValue());
             transaction.setCurrency(currencyCombo.getValue());
             transaction.setAmount(amount);
             transaction.setCategory(categoryField.getText());
             transaction.setPaymentMethod(methodField.getText());
+            transaction.setDescription(descriptionField.getText()); // 添加description字段
 
             TransactionService service = new TransactionService();
             service.addTransaction(loggedUser, transaction); // 传入 loggedUser
@@ -326,10 +327,9 @@ public class TransactionScene {
                 descriptionBox,
                 categoryBox,
                 methodBox,
-                submitManualBtn
-        );
-        centerBox.setSpacing(10);  // 增加整个区域内的元素间距
-        centerBox.setAlignment(Pos.CENTER);  // 让整个 centerBox 内的元素居中
+                submitManualBtn);
+        centerBox.setSpacing(10); // 增加整个区域内的元素间距
+        centerBox.setAlignment(Pos.CENTER); // 让整个 centerBox 内的元素居中
 
         // 右侧传输csv文件部分
         // 修改rightBar的VBox设置
@@ -339,8 +339,7 @@ public class TransactionScene {
                         "-fx-border-width: 2;" +
                         "-fx-border-radius: 15;" +
                         themeService.getCurrentFormBackgroundStyle() +
-                        "-fx-padding: 20;"
-        );
+                        "-fx-padding: 20;");
         rightBar.setPadding(new Insets(20, 20, 20, 20));
         // 新增：允许垂直扩展
         rightBar.setMaxHeight(Double.MAX_VALUE);
@@ -386,25 +385,24 @@ public class TransactionScene {
         rightBar.getChildren().addAll(
                 promptLabel,
                 importCSVButton,
-                formatLabel
-        );
+                formatLabel);
 
-        rightBar.setSpacing(10);  // 增加整个区域内的元素间距
-        rightBar.setAlignment(Pos.CENTER);  // 让整个 rightBar 内的元素居中
+        rightBar.setSpacing(10); // 增加整个区域内的元素间距
+        rightBar.setAlignment(Pos.CENTER); // 让整个 rightBar 内的元素居中
 
         // 使用 GridPane 来确保两个模块大小一致，并且在窗口拉伸时一起变化
         GridPane centerAndRight = new GridPane();
         centerAndRight.setPadding(new Insets(20, 20, 20, 20));
-        centerAndRight.setHgap(20);  // 设置两个模块之间的水平间距
+        centerAndRight.setHgap(20); // 设置两个模块之间的水平间距
 
         // 添加列约束，确保两列在窗口大小变化时均匀分配空间
         ColumnConstraints column1 = new ColumnConstraints();
-        column1.setPercentWidth(50);  // 占据 50% 的宽度
-        column1.setFillWidth(true);  // 设置列填充整个宽度
+        column1.setPercentWidth(50); // 占据 50% 的宽度
+        column1.setFillWidth(true); // 设置列填充整个宽度
 
         ColumnConstraints column2 = new ColumnConstraints();
-        column2.setPercentWidth(50);  // 占据 50% 的宽度
-        column2.setFillWidth(true);  // 设置列填充整个宽度
+        column2.setPercentWidth(50); // 占据 50% 的宽度
+        column2.setFillWidth(true); // 设置列填充整个宽度
 
         centerAndRight.getColumnConstraints().addAll(column1, column2);
 
@@ -417,8 +415,8 @@ public class TransactionScene {
         centerBox.setAlignment(Pos.TOP_CENTER); // 顶部居中，允许下方空间扩展
         rightBar.setAlignment(Pos.TOP_CENTER);
         // 将 centerBox 和 rightBar 添加到 GridPane 中
-        centerAndRight.add(centerBox, 0, 0);  // centerBox 放在第 0 列
-        centerAndRight.add(rightBar, 1, 0);   // rightBar 放在第 1 列
+        centerAndRight.add(centerBox, 0, 0); // centerBox 放在第 0 列
+        centerAndRight.add(rightBar, 1, 0); // rightBar 放在第 1 列
 
         // 新增滚动面板
         ScrollPane scrollPane = new ScrollPane();
@@ -430,8 +428,7 @@ public class TransactionScene {
                 "-fx-background: " + backgroundColor + ";" +
                         "-fx-border-color: transparent;" +
                         "-fx-control-inner-background: " + backgroundColor + ";" +
-                        "-fx-text-fill: transparent;"
-        );
+                        "-fx-text-fill: transparent;");
         scrollPane.setPadding(new Insets(0)); // 移除内边距
 
         // 保持滚动面板的扩展性
