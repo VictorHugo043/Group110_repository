@@ -7,9 +7,7 @@ import javafx.collections.ObservableList;
 import javafx.scene.chart.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ChartService {
@@ -37,7 +35,7 @@ public class ChartService {
     private void updateLineChart(LocalDate startDate, LocalDate endDate) {
         List<Transaction> transactions = getFilteredTransactions(startDate, endDate);
         long totalDays = endDate.toEpochDay() - startDate.toEpochDay() + 1;
-        List<String> allDates = generateDateList(startDate, endDate);
+        List<String> allDates = generateDateList(startDate, endDate, totalDays);
 
         Map<String, Double> incomeByDate = transactions.stream()
                 .filter(t -> "Income".equals(t.getTransactionType()))
@@ -75,39 +73,40 @@ public class ChartService {
     private void updateBarChart(LocalDate startDate, LocalDate endDate) {
         List<Transaction> transactions = getFilteredTransactions(startDate, endDate);
         long totalDays = endDate.toEpochDay() - startDate.toEpochDay() + 1;
-        List<String> allDates = generateDateList(startDate, endDate);
+        int groupDays = calculateGroupDays(totalDays);
+        List<String> groupedDates = generateGroupedDateList(startDate, endDate, groupDays);
 
-        Map<String, Double> incomeByDate = transactions.stream()
-                .filter(t -> "Income".equals(t.getTransactionType()))
-                .collect(Collectors.groupingBy(
-                        t -> LocalDate.parse(t.getTransactionDate()).format(getFormatter(totalDays)),
-                        Collectors.summingDouble(Transaction::getAmount)
-                ));
+        Map<String, Double> incomeByDate = new HashMap<>();
+        Map<String, Double> expenseByDate = new HashMap<>();
 
-        Map<String, Double> expenseByDate = transactions.stream()
-                .filter(t -> "Expense".equals(t.getTransactionType()))
-                .collect(Collectors.groupingBy(
-                        t -> LocalDate.parse(t.getTransactionDate()).format(getFormatter(totalDays)),
-                        Collectors.summingDouble(Transaction::getAmount)
-                ));
+        for (Transaction t : transactions) {
+            LocalDate txDate = LocalDate.parse(t.getTransactionDate());
+            String groupedDate = getGroupedDate(txDate, startDate, groupDays, totalDays);
+
+            if ("Income".equals(t.getTransactionType())) {
+                incomeByDate.merge(groupedDate, t.getAmount(), Double::sum);
+            } else if ("Expense".equals(t.getTransactionType())) {
+                expenseByDate.merge(groupedDate, t.getAmount(), Double::sum);
+            }
+        }
 
         barChart.getData().clear();
         CategoryAxis xAxis = (CategoryAxis) barChart.getXAxis();
         xAxis.getCategories().clear();
-        xAxis.setCategories(FXCollections.observableArrayList(allDates));
+        xAxis.setCategories(FXCollections.observableArrayList(groupedDates));
 
         XYChart.Series<String, Number> incomeSeries = new XYChart.Series<>();
         incomeSeries.setName("Income");
         XYChart.Series<String, Number> expenseSeries = new XYChart.Series<>();
         expenseSeries.setName("Expense");
 
-        for (String date : allDates) {
+        for (String date : groupedDates) {
             incomeSeries.getData().add(new XYChart.Data<>(date, incomeByDate.getOrDefault(date, 0.0)));
             expenseSeries.getData().add(new XYChart.Data<>(date, expenseByDate.getOrDefault(date, 0.0)));
         }
 
         barChart.getData().addAll(incomeSeries, expenseSeries);
-        adjustXAxis(xAxis, totalDays);
+        adjustXAxis(xAxis, groupedDates.size());
     }
 
     private void updatePieChart(LocalDate startDate, LocalDate endDate) {
@@ -131,16 +130,59 @@ public class ChartService {
                 .collect(Collectors.toList());
     }
 
-    private List<String> generateDateList(LocalDate startDate, LocalDate endDate) {
+    private List<String> generateDateList(LocalDate startDate, LocalDate endDate, long totalDays) {
         List<String> allDates = new ArrayList<>();
         LocalDate currentDate = startDate;
-        long totalDays = endDate.toEpochDay() - startDate.toEpochDay() + 1;
         DateTimeFormatter formatter = getFormatter(totalDays);
         while (!currentDate.isAfter(endDate)) {
             allDates.add(currentDate.format(formatter));
             currentDate = currentDate.plusDays(1);
         }
         return allDates;
+    }
+
+    private List<String> generateGroupedDateList(LocalDate startDate, LocalDate endDate, int groupDays) {
+        List<String> groupedDates = new ArrayList<>();
+        LocalDate currentDate = startDate;
+        long totalDays = endDate.toEpochDay() - startDate.toEpochDay() + 1;
+        DateTimeFormatter formatter = getFormatter(totalDays);
+
+        while (!currentDate.isAfter(endDate)) {
+            LocalDate groupEnd = currentDate.plusDays(groupDays - 1);
+            if (groupEnd.isAfter(endDate)) {
+                groupEnd = endDate;
+            }
+            String label = currentDate.format(formatter);
+            if (!groupEnd.equals(currentDate)) {
+                label += " to " + groupEnd.format(formatter);
+            }
+            groupedDates.add(label);
+            currentDate = groupEnd.plusDays(1);
+        }
+        return groupedDates;
+    }
+
+    private String getGroupedDate(LocalDate date, LocalDate startDate, int groupDays, long totalDays) {
+        long daysSinceStart = date.toEpochDay() - startDate.toEpochDay();
+        long groupIndex = daysSinceStart / groupDays;
+        LocalDate groupStart = startDate.plusDays(groupIndex * groupDays);
+        LocalDate groupEnd = groupStart.plusDays(groupDays - 1);
+        if (groupEnd.isAfter(date)) {
+            groupEnd = date;
+        }
+        DateTimeFormatter formatter = getFormatter(totalDays);
+        String label = groupStart.format(formatter);
+        if (!groupEnd.equals(groupStart)) {
+            label += " to " + groupEnd.format(formatter);
+        }
+        return label;
+    }
+
+    private int calculateGroupDays(long totalDays) {
+        if (totalDays <= 30) return 1;
+        if (totalDays <= 90) return 3;
+        if (totalDays <= 180) return 7;
+        return 14;
     }
 
     private DateTimeFormatter getFormatter(long totalDays) {
