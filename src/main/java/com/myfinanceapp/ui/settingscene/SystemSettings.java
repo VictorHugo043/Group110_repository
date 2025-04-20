@@ -186,6 +186,13 @@ public class SystemSettings {
                     );
                 }
             }
+            // Update form buttons
+            container.getChildren().stream()
+                    .filter(node -> node instanceof HBox && ((HBox) node).getChildren().stream().anyMatch(child -> child instanceof Button))
+                    .findFirst()
+                    .ifPresent(hbox -> ((HBox) hbox).getChildren().stream()
+                            .filter(child -> child instanceof Button)
+                            .forEach(button -> ((Button) button).setStyle(themeService.getButtonStyle())));
         });
         nightBox.getChildren().addAll(dayIcon, nightLabel, nightCombo);
 
@@ -285,6 +292,13 @@ public class SystemSettings {
                     );
                 }
             }
+            // Update form buttons
+            container.getChildren().stream()
+                    .filter(node -> node instanceof HBox && ((HBox) node).getChildren().stream().anyMatch(child -> child instanceof Button))
+                    .findFirst()
+                    .ifPresent(hbox -> ((HBox) hbox).getChildren().stream()
+                            .filter(child -> child instanceof Button)
+                            .forEach(button -> ((Button) button).setStyle(themeService.getButtonStyle())));
         });
         Button backBtn = new Button("Back to Status");
         backBtn.setStyle(themeService.getButtonStyle());

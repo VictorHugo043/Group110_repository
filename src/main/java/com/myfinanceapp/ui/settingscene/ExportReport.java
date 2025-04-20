@@ -110,7 +110,7 @@ public class ExportReport {
         backBtn.setStyle(themeService.getButtonStyle());
         backBtn.setOnAction(e -> {
             StatusScene statusScene = new StatusScene(stage, width, height, loggedUser);
-            stage.setScene(statusScene.createScene());
+            stage.setScene(statusScene.createScene(themeService));
             StatusService statusService = new StatusService(statusScene, loggedUser);
             stage.setTitle("Finanger - Status");
         });

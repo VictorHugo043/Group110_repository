@@ -17,7 +17,6 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.event.ActionEvent;
@@ -40,12 +39,15 @@ public class CreateGoalScene {
     private static final double MIN_WINDOW_WIDTH = 800;
     private static final double MIN_WINDOW_HEIGHT = 450;
 
+    private static ThemeService themeService; // Store ThemeService instance
+
     // 重载方法，兼容旧的调用方式
     public static Scene createScene(Stage stage, double width, double height, User loggedUser) {
         return createScene(stage, width, height, loggedUser, new ThemeService());
     }
 
     public static Scene createScene(Stage stage, double width, double height, User loggedUser, ThemeService themeService) {
+        CreateGoalScene.themeService = themeService; // Store the ThemeService instance
         // 确保窗口大小不小于最小值
         final double finalWidth = Math.max(width, MIN_WINDOW_WIDTH);
         final double finalHeight = Math.max(height, MIN_WINDOW_HEIGHT);
@@ -155,8 +157,8 @@ public class CreateGoalScene {
                     // Save the new goal to storage with user information
                     GoalService.addGoal(newGoal, loggedUser);
 
-                    // Navigate back to goals list
-                    Scene goalsScene = Goals.createScene(stage, stage.getScene().getWidth(), stage.getScene().getHeight(), loggedUser);
+                    // Navigate back to goals list with ThemeService
+                    Scene goalsScene = Goals.createScene(stage, stage.getScene().getWidth(), stage.getScene().getHeight(), loggedUser, themeService);
                     SceneManager.switchScene(stage, goalsScene);
                 } catch (IOException e) {
                     logger.error("Failed to save goal", e);
@@ -165,8 +167,8 @@ public class CreateGoalScene {
         });
 
         Button cancelButton = createButton("Cancel", themeService.getButtonStyle(), event -> {
-            // Navigate back to goals list
-            Scene goalsScene = Goals.createScene(stage, stage.getScene().getWidth(), stage.getScene().getHeight(), loggedUser);
+            // Navigate back to goals list with ThemeService
+            Scene goalsScene = Goals.createScene(stage, stage.getScene().getWidth(), stage.getScene().getHeight(), loggedUser, themeService);
             SceneManager.switchScene(stage, goalsScene);
         });
 
