@@ -188,7 +188,7 @@ public class StatusService {
                         tx.getTransactionDate(), tx.getTransactionType(), tx.getCurrency(),
                         tx.getAmount(), tx.getCategory(), tx.getPaymentMethod()));
             }
-            String systemPrompt = "现在你是我的专属财务管理助手，我希望你解答我有关个人财务的问题。\n" +
+            String systemPrompt = "现在你是我的专属财务管理助手，我希望你解答我有关个人财务的问题。请注意，你当且仅当回答有关财务相关的问题，当用户问出与其个人财务或财务相关知识无关的问题后，你应当拒绝回答。并且回答应全部使用英文。\n" +
                     "这是我的财务数据结构: Transaction Date(YYYY-MM-DD), Type(Income/Expense), Currency, Amount, Category, PaymentMethod.\n"
                     +
                     "下面是我目前的数据：\n" + dataSummary +
