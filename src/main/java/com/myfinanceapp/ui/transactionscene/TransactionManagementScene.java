@@ -49,7 +49,6 @@ public class TransactionManagementScene {
         this.currentUser = currentUser;
     }
 
-    // 重载方法保持向后兼容
     public Scene createScene() {
         return createScene(new ThemeService());
     }
@@ -101,7 +100,6 @@ public class TransactionManagementScene {
             // 回到 Status 界面
             StatusScene statusScene = new StatusScene(stage, currentWidth, currentHeight, currentUser);
             Scene scene = statusScene.createScene(themeService);
-            //SceneManager.switchScene(stage, scene);
             stage.setScene(scene);
             StatusService statusService = new StatusService(statusScene, currentUser);
             stage.setTitle("Finanger - Status");
@@ -111,6 +109,9 @@ public class TransactionManagementScene {
         root.setCenter(mainContent);
 
         Scene scene = new Scene(root, width, height);
+        // Add dynamic theme stylesheet for ComboBox
+        scene.getStylesheets().add("data:text/css," + themeService.getThemeStylesheet());
+
         return scene;
     }
 
@@ -151,6 +152,8 @@ public class TransactionManagementScene {
         ComboBox<String> comboBox = new ComboBox<>();
         comboBox.setPromptText(name);
         comboBox.setValue("All " + name);
+        // Apply theme style class
+        comboBox.getStyleClass().add(themeService.isDayMode() ? "day-theme-combo-box" : "night-theme-combo-box");
 
         // 添加筛选事件
         comboBox.setOnAction(e -> {
@@ -171,7 +174,6 @@ public class TransactionManagementScene {
         transactionTable.getStylesheets().add("data:text/css," + themeService.getTableHeaderStyle());
 
         // 允许表格进行排序
-        // 修改 createTransactionTable 方法中的排序策略
         transactionTable.setSortPolicy(tableView -> {
             if (tableView.getComparator() != null) {
                 // 直接对原始数据源进行排序，避免调用 applyFilters

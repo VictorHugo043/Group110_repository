@@ -6,6 +6,7 @@ import com.myfinanceapp.ui.common.LeftSidebarFactory;
 import com.myfinanceapp.ui.statusscene.StatusScene;
 import com.myfinanceapp.service.StatusService;
 import com.myfinanceapp.service.ThemeService;
+import javafx.animation.PauseTransition;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -14,6 +15,7 @@ import javafx.scene.image.*;
 import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 import java.util.Objects;
 
@@ -30,11 +32,11 @@ public class SystemSettings {
         BorderPane root = new BorderPane();
         root.setStyle(themeService.getCurrentThemeStyle());
 
-        // ===== 左侧导航栏：与 Status 一致，但 Settings 选中 =====
+        // 左侧导航栏：与 Status 一致，但 Settings 选中
         VBox sideBar = LeftSidebarFactory.createLeftSidebar(stage, "Settings", loggedUser, themeService);
         root.setLeft(sideBar);
 
-        // ===== 中心容器：包含顶部选项栏 + 设置表单，共用同一个圆角边框 =====
+        // 中心容器：包含顶部选项栏 + 设置表单，共用同一个圆角边框
         HBox centerBox = new HBox();
         centerBox.setAlignment(Pos.CENTER);
 
@@ -65,7 +67,11 @@ public class SystemSettings {
         centerBox.getChildren().add(container);
         root.setCenter(centerBox);
 
-        return new Scene(root, width, height);
+        Scene scene = new Scene(root, width, height);
+        // Add the custom theme stylesheet (JavaFX automatically includes the Modena stylesheet)
+        scene.getStylesheets().add("data:text/css," + themeService.getThemeStylesheet());
+
+        return scene;
     }
 
     /**
@@ -81,6 +87,11 @@ public class SystemSettings {
         Label nightLabel = new Label("Night/Daytime Mode");
         Label sizeLabel = new Label("Window Size");
 
+        // Declare ComboBoxes at method scope
+        ComboBox<String> langCombo = new ComboBox<>();
+        ComboBox<String> nightCombo = new ComboBox<>();
+        ComboBox<String> sizeCombo = new ComboBox<>();
+
         // 语言
         ImageView languagesIcon = new ImageView();
         languagesIcon.setFitWidth(20);
@@ -94,9 +105,9 @@ public class SystemSettings {
         HBox langBox = new HBox(20);
         langLabel.setFont(Font.font("Arial", 14));
         langLabel.setStyle(themeService.getTextColorStyle());
-        ComboBox<String> langCombo = new ComboBox<>();
         langCombo.getItems().addAll("English", "Chinese", "Spanish");
         langCombo.setValue("English");
+        langCombo.getStyleClass().add(themeService.isDayMode() ? "day-theme-combo-box" : "night-theme-combo-box");
         langBox.getChildren().addAll(languagesIcon, langLabel, langCombo);
 
         // Night/Daytime
@@ -112,87 +123,17 @@ public class SystemSettings {
         HBox nightBox = new HBox(20);
         nightLabel.setFont(Font.font("Arial", 14));
         nightLabel.setStyle(themeService.getTextColorStyle());
-        ComboBox<String> nightCombo = new ComboBox<>();
         nightCombo.getItems().addAll("Daytime", "Nighttime");
         nightCombo.setValue(themeService.isDayMode() ? "Daytime" : "Nighttime");
+        nightCombo.getStyleClass().add(themeService.isDayMode() ? "day-theme-combo-box" : "night-theme-combo-box");
         nightCombo.setOnAction(e -> {
             String selectedMode = nightCombo.getValue();
-            themeService.setTheme(selectedMode.equals("Daytime"));
-            root.setStyle(themeService.getCurrentThemeStyle());
-            outerBox.setStyle(
-                    "-fx-border-color: #3282FA;" +
-                            "-fx-border-width: 2;" +
-                            "-fx-border-radius: 0 0 12 12;" +
-                            "-fx-background-radius: 0 0 12 12;" +
-                            themeService.getCurrentFormBackgroundStyle()
-            );
-            langLabel.setStyle(themeService.getTextColorStyle());
-            nightLabel.setStyle(themeService.getTextColorStyle());
-            sizeLabel.setStyle(themeService.getTextColorStyle());
-            // Update sidebar styles
-            sideBar.setStyle(
-                    themeService.getCurrentThemeStyle() +
-                            "-fx-border-color: #3282FA;" +
-                            "-fx-border-width: 0 2 0 0;"
-            );
-            // Update welcomeLabel style (first child of sideBar)
-            Label welcomeLabel = (Label) sideBar.getChildren().get(0);
-            welcomeLabel.setStyle(themeService.getTextColorStyle());
-            // Update button styles in sidebar
-            for (int i = 1; i < sideBar.getChildren().size(); i++) {
-                HBox buttonBox = (HBox) sideBar.getChildren().get(i);
-                Label buttonLabel = (Label) buttonBox.getChildren().get(0);
-                boolean isActive = buttonLabel.getPrefWidth() == 172; // Active buttons have width 172
-                if (isActive) {
-                    buttonLabel.setStyle(
-                            themeService.getCurrentThemeStyle() +
-                                    "-fx-text-fill: #3282FA; " +
-                                    "-fx-border-color: #3282FA transparent #3282FA #3282FA; " +
-                                    "-fx-border-width: 2 0 2 2; " +
-                                    "-fx-border-radius: 8 0 0 8;" +
-                                    "-fx-background-radius: 8 0 0 8;"
-                    );
-                } else {
-                    buttonLabel.setStyle(
-                            "-fx-background-color: " + (themeService.isDayMode() ? "#E0F0FF" : "#4A6FA5") + "; " +
-                                    themeService.getTextColorStyle() +
-                                    "-fx-border-color: #3282FA transparent #3282FA #3282FA; " +
-                                    "-fx-border-width: 2 0 2 2; " +
-                                    "-fx-border-radius: 8 0 0 8;" +
-                                    "-fx-background-radius: 8 0 0 8;"
-                    );
-                }
-            }
-            // Update top bar styles
-            for (int i = 0; i < topBar.getChildren().size(); i++) {
-                VBox tab = (VBox) topBar.getChildren().get(i);
-                Label arrow = (Label) tab.getChildren().get(0);
-                Label tabLabel = (Label) tab.getChildren().get(1);
-                boolean isActive = arrow.isVisible();
-                arrow.setTextFill(javafx.scene.paint.Color.web(themeService.isDayMode() ? "#3282FA" : "#E0F0FF"));
-                if (isActive) {
-                    tabLabel.setStyle(
-                            "-fx-background-color: #3282FA;" +
-                                    "-fx-text-fill: white;" +
-                                    "-fx-border-radius: 8 8 0 0;" +
-                                    "-fx-background-radius: 8 8 0 0;"
-                    );
-                } else {
-                    tabLabel.setStyle(
-                            "-fx-background-color: " + (themeService.isDayMode() ? "#E0F0FF" : "#4A6FA5") + ";" +
-                                    themeService.getTextColorStyle() +
-                                    "-fx-border-radius: 8 8 0 0;" +
-                                    "-fx-background-radius: 8 8 0 0;"
-                    );
-                }
-            }
-            // Update form buttons
-            container.getChildren().stream()
-                    .filter(node -> node instanceof HBox && ((HBox) node).getChildren().stream().anyMatch(child -> child instanceof Button))
-                    .findFirst()
-                    .ifPresent(hbox -> ((HBox) hbox).getChildren().stream()
-                            .filter(child -> child instanceof Button)
-                            .forEach(button -> ((Button) button).setStyle(themeService.getButtonStyle())));
+            PauseTransition debounce = new PauseTransition(Duration.millis(100));
+            debounce.setOnFinished(event -> {
+                themeService.setTheme(selectedMode.equals("Daytime"));
+                updateTheme(stage, root, outerBox, sideBar, topBar, container, langLabel, nightLabel, sizeLabel, langCombo, nightCombo, sizeCombo);
+            });
+            debounce.play();
         });
         nightBox.getChildren().addAll(dayIcon, nightLabel, nightCombo);
 
@@ -209,9 +150,9 @@ public class SystemSettings {
         HBox sizeBox = new HBox(20);
         sizeLabel.setFont(Font.font("Arial", 14));
         sizeLabel.setStyle(themeService.getTextColorStyle());
-        ComboBox<String> sizeCombo = new ComboBox<>();
         sizeCombo.getItems().addAll("1920x1080", "1366x768", "1280x720");
         sizeCombo.setValue("1920x1080");
+        sizeCombo.getStyleClass().add(themeService.isDayMode() ? "day-theme-combo-box" : "night-theme-combo-box");
         sizeBox.getChildren().addAll(windowIcon, sizeLabel, sizeCombo);
 
         // 按钮区
@@ -223,82 +164,12 @@ public class SystemSettings {
             langCombo.setValue("English");
             nightCombo.setValue("Daytime");
             sizeCombo.setValue("1920x1080");
-            themeService.setTheme(true); // Reset to Daytime
-            root.setStyle(themeService.getCurrentThemeStyle());
-            outerBox.setStyle(
-                    "-fx-border-color: #3282FA;" +
-                            "-fx-border-width: 2;" +
-                            "-fx-border-radius: 0 0 12 12;" +
-                            "-fx-background-radius: 0 0 12 12;" +
-                            themeService.getCurrentFormBackgroundStyle()
-            );
-            langLabel.setStyle(themeService.getTextColorStyle());
-            nightLabel.setStyle(themeService.getTextColorStyle());
-            sizeLabel.setStyle(themeService.getTextColorStyle());
-            // Update sidebar styles
-            sideBar.setStyle(
-                    themeService.getCurrentThemeStyle() +
-                            "-fx-border-color: #3282FA;" +
-                            "-fx-border-width: 0 2 0 0;"
-            );
-            // Update welcomeLabel style (first child of sideBar)
-            Label welcomeLabel = (Label) sideBar.getChildren().get(0);
-            welcomeLabel.setStyle(themeService.getTextColorStyle());
-            // Update button styles in sidebar
-            for (int i = 1; i < sideBar.getChildren().size(); i++) {
-                HBox buttonBox1 = (HBox) sideBar.getChildren().get(i);
-                Label buttonLabel = (Label) buttonBox1.getChildren().get(0);
-                boolean isActive = buttonLabel.getPrefWidth() == 172; // Active buttons have width 172
-                if (isActive) {
-                    buttonLabel.setStyle(
-                            themeService.getCurrentThemeStyle() +
-                                    "-fx-text-fill: #3282FA; " +
-                                    "-fx-border-color: #3282FA transparent #3282FA #3282FA; " +
-                                    "-fx-border-width: 2 0 2 2; " +
-                                    "-fx-border-radius: 8 0 0 8;" +
-                                    "-fx-background-radius: 8 0 0 8;"
-                    );
-                } else {
-                    buttonLabel.setStyle(
-                            "-fx-background-color: " + (themeService.isDayMode() ? "#E0F0FF" : "#4A6FA5") + "; " +
-                                    themeService.getTextColorStyle() +
-                                    "-fx-border-color: #3282FA transparent #3282FA #3282FA; " +
-                                    "-fx-border-width: 2 0 2 2; " +
-                                    "-fx-border-radius: 8 0 0 8;" +
-                                    "-fx-background-radius: 8 0 0 8;"
-                    );
-                }
-            }
-            // Update top bar styles
-            for (int i = 0; i < topBar.getChildren().size(); i++) {
-                VBox tab = (VBox) topBar.getChildren().get(i);
-                Label arrow = (Label) tab.getChildren().get(0);
-                Label tabLabel = (Label) tab.getChildren().get(1);
-                boolean isActive = arrow.isVisible();
-                arrow.setTextFill(javafx.scene.paint.Color.web(themeService.isDayMode() ? "#3282FA" : "#E0F0FF"));
-                if (isActive) {
-                    tabLabel.setStyle(
-                            "-fx-background-color: #3282FA;" +
-                                    "-fx-text-fill: white;" +
-                                    "-fx-border-radius: 8 8 0 0;" +
-                                    "-fx-background-radius: 8 8 0 0;"
-                    );
-                } else {
-                    tabLabel.setStyle(
-                            "-fx-background-color: " + (themeService.isDayMode() ? "#E0F0FF" : "#4A6FA5") + ";" +
-                                    themeService.getTextColorStyle() +
-                                    "-fx-border-radius: 8 8 0 0;" +
-                                    "-fx-background-radius: 8 8 0 0;"
-                    );
-                }
-            }
-            // Update form buttons
-            container.getChildren().stream()
-                    .filter(node -> node instanceof HBox && ((HBox) node).getChildren().stream().anyMatch(child -> child instanceof Button))
-                    .findFirst()
-                    .ifPresent(hbox -> ((HBox) hbox).getChildren().stream()
-                            .filter(child -> child instanceof Button)
-                            .forEach(button -> ((Button) button).setStyle(themeService.getButtonStyle())));
+            PauseTransition debounce = new PauseTransition(Duration.millis(100));
+            debounce.setOnFinished(event -> {
+                themeService.setTheme(true); // Reset to Daytime
+                updateTheme(stage, root, outerBox, sideBar, topBar, container, langLabel, nightLabel, sizeLabel, langCombo, nightCombo, sizeCombo);
+            });
+            debounce.play();
         });
         Button backBtn = new Button("Back to Status");
         backBtn.setStyle(themeService.getButtonStyle());
@@ -310,8 +181,111 @@ public class SystemSettings {
         });
 
         buttonBox.getChildren().addAll(resetBtn, backBtn);
-
         container.getChildren().addAll(langBox, nightBox, sizeBox, buttonBox);
         return container;
+    }
+
+    /**
+     * 更新主题样式
+     */
+    private static void updateTheme(Stage stage, BorderPane root, VBox outerBox, VBox sideBar, HBox topBar, VBox container,
+                                    Label langLabel, Label nightLabel, Label sizeLabel,
+                                    ComboBox<String> langCombo, ComboBox<String> nightCombo, ComboBox<String> sizeCombo) {
+        // 更新根节点和主要容器样式
+        root.setStyle(themeService.getCurrentThemeStyle());
+        outerBox.setStyle(
+                "-fx-border-color: #3282FA;" +
+                        "-fx-border-width: 2;" +
+                        "-fx-border-radius: 0 0 12 12;" +
+                        "-fx-background-radius: 0 0 12 12;" +
+                        themeService.getCurrentFormBackgroundStyle()
+        );
+        sideBar.setStyle(
+                themeService.getCurrentThemeStyle() +
+                        "-fx-border-color: #3282FA;" +
+                        "-fx-border-width: 0 2 0 0;"
+        );
+
+        // 更新标签样式
+        langLabel.setStyle(themeService.getTextColorStyle());
+        nightLabel.setStyle(themeService.getTextColorStyle());
+        sizeLabel.setStyle(themeService.getTextColorStyle());
+        Label welcomeLabel = (Label) sideBar.getChildren().get(0);
+        welcomeLabel.setStyle(themeService.getTextColorStyle());
+
+        // 更新 ComboBox 样式
+        for (ComboBox<?> comboBox : new ComboBox<?>[]{langCombo, nightCombo, sizeCombo}) {
+            comboBox.getStyleClass().removeAll("day-theme-combo-box", "night-theme-combo-box");
+            comboBox.getStyleClass().add(themeService.isDayMode() ? "day-theme-combo-box" : "night-theme-combo-box");
+            comboBox.applyCss();
+            comboBox.layout();
+        }
+
+        // 更新侧边栏按钮样式
+        for (int i = 1; i < sideBar.getChildren().size(); i++) {
+            HBox buttonBox = (HBox) sideBar.getChildren().get(i);
+            Label buttonLabel = (Label) buttonBox.getChildren().get(0);
+            boolean isActive = buttonLabel.getPrefWidth() == 172;
+            if (isActive) {
+                buttonLabel.setStyle(
+                        themeService.getCurrentThemeStyle() +
+                                "-fx-text-fill: #3282FA;" +
+                                "-fx-border-color: #3282FA transparent #3282FA #3282FA;" +
+                                "-fx-border-width: 2 0 2 2;" +
+                                "-fx-border-radius: 8 0 0 8;" +
+                                "-fx-background-radius: 8 0 0 8;"
+                );
+            } else {
+                buttonLabel.setStyle(
+                        "-fx-background-color: " + (themeService.isDayMode() ? "#E0F0FF" : "#4A6FA5") + ";" +
+                                themeService.getTextColorStyle() +
+                                "-fx-border-color: #3282FA transparent #3282FA #3282FA;" +
+                                "-fx-border-width: 2 0 2 2;" +
+                                "-fx-border-radius: 8 0 0 8;" +
+                                "-fx-background-radius: 8 0 0 8;"
+                );
+            }
+        }
+
+        // 更新顶部栏样式
+        for (int i = 0; i < topBar.getChildren().size(); i++) {
+            VBox tab = (VBox) topBar.getChildren().get(i);
+            Label arrow = (Label) tab.getChildren().get(0);
+            Label tabLabel = (Label) tab.getChildren().get(1);
+            boolean isActive = arrow.isVisible();
+            arrow.setTextFill(javafx.scene.paint.Color.web(themeService.isDayMode() ? "#3282FA" : "#E0F0FF"));
+            if (isActive) {
+                tabLabel.setStyle(
+                        "-fx-background-color: #3282FA;" +
+                                "-fx-text-fill: white;" +
+                                "-fx-border-radius: 8 8 0 0;" +
+                                "-fx-background-radius: 8 8 0 0;"
+                );
+            } else {
+                tabLabel.setStyle(
+                        "-fx-background-color: " + (themeService.isDayMode() ? "#E0F0FF" : "#4A6FA5") + ";" +
+                                themeService.getTextColorStyle() +
+                                "-fx-border-radius: 8 8 0 0;" +
+                                "-fx-background-radius: 8 8 0 0;"
+                );
+            }
+        }
+
+        // 更新按钮样式
+        container.getChildren().stream()
+                .filter(node -> node instanceof HBox && ((HBox) node).getChildren().stream().anyMatch(child -> child instanceof Button))
+                .findFirst()
+                .ifPresent(hbox -> ((HBox) hbox).getChildren().stream()
+                        .filter(child -> child instanceof Button)
+                        .forEach(button -> ((Button) button).setStyle(themeService.getButtonStyle())));
+
+        // 更新 CSS 样式表
+        Scene scene = stage.getScene();
+        if (scene.getStylesheets().size() > 1) {
+            scene.getStylesheets().remove(scene.getStylesheets().size() - 1);
+        }
+        scene.getStylesheets().add("data:text/css," + themeService.getThemeStylesheet());
+        scene.getRoot().applyCss();
+        scene.getRoot().layout();
     }
 }

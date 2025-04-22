@@ -95,10 +95,19 @@ public class ExportReport {
 
         DatePicker startDatePicker = new DatePicker();
         startDatePicker.setPromptText("Start Date");
+        // Apply theme style class
+        startDatePicker.getStyleClass().add(themeService.isDayMode() ? "day-theme-date-picker" : "night-theme-date-picker");
+
+        Label toLabel = new Label("to");
+        // Apply theme text color
+        toLabel.setStyle(themeService.getTextColorStyle());
+
         DatePicker endDatePicker = new DatePicker();
         endDatePicker.setPromptText("End Date");
+        // Apply theme style class
+        endDatePicker.getStyleClass().add(themeService.isDayMode() ? "day-theme-date-picker" : "night-theme-date-picker");
 
-        HBox datePickerRow = new HBox(10, startDatePicker, new Label("to"), endDatePicker);
+        HBox datePickerRow = new HBox(10, startDatePicker, toLabel, endDatePicker);
         datePickerRow.setAlignment(Pos.CENTER_LEFT);
 
         // Export button
@@ -156,7 +165,11 @@ public class ExportReport {
         centerBox.getChildren().add(container);
         root.setCenter(centerBox);
 
-        return new Scene(root, width, height);
+        Scene scene = new Scene(root, width, height);
+        // Add dynamic theme stylesheet for DatePicker
+        scene.getStylesheets().add("data:text/css," + themeService.getThemeStylesheet());
+
+        return scene;
     }
 
     /**

@@ -27,7 +27,7 @@ public class TransactionScene {
     }
 
     public static Scene createScene(Stage stage, double width, double height, User loggedUser,
-            ThemeService themeService) {
+                                    ThemeService themeService) {
         BorderPane root = new BorderPane();
         root.setStyle(themeService.getCurrentThemeStyle());
 
@@ -43,23 +43,22 @@ public class TransactionScene {
                         themeService.getCurrentFormBackgroundStyle() +
                         "-fx-padding: 20;");
         centerBox.setPadding(new Insets(20, 20, 40, 20));
-        // 新增：允许垂直扩展
         centerBox.setMaxHeight(Double.MAX_VALUE);
         VBox.setVgrow(centerBox, Priority.ALWAYS);
 
         Label topicLabel = new Label("Manual Import:");
         topicLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;" + themeService.getTextColorStyle());
-        // VBox.setMargin(topicLabel, new Insets(5, 0, 5, 0)); // 上下边距
 
         // 日期选择器部分
         Label dateLabel = new Label("Transaction Date");
         dateLabel.setStyle(themeService.getTextColorStyle());
 
-        // 创建DatePicker并设置提示文本
         DatePicker datePicker = new DatePicker();
         datePicker.setPromptText("Select date");
+        datePicker.getStyleClass().add(themeService.isDayMode() ? "day-theme-date-picker" : "night-theme-date-picker");
+        datePicker.setVisible(false);
+        datePicker.setVisible(true);
 
-        // 设置日期选择器的最大和最小宽度
         datePicker.setMaxWidth(200);
         datePicker.setPrefWidth(150);
 
@@ -67,31 +66,30 @@ public class TransactionScene {
             @Override
             public void updateItem(LocalDate date, boolean empty) {
                 super.updateItem(date, empty);
-                // 禁用未来的日期
                 boolean isFuture = date.isAfter(LocalDate.now());
                 setDisable(isFuture);
-
-                // 仅修改文字颜色
                 if (isFuture) {
-                    setStyle("-fx-text-fill: #808080;"); // 灰色文字
+                    setStyle("-fx-text-fill: #808080;");
                 } else {
-                    setStyle(""); // 恢复默认样式
+                    setStyle(themeService.isDayMode() ? "-fx-text-fill: black;" : "-fx-text-fill: white;");
                 }
             }
         });
 
-        // 将日期选择器放入VBox中
         VBox dateBox = new VBox(dateLabel, datePicker);
         dateBox.setAlignment(Pos.CENTER);
 
-        Label typeLabel = new Label("Transition Type");
+        Label typeLabel = new Label("Transaction Type");
         typeLabel.setStyle(themeService.getTextColorStyle());
         ComboBox<String> typeCombo = new ComboBox<>();
         typeCombo.getItems().addAll("Income", "Expense");
         typeCombo.setMaxWidth(200);
         typeCombo.setPrefWidth(150);
-        typeCombo.setValue("Expense"); // Set default value
-        typeCombo.setFocusTraversable(false); // 防止自动获取焦点
+        typeCombo.setValue("Expense");
+        typeCombo.setFocusTraversable(false);
+        typeCombo.getStyleClass().add(themeService.isDayMode() ? "day-theme-combo-box" : "night-theme-combo-box");
+        typeCombo.setVisible(false);
+        typeCombo.setVisible(true);
         VBox typeBox = new VBox(typeLabel, typeCombo);
         typeBox.setAlignment(Pos.CENTER);
 
@@ -101,8 +99,11 @@ public class TransactionScene {
         currencyCombo.getItems().addAll("CNY", "USD", "EUR");
         currencyCombo.setMaxWidth(200);
         currencyCombo.setPrefWidth(150);
-        currencyCombo.setValue("CNY"); // Set default value
-        currencyCombo.setFocusTraversable(false); // 防止自动获取焦点
+        currencyCombo.setValue("CNY");
+        currencyCombo.setFocusTraversable(false);
+        currencyCombo.getStyleClass().add(themeService.isDayMode() ? "day-theme-combo-box" : "night-theme-combo-box");
+        currencyCombo.setVisible(false);
+        currencyCombo.setVisible(true);
         VBox currencyBox = new VBox(currencyLabel, currencyCombo);
         currencyBox.setAlignment(Pos.CENTER);
 
@@ -112,11 +113,13 @@ public class TransactionScene {
         amountField.setPromptText("Please enter amount");
         amountField.setMaxWidth(200);
         amountField.setPrefWidth(150);
-        amountField.setFocusTraversable(false); // 防止自动获取焦点
+        amountField.setFocusTraversable(false);
+        amountField.getStyleClass().add(themeService.isDayMode() ? "day-theme-text-field" : "night-theme-text-field");
+        amountField.setVisible(false);
+        amountField.setVisible(true);
         VBox amountBox = new VBox(amountLabel, amountField);
         amountBox.setAlignment(Pos.CENTER);
 
-        // 添加描述框和自动分类按钮
         Label descriptionLabel = new Label("Description");
         descriptionLabel.setStyle(themeService.getTextColorStyle());
         TextArea descriptionField = new TextArea();
@@ -126,6 +129,9 @@ public class TransactionScene {
         descriptionField.setPrefRowCount(3);
         descriptionField.setWrapText(true);
         descriptionField.setFocusTraversable(false);
+        descriptionField.getStyleClass().add(themeService.isDayMode() ? "day-theme-text-field" : "night-theme-text-field");
+        descriptionField.setVisible(false);
+        descriptionField.setVisible(true);
         VBox descriptionBox = new VBox(descriptionLabel, descriptionField);
         descriptionBox.setAlignment(Pos.CENTER);
 
@@ -134,7 +140,6 @@ public class TransactionScene {
         autoSortButton.setMaxWidth(100);
         autoSortButton.setPrefWidth(100);
 
-        // 修改分类框的布局，将自动分类按钮放在category输入框右边
         Label categoryLabel = new Label("Category");
         categoryLabel.setStyle(themeService.getTextColorStyle());
         TextField categoryField = new TextField();
@@ -142,6 +147,9 @@ public class TransactionScene {
         categoryField.setMaxWidth(200);
         categoryField.setPrefWidth(150);
         categoryField.setFocusTraversable(false);
+        categoryField.getStyleClass().add(themeService.isDayMode() ? "day-theme-text-field" : "night-theme-text-field");
+        categoryField.setVisible(false);
+        categoryField.setVisible(true);
 
         HBox categoryAndButton = new HBox(categoryField, autoSortButton);
         categoryAndButton.setSpacing(5);
@@ -155,11 +163,13 @@ public class TransactionScene {
         methodField.setPromptText("e.g., Cash, PayPal, Bank Transfer");
         methodField.setMaxWidth(200);
         methodField.setPrefWidth(150);
-        methodField.setFocusTraversable(false); // 防止自动获取焦点
+        methodField.setFocusTraversable(false);
+        methodField.getStyleClass().add(themeService.isDayMode() ? "day-theme-text-field" : "night-theme-text-field");
+        methodField.setVisible(false);
+        methodField.setVisible(true);
         VBox methodBox = new VBox(methodLabel, methodField);
         methodBox.setAlignment(Pos.CENTER);
 
-        // 按下自动分类按钮后调用AI进行自动分类
         autoSortButton.setOnAction(event -> {
             String description = descriptionField.getText();
             if (description.isEmpty()) {
@@ -191,26 +201,21 @@ public class TransactionScene {
         submitManualBtn.setAlignment(Pos.CENTER);
 
         submitManualBtn.setOnAction(event -> {
-            // 获取日期选择器的值
             String selectedDate = datePicker.getValue() != null ? datePicker.getValue().toString() : null;
 
             if (selectedDate == null || selectedDate.isEmpty() ||
                     amountField.getText().isEmpty() ||
                     categoryField.getText().isEmpty() ||
                     methodField.getText().isEmpty()) {
-                // 弹出提示窗口，要求填写所有字段
                 Alert alert = new Alert(Alert.AlertType.WARNING);
                 alert.setTitle("Missing Information");
                 alert.setHeaderText(null);
                 alert.setContentText("Please fill in all blanks before submitting");
                 alert.showAndWait();
-                return; // 停止提交过程
+                return;
             }
 
-            // 验证日期格式和范围
             try {
-                // 此时selectedDate已经是正确格式，无需再次验证
-                // 只需检查年月日是否有效
                 String[] dateParts = selectedDate.split("-");
                 if (dateParts.length == 3) {
                     int year = Integer.parseInt(dateParts[0]);
@@ -225,7 +230,6 @@ public class TransactionScene {
                         throw new ParseException("Invalid day", 0);
                     }
 
-                    // 检查特定月份的天数上限
                     int maxDays;
                     switch (month) {
                         case 4:
@@ -235,7 +239,6 @@ public class TransactionScene {
                             maxDays = 30;
                             break;
                         case 2:
-                            // 检查闰年
                             boolean isLeapYear = (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
                             maxDays = isLeapYear ? 29 : 28;
                             break;
@@ -248,17 +251,15 @@ public class TransactionScene {
                     }
                 }
             } catch (ParseException | NumberFormatException e) {
-                // 弹出提示窗口，告知日期格式错误
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle("Invalid Date");
                 alert.setHeaderText(null);
                 alert.setContentText("Please enter a valid date in format yyyy-MM-dd\n" +
                         "Month must be 1-12 and day must be 1-31");
                 alert.showAndWait();
-                return; // 停止提交过程
+                return;
             }
 
-            // 验证category和payment method只包含英文单词
             if (!categoryField.getText().matches("^[a-zA-Z\\s]+$")) {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle("Invalid Category");
@@ -277,40 +278,36 @@ public class TransactionScene {
                 return;
             }
 
-            // 验证金额格式
             double amount;
             try {
                 amount = Double.parseDouble(amountField.getText());
             } catch (NumberFormatException e) {
-                // 弹出提示窗口，告知金额格式错误
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle("Invalid Amount");
                 alert.setHeaderText(null);
                 alert.setContentText("Please type in a valid number");
                 alert.showAndWait();
-                return; // 停止提交过程
+                return;
             }
 
             Transaction transaction = new Transaction();
-            transaction.setTransactionDate(selectedDate); // 使用选定的日期
+            transaction.setTransactionDate(selectedDate);
             transaction.setTransactionType(typeCombo.getValue());
             transaction.setCurrency(currencyCombo.getValue());
             transaction.setAmount(amount);
             transaction.setCategory(categoryField.getText());
             transaction.setPaymentMethod(methodField.getText());
-            transaction.setDescription(descriptionField.getText()); // 添加description字段
+            transaction.setDescription(descriptionField.getText());
 
             TransactionService service = new TransactionService();
-            service.addTransaction(loggedUser, transaction); // 传入 loggedUser
+            service.addTransaction(loggedUser, transaction);
 
-            // 提交后清空输入框内容
-            datePicker.setValue(null); // 清空日期选择器
-            amountField.clear(); // 清空金额文本框
-            categoryField.clear(); // 清空类别文本框
-            methodField.clear(); // 清空支付方式文本框
-            descriptionField.clear(); // 清空描述框
+            datePicker.setValue(null);
+            amountField.clear();
+            categoryField.clear();
+            methodField.clear();
+            descriptionField.clear();
 
-            // 提交成功后弹出一个提示框，通知用户交易已成功保存
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("Transaction Added");
             alert.setHeaderText(null);
@@ -328,11 +325,10 @@ public class TransactionScene {
                 categoryBox,
                 methodBox,
                 submitManualBtn);
-        centerBox.setSpacing(10); // 增加整个区域内的元素间距
-        centerBox.setAlignment(Pos.CENTER); // 让整个 centerBox 内的元素居中
+        centerBox.setSpacing(10);
+        centerBox.setAlignment(Pos.CENTER);
 
         // 右侧传输csv文件部分
-        // 修改rightBar的VBox设置
         VBox rightBar = new VBox();
         rightBar.setStyle(
                 "-fx-border-color: #3282FA;" +
@@ -341,22 +337,19 @@ public class TransactionScene {
                         themeService.getCurrentFormBackgroundStyle() +
                         "-fx-padding: 20;");
         rightBar.setPadding(new Insets(20, 20, 20, 20));
-        // 新增：允许垂直扩展
         rightBar.setMaxHeight(Double.MAX_VALUE);
         VBox.setVgrow(rightBar, Priority.ALWAYS);
 
         Label promptLabel = new Label("File Import:");
         promptLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;" + themeService.getTextColorStyle());
-        VBox.setMargin(promptLabel, new Insets(10, 0, 0, 0)); // 增加与下方内容的间距
+        VBox.setMargin(promptLabel, new Insets(10, 0, 0, 0));
 
         Button importCSVButton = new Button("Select a file");
         importCSVButton.setPrefWidth(100);
         importCSVButton.setStyle(themeService.getButtonStyle() + "-fx-font-weight: bold; " + "-fx-border-radius: 15;");
 
         importCSVButton.setOnAction(event -> {
-            // FileChooser 是 JavaFX 提供的一个用于选择文件的控件。fileChooser 会弹出一个文件选择对话框，允许用户浏览文件系统并选择文件。
             FileChooser fileChooser = new FileChooser();
-            // 通过 getExtensionFilters() 为 FileChooser 添加文件扩展名过滤器。它只允许用户选择 CSV 文件
             fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV Files", "*.csv"));
             File file = fileChooser.showOpenDialog(stage);
             if (file != null) {
@@ -380,45 +373,40 @@ public class TransactionScene {
                 "(payment method)");
         formatLabel.setFont(new Font(11));
         formatLabel.setStyle(themeService.getTextColorStyle());
-        VBox.setMargin(formatLabel, new Insets(10, 0, 20, 0)); // 增加与下方内容的间距
+        VBox.setMargin(formatLabel, new Insets(10, 0, 20, 0));
 
         rightBar.getChildren().addAll(
                 promptLabel,
                 importCSVButton,
                 formatLabel);
 
-        rightBar.setSpacing(10); // 增加整个区域内的元素间距
-        rightBar.setAlignment(Pos.CENTER); // 让整个 rightBar 内的元素居中
+        rightBar.setSpacing(10);
+        rightBar.setAlignment(Pos.CENTER);
 
-        // 使用 GridPane 来确保两个模块大小一致，并且在窗口拉伸时一起变化
         GridPane centerAndRight = new GridPane();
         centerAndRight.setPadding(new Insets(20, 20, 20, 20));
-        centerAndRight.setHgap(20); // 设置两个模块之间的水平间距
+        centerAndRight.setHgap(20);
 
-        // 添加列约束，确保两列在窗口大小变化时均匀分配空间
         ColumnConstraints column1 = new ColumnConstraints();
-        column1.setPercentWidth(50); // 占据 50% 的宽度
-        column1.setFillWidth(true); // 设置列填充整个宽度
+        column1.setPercentWidth(50);
+        column1.setFillWidth(true);
 
         ColumnConstraints column2 = new ColumnConstraints();
-        column2.setPercentWidth(50); // 占据 50% 的宽度
-        column2.setFillWidth(true); // 设置列填充整个宽度
+        column2.setPercentWidth(50);
+        column2.setFillWidth(true);
 
         centerAndRight.getColumnConstraints().addAll(column1, column2);
 
-        // 修改GridPane的行约束
         RowConstraints rowConstraint = new RowConstraints();
-        rowConstraint.setVgrow(Priority.ALWAYS); // 允许行垂直扩展
+        rowConstraint.setVgrow(Priority.ALWAYS);
         rowConstraint.setFillHeight(true);
         centerAndRight.getRowConstraints().add(rowConstraint);
-        // 确保内部元素不会限制VBox扩展
-        centerBox.setAlignment(Pos.TOP_CENTER); // 顶部居中，允许下方空间扩展
-        rightBar.setAlignment(Pos.TOP_CENTER);
-        // 将 centerBox 和 rightBar 添加到 GridPane 中
-        centerAndRight.add(centerBox, 0, 0); // centerBox 放在第 0 列
-        centerAndRight.add(rightBar, 1, 0); // rightBar 放在第 1 列
 
-        // 新增滚动面板
+        centerBox.setAlignment(Pos.TOP_CENTER);
+        rightBar.setAlignment(Pos.TOP_CENTER);
+        centerAndRight.add(centerBox, 0, 0);
+        centerAndRight.add(rightBar, 1, 0);
+
         ScrollPane scrollPane = new ScrollPane();
         scrollPane.setContent(centerAndRight);
         scrollPane.setFitToWidth(true);
@@ -429,9 +417,8 @@ public class TransactionScene {
                         "-fx-border-color: transparent;" +
                         "-fx-control-inner-background: " + backgroundColor + ";" +
                         "-fx-text-fill: transparent;");
-        scrollPane.setPadding(new Insets(0)); // 移除内边距
+        scrollPane.setPadding(new Insets(0));
 
-        // 保持滚动面板的扩展性
         scrollPane.setMaxHeight(Double.MAX_VALUE);
         scrollPane.setMaxWidth(Double.MAX_VALUE);
         BorderPane.setMargin(scrollPane, new Insets(0));
@@ -439,7 +426,147 @@ public class TransactionScene {
         root.setCenter(scrollPane);
         Scene scene = new Scene(root, width, height);
 
-        // 添加一条全局样式：所有 Label 默认为动态颜色
+        String componentStylesheet = """
+                /* DatePicker styles */
+                .day-theme-date-picker {
+                    -fx-background-color: white;
+                    -fx-text-fill: black;
+                    -fx-border-color: #999999;
+                    -fx-border-width: 1;
+                    -fx-border-radius: 4;
+                    -fx-background-radius: 4;
+                    -fx-prompt-text-fill: gray;
+                }
+                .night-theme-date-picker {
+                    -fx-background-color: #3C3C3C;
+                    -fx-text-fill: white;
+                    -fx-border-color: #666666;
+                    -fx-border-width: 1;
+                    -fx-border-radius: 4;
+                    -fx-background-radius: 4;
+                    -fx-prompt-text-fill: lightgray;
+                }
+                .day-theme-date-picker .text-field {
+                    -fx-background-color: white;
+                    -fx-text-fill: black;
+                    -fx-prompt-text-fill: gray;
+                }
+                .night-theme-date-picker .text-field {
+                    -fx-background-color: #3C3C3C;
+                    -fx-text-fill: white;
+                    -fx-prompt-text-fill: lightgray;
+                }
+                .day-theme-date-picker .arrow-button {
+                    -fx-background-color: white;
+                    -fx-border-color: #999999;
+                    -fx-border-width: 1;
+                }
+                .night-theme-date-picker .arrow-button {
+                    -fx-background-color: #3C3C3C;
+                    -fx-border-color: #666666;
+                    -fx-border-width: 1;
+                }
+                .day-theme-date-picker .calendar-popup {
+                    -fx-background-color: white;
+                }
+                .night-theme-date-picker .calendar-popup {
+                    -fx-background-color: #3C3C3C;
+                }
+                .day-theme-date-picker .month-year-pane {
+                    -fx-background-color: white;
+                }
+                .night-theme-date-picker .month-year-pane {
+                    -fx-background-color: #3C3C3C;
+                }
+                .day-theme-date-picker .spinner .label {
+                    -fx-text-fill: black;
+                }
+                .night-theme-date-picker .spinner .label {
+                    -fx-text-fill: white;
+                }
+                .day-theme-date-picker .spinner .button {
+                    -fx-background-color: white;
+                    -fx-border-color: #999999;
+                    -fx-border-width: 1;
+                }
+                .night-theme-date-picker .spinner .button {
+                    -fx-background-color: #3C3C3C;
+                    -fx-border-color: #666666;
+                    -fx-border-width: 1;
+                }
+
+                /* ComboBox styles */
+                .day-theme-combo-box {
+                    -fx-background-color: white;
+                    -fx-text-fill: black;
+                    -fx-border-color: #999999;
+                    -fx-border-width: 1;
+                    -fx-border-radius: 4;
+                    -fx-background-radius: 4;
+                }
+                .night-theme-combo-box {
+                    -fx-background-color: #3C3C3C;
+                    -fx-text-fill: white;
+                    -fx-border-color: #666666;
+                    -fx-border-width: 1;
+                    -fx-border-radius: 4;
+                    -fx-background-radius: 4;
+                }
+                .day-theme-combo-box .list-cell {
+                    -fx-background-color: white;
+                    -fx-text-fill: black;
+                }
+                .night-theme-combo-box .list-cell {
+                    -fx-background-color: #3C3C3C;
+                    -fx-text-fill: white;
+                }
+                .day-theme-combo-box .list-cell:hover {
+                    -fx-background-color: #E0F0FF;
+                }
+                .night-theme-combo-box .list-cell:hover {
+                    -fx-background-color: #4A6FA5;
+                }
+                .day-theme-combo-box .arrow-button {
+                    -fx-background-color: white;
+                    -fx-border-color: #999999;
+                    -fx-border-width: 1;
+                }
+                .night-theme-combo-box .arrow-button {
+                    -fx-background-color: #3C3C3C;
+                    -fx-border-color: #666666;
+                    -fx-border-width: 1;
+                }
+
+                /* TextField and TextArea styles */
+                .day-theme-text-field {
+                    -fx-background-color: white;
+                    -fx-text-fill: black;
+                    -fx-border-color: #999999;
+                    -fx-border-width: 1;
+                    -fx-border-radius: 4;
+                    -fx-background-radius: 4;
+                    -fx-prompt-text-fill: gray;
+                }
+                .night-theme-text-field {
+                    -fx-background-color: #3C3C3C;
+                    -fx-text-fill: white;
+                    -fx-border-color: #666666;
+                    -fx-border-width: 1;
+                    -fx-border-radius: 4;
+                    -fx-background-radius: 4;
+                    -fx-prompt-text-fill: lightgray;
+                }
+                .day-theme-text-field .text {
+                    -fx-fill: black;
+                }
+                .night-theme-text-field .text {
+                    -fx-fill: white;
+                }
+                """;
+        scene.getStylesheets().add("data:text/css," + componentStylesheet);
+
+        scene.getStylesheets().add("data:text/css," + themeService.getThemeStylesheet());
+
         String labelColor = themeService.isDayMode() ? "darkblue" : "white";
         scene.getStylesheets().add("data:,Label { -fx-text-fill: " + labelColor + "; }");
 

@@ -102,6 +102,11 @@ public class UserOptions {
 
         TextField newUsernameField = new TextField();
         newUsernameField.setPromptText("New username");
+        // Apply theme style class for TextField
+        newUsernameField.getStyleClass().add(themeService.isDayMode() ? "day-theme-text-field" : "night-theme-text-field");
+        // Force refresh to ensure style is applied
+        newUsernameField.setVisible(false);
+        newUsernameField.setVisible(true);
 
         Button saveUserBtn = new Button("save");
         saveUserBtn.setStyle(themeService.getButtonStyle());
@@ -157,11 +162,21 @@ public class UserOptions {
                 "What city were you born in?"
         );
         questionCombo.setValue(currentUser.getSecurityQuestion());
+        // Apply theme style class for ComboBox
+        questionCombo.getStyleClass().add(themeService.isDayMode() ? "day-theme-combo-box" : "night-theme-combo-box");
+        // Force refresh to ensure style is applied
+        questionCombo.setVisible(false);
+        questionCombo.setVisible(true);
 
         Label ansLabel = new Label("Your answer:");
         ansLabel.setStyle("-fx-text-fill: #3282FA; -fx-font-weight: bold;");
 
         TextField ansField = new TextField(currentUser.getSecurityAnswer());
+        // Apply theme style class for TextField
+        ansField.getStyleClass().add(themeService.isDayMode() ? "day-theme-text-field" : "night-theme-text-field");
+        // Force refresh to ensure style is applied
+        ansField.setVisible(false);
+        ansField.setVisible(true);
 
         Button saveSecBtn = new Button("save");
         saveSecBtn.setStyle(themeService.getButtonStyle());
@@ -241,7 +256,43 @@ public class UserOptions {
         centerBox.getChildren().add(container);
         root.setCenter(centerBox);
 
-        return new Scene(root, width, height);
+        Scene scene = new Scene(root, width, height);
+        // Add the custom theme stylesheet for ComboBox styles
+        scene.getStylesheets().add("data:text/css," + themeService.getThemeStylesheet());
+        // Add a local stylesheet for TextField styles to ensure night mode adaptation
+        String textFieldStylesheet = """
+                .day-theme-text-field {
+                    -fx-background-color: white;
+                    -fx-text-fill: black;
+                    -fx-border-color: #3282FA;
+                    -fx-border-width: 1;
+                    -fx-border-radius: 4;
+                    -fx-background-radius: 4;
+                }
+                .night-theme-text-field {
+                    -fx-background-color: #3C3C3C;
+                    -fx-text-fill: white;
+                    -fx-border-color: #3282FA;
+                    -fx-border-width: 1;
+                    -fx-border-radius: 4;
+                    -fx-background-radius: 4;
+                }
+                .day-theme-text-field .text {
+                    -fx-fill: black;
+                }
+                .night-theme-text-field .text {
+                    -fx-fill: white;
+                }
+                .day-theme-text-field .prompt-text {
+                    -fx-fill: gray;
+                }
+                .night-theme-text-field .prompt-text {
+                    -fx-fill: lightgray;
+                }
+                """;
+        scene.getStylesheets().add("data:text/css," + textFieldStylesheet);
+
+        return scene;
     }
 
     /**
