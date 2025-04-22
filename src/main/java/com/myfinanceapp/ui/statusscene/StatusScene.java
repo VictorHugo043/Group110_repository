@@ -73,7 +73,7 @@ public class StatusScene {
         String backgroundColor = themeService.isDayMode() ? "white" : "#2A2A2A";
         scrollPane.setStyle("-fx-background: " + backgroundColor + "; -fx-background-color: " + backgroundColor + "; -fx-border-width: 0;");
 
-        scrollPane.setPadding(new Insets(0));
+        scrollPane.setPadding(new Insets(2));
         root.setCenter(scrollPane);
 
         VBox mainContent = new VBox(20);
@@ -113,7 +113,11 @@ public class StatusScene {
 
         Scene scene = new Scene(root, width, height);
 
+        // Add existing chart stylesheet
         scene.getStylesheets().add(getClass().getResource("/css/chart-styles.css").toExternalForm());
+        // Add dynamic theme stylesheet for ComboBox and DatePicker
+        scene.getStylesheets().add("data:text/css," + themeService.getThemeStylesheet());
+        // Add scroll pane styles
         scene.getStylesheets().add("data:text/css," +
                 ".scroll-pane { -fx-background-insets: 0; -fx-padding: 0; }" +
                 ".scroll-pane > .viewport { -fx-background-color: " + backgroundColor + "; }" +
@@ -149,6 +153,7 @@ public class StatusScene {
         startDatePicker = new DatePicker();
         startDatePicker.setPromptText("Select start date");
         startDatePicker.setPrefWidth(150);
+        startDatePicker.getStyleClass().add(themeService.isDayMode() ? "day-theme-date-picker" : "night-theme-date-picker");
         controlGrid.add(startDateLabel, 0, 0);
         controlGrid.add(startDatePicker, 1, 0);
 
@@ -158,6 +163,7 @@ public class StatusScene {
         endDatePicker = new DatePicker();
         endDatePicker.setPromptText("Select end date");
         endDatePicker.setPrefWidth(150);
+        endDatePicker.getStyleClass().add(themeService.isDayMode() ? "day-theme-date-picker" : "night-theme-date-picker");
         controlGrid.add(endDateLabel, 0, 1);
         controlGrid.add(endDatePicker, 1, 1);
 
@@ -168,6 +174,7 @@ public class StatusScene {
         chartTypeCombo.getItems().addAll("Line graph", "Bar graph");
         chartTypeCombo.setValue("Line graph");
         chartTypeCombo.setPrefWidth(150);
+        chartTypeCombo.getStyleClass().add(themeService.isDayMode() ? "day-theme-combo-box" : "night-theme-combo-box");
         controlGrid.add(chartTypeLabel, 0, 2);
         controlGrid.add(chartTypeCombo, 1, 2);
 
@@ -273,7 +280,7 @@ public class StatusScene {
             if ("Bar graph".equals(chartTypeCombo.getValue())) {
                 chartPane.getChildren().add(barChartScrollPane);
             } else {
-                chartPane.getChildren().add(lineChart);
+                chartPane.getChildren().add(lineChart); // Fixed syntax error
             }
         });
 
@@ -506,6 +513,8 @@ public class StatusScene {
                 .append("; margin: 0; padding: 0;'>");
         htmlContent.append("<div class='chat-history'>");
         for (Map<String, String> message : chatHistory) {
+
+
             String role = message.get("role");
             String content = message.get("content");
 

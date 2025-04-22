@@ -7,50 +7,26 @@ public class ThemeService {
         this.isDayMode = true; // Default to Daytime mode
     }
 
-    /**
-     * Sets the theme based on the day mode flag.
-     * @param isDay true for Daytime mode, false for Nighttime mode
-     */
     public void setTheme(boolean isDay) {
         this.isDayMode = isDay;
     }
 
-    /**
-     * Returns whether the current theme is Daytime mode.
-     * @return true if Daytime mode, false if Nighttime mode
-     */
     public boolean isDayMode() {
         return isDayMode;
     }
 
-    /**
-     * Gets the current theme style for the root pane.
-     * @return CSS style string for the root pane
-     */
     public String getCurrentThemeStyle() {
         return isDayMode ? "-fx-background-color: white;" : "-fx-background-color: #2E2E2E;";
     }
 
-    /**
-     * Gets the current background style for the settings form.
-     * @return CSS style string for the form background
-     */
     public String getCurrentFormBackgroundStyle() {
         return isDayMode ? "-fx-background-color: white;" : "-fx-background-color: #3C3C3C;";
     }
 
-    /**
-     * Gets the text color style based on the current theme.
-     * @return CSS style string for text color
-     */
     public String getTextColorStyle() {
         return isDayMode ? "-fx-text-fill: black;" : "-fx-text-fill: white;";
     }
 
-    /**
-     * Gets the button style based on the current theme.
-     * @return CSS style string for buttons
-     */
     public String getButtonStyle() {
         if (isDayMode) {
             return "-fx-background-color: #E0F0FF; -fx-text-fill: #3282FA; -fx-font-weight: bold;";
@@ -59,10 +35,6 @@ public class ThemeService {
         }
     }
 
-    /**
-     * Gets the table style based on the current theme.
-     * @return CSS style string for the table
-     */
     public String getTableStyle() {
         if (isDayMode) {
             return ".table-view { -fx-background-color: white; } " +
@@ -75,10 +47,6 @@ public class ThemeService {
         }
     }
 
-    /**
-     * Gets the table header style based on the current theme.
-     * @return CSS style string for the table header
-     */
     public String getTableHeaderStyle() {
         if (isDayMode) {
             return ".table-view .column-header { -fx-background-color: #F0F0F0; -fx-border-color: #D3D3D3; } " +
@@ -86,6 +54,130 @@ public class ThemeService {
         } else {
             return ".table-view .column-header { -fx-background-color: #4A4A4A; -fx-border-color: #555555; } " +
                     ".table-view .column-header .label { -fx-text-fill: white; }";
+        }
+    }
+
+    public String getThemeStylesheet() {
+        if (isDayMode) {
+            return ".day-theme-combo-box { " +
+                    "-fx-background-color: white; " +
+                    "-fx-text-fill: black; " +
+                    "-fx-control-inner-background: white; " +
+                    "-fx-border-color: #D3D3D3; " +
+                    "-fx-border-radius: 3; " +
+                    "} " +
+                    ".day-theme-combo-box .list-cell { " +
+                    "-fx-text-fill: black; " +
+                    "-fx-background-color: white; " +
+                    "} " +
+                    ".day-theme-combo-box .combo-box-popup .list-view { " +
+                    "-fx-background-color: white; " +
+                    "} " +
+                    ".day-theme-combo-box .combo-box-popup .list-view .list-cell { " +
+                    "-fx-text-fill: black; " +
+                    "-fx-background-color: white; " +
+                    "} " +
+                    ".day-theme-combo-box .combo-box-popup .list-view .list-cell:hover { " +
+                    "-fx-background-color: #E0F0FF; " +
+                    "} " +
+                    ".day-theme-date-picker { " +
+                    "-fx-background-color: white; " +
+                    "-fx-text-fill: black; " +
+                    "-fx-control-inner-background: white; " +
+                    "-fx-border-color: #D3D3D3; " +
+                    "-fx-border-radius: 3; " +
+                    "} " +
+                    ".day-theme-date-picker .text-field { " +
+                    "-fx-text-fill: black; " +
+                    "-fx-background-color: white; " +
+                    "-fx-prompt-text-fill: #555555; " +
+                    "} " +
+                    ".day-theme-date-picker .date-picker-popup { " +
+                    "-fx-background-color: white; " +
+                    "-fx-border-color: #D3D3D3; " +
+                    "} " +
+                    ".day-theme-date-picker .date-picker-popup .month-year-pane { " +
+                    "-fx-background-color: #F0F0F0; " +
+                    "-fx-text-fill: black; " +
+                    "} " +
+                    ".day-theme-date-picker .date-picker-popup .day-name-cell { " +
+                    "-fx-text-fill: black; " +
+                    "-fx-background-color: white; " +
+                    "} " +
+                    ".day-theme-date-picker .date-picker-popup .calendar-grid { " +
+                    "-fx-background-color: white; " +
+                    "} " +
+                    ".day-theme-date-picker .date-picker-popup .day-cell { " +
+                    "-fx-text-fill: black; " +
+                    "-fx-background-color: white; " +
+                    "} " +
+                    ".day-theme-date-picker .date-picker-popup .day-cell:hover { " +
+                    "-fx-background-color: #E0F0FF; " +
+                    "} " +
+                    ".day-theme-date-picker .date-picker-popup .day-cell:selected { " +
+                    "-fx-background-color: #3282FA; " +
+                    "-fx-text-fill: white; " +
+                    "}";
+        } else {
+            return ".night-theme-combo-box { " +
+                    "-fx-background-color: #3C3C3C; " +
+                    "-fx-text-fill: white; " +
+                    "-fx-control-inner-background: #3C3C3C; " +
+                    "-fx-border-color: #555555; " +
+                    "-fx-border-radius: 3; " +
+                    "} " +
+                    ".night-theme-combo-box .list-cell { " +
+                    "-fx-text-fill: white; " +
+                    "-fx-background-color: #3C3C3C; " +
+                    "} " +
+                    ".night-theme-combo-box .combo-box-popup .list-view { " +
+                    "-fx-background-color: #3C3C3C; " +
+                    "} " +
+                    ".night-theme-combo-box .combo-box-popup .list-view .list-cell { " +
+                    "-fx-text-fill: white; " +
+                    "-fx-background-color: #3C3C3C; " +
+                    "} " +
+                    ".night-theme-combo-box .combo-box-popup .list-view .list-cell:hover { " +
+                    "-fx-background-color: #4A6FA5; " +
+                    "} " +
+                    ".night-theme-date-picker { " +
+                    "-fx-background-color: #3C3C3C; " +
+                    "-fx-text-fill: white; " +
+                    "-fx-control-inner-background: #3C3C3C; " +
+                    "-fx-border-color: #555555; " +
+                    "-fx-border-radius: 3; " +
+                    "} " +
+                    ".night-theme-date-picker .text-field { " +
+                    "-fx-text-fill: white; " +
+                    "-fx-background-color: #3C3C3C; " +
+                    "-fx-prompt-text-fill: #CCCCCC; " +
+                    "} " +
+                    ".night-theme-date-picker .date-picker-popup { " +
+                    "-fx-background-color: #3C3C3C; " +
+                    "-fx-border-color: #555555; " +
+                    "} " +
+                    ".night-theme-date-picker .date-picker-popup .month-year-pane { " +
+                    "-fx-background-color: #4A4A4A; " +
+                    "-fx-text-fill: white; " +
+                    "} " +
+                    ".night-theme-date-picker .date-picker-popup .day-name-cell { " +
+                    "-fx-text-fill: white; " +
+                    "-fx-background-color: #3C3C3C; " +
+                    "} " +
+                    ".night-theme-date-picker .date-picker-popup .calendar-grid { " +
+                    "-fx-background-color: #3C3C3C; " +
+                    "} " +
+                    ".night-theme-date-picker .date-picker-popup .day-cell { " +
+                    "-fx-text-fill: white; " +
+                    "-fx-background-color: #3C3C3C; " +
+                    "} " +
+                    ".night-theme-date-picker .date-picker-popup .day-cell:hover { " +
+                    "-fx-background-color: #4A6FA5; " +
+                    "} " +
+                    ".night-theme-date-picker .date-picker-popup .day-cell:selected { " +
+                    "-fx-background-color: #4A6FA5; " +
+                    "-fx-text-fill: white; " +
+                    "}";
         }
     }
 }

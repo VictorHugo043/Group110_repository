@@ -41,7 +41,6 @@ public class CreateGoalScene {
 
     private static ThemeService themeService; // Store ThemeService instance
 
-    // 重载方法，兼容旧的调用方式
     public static Scene createScene(Stage stage, double width, double height, User loggedUser) {
         return createScene(stage, width, height, loggedUser, new ThemeService());
     }
@@ -189,6 +188,9 @@ public class CreateGoalScene {
         // 创建场景
         Scene scene = new Scene(root, finalWidth, finalHeight);
 
+        // Add dynamic theme stylesheet for ComboBox, DatePicker, and TextField
+        scene.getStylesheets().add("data:text/css," + themeService.getThemeStylesheet());
+
         // 添加窗口大小变化监听器
         scene.widthProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal.doubleValue() < MIN_WINDOW_WIDTH) {
@@ -210,6 +212,8 @@ public class CreateGoalScene {
         comboBox.getItems().addAll(items);
         comboBox.getSelectionModel().selectFirst();
         comboBox.setPrefWidth(FIELD_WIDTH);
+        // Apply theme style class
+        comboBox.getStyleClass().add(themeService.isDayMode() ? "day-theme-combo-box" : "night-theme-combo-box");
         addStyledRow(grid, row, labelText, comboBox, font, themeService);
         return comboBox;
     }
@@ -218,6 +222,11 @@ public class CreateGoalScene {
         TextField textField = new TextField();
         textField.setPromptText(promptText);
         textField.setPrefWidth(FIELD_WIDTH);
+        // Apply custom style for TextField with border
+        String textFieldStyle = themeService.isDayMode() ?
+                "-fx-background-color: white; -fx-text-fill: black; -fx-prompt-text-fill: #555555; -fx-border-color: #D3D3D3; -fx-border-radius: 3;" :
+                "-fx-background-color: #3C3C3C; -fx-text-fill: white; -fx-prompt-text-fill: #CCCCCC; -fx-border-color: #555555; -fx-border-radius: 3;";
+        textField.setStyle(textFieldStyle);
         addStyledRow(grid, row, labelText, textField, font, themeService);
         return textField;
     }
@@ -225,6 +234,8 @@ public class CreateGoalScene {
     private static DatePicker createDatePicker(int row, GridPane grid, String labelText, Font font, ThemeService themeService) {
         DatePicker datePicker = new DatePicker(LocalDate.now().plusMonths(1));
         datePicker.setPrefWidth(FIELD_WIDTH);
+        // Apply theme style class
+        datePicker.getStyleClass().add(themeService.isDayMode() ? "day-theme-date-picker" : "night-theme-date-picker");
         addStyledRow(grid, row, labelText, datePicker, font, themeService);
         return datePicker;
     }
