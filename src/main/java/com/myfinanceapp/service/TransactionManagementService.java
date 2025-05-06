@@ -193,7 +193,42 @@ public class TransactionManagementService {
 
         List<String> items = new ArrayList<>();
         items.add("All " + name);
-        items.addAll(uniqueValues);
+        if (name.equals("Date")) {
+            // 将日期字符串转换为可排序的对象
+            List<String> sortedDates = new ArrayList<>(uniqueValues);
+            sortedDates.sort((date1, date2) -> {
+                try {
+                    // 假设日期格式为 yyyy-MM-dd
+                    String[] parts1 = date1.split("-");
+                    String[] parts2 = date2.split("-");
+
+                    // 按年、月、日比较
+                    int yearCompare = Integer.compare(
+                            Integer.parseInt(parts1[0]),
+                            Integer.parseInt(parts2[0])
+                    );
+                    if (yearCompare != 0) return yearCompare;
+
+                    int monthCompare = Integer.compare(
+                            Integer.parseInt(parts1[1]),
+                            Integer.parseInt(parts2[1])
+                    );
+                    if (monthCompare != 0) return monthCompare;
+
+                    return Integer.compare(
+                            Integer.parseInt(parts1[2]),
+                            Integer.parseInt(parts2[2])
+                    );
+                } catch (Exception e) {
+                    // 如果解析失败，回退到字符串比较
+                    return date1.compareTo(date2);
+                }
+            });
+            items.addAll(sortedDates);
+        } else {
+            // 其他字段保持原样
+            items.addAll(uniqueValues);
+        }
 
         comboBox.getItems().addAll(items);
         setComboBoxValueSafely(comboBox, currentValue, "All " + name);

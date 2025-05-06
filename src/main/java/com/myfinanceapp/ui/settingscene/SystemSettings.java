@@ -150,9 +150,38 @@ public class SystemSettings {
         HBox sizeBox = new HBox(20);
         sizeLabel.setFont(Font.font("Arial", 14));
         sizeLabel.setStyle(themeService.getTextColorStyle());
-        sizeCombo.getItems().addAll("1920x1080", "1366x768", "1280x720");
+        sizeCombo.getItems().addAll(
+                "1920x1080", // Full HD
+                "1680x1050", // WSXGA+
+                "1600x1000", // 16:10
+                "1440x900",  // WXGA+
+                "1366x768",  // HD
+                "1280x800",  // WXGA
+                "1280x720"   // HD
+        );
         sizeCombo.setValue("1920x1080");
         sizeCombo.getStyleClass().add(themeService.isDayMode() ? "day-theme-combo-box" : "night-theme-combo-box");
+        sizeCombo.setOnAction(e -> {
+            String selectedSize = sizeCombo.getValue();
+            String[] dimensions = selectedSize.split("x");
+            if (dimensions.length == 2) {
+                try {
+                    double newWidth = Double.parseDouble(dimensions[0]);
+                    double newHeight = Double.parseDouble(dimensions[1]);
+
+                    // 调整窗口大小
+                    stage.setWidth(newWidth);
+                    stage.setHeight(newHeight);
+
+                    // 居中显示窗口
+                    stage.centerOnScreen();
+
+
+                } catch (NumberFormatException ex) {
+                    System.err.println("Failed to parse window dimensions: " + selectedSize);
+                }
+            }
+        });
         sizeBox.getChildren().addAll(windowIcon, sizeLabel, sizeCombo);
 
         // 按钮区
@@ -164,6 +193,9 @@ public class SystemSettings {
             langCombo.setValue("English");
             nightCombo.setValue("Daytime");
             sizeCombo.setValue("1920x1080");
+            stage.setWidth(1920);
+            stage.setHeight(1080);
+            stage.centerOnScreen();
             PauseTransition debounce = new PauseTransition(Duration.millis(100));
             debounce.setOnFinished(event -> {
                 themeService.setTheme(true); // Reset to Daytime
