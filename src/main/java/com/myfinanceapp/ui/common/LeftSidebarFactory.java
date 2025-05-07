@@ -8,6 +8,7 @@ import com.myfinanceapp.service.StatusService;
 import com.myfinanceapp.ui.goalsscene.Goals;
 import com.myfinanceapp.ui.transactionscene.TransactionScene;
 import com.myfinanceapp.service.ThemeService;
+import com.myfinanceapp.service.CurrencyService;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
@@ -28,14 +29,15 @@ public class LeftSidebarFactory {
      * 重载方法，兼容旧的调用方式
      */
     public static VBox createLeftSidebar(Stage stage, String selectedButton, User loggedUser) {
-        return createLeftSidebar(stage, selectedButton, loggedUser, new ThemeService());
+        return createLeftSidebar(stage, selectedButton, loggedUser, new ThemeService(), new CurrencyService("USD"));
     }
 
     /**
      * 创建左侧边栏，支持传入一个 selectedButton 表示哪个按钮是"选中"。
      * 可取值如 "Status", "Goals", "New", "Settings", "Logout" 等
+     * 增加 CurrencyService 参数以确保货币设置的一致性
      */
-    public static VBox createLeftSidebar(Stage stage, String selectedButton, User loggedUser, ThemeService themeService) {
+    public static VBox createLeftSidebar(Stage stage, String selectedButton, User loggedUser, ThemeService themeService, CurrencyService currencyService) {
         VBox sideBar = new VBox(15);
         sideBar.setPadding(new Insets(20, 0, 20, 15));
         sideBar.setAlignment(Pos.TOP_LEFT);
@@ -73,11 +75,11 @@ public class LeftSidebarFactory {
         welcomeLabel.setStyle(themeService.getTextColorStyle());
 
         // 创建五个按钮，判断哪个是选中
-        HBox statusBox   = createSidebarButtonBox(stage, "Status",   "status_icon_default.png",   "status_icon_selected.png",   selectedButton.equals("Status"), loggedUser, themeService);
-        HBox goalsBox    = createSidebarButtonBox(stage, "Goals",    "goals_icon_default.png",    "goals_icon_selected.png",    selectedButton.equals("Goals"), loggedUser, themeService);
-        HBox newBox      = createSidebarButtonBox(stage, "New",      "new_icon_default.png",      "new_icon_selected.png",      selectedButton.equals("New"), loggedUser, themeService);
-        HBox settingsBox = createSidebarButtonBox(stage, "Settings", "settings_icon_default.png", "settings_icon_selected.png", selectedButton.equals("Settings"), loggedUser, themeService);
-        HBox logoutBox   = createSidebarButtonBox(stage, "Log out",  "logout_icon_default.png",   "logout_icon_selected.png",   selectedButton.equals("Log out"), loggedUser, themeService);
+        HBox statusBox   = createSidebarButtonBox(stage, "Status",   "status_icon_default.png",   "status_icon_selected.png",   selectedButton.equals("Status"), loggedUser, themeService, currencyService);
+        HBox goalsBox    = createSidebarButtonBox(stage, "Goals",    "goals_icon_default.png",    "goals_icon_selected.png",    selectedButton.equals("Goals"), loggedUser, themeService, currencyService);
+        HBox settingsBox = createSidebarButtonBox(stage, "Settings", "settings_icon_default.png", "settings_icon_selected.png", selectedButton.equals("Settings"), loggedUser, themeService, currencyService);
+        HBox newBox      = createSidebarButtonBox(stage, "New",      "new_icon_default.png",      "new_icon_selected.png",      selectedButton.equals("New"), loggedUser, themeService, currencyService);
+        HBox logoutBox   = createSidebarButtonBox(stage, "Log out",  "logout_icon_default.png",   "logout_icon_selected.png",   selectedButton.equals("Log out"), loggedUser, themeService, currencyService);
 
         sideBar.getChildren().addAll(
                 welcomeLabel,
@@ -92,8 +94,9 @@ public class LeftSidebarFactory {
 
     /**
      * 生成单个按钮Box，可根据 isActive 决定是否覆盖竖线
+     * 增加 CurrencyService 参数以传递给目标场景
      */
-    private static HBox createSidebarButtonBox(Stage stage, String text, String defaultIcon, String selectedIcon, boolean isActive, User loggedUser, ThemeService themeService) {
+    private static HBox createSidebarButtonBox(Stage stage, String text, String defaultIcon, String selectedIcon, boolean isActive, User loggedUser, ThemeService themeService, CurrencyService currencyService) {
         Label label = new Label(text);
         label.setFont(new Font(14));
         label.setPrefSize(isActive ? 172 : 170, 40); // 选中时多2px
@@ -143,20 +146,20 @@ public class LeftSidebarFactory {
                 case "Status":
                     // 跳转 Status
                     StatusScene statusScene = new StatusScene(stage, currentWidth, currentHeight, loggedUser);
-                    Scene newStatusScene = statusScene.createScene(themeService); // Pass themeService
+                    Scene newStatusScene = statusScene.createScene(themeService, currencyService);
                     SceneManager.switchScene(stage, newStatusScene);
-                    StatusService statusService = new StatusService(statusScene, loggedUser); // 初始化服务
+                    StatusService statusService = new StatusService(statusScene, loggedUser, currencyService);
                     break;
                 case "Goals":
-                    Scene goalsScene = Goals.createScene(stage, currentWidth, currentHeight, loggedUser, themeService);
+                    Scene goalsScene = Goals.createScene(stage, currentWidth, currentHeight, loggedUser, themeService, currencyService);
                     SceneManager.switchScene(stage, goalsScene);
                     break;
                 case "New":
-                    Scene transactionScene = TransactionScene.createScene(stage, currentWidth, currentHeight, loggedUser, themeService);
+                    Scene transactionScene = TransactionScene.createScene(stage, currentWidth, currentHeight, loggedUser, themeService, currencyService);
                     SceneManager.switchScene(stage, transactionScene);
                     break;
                 case "Settings":
-                    Scene settingsScene = SystemSettings.createScene(stage, currentWidth, currentHeight, loggedUser, themeService);
+                    Scene settingsScene = SystemSettings.createScene(stage, currentWidth, currentHeight, loggedUser, themeService, currencyService);
                     SceneManager.switchScene(stage, settingsScene);
                     break;
                 case "Log out":

@@ -8,6 +8,7 @@ import com.myfinanceapp.ui.loginscene.ResetPassword;
 import com.myfinanceapp.ui.statusscene.StatusScene;
 import com.myfinanceapp.service.StatusService;
 import com.myfinanceapp.service.ThemeService;
+import com.myfinanceapp.service.CurrencyService;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -30,10 +31,14 @@ public class UserOptions {
 
     // 重载方法，兼容旧的调用方式
     public static Scene createScene(Stage stage, double width, double height, User loggedUser) {
-        return createScene(stage, width, height, loggedUser, new ThemeService());
+        return createScene(stage, width, height, loggedUser, new ThemeService(), new CurrencyService("USD"));
     }
 
     public static Scene createScene(Stage stage, double width, double height, User loggedUser, ThemeService themeService) {
+        return createScene(stage, width, height, loggedUser, themeService, new CurrencyService("USD"));
+    }
+
+    public static Scene createScene(Stage stage, double width, double height, User loggedUser, ThemeService themeService, CurrencyService currencyService) {
         // 把当前登录用户保存，供下文使用
         currentUser = loggedUser;
         if (currentUser == null) {
@@ -44,7 +49,7 @@ public class UserOptions {
         root.setStyle(themeService.getCurrentThemeStyle());
 
         // 左侧边栏: "Settings" 选中
-        VBox sideBar = LeftSidebarFactory.createLeftSidebar(stage, "Settings", loggedUser, themeService);
+        VBox sideBar = LeftSidebarFactory.createLeftSidebar(stage, "Settings", loggedUser, themeService, currencyService);
         root.setLeft(sideBar);
 
         // 中心：与 SystemSettings/ About 等相同
@@ -56,7 +61,7 @@ public class UserOptions {
         container.setAlignment(Pos.CENTER);
 
         // 顶部Tab栏: "User Options" 选中
-        HBox topBar = SettingsTopBarFactory.createTopBar(stage, "User Options", loggedUser, themeService);
+        HBox topBar = SettingsTopBarFactory.createTopBar(stage, "User Options", loggedUser, themeService, currencyService);
 
         // 下部圆角容器
         VBox outerBox = new VBox(20);
@@ -236,8 +241,8 @@ public class UserOptions {
         backBtn.setStyle(themeService.getButtonStyle());
         backBtn.setOnAction(e -> {
             StatusScene statusScene = new StatusScene(stage, width, height, loggedUser);
-            stage.setScene(statusScene.createScene(themeService));
-            StatusService statusService = new StatusService(statusScene, loggedUser);
+            stage.setScene(statusScene.createScene(themeService, currencyService));
+            StatusService statusService = new StatusService(statusScene, loggedUser, currencyService);
             stage.setTitle("Finanger - Status");
         });
 

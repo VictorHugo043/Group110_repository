@@ -7,6 +7,7 @@ import com.myfinanceapp.service.GoalFormService;
 import com.myfinanceapp.ui.common.LeftSidebarFactory;
 import com.myfinanceapp.ui.common.SceneManager;
 import com.myfinanceapp.service.ThemeService;
+import com.myfinanceapp.service.CurrencyService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import javafx.geometry.Insets;
@@ -40,10 +41,14 @@ public class EditGoalScene {
 
     // 重载方法，兼容旧的调用方式
     public static Scene createScene(Stage stage, double width, double height, User loggedUser, Goal goalToEdit) {
-        return createScene(stage, width, height, loggedUser, goalToEdit, new ThemeService());
+        return createScene(stage, width, height, loggedUser, goalToEdit, new ThemeService(), new CurrencyService("USD"));
     }
 
     public static Scene createScene(Stage stage, double width, double height, User loggedUser, Goal goalToEdit, ThemeService themeService) {
+        return createScene(stage, width, height, loggedUser, goalToEdit, themeService, new CurrencyService("USD"));
+    }
+
+    public static Scene createScene(Stage stage, double width, double height, User loggedUser, Goal goalToEdit, ThemeService themeService, CurrencyService currencyService) {
         // 确保窗口大小不小于最小值
         final double finalWidth = Math.max(width, MIN_WINDOW_WIDTH);
         final double finalHeight = Math.max(height, MIN_WINDOW_HEIGHT);
@@ -52,7 +57,7 @@ public class EditGoalScene {
         root.setStyle(themeService.getCurrentThemeStyle());
 
         // Left sidebar
-        VBox sideBar = LeftSidebarFactory.createLeftSidebar(stage, "Goals", loggedUser, themeService);
+        VBox sideBar = LeftSidebarFactory.createLeftSidebar(stage, "Goals", loggedUser, themeService, currencyService);
         root.setLeft(sideBar);
 
         // Main container
@@ -165,8 +170,8 @@ public class EditGoalScene {
                     // Save the updated goal
                     GoalService.updateGoal(goalToEdit, loggedUser);
 
-                    // Navigate back to goals list
-                    Scene goalsScene = Goals.createScene(stage, stage.getScene().getWidth(), stage.getScene().getHeight(), loggedUser, themeService);
+                    // Navigate back to goals list with ThemeService and CurrencyService
+                    Scene goalsScene = Goals.createScene(stage, stage.getScene().getWidth(), stage.getScene().getHeight(), loggedUser, themeService, currencyService);
                     SceneManager.switchScene(stage, goalsScene);
                 } catch (IOException e) {
                     logger.error("Failed to update goal", e);
@@ -175,8 +180,8 @@ public class EditGoalScene {
         });
 
         Button cancelButton = createButton("Cancel", themeService.getButtonStyle(), event -> {
-            // Navigate back to goals list
-            Scene goalsScene = Goals.createScene(stage, stage.getScene().getWidth(), stage.getScene().getHeight(), loggedUser, themeService);
+            // Navigate back to goals list with ThemeService and CurrencyService
+            Scene goalsScene = Goals.createScene(stage, stage.getScene().getWidth(), stage.getScene().getHeight(), loggedUser, themeService, currencyService);
             SceneManager.switchScene(stage, goalsScene);
         });
 

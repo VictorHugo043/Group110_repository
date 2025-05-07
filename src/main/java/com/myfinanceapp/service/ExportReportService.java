@@ -54,15 +54,17 @@ public class ExportReportService {
 
     private final TransactionService txService;
     private final User currentUser;
+    private final CurrencyService currencyService;
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private static final DateTimeFormatter FILE_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
     private static final Gson gson = new Gson();
     private static final String FIXED_KEY = "MyFinanceAppSecretKey1234567890";  // 固定密钥
     final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
-    public ExportReportService(TransactionService txService, User currentUser) {
+    public ExportReportService(TransactionService txService, User currentUser, CurrencyService currencyService) {
         this.txService = txService;
         this.currentUser = currentUser;
+        this.currencyService = currencyService;
     }
 
     /**
@@ -80,16 +82,16 @@ public class ExportReportService {
     private List<Transaction> loadTransactions() throws IOException, EncryptionException {
         String filePath = "src/main/resources/transaction/" + currentUser.getUid() + ".json";
         String content = new String(Files.readAllBytes(Paths.get(filePath)), StandardCharsets.UTF_8);
-        
+
         // Parse encrypted data from JSON
         EncryptedData encryptedData = gson.fromJson(content, EncryptedData.class);
-        
+
         // Get encryption key derived from user ID
         SecretKey key = getEncryptionKey();
-        
+
         // Decrypt the content
         String decryptedContent = EncryptionService.decrypt(encryptedData, key);
-        
+
         // Parse the decrypted content into List<Transaction>
         Type listType = new TypeToken<List<Transaction>>() {}.getType();
         return gson.fromJson(decryptedContent, listType);
@@ -142,7 +144,7 @@ public class ExportReportService {
                 LineChart<String, Number> lineChart = new LineChart<>(new CategoryAxis(), new NumberAxis());
                 BarChart<String, Number> barChart = new BarChart<>(new CategoryAxis(), new NumberAxis());
                 PieChart pieChart = new PieChart();
-                ChartService chartService = new ChartService(lineChart, barChart, pieChart, txService, currentUser);
+                ChartService chartService = new ChartService(lineChart, barChart, pieChart, txService, currentUser, currencyService);
                 chartService.updateAllCharts(startDate, endDate);
 
                 // Generate PDF only if file is selected
@@ -201,18 +203,18 @@ public class ExportReportService {
 
             double totalIncome = transactions.stream()
                     .filter(t -> "Income".equals(t.getTransactionType()))
-                    .mapToDouble(Transaction::getAmount)
+                    .mapToDouble(t -> currencyService.convertCurrency(t.getAmount(), t.getCurrency()))
                     .sum();
             double totalExpense = transactions.stream()
                     .filter(t -> "Expense".equals(t.getTransactionType()))
-                    .mapToDouble(Transaction::getAmount)
+                    .mapToDouble(t -> currencyService.convertCurrency(t.getAmount(), t.getCurrency()))
                     .sum();
 
             Map<String, Double> expenseByCategory = transactions.stream()
                     .filter(t -> "Expense".equals(t.getTransactionType()))
                     .collect(Collectors.groupingBy(
                             Transaction::getCategory,
-                            Collectors.summingDouble(Transaction::getAmount)
+                            Collectors.summingDouble(t -> currencyService.convertCurrency(t.getAmount(), t.getCurrency()))
                     ));
 
             String topCategory = expenseByCategory.entrySet().stream()
@@ -220,10 +222,11 @@ public class ExportReportService {
                     .map(Map.Entry::getKey)
                     .orElse("N/A");
 
+            String currencySymbol = currencyService.getSelectedCurrency();
             document.add(new Paragraph("\n3. Financial Summary").setFontSize(14).setBold());
-            document.add(new Paragraph(String.format("Total Income: %.2f CNY", totalIncome)));
-            document.add(new Paragraph(String.format("Total Expense: %.2f CNY", totalExpense)));
-            document.add(new Paragraph(String.format("Net Balance: %.2f CNY", totalIncome - totalExpense)));
+            document.add(new Paragraph(String.format("Total Income: %.2f %s", totalIncome, currencySymbol)));
+            document.add(new Paragraph(String.format("Total Expense: %.2f %s", totalExpense, currencySymbol)));
+            document.add(new Paragraph(String.format("Net Balance: %.2f %s", totalIncome - totalExpense, currencySymbol)));
             document.add(new Paragraph(String.format("Top Expense Category: %s", topCategory)));
 
             // 3. Transaction Details
@@ -237,9 +240,10 @@ public class ExportReportService {
             table.addHeaderCell("Payment Method");
 
             for (Transaction t : transactions) {
+                double convertedAmount = currencyService.convertCurrency(t.getAmount(), t.getCurrency());
                 table.addCell(t.getTransactionDate());
                 table.addCell(t.getTransactionType());
-                table.addCell(String.format("%.2f", t.getAmount()));
+                table.addCell(String.format("%.2f %s", convertedAmount, currencySymbol));
                 table.addCell(t.getCurrency());
                 table.addCell(t.getCategory());
                 table.addCell(t.getPaymentMethod());

@@ -29,12 +29,14 @@ public class StatusService {
     private final ChartService chartService;
     private final Parser mdParser = Parser.builder().build();
     private final HtmlRenderer mdRenderer = HtmlRenderer.builder().build();
+    private final CurrencyService currencyService;
 
-    public StatusService(StatusScene scene, User currentUser) {
+    public StatusService(StatusScene scene, User currentUser, CurrencyService currencyService) {
         this.scene = scene;
         this.currentUser = currentUser;
         this.txService = new TransactionService();
-        this.chartService = new ChartService(scene.lineChart, scene.barChart, scene.pieChart, txService, currentUser);
+        this.currencyService = currencyService;
+        this.chartService = new ChartService(scene.lineChart, scene.barChart, scene.pieChart, txService, currentUser, currencyService);
         initialize();
     }
 
@@ -135,15 +137,16 @@ public class StatusService {
 
         double totalIncome = transactions.stream()
                 .filter(t -> "Income".equals(t.getTransactionType()))
-                .mapToDouble(Transaction::getAmount)
+                .mapToDouble(t -> currencyService.convertCurrency(t.getAmount(), t.getCurrency()))
                 .sum();
         double totalExpense = transactions.stream()
                 .filter(t -> "Expense".equals(t.getTransactionType()))
-                .mapToDouble(Transaction::getAmount)
+                .mapToDouble(t -> currencyService.convertCurrency(t.getAmount(), t.getCurrency()))
                 .sum();
 
-        scene.exLabel.setText(String.format("Ex.  %.2f CNY", totalExpense));
-        scene.inLabel.setText(String.format("In.  %.2f CNY", totalIncome));
+        String currencySymbol = currencyService.getSelectedCurrency();
+        scene.exLabel.setText(String.format("Ex.  %.2f %s", totalExpense, currencySymbol));
+        scene.inLabel.setText(String.format("In.  %.2f %s", totalIncome, currencySymbol));
         scene.exLabel.setStyle(
                 "-fx-background-color: #E0F0FF; -fx-text-fill: #3282FA; -fx-border-radius: 30; -fx-background-radius: 30; -fx-padding: 10 20 10 20;");
         scene.inLabel.setStyle(
@@ -153,6 +156,7 @@ public class StatusService {
     void updateTransactions(LocalDate startDate, LocalDate endDate) {
         List<Transaction> transactions = txService.loadTransactions(currentUser);
         scene.transactionsBox.getChildren().clear();
+        String currencySymbol = currencyService.getSelectedCurrency();
         transactions.stream()
                 .filter(t -> {
                     LocalDate txDate = LocalDate.parse(t.getTransactionDate());
@@ -160,9 +164,9 @@ public class StatusService {
                 })
                 .sorted((t1, t2) -> t2.getTransactionDate().compareTo(t1.getTransactionDate()))
                 .forEach(t -> {
-                    // 移除了 description 部分
-                    Label txLabel = new Label(String.format("%s   %s    %.2f CNY",
-                            t.getTransactionDate(), t.getCategory(), t.getAmount()));
+                    double convertedAmount = currencyService.convertCurrency(t.getAmount(), t.getCurrency());
+                    Label txLabel = new Label(String.format("%s   %s    %.2f %s",
+                            t.getTransactionDate(), t.getCategory(), convertedAmount, currencySymbol));
                     txLabel.setWrapText(true);
                     scene.transactionsBox.getChildren().add(txLabel);
                 });
