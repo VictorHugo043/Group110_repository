@@ -40,7 +40,7 @@ public class StatusService {
         initialize();
     }
 
-    private void initialize() {
+    void initialize() {
         // 初始化日期为本月1日起到今天
         LocalDate today = LocalDate.now();
         startDate = today.withDayOfMonth(1);
