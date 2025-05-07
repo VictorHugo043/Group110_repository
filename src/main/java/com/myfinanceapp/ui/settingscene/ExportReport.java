@@ -8,6 +8,7 @@ import com.myfinanceapp.ui.common.LeftSidebarFactory;
 import com.myfinanceapp.ui.common.SettingsTopBarFactory;
 import com.myfinanceapp.ui.statusscene.StatusScene;
 import com.myfinanceapp.service.ThemeService;
+import com.myfinanceapp.service.CurrencyService;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -30,10 +31,14 @@ public class ExportReport {
 
     // 重载方法，兼容旧的调用方式
     public static Scene createScene(Stage stage, double width, double height, User loggedUser) {
-        return createScene(stage, width, height, loggedUser, new ThemeService());
+        return createScene(stage, width, height, loggedUser, new ThemeService(), new CurrencyService("USD"));
     }
 
     public static Scene createScene(Stage stage, double width, double height, User loggedUser, ThemeService themeService) {
+        return createScene(stage, width, height, loggedUser, themeService, new CurrencyService("USD"));
+    }
+
+    public static Scene createScene(Stage stage, double width, double height, User loggedUser, ThemeService themeService, CurrencyService currencyService) {
         // Store current logged-in user
         currentUser = loggedUser;
         if (currentUser == null) {
@@ -44,7 +49,7 @@ public class ExportReport {
         root.setStyle(themeService.getCurrentThemeStyle());
 
         // Left sidebar: "Settings" selected
-        VBox sideBar = LeftSidebarFactory.createLeftSidebar(stage, "Settings", loggedUser, themeService);
+        VBox sideBar = LeftSidebarFactory.createLeftSidebar(stage, "Settings", loggedUser, themeService, currencyService);
         root.setLeft(sideBar);
 
         // Center content
@@ -56,7 +61,7 @@ public class ExportReport {
         container.setAlignment(Pos.CENTER);
 
         // Top tab bar: "Export Report" selected
-        HBox topBar = SettingsTopBarFactory.createTopBar(stage, "Export Report", loggedUser, themeService);
+        HBox topBar = SettingsTopBarFactory.createTopBar(stage, "Export Report", loggedUser, themeService, currencyService);
 
         // Bottom rounded container
         VBox outerBox = new VBox(20);
@@ -119,14 +124,14 @@ public class ExportReport {
         backBtn.setStyle(themeService.getButtonStyle());
         backBtn.setOnAction(e -> {
             StatusScene statusScene = new StatusScene(stage, width, height, loggedUser);
-            stage.setScene(statusScene.createScene(themeService));
-            StatusService statusService = new StatusService(statusScene, loggedUser);
+            stage.setScene(statusScene.createScene(themeService, currencyService));
+            StatusService statusService = new StatusService(statusScene, loggedUser, currencyService);
             stage.setTitle("Finanger - Status");
         });
 
         // Export functionality
         TransactionService txService = new TransactionService();
-        reportService = new ExportReportService(txService, currentUser);
+        reportService = new ExportReportService(txService, currentUser, currencyService);
         exportButton.setOnAction(e -> {
             exportButton.setDisable(true); // Disable button during export
             reportService.handleExport(stage, startDatePicker.getValue(), endDatePicker.getValue())

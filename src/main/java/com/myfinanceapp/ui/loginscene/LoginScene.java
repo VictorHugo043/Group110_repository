@@ -5,6 +5,7 @@ import com.myfinanceapp.service.UserService;
 import com.myfinanceapp.ui.signupscene.SignUp;
 import com.myfinanceapp.ui.statusscene.StatusScene;
 import com.myfinanceapp.service.StatusService;
+import com.myfinanceapp.service.CurrencyService;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
@@ -74,6 +75,10 @@ public class LoginScene {
      * 创建并返回此登录场景
      */
     public static Scene createScene(Stage stage, double width, double height) {
+        return createScene(stage, width, height, new CurrencyService("USD"));
+    }
+
+    public static Scene createScene(Stage stage, double width, double height, CurrencyService currencyService) {
         // 准备一个root Group
         root = new Group();
 
@@ -86,7 +91,7 @@ public class LoginScene {
         stage.setMinHeight(450);
 
         // 初始化 UI 节点
-        initUI(stage);
+        initUI(stage, currencyService);
 
         // 监听 scene 大小变化 -> relayout
         scene.widthProperty().addListener((obs, oldVal, newVal) -> relayout());
@@ -98,7 +103,7 @@ public class LoginScene {
         return scene;
     }
 
-    private static void initUI(Stage stage) {
+    private static void initUI(Stage stage, CurrencyService currencyService) {
         // 1) 左侧多边形
         leftPolygon = new Polygon();
         // 用图片填充
@@ -174,7 +179,7 @@ public class LoginScene {
                 // Login successful, jump to Status scene
                 StatusScene statusScene = new StatusScene(stage, root.getScene().getWidth(), root.getScene().getHeight(), loggedUser);
                 stage.setScene(statusScene.createScene());
-                StatusService statusService = new StatusService(statusScene, loggedUser); // 初始化服务
+                StatusService statusService = new StatusService(statusScene, loggedUser, currencyService); // Pass currencyService
                 stage.setTitle("Finanger - Status");
                 showAlert("Success", "Login Successful!");
             } else {

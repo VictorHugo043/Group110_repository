@@ -6,6 +6,7 @@ import com.myfinanceapp.ui.settingscene.SystemSettings;
 import com.myfinanceapp.ui.settingscene.UserOptions;
 import com.myfinanceapp.ui.settingscene.ExportReport;
 import com.myfinanceapp.service.ThemeService;
+import com.myfinanceapp.service.CurrencyService;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -29,10 +30,14 @@ public class SettingsTopBarFactory {
 
     // 重载方法，兼容旧的调用方式
     public static HBox createTopBar(Stage stage, String activeTab, User loggedUser) {
-        return createTopBar(stage, activeTab, loggedUser, new ThemeService());
+        return createTopBar(stage, activeTab, loggedUser, new ThemeService(), new CurrencyService("USD"));
     }
 
     public static HBox createTopBar(Stage stage, String activeTab, User loggedUser, ThemeService themeService) {
+        return createTopBar(stage, activeTab, loggedUser, themeService, new CurrencyService("USD"));
+    }
+
+    public static HBox createTopBar(Stage stage, String activeTab, User loggedUser, ThemeService themeService, CurrencyService currencyService) {
         // 确保窗口有最小尺寸限制
         stage.setMinWidth(MIN_WINDOW_WIDTH);
         stage.setMinHeight(MIN_WINDOW_HEIGHT);
@@ -72,22 +77,22 @@ public class SettingsTopBarFactory {
 
         // 设置点击事件
         aboutTab.setOnMouseClicked(e -> {
-            Scene newScene = About.createScene(stage, currentWidth, currentHeight, loggedUser, themeService);
+            Scene newScene = About.createScene(stage, currentWidth, currentHeight, loggedUser, themeService, currencyService);
             SceneManager.switchScene(stage, newScene);
         });
 
         systemSettingsTab.setOnMouseClicked(e -> {
-            Scene newScene = SystemSettings.createScene(stage, currentWidth, currentHeight, loggedUser);
+            Scene newScene = SystemSettings.createScene(stage, currentWidth, currentHeight, loggedUser, themeService, currencyService);
             SceneManager.switchScene(stage, newScene);
         });
 
         userOptionsTab.setOnMouseClicked(e -> {
-            Scene newScene = UserOptions.createScene(stage, currentWidth, currentHeight, loggedUser, themeService);
+            Scene newScene = UserOptions.createScene(stage, currentWidth, currentHeight, loggedUser, themeService, currencyService);
             SceneManager.switchScene(stage, newScene);
         });
 
         exportReportTab.setOnMouseClicked(e -> {
-            Scene newScene = ExportReport.createScene(stage, currentWidth, currentHeight, loggedUser, themeService);
+            Scene newScene = ExportReport.createScene(stage, currentWidth, currentHeight, loggedUser, themeService, currencyService);
             SceneManager.switchScene(stage, newScene);
         });
 

@@ -7,6 +7,7 @@ import com.myfinanceapp.service.ThemeService;
 import com.myfinanceapp.service.TransactionManagementService;
 import com.myfinanceapp.ui.common.LeftSidebarFactory;
 import com.myfinanceapp.ui.statusscene.StatusScene;
+import com.myfinanceapp.service.CurrencyService;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -33,6 +34,7 @@ public class TransactionManagementScene {
     private final User currentUser;
     private TableView<Transaction> transactionTable;
     private ThemeService themeService;
+    private CurrencyService currencyService; // Add instance variable for CurrencyService
     private TransactionManagementService service;
 
     // 筛选控件
@@ -54,12 +56,17 @@ public class TransactionManagementScene {
     }
 
     public Scene createScene(ThemeService themeService) {
+        return createScene(themeService, new CurrencyService("USD"));
+    }
+
+    public Scene createScene(ThemeService themeService, CurrencyService currencyService) {
         this.themeService = themeService;
+        this.currencyService = currencyService; // Store the CurrencyService instance
         BorderPane root = new BorderPane();
         root.setStyle(themeService.getCurrentThemeStyle());
 
         // 使用相同的侧边栏
-        VBox sideBar = LeftSidebarFactory.createLeftSidebar(stage, "Transactions", currentUser, themeService);
+        VBox sideBar = LeftSidebarFactory.createLeftSidebar(stage, "Transactions", currentUser, themeService, currencyService);
         root.setLeft(sideBar);
 
         // 主内容区
@@ -81,7 +88,7 @@ public class TransactionManagementScene {
         // 初始化服务
         this.service = new TransactionManagementService(
                 currentUser, transactionTable, dateFilter, typeFilter,
-                currencyFilter, categoryFilter, paymentMethodFilter);
+                currencyFilter, categoryFilter, paymentMethodFilter); // Removed currencyService from constructor
 
         // 设置表格数据源
         transactionTable.setItems(service.getFilteredTransactions());
@@ -99,9 +106,9 @@ public class TransactionManagementScene {
             double currentHeight = stage.getHeight();
             // 回到 Status 界面
             StatusScene statusScene = new StatusScene(stage, currentWidth, currentHeight, currentUser);
-            Scene scene = statusScene.createScene(themeService);
+            Scene scene = statusScene.createScene(themeService, currencyService);
             stage.setScene(scene);
-            StatusService statusService = new StatusService(statusScene, currentUser);
+            StatusService statusService = new StatusService(statusScene, currentUser, currencyService);
             stage.setTitle("Finanger - Status");
         });
 

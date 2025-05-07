@@ -7,6 +7,7 @@ import com.myfinanceapp.service.GoalFormService;
 import com.myfinanceapp.ui.common.LeftSidebarFactory;
 import com.myfinanceapp.ui.common.SceneManager;
 import com.myfinanceapp.service.ThemeService;
+import com.myfinanceapp.service.CurrencyService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import javafx.geometry.Insets;
@@ -42,10 +43,14 @@ public class CreateGoalScene {
     private static ThemeService themeService; // Store ThemeService instance
 
     public static Scene createScene(Stage stage, double width, double height, User loggedUser) {
-        return createScene(stage, width, height, loggedUser, new ThemeService());
+        return createScene(stage, width, height, loggedUser, new ThemeService(), new CurrencyService("USD"));
     }
 
     public static Scene createScene(Stage stage, double width, double height, User loggedUser, ThemeService themeService) {
+        return createScene(stage, width, height, loggedUser, themeService, new CurrencyService("USD"));
+    }
+
+    public static Scene createScene(Stage stage, double width, double height, User loggedUser, ThemeService themeService, CurrencyService currencyService) {
         CreateGoalScene.themeService = themeService; // Store the ThemeService instance
         // 确保窗口大小不小于最小值
         final double finalWidth = Math.max(width, MIN_WINDOW_WIDTH);
@@ -55,7 +60,7 @@ public class CreateGoalScene {
         root.setStyle(themeService.getCurrentThemeStyle());
 
         // Left sidebar
-        VBox sideBar = LeftSidebarFactory.createLeftSidebar(stage, "Goals", loggedUser, themeService);
+        VBox sideBar = LeftSidebarFactory.createLeftSidebar(stage, "Goals", loggedUser, themeService, currencyService);
         root.setLeft(sideBar);
 
         // Main container
@@ -156,8 +161,8 @@ public class CreateGoalScene {
                     // Save the new goal to storage with user information
                     GoalService.addGoal(newGoal, loggedUser);
 
-                    // Navigate back to goals list with ThemeService
-                    Scene goalsScene = Goals.createScene(stage, stage.getScene().getWidth(), stage.getScene().getHeight(), loggedUser, themeService);
+                    // Navigate back to goals list with ThemeService and CurrencyService
+                    Scene goalsScene = Goals.createScene(stage, stage.getScene().getWidth(), stage.getScene().getHeight(), loggedUser, themeService, currencyService);
                     SceneManager.switchScene(stage, goalsScene);
                 } catch (IOException e) {
                     logger.error("Failed to save goal", e);
@@ -166,8 +171,8 @@ public class CreateGoalScene {
         });
 
         Button cancelButton = createButton("Cancel", themeService.getButtonStyle(), event -> {
-            // Navigate back to goals list with ThemeService
-            Scene goalsScene = Goals.createScene(stage, stage.getScene().getWidth(), stage.getScene().getHeight(), loggedUser, themeService);
+            // Navigate back to goals list with ThemeService and CurrencyService
+            Scene goalsScene = Goals.createScene(stage, stage.getScene().getWidth(), stage.getScene().getHeight(), loggedUser, themeService, currencyService);
             SceneManager.switchScene(stage, goalsScene);
         });
 

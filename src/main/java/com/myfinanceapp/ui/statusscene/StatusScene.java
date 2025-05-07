@@ -1,9 +1,11 @@
 package com.myfinanceapp.ui.statusscene;
 
 import com.myfinanceapp.model.User;
+import com.myfinanceapp.service.StatusService;
 import com.myfinanceapp.ui.common.LeftSidebarFactory;
 import com.myfinanceapp.ui.transactionscene.TransactionManagementScene;
 import com.myfinanceapp.service.ThemeService;
+import com.myfinanceapp.service.CurrencyService;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -46,6 +48,7 @@ public class StatusScene {
     public VBox transactionsBox;
     public StackPane chartPane;
     public ThemeService themeService;
+    private CurrencyService currencyService; // Add instance variable for CurrencyService
     private ScrollPane pieChartScrollPane;
 
     public StatusScene(Stage stage, double width, double height, User loggedUser) {
@@ -56,15 +59,16 @@ public class StatusScene {
     }
 
     public Scene createScene() {
-        return createScene(new ThemeService());
+        return createScene(new ThemeService(), new CurrencyService("USD"));
     }
 
-    public Scene createScene(ThemeService themeService) {
+    public Scene createScene(ThemeService themeService, CurrencyService currencyService) {
         this.themeService = themeService;
+        this.currencyService = currencyService; // Store the CurrencyService instance
         BorderPane root = new BorderPane();
         root.setStyle(themeService.getCurrentThemeStyle());
 
-        VBox sideBar = LeftSidebarFactory.createLeftSidebar(stage, "Status", currentUser, themeService);
+        VBox sideBar = LeftSidebarFactory.createLeftSidebar(stage, "Status", currentUser, themeService, currencyService);
         root.setLeft(sideBar);
 
         ScrollPane scrollPane = new ScrollPane();
@@ -122,6 +126,9 @@ public class StatusScene {
                 ".scroll-pane { -fx-background-insets: 0; -fx-padding: 0; }" +
                 ".scroll-pane > .viewport { -fx-background-color: " + backgroundColor + "; }" +
                 ".scroll-pane > .corner { -fx-background-color: " + backgroundColor + "; }");
+
+        // Initialize StatusService with CurrencyService
+        StatusService statusService = new StatusService(this, currentUser, currencyService);
 
         return scene;
     }
@@ -401,7 +408,7 @@ public class StatusScene {
         double currentWidth = stage.getWidth();
         double currentHeight = stage.getHeight();
         TransactionManagementScene txManagementScene = new TransactionManagementScene(stage, currentWidth, currentHeight, currentUser);
-        Scene scene = txManagementScene.createScene(themeService);
+        Scene scene = txManagementScene.createScene(themeService, currencyService); // Use the stored instance variable
         stage.setScene(scene);
     }
 
@@ -513,8 +520,6 @@ public class StatusScene {
                 .append("; margin: 0; padding: 0;'>");
         htmlContent.append("<div class='chat-history'>");
         for (Map<String, String> message : chatHistory) {
-
-
             String role = message.get("role");
             String content = message.get("content");
 

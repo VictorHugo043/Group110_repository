@@ -6,6 +6,7 @@ import com.myfinanceapp.ui.common.SettingsTopBarFactory;
 import com.myfinanceapp.ui.statusscene.StatusScene;
 import com.myfinanceapp.service.StatusService;
 import com.myfinanceapp.service.ThemeService;
+import com.myfinanceapp.service.CurrencyService;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -17,16 +18,20 @@ import javafx.stage.Stage;
 public class About {
     // 重载方法，兼容旧的调用方式
     public static Scene createScene(Stage stage, double width, double height, User loggedUser) {
-        return createScene(stage, width, height, loggedUser, new ThemeService());
+        return createScene(stage, width, height, loggedUser, new ThemeService(), new CurrencyService("USD"));
     }
 
     public static Scene createScene(Stage stage, double width, double height, User loggedUser, ThemeService themeService) {
+        return createScene(stage, width, height, loggedUser, themeService, new CurrencyService("USD"));
+    }
+
+    public static Scene createScene(Stage stage, double width, double height, User loggedUser, ThemeService themeService, CurrencyService currencyService) {
         // 整体 BorderPane
         BorderPane root = new BorderPane();
         root.setStyle(themeService.getCurrentThemeStyle());
 
         // 左侧边栏: Settings选中 (与 SystemSettings 相同)
-        VBox sideBar = LeftSidebarFactory.createLeftSidebar(stage, "Settings", loggedUser, themeService);
+        VBox sideBar = LeftSidebarFactory.createLeftSidebar(stage, "Settings", loggedUser, themeService, currencyService);
         root.setLeft(sideBar);
 
         // 中心容器: 垂直组合 (topBar, outerBox)，放入 centerBox
@@ -37,7 +42,7 @@ public class About {
         container.setAlignment(Pos.CENTER);
 
         // Tab栏: About 选中
-        HBox topBar = SettingsTopBarFactory.createTopBar(stage, "About", loggedUser, themeService);
+        HBox topBar = SettingsTopBarFactory.createTopBar(stage, "About", loggedUser, themeService, currencyService);
 
         // outerBox: 下方圆角容器
         VBox outerBox = new VBox(0);
@@ -53,7 +58,7 @@ public class About {
         );
 
         // 中心内容：About 文本
-        Pane aboutContent = createAboutContent(stage, width, height, loggedUser, themeService);
+        Pane aboutContent = createAboutContent(stage, width, height, loggedUser, themeService, currencyService);
 
         outerBox.getChildren().addAll(aboutContent);
         container.getChildren().addAll(topBar, outerBox);
@@ -67,7 +72,7 @@ public class About {
     /**
      * 生成 About 界面的正文内容
      */
-    private static Pane createAboutContent(Stage stage, double width, double height, User loggedUser, ThemeService themeService) {
+    private static Pane createAboutContent(Stage stage, double width, double height, User loggedUser, ThemeService themeService, CurrencyService currencyService) {
         VBox container = new VBox(20);
         container.setAlignment(Pos.TOP_CENTER);
         container.setPadding(new Insets(30));
@@ -106,8 +111,8 @@ public class About {
         backBtn.setStyle(themeService.getButtonStyle());
         backBtn.setOnAction(e -> {
             StatusScene statusScene = new StatusScene(stage, width, height, loggedUser);
-            stage.setScene(statusScene.createScene(themeService));
-            StatusService statusService = new StatusService(statusScene, loggedUser);
+            stage.setScene(statusScene.createScene(themeService, currencyService));
+            StatusService statusService = new StatusService(statusScene, loggedUser, currencyService);
             stage.setTitle("Finanger - Status");
         });
 

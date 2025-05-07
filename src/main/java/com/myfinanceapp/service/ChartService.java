@@ -16,14 +16,16 @@ public class ChartService {
     private final PieChart pieChart;
     private final TransactionService txService;
     private final User currentUser;
+    private final CurrencyService currencyService;
 
     public ChartService(LineChart<String, Number> lineChart, BarChart<String, Number> barChart,
-                        PieChart pieChart, TransactionService txService, User currentUser) {
+                        PieChart pieChart, TransactionService txService, User currentUser, CurrencyService currencyService) {
         this.lineChart = lineChart;
         this.barChart = barChart;
         this.pieChart = pieChart;
         this.txService = txService;
         this.currentUser = currentUser;
+        this.currencyService = currencyService;
     }
 
     public void updateAllCharts(LocalDate startDate, LocalDate endDate) {
@@ -41,14 +43,14 @@ public class ChartService {
                 .filter(t -> "Income".equals(t.getTransactionType()))
                 .collect(Collectors.groupingBy(
                         t -> LocalDate.parse(t.getTransactionDate()).format(getFormatter(totalDays)),
-                        Collectors.summingDouble(Transaction::getAmount)
+                        Collectors.summingDouble(t -> currencyService.convertCurrency(t.getAmount(), t.getCurrency()))
                 ));
 
         Map<String, Double> expenseByDate = transactions.stream()
                 .filter(t -> "Expense".equals(t.getTransactionType()))
                 .collect(Collectors.groupingBy(
                         t -> LocalDate.parse(t.getTransactionDate()).format(getFormatter(totalDays)),
-                        Collectors.summingDouble(Transaction::getAmount)
+                        Collectors.summingDouble(t -> currencyService.convertCurrency(t.getAmount(), t.getCurrency()))
                 ));
 
         lineChart.getData().clear();
@@ -82,11 +84,12 @@ public class ChartService {
         for (Transaction t : transactions) {
             LocalDate txDate = LocalDate.parse(t.getTransactionDate());
             String groupedDate = getGroupedDate(txDate, startDate, groupDays, totalDays);
+            double convertedAmount = currencyService.convertCurrency(t.getAmount(), t.getCurrency());
 
             if ("Income".equals(t.getTransactionType())) {
-                incomeByDate.merge(groupedDate, t.getAmount(), Double::sum);
+                incomeByDate.merge(groupedDate, convertedAmount, Double::sum);
             } else if ("Expense".equals(t.getTransactionType())) {
-                expenseByDate.merge(groupedDate, t.getAmount(), Double::sum);
+                expenseByDate.merge(groupedDate, convertedAmount, Double::sum);
             }
         }
 
@@ -113,10 +116,14 @@ public class ChartService {
         List<Transaction> transactions = getFilteredTransactions(startDate, endDate);
         Map<String, Double> categoryTotals = transactions.stream()
                 .filter(t -> "Expense".equals(t.getTransactionType()))
-                .collect(Collectors.groupingBy(Transaction::getCategory, Collectors.summingDouble(Transaction::getAmount)));
+                .collect(Collectors.groupingBy(
+                        Transaction::getCategory,
+                        Collectors.summingDouble(t -> currencyService.convertCurrency(t.getAmount(), t.getCurrency()))
+                ));
+        String currencySymbol = currencyService.getSelectedCurrency();
         ObservableList<PieChart.Data> pieChartData = FXCollections.observableArrayList();
         categoryTotals.forEach((category, amount) ->
-                pieChartData.add(new PieChart.Data(category + " " + String.format("%.2f CNY", amount), amount)));
+                pieChartData.add(new PieChart.Data(category + " " + String.format("%.2f %s", amount, currencySymbol), amount)));
         pieChart.setData(pieChartData);
     }
 

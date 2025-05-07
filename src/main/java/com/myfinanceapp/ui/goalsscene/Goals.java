@@ -7,6 +7,7 @@ import com.myfinanceapp.service.GoalService;
 import com.myfinanceapp.service.TransactionDataService;
 import com.myfinanceapp.ui.common.SceneManager;
 import com.myfinanceapp.service.ThemeService;
+import com.myfinanceapp.service.CurrencyService;
 
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -33,15 +34,15 @@ import java.util.ArrayList;
 public class Goals {
     // 重载方法，兼容旧的调用方式
     public static Scene createScene(Stage stage, double width, double height, User loggedUser) {
-        return createScene(stage, width, height, loggedUser, new ThemeService());
+        return createScene(stage, width, height, loggedUser, new ThemeService(), new CurrencyService("USD"));
     }
 
-    public static Scene createScene(Stage stage, double width, double height, User loggedUser, ThemeService themeService) {
+    public static Scene createScene(Stage stage, double width, double height, User loggedUser, ThemeService themeService, CurrencyService currencyService) {
         BorderPane root = new BorderPane();
         root.setStyle(themeService.getCurrentThemeStyle());
 
         // 左侧导航栏
-        VBox sideBar = LeftSidebarFactory.createLeftSidebar(stage, "Goals", loggedUser, themeService);
+        VBox sideBar = LeftSidebarFactory.createLeftSidebar(stage, "Goals", loggedUser, themeService, currencyService);
         root.setLeft(sideBar);
 
         // 创建网格布局
@@ -75,7 +76,7 @@ public class Goals {
                 try {
                     if (loggedUser == null || goal.getUserId() == null ||
                             loggedUser.getUid().equals(goal.getUserId())) {
-                        VBox goalCard = createGoalCard(goal, stage, loggedUser, themeService);
+                        VBox goalCard = createGoalCard(goal, stage, loggedUser, themeService, currencyService);
                         goalCard.setMinWidth(300);
                         goalCard.setMaxWidth(400);
                         allCards.add(goalCard);
@@ -88,7 +89,7 @@ public class Goals {
         }
 
         // 添加"创建新目标"卡片
-        VBox createNewGoalCard = createCreateNewGoalCard(stage, loggedUser, themeService);
+        VBox createNewGoalCard = createCreateNewGoalCard(stage, loggedUser, themeService, currencyService);
         createNewGoalCard.setMinWidth(300);
         createNewGoalCard.setMaxWidth(400);
         allCards.add(createNewGoalCard);
@@ -175,7 +176,7 @@ public class Goals {
         return container;
     }
 
-    private static VBox createGoalCard(Goal goal, Stage stage, User loggedUser, ThemeService themeService) {
+    private static VBox createGoalCard(Goal goal, Stage stage, User loggedUser, ThemeService themeService, CurrencyService currencyService) {
         VBox card = new VBox(15);
         card.setAlignment(Pos.CENTER);
         card.setMaxWidth(300);
@@ -236,7 +237,7 @@ public class Goals {
                         GoalService.deleteGoal(goal.getId(), loggedUser);
 
                         // Refresh the goals scene with the exact original dimensions
-                        Scene newScene = createScene(stage, originalWidth, originalHeight, loggedUser, themeService);
+                        Scene newScene = createScene(stage, originalWidth, originalHeight, loggedUser, themeService, currencyService);
                         stage.setScene(newScene);
                     } catch (IOException e) {
                         // Show error message
@@ -372,7 +373,7 @@ public class Goals {
             if (!event.isConsumed()) {  // Only handle if not already consumed by delete button
                 double currentWidth = stage.getScene().getWidth();
                 double currentHeight = stage.getScene().getHeight();
-                Scene editScene = EditGoalScene.createScene(stage, currentWidth, currentHeight, loggedUser, goal, themeService);
+                Scene editScene = EditGoalScene.createScene(stage, currentWidth, currentHeight, loggedUser, goal, themeService, currencyService);
                 SceneManager.switchScene(stage, editScene);
             }
         });
@@ -380,7 +381,7 @@ public class Goals {
         return card;
     }
 
-    private static VBox createCreateNewGoalCard(Stage stage, User loggedUser, ThemeService themeService) {
+    private static VBox createCreateNewGoalCard(Stage stage, User loggedUser, ThemeService themeService, CurrencyService currencyService) {
         VBox card = new VBox(15);
         card.setAlignment(Pos.CENTER);
         card.setMaxWidth(300);
@@ -433,7 +434,7 @@ public class Goals {
             double currentHeight = stage.getScene().getHeight();
 
             // Navigate to create goal page with current window dimensions
-            Scene createScene = CreateGoalScene.createScene(stage, currentWidth, currentHeight, loggedUser, themeService);
+            Scene createScene = CreateGoalScene.createScene(stage, currentWidth, currentHeight, loggedUser, themeService, currencyService);
             SceneManager.switchScene(stage, createScene);
         });
 

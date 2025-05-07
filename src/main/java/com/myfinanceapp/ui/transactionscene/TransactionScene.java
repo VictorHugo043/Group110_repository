@@ -15,6 +15,7 @@ import javafx.scene.text.Font;
 
 import com.myfinanceapp.ui.common.LeftSidebarFactory;
 import com.myfinanceapp.service.AISortingService;
+import com.myfinanceapp.service.CurrencyService;
 
 import java.io.File;
 import java.time.LocalDate;
@@ -28,10 +29,15 @@ public class TransactionScene {
 
     public static Scene createScene(Stage stage, double width, double height, User loggedUser,
                                     ThemeService themeService) {
+        return createScene(stage, width, height, loggedUser, themeService, new CurrencyService("CNY"));
+    }
+
+    public static Scene createScene(Stage stage, double width, double height, User loggedUser,
+                                    ThemeService themeService, CurrencyService currencyService) {
         BorderPane root = new BorderPane();
         root.setStyle(themeService.getCurrentThemeStyle());
 
-        VBox sideBar = LeftSidebarFactory.createLeftSidebar(stage, "New", loggedUser, themeService);
+        VBox sideBar = LeftSidebarFactory.createLeftSidebar(stage, "New", loggedUser, themeService, currencyService);
         root.setLeft(sideBar);
 
         // 中间手动输入部分
