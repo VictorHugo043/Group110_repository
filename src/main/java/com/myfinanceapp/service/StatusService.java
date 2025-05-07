@@ -2,6 +2,7 @@ package com.myfinanceapp.service;
 
 import com.myfinanceapp.model.Transaction;
 import com.myfinanceapp.model.User;
+import com.myfinanceapp.model.Goal;
 import com.myfinanceapp.ui.statusscene.StatusScene;
 import javafx.beans.value.ChangeListener;
 import javafx.scene.control.DateCell;
@@ -22,6 +23,7 @@ import javafx.application.Platform;
 public class StatusService {
     private final User currentUser;
     private final TransactionService txService;
+    private final GoalService goalService;
     private final List<Map<String, String>> chatMessages = new ArrayList<>();
     private LocalDate startDate;
     private LocalDate endDate;
@@ -35,6 +37,7 @@ public class StatusService {
         this.scene = scene;
         this.currentUser = currentUser;
         this.txService = new TransactionService();
+        this.goalService = new GoalService();
         this.currencyService = currencyService;
         this.chartService = new ChartService(scene.lineChart, scene.barChart, scene.pieChart, txService, currentUser, currencyService);
         initialize();
@@ -184,6 +187,7 @@ public class StatusService {
             userMsg.put("content", userInput);
             chatMessages.add(userMsg);
 
+            // 获取交易数据
             List<Transaction> txList = txService.loadTransactions(currentUser);
             StringBuilder dataSummary = new StringBuilder();
             dataSummary.append("以下是我的财务交易数据，每条格式：Date, Type, Currency, Amount, Category, PaymentMethod:\n");
@@ -192,9 +196,21 @@ public class StatusService {
                         tx.getTransactionDate(), tx.getTransactionType(), tx.getCurrency(),
                         tx.getAmount(), tx.getCategory(), tx.getPaymentMethod()));
             }
+
+            // 获取目标数据
+            List<Goal> goalsList = goalService.getUserGoals(currentUser);
+            dataSummary.append("\n以下是我的财务目标数据，每条格式：Type, Title, Target Amount, Current Amount, Deadline, Category, Currency:\n");
+            for (Goal goal : goalsList) {
+                dataSummary.append(String.format("- %s, %s, %.2f, %.2f, %s, %s, %s\n",
+                        goal.getType(), goal.getTitle(), goal.getTargetAmount(),
+                        goal.getCurrentAmount(), goal.getDeadline(), goal.getCategory(),
+                        goal.getCurrency()));
+            }
+
             String systemPrompt = "现在你是我的专属财务管理助手，我希望你解答我有关个人财务的问题。请注意，你当且仅当回答有关财务相关的问题，当用户问出与其个人财务或财务相关知识无关的问题后，你应当拒绝回答。并且回答应全部使用英文。\n" +
-                    "这是我的财务数据结构: Transaction Date(YYYY-MM-DD), Type(Income/Expense), Currency, Amount, Category, PaymentMethod.\n"
-                    +
+                    "这是我的财务数据结构:\n" +
+                    "1. 交易数据: Transaction Date(YYYY-MM-DD), Type(Income/Expense), Currency, Amount, Category, PaymentMethod\n" +
+                    "2. 目标数据: Type(SAVING/DEBT_REPAYMENT/BUDGET_CONTROL), Title, Target Amount, Current Amount, Deadline, Category, Currency\n" +
                     "下面是我目前的数据：\n" + dataSummary +
                     "\n用户的问题是： " + userInput;
 
