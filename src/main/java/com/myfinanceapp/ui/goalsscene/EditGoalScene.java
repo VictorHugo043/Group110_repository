@@ -41,11 +41,11 @@ public class EditGoalScene {
 
     // 重载方法，兼容旧的调用方式
     public static Scene createScene(Stage stage, double width, double height, User loggedUser, Goal goalToEdit) {
-        return createScene(stage, width, height, loggedUser, goalToEdit, new ThemeService(), new CurrencyService("USD"));
+        return createScene(stage, width, height, loggedUser, goalToEdit, new ThemeService(), new CurrencyService("CNY"));
     }
 
     public static Scene createScene(Stage stage, double width, double height, User loggedUser, Goal goalToEdit, ThemeService themeService) {
-        return createScene(stage, width, height, loggedUser, goalToEdit, themeService, new CurrencyService("USD"));
+        return createScene(stage, width, height, loggedUser, goalToEdit, themeService, new CurrencyService("CNY"));
     }
 
     public static Scene createScene(Stage stage, double width, double height, User loggedUser, Goal goalToEdit, ThemeService themeService, CurrencyService currencyService) {

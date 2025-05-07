@@ -43,11 +43,11 @@ public class CreateGoalScene {
     private static ThemeService themeService; // Store ThemeService instance
 
     public static Scene createScene(Stage stage, double width, double height, User loggedUser) {
-        return createScene(stage, width, height, loggedUser, new ThemeService(), new CurrencyService("USD"));
+        return createScene(stage, width, height, loggedUser, new ThemeService(), new CurrencyService("CNY"));
     }
 
     public static Scene createScene(Stage stage, double width, double height, User loggedUser, ThemeService themeService) {
-        return createScene(stage, width, height, loggedUser, themeService, new CurrencyService("USD"));
+        return createScene(stage, width, height, loggedUser, themeService, new CurrencyService("CNY"));
     }
 
     public static Scene createScene(Stage stage, double width, double height, User loggedUser, ThemeService themeService, CurrencyService currencyService) {
