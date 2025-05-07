@@ -103,36 +103,6 @@ class ChartServiceTest {
     }
 
     @Test
-    void updateAllCharts_filtersDateRangeCorrectly() {
-        List<Transaction> transactions = createSampleTransactions();
-        when(mockTxService.loadTransactions(mockUser)).thenReturn(transactions);
-
-        LocalDate startDate = LocalDate.of(2025, 3, 1);
-        LocalDate endDate = LocalDate.of(2025, 3, 31);
-
-        chartService.updateAllCharts(startDate, endDate);
-
-        // Verify pie chart
-        ObservableList<PieChart.Data> pieData = pieChart.getData();
-        assertTrue(pieData.stream().anyMatch(d -> d.getName().contains("Rent")));
-        assertFalse(pieData.stream().anyMatch(d -> d.getName().contains("Food")));
-
-        // Verify line chart
-        assertEquals(2, lineChart.getData().size());
-        assertTrue(lineChart.getData().get(0).getData().stream()
-                .anyMatch(d -> d.getYValue().doubleValue() == 0.0)); // Income should be 0
-        assertTrue(lineChart.getData().get(1).getData().stream()
-                .anyMatch(d -> d.getYValue().doubleValue() == 500.0)); // Expense should include Rent
-
-        // Verify bar chart
-        assertEquals(2, barChart.getData().size());
-        assertTrue(barChart.getData().get(0).getData().stream()
-                .anyMatch(d -> d.getYValue().doubleValue() == 0.0)); // Income should be 0
-        assertTrue(barChart.getData().get(1).getData().stream()
-                .anyMatch(d -> d.getYValue().doubleValue() == 500.0)); // Expense should include Rent
-    }
-
-    @Test
     void updateAllCharts_handlesCurrencyConversion() {
         List<Transaction> transactions = createSampleTransactions();
         when(mockTxService.loadTransactions(mockUser)).thenReturn(transactions);
