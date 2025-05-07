@@ -30,11 +30,11 @@ public class SettingsTopBarFactory {
 
     // 重载方法，兼容旧的调用方式
     public static HBox createTopBar(Stage stage, String activeTab, User loggedUser) {
-        return createTopBar(stage, activeTab, loggedUser, new ThemeService(), new CurrencyService("USD"));
+        return createTopBar(stage, activeTab, loggedUser, new ThemeService(), new CurrencyService("CNY"));
     }
 
     public static HBox createTopBar(Stage stage, String activeTab, User loggedUser, ThemeService themeService) {
-        return createTopBar(stage, activeTab, loggedUser, themeService, new CurrencyService("USD"));
+        return createTopBar(stage, activeTab, loggedUser, themeService, new CurrencyService("CNY"));
     }
 
     public static HBox createTopBar(Stage stage, String activeTab, User loggedUser, ThemeService themeService, CurrencyService currencyService) {

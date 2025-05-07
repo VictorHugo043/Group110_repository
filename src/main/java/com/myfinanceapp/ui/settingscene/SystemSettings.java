@@ -26,11 +26,11 @@ public class SystemSettings {
 
     // Overloaded method for backward compatibility
     public static Scene createScene(Stage stage, double width, double height, User loggedUser) {
-        return createScene(stage, width, height, loggedUser, new ThemeService(), new CurrencyService("USD"));
+        return createScene(stage, width, height, loggedUser, new ThemeService(), new CurrencyService("CNY"));
     }
 
     public static Scene createScene(Stage stage, double width, double height, User loggedUser, ThemeService themeService) {
-        return createScene(stage, width, height, loggedUser, themeService, new CurrencyService("USD"));
+        return createScene(stage, width, height, loggedUser, themeService, new CurrencyService("CNY"));
     }
 
     public static Scene createScene(Stage stage, double width, double height, User loggedUser, ThemeService themeService, CurrencyService currencyService) {
@@ -225,8 +225,8 @@ public class SystemSettings {
             stage.setWidth(1920);
             stage.setHeight(1080);
             stage.centerOnScreen();
-            currencyCombo.setValue("USD");
-            currencyService.setSelectedCurrency("USD");
+            currencyCombo.setValue("CNY");
+            currencyService.setSelectedCurrency("CNY");
             PauseTransition debounce = new PauseTransition(Duration.millis(100));
             debounce.setOnFinished(event -> {
                 themeService.setTheme(true); // Reset to Daytime

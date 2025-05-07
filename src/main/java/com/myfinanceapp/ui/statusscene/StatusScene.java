@@ -59,7 +59,7 @@ public class StatusScene {
     }
 
     public Scene createScene() {
-        return createScene(new ThemeService(), new CurrencyService("USD"));
+        return createScene(new ThemeService(), new CurrencyService("CNY"));
     }
 
     public Scene createScene(ThemeService themeService, CurrencyService currencyService) {

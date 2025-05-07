@@ -29,7 +29,7 @@ public class LeftSidebarFactory {
      * 重载方法，兼容旧的调用方式
      */
     public static VBox createLeftSidebar(Stage stage, String selectedButton, User loggedUser) {
-        return createLeftSidebar(stage, selectedButton, loggedUser, new ThemeService(), new CurrencyService("USD"));
+        return createLeftSidebar(stage, selectedButton, loggedUser, new ThemeService(), new CurrencyService("CNY"));
     }
 
     /**

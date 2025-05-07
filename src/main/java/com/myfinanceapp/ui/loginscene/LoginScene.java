@@ -75,7 +75,7 @@ public class LoginScene {
      * 创建并返回此登录场景
      */
     public static Scene createScene(Stage stage, double width, double height) {
-        return createScene(stage, width, height, new CurrencyService("USD"));
+        return createScene(stage, width, height, new CurrencyService("CNY"));
     }
 
     public static Scene createScene(Stage stage, double width, double height, CurrencyService currencyService) {

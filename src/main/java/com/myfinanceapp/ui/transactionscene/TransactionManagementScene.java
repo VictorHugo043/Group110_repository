@@ -56,7 +56,7 @@ public class TransactionManagementScene {
     }
 
     public Scene createScene(ThemeService themeService) {
-        return createScene(themeService, new CurrencyService("USD"));
+        return createScene(themeService, new CurrencyService("CNY"));
     }
 
     public Scene createScene(ThemeService themeService, CurrencyService currencyService) {
