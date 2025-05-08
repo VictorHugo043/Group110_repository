@@ -373,6 +373,8 @@ public class TransactionScene {
                 "(currency type, e.g. CNY, USD)\n\n" +
                 "Amount\n" +
                 "(number format, e.g. 1234.56)\n\n" +
+                "Description\n" +   
+                "(transaction description)\n\n" +
                 "Category\n" +
                 "(income and expense category)\n\n" +
                 "Payment Method\n" +
