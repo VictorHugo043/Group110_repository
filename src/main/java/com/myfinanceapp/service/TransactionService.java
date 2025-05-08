@@ -88,7 +88,7 @@ public class TransactionService {
                 alert.setTitle("Invalid CSV Format");
                 alert.setHeaderText(null);
                 alert.setContentText("The CSV file must contain the following headers:\n" +
-                        "Transaction Date, Transaction Type, Currency, Amount, Category, Payment Method");
+                        "Transaction Date, Transaction Type, Currency, Amount, Description, Category, Payment Method");
                 alert.showAndWait();
                 return;
             }
@@ -97,7 +97,7 @@ public class TransactionService {
                 // 按照逗号分割每一行数据
                 String[] parts = line.split(",");
                  // 检查每行数据是否包含 6 列
-                if (parts.length == 6) {
+                if (parts.length == 7) {
                     // 创建新的交易记录对象
                     Transaction tx = new Transaction();
                     // 转换日期格式从 YYYY/M/D 到 YYYY-MM-DD
@@ -114,8 +114,9 @@ public class TransactionService {
                     } catch (NumberFormatException e) {
                         continue;
                     }
-                    tx.setCategory(parts[4].trim());
-                    tx.setPaymentMethod(parts[5].trim());
+                    tx.setDescription(parts[4].trim());
+                    tx.setCategory(parts[5].trim());
+                    tx.setPaymentMethod(parts[6].trim());
                      // 检查是否存在重复的交易记录
                     boolean dup = false;
                     for (Transaction existing : allTxs) {
@@ -158,8 +159,9 @@ public class TransactionService {
                 headers[1].trim().equals("Transaction Type") &&
                 headers[2].trim().equals("Currency") &&
                 headers[3].trim().equals("Amount") &&
-                headers[4].trim().equals("Category") &&
-                headers[5].trim().equals("Payment Method");
+                headers[4].trim().equals("Description") &&
+                headers[5].trim().equals("Category") &&
+                headers[6].trim().equals("Payment Method");
     }
     
 
