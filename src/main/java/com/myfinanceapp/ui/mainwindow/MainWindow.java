@@ -65,7 +65,16 @@ public class MainWindow extends Application {
     @Override
     public void start(Stage stage) {
         root = new Group();
-        Scene scene = new Scene(root, 1600, 900);
+    // 调整初始窗口大小为屏幕分辨率的80%
+    java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
+    double screenWidth = screenSize.getWidth();
+    double screenHeight = screenSize.getHeight();
+    
+    // 计算合适的窗口大小
+    double windowWidth = Math.min(1600, screenWidth * 0.8);
+    double windowHeight = Math.min(900, screenHeight * 0.8);
+ 
+ Scene scene = new Scene(root, windowWidth, windowHeight);
 
         stage.setTitle("Finanger - Welcome");
         stage.setScene(scene);
