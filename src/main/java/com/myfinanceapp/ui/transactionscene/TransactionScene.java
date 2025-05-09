@@ -12,6 +12,8 @@ import javafx.scene.layout.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
+import javafx.application.Platform;
 
 import com.myfinanceapp.ui.common.LeftSidebarFactory;
 import com.myfinanceapp.service.AISortingService;
@@ -32,10 +34,16 @@ public class TransactionScene {
         return createScene(stage, width, height, loggedUser, themeService, new CurrencyService("CNY"));
     }
 
+
+
     public static Scene createScene(Stage stage, double width, double height, User loggedUser,
                                     ThemeService themeService, CurrencyService currencyService) {
         BorderPane root = new BorderPane();
         root.setStyle(themeService.getCurrentThemeStyle());
+
+        // 保存初始宽高，用于计算缩放比例
+        final double INITIAL_WIDTH = width;
+        final double INITIAL_HEIGHT = height;
 
         VBox sideBar = LeftSidebarFactory.createLeftSidebar(stage, "New", loggedUser, themeService, currencyService);
         root.setLeft(sideBar);
@@ -391,6 +399,7 @@ public class TransactionScene {
         rightBar.setSpacing(10);
         rightBar.setAlignment(Pos.CENTER);
 
+        // GridPane布局设置
         GridPane centerAndRight = new GridPane();
         centerAndRight.setPadding(new Insets(20, 20, 20, 20));
         centerAndRight.setHgap(20);
@@ -398,10 +407,12 @@ public class TransactionScene {
         ColumnConstraints column1 = new ColumnConstraints();
         column1.setPercentWidth(50);
         column1.setFillWidth(true);
+        column1.setHgrow(Priority.ALWAYS);
 
         ColumnConstraints column2 = new ColumnConstraints();
         column2.setPercentWidth(50);
         column2.setFillWidth(true);
+        column2.setHgrow(Priority.ALWAYS);
 
         centerAndRight.getColumnConstraints().addAll(column1, column2);
 
@@ -415,9 +426,17 @@ public class TransactionScene {
         centerAndRight.add(centerBox, 0, 0);
         centerAndRight.add(rightBar, 1, 0);
 
+        // 确保框线可以竖直拉伸
+        GridPane.setVgrow(centerBox, Priority.ALWAYS);
+        GridPane.setVgrow(rightBar, Priority.ALWAYS);
+        GridPane.setHgrow(centerBox, Priority.ALWAYS);
+        GridPane.setHgrow(rightBar, Priority.ALWAYS);
+
         ScrollPane scrollPane = new ScrollPane();
         scrollPane.setContent(centerAndRight);
         scrollPane.setFitToWidth(true);
+        scrollPane.setFitToHeight(false);
+        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         String backgroundColor = themeService.isDayMode() ? "white" : "#2A2A2A";
         scrollPane.setStyle(
@@ -427,10 +446,19 @@ public class TransactionScene {
                         "-fx-text-fill: transparent;");
         scrollPane.setPadding(new Insets(0));
 
+        VBox contentWrapper = new VBox(centerAndRight);
+        contentWrapper.setFillWidth(true);
+        VBox.setVgrow(centerAndRight, Priority.ALWAYS);
+        contentWrapper.setMinHeight(400);
+
+        scrollPane.setContent(contentWrapper);
+
         scrollPane.setMaxHeight(Double.MAX_VALUE);
         scrollPane.setMaxWidth(Double.MAX_VALUE);
         BorderPane.setMargin(scrollPane, new Insets(0));
 
+        scrollPane.getStyleClass().add("scroll-pane");
+        
         root.setCenter(scrollPane);
         Scene scene = new Scene(root, width, height);
 
@@ -577,6 +605,169 @@ public class TransactionScene {
 
         String labelColor = themeService.isDayMode() ? "darkblue" : "white";
         scene.getStylesheets().add("data:,Label { -fx-text-fill: " + labelColor + "; }");
+
+        // 添加滚动条样式
+        String scrollbarStyle = """
+                .scroll-pane .scroll-bar:vertical {
+                    -fx-background-color: #e0e0e0;
+                    -fx-padding: 2;
+                }
+                .scroll-pane .scroll-bar:vertical .thumb {
+                    -fx-background-color: #3282fa;
+                    -fx-background-radius: 5px;
+                }
+                .scroll-pane .scroll-bar:vertical .track {
+                    -fx-background-color: #f0f0f0;
+                    -fx-background-radius: 0;
+                }
+                .scroll-pane .corner {
+                    -fx-background-color: transparent;
+                }
+                """;
+        scene.getStylesheets().add("data:text/css," + scrollbarStyle);
+
+        // 创建一个方法来调整所有组件的字体大小
+        Runnable adjustFontSizes = () -> {
+            try {
+                // 计算当前窗口相对于初始窗口的缩放比例
+                double scaleW = scene.getWidth() / INITIAL_WIDTH;
+                double scaleH = scene.getHeight() / INITIAL_HEIGHT;
+                double scale = Math.min(scaleW, scaleH);
+                
+                // 基础字体大小设置 - 可以调整这些基础值以适应不同窗口大小
+                double titleFontSize = 25 * scale;
+                double labelFontSize = 19 * scale;
+                double inputFontSize = 20 * scale;
+                double formatLabelFontSize = 18 * scale;
+                
+                // 确保字体大小有最小值和最大值限制，防止太小或太大
+                titleFontSize = Math.max(14, Math.min(titleFontSize, 28));
+                labelFontSize = Math.max(10, Math.min(labelFontSize, 22));
+                inputFontSize = Math.max(9, Math.min(inputFontSize, 22));
+                formatLabelFontSize = Math.max(8, Math.min(formatLabelFontSize, 20));
+                
+                // 更新标题字体大小
+                topicLabel.setStyle("-fx-font-size: " + titleFontSize + "px; -fx-font-weight: bold;" + themeService.getTextColorStyle());
+                promptLabel.setStyle("-fx-font-size: " + titleFontSize + "px; -fx-font-weight: bold;" + themeService.getTextColorStyle());
+                
+                // 更新标签字体大小
+                dateLabel.setFont(Font.font(dateLabel.getFont().getFamily(), labelFontSize));
+                typeLabel.setFont(Font.font(typeLabel.getFont().getFamily(), labelFontSize));
+                currencyLabel.setFont(Font.font(currencyLabel.getFont().getFamily(), labelFontSize));
+                amountLabel.setFont(Font.font(amountLabel.getFont().getFamily(), labelFontSize));
+                descriptionLabel.setFont(Font.font(descriptionLabel.getFont().getFamily(), labelFontSize));
+                categoryLabel.setFont(Font.font(categoryLabel.getFont().getFamily(), labelFontSize));
+                methodLabel.setFont(Font.font(methodLabel.getFont().getFamily(), labelFontSize));
+                formatLabel.setFont(Font.font(formatLabel.getFont().getFamily(), formatLabelFontSize));
+                
+                // 更新按钮字体大小
+                submitManualBtn.setStyle(submitManualBtn.getStyle() + "-fx-font-size: " + inputFontSize + "px;");
+                importCSVButton.setStyle(importCSVButton.getStyle() + "-fx-font-size: " + inputFontSize + "px;");
+                autoSortButton.setStyle(autoSortButton.getStyle() + "-fx-font-size: " + inputFontSize + "px;");
+                
+                // 调整按钮大小与字体成比例
+                double buttonHeight = 25 * scale;
+                buttonHeight = Math.max(20, Math.min(buttonHeight, 30)); // 限制按钮高度范围
+                submitManualBtn.setPrefHeight(buttonHeight);
+                importCSVButton.setPrefHeight(buttonHeight);
+                autoSortButton.setPrefHeight(buttonHeight);
+                
+                // 更新文本输入控件字体大小
+                amountField.setStyle(amountField.getStyle() + "-fx-font-size: " + inputFontSize + "px;");
+                categoryField.setStyle(categoryField.getStyle() + "-fx-font-size: " + inputFontSize + "px;");
+                methodField.setStyle(methodField.getStyle() + "-fx-font-size: " + inputFontSize + "px;");
+                descriptionField.setStyle(descriptionField.getStyle() + "-fx-font-size: " + inputFontSize + "px;");
+                
+                // 调整文本输入框高度
+                double fieldHeight = 28 * scale;
+                fieldHeight = Math.max(22, Math.min(fieldHeight, 35)); // 限制输入框高度范围
+                amountField.setPrefHeight(fieldHeight);
+                categoryField.setPrefHeight(fieldHeight);
+                methodField.setPrefHeight(fieldHeight);
+                
+                // 描述框高度单独设置，可以更大一些
+                double descFieldHeight = 70 * scale;
+                descFieldHeight = Math.max(45, Math.min(descFieldHeight, 90)); // 限制描述框高度范围
+                descriptionField.setPrefHeight(descFieldHeight);
+                
+                // 更新下拉菜单字体大小
+                typeCombo.setStyle(typeCombo.getStyle() + "-fx-font-size: " + inputFontSize + "px;");
+                currencyCombo.setStyle(currencyCombo.getStyle() + "-fx-font-size: " + inputFontSize + "px;");
+                
+                // 调整下拉菜单高度
+                typeCombo.setPrefHeight(fieldHeight);
+                currencyCombo.setPrefHeight(fieldHeight);
+                
+                // 更新日期选择器字体大小
+                datePicker.setStyle(datePicker.getStyle() + "-fx-font-size: " + inputFontSize + "px;");
+                datePicker.setPrefHeight(fieldHeight);
+                
+                // 调整间距也随窗口大小变化
+                double spacing = 10 * scale;
+                spacing = Math.max(5, Math.min(spacing, 15)); // 限制间距范围
+                centerBox.setSpacing(spacing);
+                rightBar.setSpacing(spacing);
+                
+                // 调整内边距，确保内容在缩小时不会贴边
+                double padding = 20 * scale;
+                padding = Math.max(10, Math.min(padding, 25)); // 限制内边距范围
+                centerBox.setPadding(new Insets(padding));
+                rightBar.setPadding(new Insets(padding));
+                
+                // 重新计算最佳宽度和高度
+                centerBox.autosize();
+                rightBar.autosize();
+                centerAndRight.autosize();
+                
+                // 请求滚动面板重新布局
+                scrollPane.requestLayout();
+            } catch (Exception e) {
+                System.err.println("Font adjustment error: " + e.getMessage());
+                e.printStackTrace();
+            }
+        };
+        
+        // 设置一个固定的边距常量，确保边框和窗口边缘始终保持这个距离
+        final int BORDER_MARGIN = 20; // 可以根据需要调整这个值
+
+        // 在监听器中使用这个固定边距
+        scene.widthProperty().addListener((obs, oldVal, newVal) -> {
+            centerAndRight.setPrefWidth(newVal.doubleValue() - sideBar.getWidth() - BORDER_MARGIN);
+            scrollPane.layout();
+            Platform.runLater(adjustFontSizes);
+        });
+
+        scene.heightProperty().addListener((obs, oldVal, newVal) -> {
+            centerAndRight.setPrefHeight(newVal.doubleValue() - BORDER_MARGIN);
+            scrollPane.layout();
+            Platform.runLater(adjustFontSizes);
+        });
+
+        // 确保第一次加载时就正确设置布局
+        // 这段代码解决初始加载时边框位置不正确的问题
+        stage.setOnShown(event -> {
+            Platform.runLater(() -> {
+                // 使用相同的边距确保一致性
+                centerAndRight.setPrefWidth(scene.getWidth() - sideBar.getWidth() - BORDER_MARGIN);
+                centerAndRight.setPrefHeight(scene.getHeight() - BORDER_MARGIN);
+                centerAndRight.layout();
+                scrollPane.layout();
+                adjustFontSizes.run();
+            });
+        });
+        // 确保第一次加载时也调整布局
+        Platform.runLater(() -> {
+            // 立即设置正确的宽度和高度，不等待窗口调整事件
+            centerAndRight.setPrefWidth(scene.getWidth() - sideBar.getWidth() - 10);
+            centerAndRight.setPrefHeight(scene.getHeight() - 10);
+            
+            // 请求立即重新布局
+            scrollPane.layout();
+            centerAndRight.layout();
+            
+            // 调整字体大小
+            adjustFontSizes.run();
+        });
 
         return scene;
     }
