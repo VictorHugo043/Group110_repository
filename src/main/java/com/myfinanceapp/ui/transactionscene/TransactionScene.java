@@ -636,9 +636,9 @@ public class TransactionScene {
                 
                 // 基础字体大小设置 - 可以调整这些基础值以适应不同窗口大小
                 double titleFontSize = 25 * scale;
-                double labelFontSize = 19 * scale;
-                double inputFontSize = 20 * scale;
-                double formatLabelFontSize = 18 * scale;
+                double labelFontSize = 17 * scale;
+                double inputFontSize = 15 * scale;
+                double formatLabelFontSize = 15 * scale;
                 
                 // 确保字体大小有最小值和最大值限制，防止太小或太大
                 titleFontSize = Math.max(14, Math.min(titleFontSize, 28));
