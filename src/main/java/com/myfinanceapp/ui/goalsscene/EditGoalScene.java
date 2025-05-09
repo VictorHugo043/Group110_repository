@@ -39,6 +39,9 @@ public class EditGoalScene {
     private static final double MIN_WINDOW_WIDTH = 800;
     private static final double MIN_WINDOW_HEIGHT = 450;
 
+    // 存储ThemeService实例
+    private static ThemeService themeService;
+
     // 重载方法，兼容旧的调用方式
     public static Scene createScene(Stage stage, double width, double height, User loggedUser, Goal goalToEdit) {
         return createScene(stage, width, height, loggedUser, goalToEdit, new ThemeService(), new CurrencyService("CNY"));
@@ -49,6 +52,8 @@ public class EditGoalScene {
     }
 
     public static Scene createScene(Stage stage, double width, double height, User loggedUser, Goal goalToEdit, ThemeService themeService, CurrencyService currencyService) {
+        EditGoalScene.themeService = themeService; // 存储ThemeService实例
+
         // 确保窗口大小不小于最小值
         final double finalWidth = Math.max(width, MIN_WINDOW_WIDTH);
         final double finalHeight = Math.max(height, MIN_WINDOW_HEIGHT);
@@ -202,6 +207,9 @@ public class EditGoalScene {
         // 创建场景
         Scene scene = new Scene(root, finalWidth, finalHeight);
 
+        // 添加全局样式表
+        scene.getStylesheets().add("data:text/css," + themeService.getThemeStylesheet());
+
         // 添加窗口大小变化监听器
         scene.widthProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal.doubleValue() < MIN_WINDOW_WIDTH) {
@@ -235,6 +243,8 @@ public class EditGoalScene {
         ComboBox<String> comboBox = new ComboBox<>();
         comboBox.getItems().addAll(items);
         comboBox.setPrefWidth(FIELD_WIDTH);
+        // 应用主题样式类
+        comboBox.getStyleClass().add(themeService.isDayMode() ? "day-theme-combo-box" : "night-theme-combo-box");
         addStyledRow(grid, row, labelText, comboBox, font, themeService);
         return comboBox;
     }
@@ -243,6 +253,11 @@ public class EditGoalScene {
         TextField textField = new TextField();
         textField.setPromptText(promptText);
         textField.setPrefWidth(FIELD_WIDTH);
+        // 应用自定义样式
+        String textFieldStyle = themeService.isDayMode() ?
+                "-fx-background-color: white; -fx-text-fill: black; -fx-prompt-text-fill: #555555; -fx-border-color: #D3D3D3; -fx-border-radius: 3;" :
+                "-fx-background-color: #3C3C3C; -fx-text-fill: white; -fx-prompt-text-fill: #CCCCCC; -fx-border-color: #555555; -fx-border-radius: 3;";
+        textField.setStyle(textFieldStyle);
         addStyledRow(grid, row, labelText, textField, font, themeService);
         return textField;
     }
@@ -250,6 +265,8 @@ public class EditGoalScene {
     private static DatePicker createDatePicker(int row, GridPane grid, String labelText, Font font, ThemeService themeService) {
         DatePicker datePicker = new DatePicker();
         datePicker.setPrefWidth(FIELD_WIDTH);
+        // 应用主题样式类
+        datePicker.getStyleClass().add(themeService.isDayMode() ? "day-theme-date-picker" : "night-theme-date-picker");
         addStyledRow(grid, row, labelText, datePicker, font, themeService);
         return datePicker;
     }
