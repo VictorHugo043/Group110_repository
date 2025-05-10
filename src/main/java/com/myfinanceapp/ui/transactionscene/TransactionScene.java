@@ -657,14 +657,14 @@ public class TransactionScene {
                 // window sizes
                 double titleFontSize = 25 * scale;
                 double labelFontSize = 17 * scale;
-                double inputFontSize = 15 * scale;
+                double inputFontSize = 13 * scale;
                 double formatLabelFontSize = 15 * scale;
 
                 // Ensure font sizes have minimum and maximum limits to prevent too small or too
                 // large
                 titleFontSize = Math.max(14, Math.min(titleFontSize, 28));
                 labelFontSize = Math.max(10, Math.min(labelFontSize, 22));
-                inputFontSize = Math.max(9, Math.min(inputFontSize, 22));
+                inputFontSize = Math.max(6, Math.min(inputFontSize, 18));
                 formatLabelFontSize = Math.max(5, Math.min(formatLabelFontSize, 20));
 
                 // Update title font sizes
@@ -687,6 +687,7 @@ public class TransactionScene {
                 submitManualBtn.setStyle(submitManualBtn.getStyle() + "-fx-font-size: " + inputFontSize + "px;");
                 importCSVButton.setStyle(importCSVButton.getStyle() + "-fx-font-size: " + inputFontSize + "px;");
                 autoSortButton.setStyle(autoSortButton.getStyle() + "-fx-font-size: " + inputFontSize + "px;");
+                downloadTemplateButton.setStyle(downloadTemplateButton.getStyle() + "-fx-font-size: " + inputFontSize + "px;");
 
                 // Adjust button size proportionate to font
                 double buttonHeight = 25 * scale;
@@ -694,12 +695,24 @@ public class TransactionScene {
                 submitManualBtn.setPrefHeight(buttonHeight);
                 importCSVButton.setPrefHeight(buttonHeight);
                 autoSortButton.setPrefHeight(buttonHeight);
+                downloadTemplateButton.setPrefHeight(buttonHeight);
+                // Ensure button min width for text visibility
+                double buttonMinWidth = 120 * scale;
+                buttonMinWidth = Math.max(80, Math.min(buttonMinWidth, 180));
+                downloadTemplateButton.setMinWidth(buttonMinWidth);
+                importCSVButton.setMinWidth(buttonMinWidth);
 
                 // Update text input control font sizes
                 amountField.setStyle(amountField.getStyle() + "-fx-font-size: " + inputFontSize + "px;");
                 categoryField.setStyle(categoryField.getStyle() + "-fx-font-size: " + inputFontSize + "px;");
                 methodField.setStyle(methodField.getStyle() + "-fx-font-size: " + inputFontSize + "px;");
                 descriptionField.setStyle(descriptionField.getStyle() + "-fx-font-size: " + inputFontSize + "px;");
+
+                // Ensure prompt text is always visible by setting min width
+                amountField.setMinWidth(120 * scale);
+                categoryField.setMinWidth(120 * scale);
+                methodField.setMinWidth(120 * scale);
+                descriptionField.setMinWidth(120 * scale);
 
                 // Adjust text input field heights
                 double fieldHeight = 28 * scale;
@@ -741,6 +754,15 @@ public class TransactionScene {
                 centerBox.autosize();
                 rightBar.autosize();
                 centerAndRight.autosize();
+
+                // For Reference Template button, allow even smaller minimum font size and min width
+                double refBtnFontSize = Math.max(6, inputFontSize); // allow min 6px
+                downloadTemplateButton.setStyle(downloadTemplateButton.getStyle() + "-fx-font-size: " + refBtnFontSize + "px;");
+
+                // Set a smaller min width for the button
+                double refBtnMinWidth = 60 * scale;
+                refBtnMinWidth = Math.max(40, Math.min(refBtnMinWidth, 120));
+                downloadTemplateButton.setMinWidth(refBtnMinWidth);
             } catch (Exception e) {
                 System.err.println("Font adjustment error: " + e.getMessage());
                 e.printStackTrace();
@@ -759,14 +781,14 @@ public class TransactionScene {
         layoutPause.play();
 
         ChangeListener<Number> stageSizeListener = (obs, oldVal, newVal) -> {
-            layoutPause.play(); // 使用暂停过渡确保布局完成
+            layoutPause.play(); // Use the pause transition to ensure the layout is completed
         };
         
-        // 添加场景尺寸监听
+        // Add scene size monitoring
         scene.widthProperty().addListener(stageSizeListener);
         scene.heightProperty().addListener(stageSizeListener);
         
-        // 修改可见性监听器
+        // Modify the visibility listener
         scene.getRoot().visibleProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal) {
                 layoutPause.play();
