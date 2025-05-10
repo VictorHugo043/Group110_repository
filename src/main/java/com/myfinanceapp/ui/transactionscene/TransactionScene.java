@@ -390,11 +390,9 @@ public class TransactionScene {
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("Save Template Excel");
             fileChooser.setInitialFileName("template.xlsx");
-            // Set file chooser extension filter to allow users to select .xlsx format
-            // files.
+            // Set file chooser extension filter to allow users to select .xlsx format files.
             fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Excel Files", "*.xlsx"));
-            // Display the file save dialog and return the target file (destFile) selected
-            // by the user, which contains the file path and name.
+            // Display the file save dialog and return the target file (destFile) selected by the user, which contains the file path and name.
             File destFile = fileChooser.showSaveDialog(stage);
             if (destFile != null) {
                 try {
@@ -403,8 +401,7 @@ public class TransactionScene {
                     if (in == null) {
                         throw new Exception("Template file not found in resources.");
                     }
-                    // If the file stream 'in' is not null, copy the file content to the
-                    // user-specified target file destFile
+                    // If the file stream 'in' is not null, copy the file content to the user-specified target file destFile
                     java.nio.file.Files.copy(in, destFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
                     in.close();
 
