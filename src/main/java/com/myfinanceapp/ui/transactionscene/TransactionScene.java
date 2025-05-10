@@ -37,13 +37,10 @@ public class TransactionScene {
         return createScene(stage, width, height, loggedUser, themeService, new CurrencyService("CNY"));
     }
 
-
     public static Scene createScene(Stage stage, double width, double height, User loggedUser,
             ThemeService themeService, CurrencyService currencyService) {
         BorderPane root = new BorderPane();
         root.setStyle(themeService.getCurrentThemeStyle());
-
-
 
         VBox sideBar = LeftSidebarFactory.createLeftSidebar(stage, "New", loggedUser, themeService, currencyService);
         root.setLeft(sideBar);
@@ -388,27 +385,29 @@ public class TransactionScene {
             // Create a FileChooser object to open a file selection dialog. Users can choose
             // the location and filename through this dialog.
             FileChooser fileChooser = new FileChooser();
-            fileChooser.setTitle("Save Template Excel");
-            fileChooser.setInitialFileName("template.xlsx");
-            // Set file chooser extension filter to allow users to select .xlsx format files.
-            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Excel Files", "*.xlsx"));
-            // Display the file save dialog and return the target file (destFile) selected by the user, which contains the file path and name.
+            fileChooser.setTitle("Save Template CSV");
+            fileChooser.setInitialFileName("template.csv");
+            // Set file chooser extension filter to allow users to select .csv format files.
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV Files", "*.csv"));
+            // Display the file save dialog and return the target file (destFile) selected
+            // by the user, which contains the file path and name.
             File destFile = fileChooser.showSaveDialog(stage);
             if (destFile != null) {
                 try {
-                    // Read template.xlsx from resources
-                    java.io.InputStream in = TransactionScene.class.getResourceAsStream("/template.xlsx");
+                    // Read template.csv from resources/template folder
+                    java.io.InputStream in = TransactionScene.class.getResourceAsStream("/template/template.csv");
                     if (in == null) {
-                        throw new Exception("Template file not found in resources.");
+                        throw new Exception("Template file not found in resources/template folder.");
                     }
-                    // If the file stream 'in' is not null, copy the file content to the user-specified target file destFile
+                    // If the file stream 'in' is not null, copy the file content to the
+                    // user-specified target file destFile
                     java.nio.file.Files.copy(in, destFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
                     in.close();
 
                     Alert alert = new Alert(Alert.AlertType.INFORMATION);
                     alert.setTitle("Download Complete");
                     alert.setHeaderText(null);
-                    alert.setContentText("Excel template downloaded successfully!");
+                    alert.setContentText("CSV template downloaded successfully!");
                     alert.showAndWait();
                 } catch (Exception e) {
                     Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -648,9 +647,9 @@ public class TransactionScene {
             try {
                 double currentWidth = scene.getWidth();
                 double currentHeight = scene.getHeight();
-                
-                double scaleW = currentWidth / 800; 
-                double scaleH = currentHeight / 600; 
+
+                double scaleW = currentWidth / 800;
+                double scaleH = currentHeight / 600;
                 double scale = Math.min(scaleW, scaleH);
 
                 // Base font size settings - can adjust these base values to suit different
@@ -687,7 +686,8 @@ public class TransactionScene {
                 submitManualBtn.setStyle(submitManualBtn.getStyle() + "-fx-font-size: " + inputFontSize + "px;");
                 importCSVButton.setStyle(importCSVButton.getStyle() + "-fx-font-size: " + inputFontSize + "px;");
                 autoSortButton.setStyle(autoSortButton.getStyle() + "-fx-font-size: " + inputFontSize + "px;");
-                downloadTemplateButton.setStyle(downloadTemplateButton.getStyle() + "-fx-font-size: " + inputFontSize + "px;");
+                downloadTemplateButton
+                        .setStyle(downloadTemplateButton.getStyle() + "-fx-font-size: " + inputFontSize + "px;");
 
                 // Adjust button size proportionate to font
                 double buttonHeight = 25 * scale;
@@ -755,9 +755,11 @@ public class TransactionScene {
                 rightBar.autosize();
                 centerAndRight.autosize();
 
-                // For Reference Template button, allow even smaller minimum font size and min width
+                // For Reference Template button, allow even smaller minimum font size and min
+                // width
                 double refBtnFontSize = Math.max(6, inputFontSize); // allow min 6px
-                downloadTemplateButton.setStyle(downloadTemplateButton.getStyle() + "-fx-font-size: " + refBtnFontSize + "px;");
+                downloadTemplateButton
+                        .setStyle(downloadTemplateButton.getStyle() + "-fx-font-size: " + refBtnFontSize + "px;");
 
                 // Set a smaller min width for the button
                 double refBtnMinWidth = 60 * scale;
@@ -783,11 +785,11 @@ public class TransactionScene {
         ChangeListener<Number> stageSizeListener = (obs, oldVal, newVal) -> {
             layoutPause.play(); // Use the pause transition to ensure the layout is completed
         };
-        
+
         // Add scene size monitoring
         scene.widthProperty().addListener(stageSizeListener);
         scene.heightProperty().addListener(stageSizeListener);
-        
+
         // Modify the visibility listener
         scene.getRoot().visibleProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal) {
