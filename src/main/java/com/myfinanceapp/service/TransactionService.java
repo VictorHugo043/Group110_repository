@@ -21,7 +21,7 @@ import java.nio.file.Files;
 public class TransactionService {
     private static final String TRANSACTION_DIR = "src/main/resources/transaction/";
     private static final Gson gson = new Gson();
-    private static final String FIXED_KEY = "MyFinanceAppSecretKey1234567890";  // 固定密钥
+    private static final String FIXED_KEY = "MyFinanceAppSecretKey1234567890"; // Fixed key
 
     public boolean addTransaction(User user, Transaction newTx) {
         List<Transaction> allTxs = loadTransactions(user);
@@ -36,7 +36,7 @@ public class TransactionService {
     }
 
     /**
-     * 读取 <UID>.json 文件：其中存的格式是 JSON数组 [ {...}, {...} ]
+     * Read <UID>.json file: which contains a JSON array format [ {...}, {...} ]
      */
     public List<Transaction> loadTransactions(User user) {
         File dir = new File(TRANSACTION_DIR);
@@ -52,14 +52,15 @@ public class TransactionService {
             // Read the entire file content
             String content = new String(Files.readAllBytes(jsonFile.toPath()), StandardCharsets.UTF_8);
             EncryptedData encryptedData = gson.fromJson(content, EncryptedData.class);
-            
+
             // Get encryption key derived from user ID
             SecretKey key = getEncryptionKey(user);
-            
+
             // Decrypt the content
             String decryptedContent = EncryptionService.decrypt(encryptedData, key);
 
-            Type listType = new TypeToken<List<Transaction>>() {}.getType();
+            Type listType = new TypeToken<List<Transaction>>() {
+            }.getType();
             List<Transaction> txList = gson.<List<Transaction>>fromJson(decryptedContent, listType);
 
             return (txList != null) ? txList : new ArrayList<>();
@@ -73,16 +74,17 @@ public class TransactionService {
         List<Transaction> allTxs = loadTransactions(user);
         try (BufferedReader br = new BufferedReader(new FileReader(csvFile))) {
             String line;
-             // 读取 CSV 文件的表头
+            // Read the CSV file header
             String headerLine = br.readLine();
             if (headerLine == null) {
                 return;
             }
 
             String[] headers = headerLine.split(",");
-             // 分割表头字段，并验证表头格式是否符合预期
+            // Split header fields and validate if the header format meets expectations
             boolean isValidHeader = validateHeader(headers);
-             // 如果表头不符合预期格式，弹出错误提示并终止导入
+            // If the header doesn't match the expected format, display an error prompt and
+            // abort import
             if (!isValidHeader) {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle("Invalid CSV Format");
@@ -92,20 +94,20 @@ public class TransactionService {
                 alert.showAndWait();
                 return;
             }
-            // 循环读取每一行数据，直到文件结束
+            // Loop through each line of data until the end of file
             while ((line = br.readLine()) != null) {
-                // 按照逗号分割每一行数据
+                // Split each line of data by comma
                 String[] parts = line.split(",");
-                 // 检查每行数据是否包含 6 列
+                // Check if each line of data contains 7 columns
                 if (parts.length == 7) {
-                    // 创建新的交易记录对象
+                    // Create a new transaction record object
                     Transaction tx = new Transaction();
-                    // 转换日期格式从 YYYY/M/D 到 YYYY-MM-DD
+                    // Convert date format from YYYY/M/D to YYYY-MM-DD
                     String[] dateParts = parts[0].trim().split("/");
-                    String formattedDate = String.format("%s-%02d-%02d", 
-                        dateParts[0], 
-                        Integer.parseInt(dateParts[1]), 
-                        Integer.parseInt(dateParts[2]));
+                    String formattedDate = String.format("%s-%02d-%02d",
+                            dateParts[0],
+                            Integer.parseInt(dateParts[1]),
+                            Integer.parseInt(dateParts[2]));
                     tx.setTransactionDate(formattedDate);
                     tx.setTransactionType(parts[1].trim());
                     tx.setCurrency(parts[2].trim());
@@ -117,7 +119,7 @@ public class TransactionService {
                     tx.setDescription(parts[4].trim());
                     tx.setCategory(parts[5].trim());
                     tx.setPaymentMethod(parts[6].trim());
-                     // 检查是否存在重复的交易记录
+                    // Check for duplicate transaction records
                     boolean dup = false;
                     for (Transaction existing : allTxs) {
                         if (existing.equals(tx)) {
@@ -125,7 +127,7 @@ public class TransactionService {
                             break;
                         }
                     }
-                     // 如果没有重复交易，添加新交易记录
+                    // If no duplicate transaction exists, add the new transaction record
                     if (!dup) {
                         allTxs.add(tx);
                     }
@@ -146,13 +148,14 @@ public class TransactionService {
             alert.showAndWait();
             e.printStackTrace();
         }
-        // 将更新后的交易记录保存到本地文件
+        // Save the updated transaction records to local file
         saveTransactions(user, allTxs);
     }
 
-    //定义了一个 validateHeader方法，用于验证 CSV 文件的表头是否符合预期格式。
+    // Define a validateHeader method to verify if the CSV file header meets the
+    // expected format
     private boolean validateHeader(String[] headers) {
-        if (headers.length != 6) {
+        if (headers.length != 7) {
             return false;
         }
         return headers[0].trim().equals("Transaction Date") &&
@@ -163,10 +166,9 @@ public class TransactionService {
                 headers[5].trim().equals("Category") &&
                 headers[6].trim().equals("Payment Method");
     }
-    
 
-//将用户的交易记录保存到一个 JSON 文件中
-public void saveTransactions(User user, List<Transaction> transactions) {
+    // Save the user's transaction records to a JSON file
+    public void saveTransactions(User user, List<Transaction> transactions) {
         File dir = new File(TRANSACTION_DIR);
         if (!dir.exists()) {
             dir.mkdirs();
@@ -176,13 +178,13 @@ public void saveTransactions(User user, List<Transaction> transactions) {
         try {
             // Convert transactions to JSON string
             String jsonContent = gson.toJson(transactions);
-            
+
             // Get encryption key derived from user ID
             SecretKey key = getEncryptionKey(user);
-            
+
             // Encrypt the content
             EncryptedData encryptedData = EncryptionService.encrypt(jsonContent, key);
-            
+
             // Save encrypted content as JSON
             String content = gson.toJson(encryptedData);
             Files.write(jsonFile.toPath(), content.getBytes(StandardCharsets.UTF_8));
@@ -192,11 +194,11 @@ public void saveTransactions(User user, List<Transaction> transactions) {
     }
 
     /**
-     * 获取加密密钥
+     * Get encryption key
      */
     private static SecretKey getEncryptionKey(User user) throws EncryptionException {
-        // 使用固定密钥和用户ID派生加密密钥
-        byte[] salt = user.getUid().getBytes();  // 使用用户ID作为盐值
+        // Use fixed key and user ID to derive encryption key
+        byte[] salt = user.getUid().getBytes(); // Use user ID as salt value
         return EncryptionService.deriveKey(FIXED_KEY, salt);
     }
 }
