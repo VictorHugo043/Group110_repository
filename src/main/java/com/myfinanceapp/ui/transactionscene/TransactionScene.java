@@ -14,6 +14,9 @@ import javafx.stage.Stage;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.animation.PauseTransition;
+import javafx.util.Duration;
 
 import com.myfinanceapp.ui.common.LeftSidebarFactory;
 import com.myfinanceapp.service.AISortingService;
@@ -34,14 +37,13 @@ public class TransactionScene {
         return createScene(stage, width, height, loggedUser, themeService, new CurrencyService("CNY"));
     }
 
+
     public static Scene createScene(Stage stage, double width, double height, User loggedUser,
             ThemeService themeService, CurrencyService currencyService) {
         BorderPane root = new BorderPane();
         root.setStyle(themeService.getCurrentThemeStyle());
 
-        // Save initial width and height for scaling calculation
-        final double INITIAL_WIDTH = width;
-        final double INITIAL_HEIGHT = height;
+
 
         VBox sideBar = LeftSidebarFactory.createLeftSidebar(stage, "New", loggedUser, themeService, currencyService);
         root.setLeft(sideBar);
@@ -485,32 +487,17 @@ public class TransactionScene {
         GridPane.setHgrow(centerBox, Priority.ALWAYS);
         GridPane.setHgrow(rightBar, Priority.ALWAYS);
 
-        ScrollPane scrollPane = new ScrollPane();
-        scrollPane.setContent(centerAndRight);
-        scrollPane.setFitToWidth(true);
-        scrollPane.setFitToHeight(false);
-        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
-        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        String backgroundColor = themeService.isDayMode() ? "white" : "#2A2A2A";
-        scrollPane.setStyle(
-                "-fx-background: " + backgroundColor + ";" +
-                        "-fx-border-color: transparent;" +
-                        "-fx-control-inner-background: " + backgroundColor + ";" +
-                        "-fx-text-fill: transparent;");
-        scrollPane.setPadding(new Insets(0));
-
         VBox contentWrapper = new VBox(centerAndRight);
         contentWrapper.setFillWidth(true);
-        VBox.setVgrow(centerAndRight, Priority.ALWAYS);
-        contentWrapper.setMinHeight(400);
+        // VBox.setVgrow(centerAndRight, Priority.ALWAYS);
 
-        scrollPane.setContent(contentWrapper);
-
-        scrollPane.setMaxHeight(Double.MAX_VALUE);
-        scrollPane.setMaxWidth(Double.MAX_VALUE);
-        BorderPane.setMargin(scrollPane, new Insets(0));
-
-        scrollPane.getStyleClass().add("scroll-pane");
+        // Add ScrollPane for adaptive scrolling
+        ScrollPane scrollPane = new ScrollPane(contentWrapper);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scrollPane.setStyle("-fx-background: white; -fx-background-color: white; -fx-border-color: transparent;");
+        scrollPane.getStyleClass().add("custom-scroll-pane");
 
         root.setCenter(scrollPane);
         Scene scene = new Scene(root, width, height);
@@ -659,32 +646,14 @@ public class TransactionScene {
         String labelColor = themeService.isDayMode() ? "darkblue" : "white";
         scene.getStylesheets().add("data:,Label { -fx-text-fill: " + labelColor + "; }");
 
-        // Add scrollbar styles
-        String scrollbarStyle = """
-                .scroll-pane .scroll-bar:vertical {
-                    -fx-background-color: #e0e0e0;
-                    -fx-padding: 2;
-                }
-                .scroll-pane .scroll-bar:vertical .thumb {
-                    -fx-background-color: #3282fa;
-                    -fx-background-radius: 5px;
-                }
-                .scroll-pane .scroll-bar:vertical .track {
-                    -fx-background-color: #f0f0f0;
-                    -fx-background-radius: 0;
-                }
-                .scroll-pane .corner {
-                    -fx-background-color: transparent;
-                }
-                """;
-        scene.getStylesheets().add("data:text/css," + scrollbarStyle);
-
         // Create a method to adjust all component font sizes
         Runnable adjustFontSizes = () -> {
             try {
-                // Calculate scaling ratio of current window relative to initial window
-                double scaleW = scene.getWidth() / INITIAL_WIDTH;
-                double scaleH = scene.getHeight() / INITIAL_HEIGHT;
+                double currentWidth = scene.getWidth();
+                double currentHeight = scene.getHeight();
+                
+                double scaleW = currentWidth / 800; 
+                double scaleH = currentHeight / 600; 
                 double scale = Math.min(scaleW, scaleH);
 
                 // Base font size settings - can adjust these base values to suit different
@@ -699,7 +668,7 @@ public class TransactionScene {
                 titleFontSize = Math.max(14, Math.min(titleFontSize, 28));
                 labelFontSize = Math.max(10, Math.min(labelFontSize, 22));
                 inputFontSize = Math.max(9, Math.min(inputFontSize, 22));
-                formatLabelFontSize = Math.max(8, Math.min(formatLabelFontSize, 20));
+                formatLabelFontSize = Math.max(5, Math.min(formatLabelFontSize, 20));
 
                 // Update title font sizes
                 topicLabel.setStyle("-fx-font-size: " + titleFontSize + "px; -fx-font-weight: bold;"
@@ -775,9 +744,6 @@ public class TransactionScene {
                 centerBox.autosize();
                 rightBar.autosize();
                 centerAndRight.autosize();
-
-                // Request scroll pane to relayout
-                scrollPane.requestLayout();
             } catch (Exception e) {
                 System.err.println("Font adjustment error: " + e.getMessage());
                 e.printStackTrace();
@@ -788,45 +754,31 @@ public class TransactionScene {
         // maintain this distance
         final int BORDER_MARGIN = 20; // Can adjust this value as needed
 
-        // Use this fixed margin in the listener
-        scene.widthProperty().addListener((obs, oldVal, newVal) -> {
-            centerAndRight.setPrefWidth(newVal.doubleValue() - sideBar.getWidth() - BORDER_MARGIN);
-            scrollPane.layout();
-            Platform.runLater(adjustFontSizes);
-        });
-
-        scene.heightProperty().addListener((obs, oldVal, newVal) -> {
-            centerAndRight.setPrefHeight(newVal.doubleValue() - BORDER_MARGIN);
-            scrollPane.layout();
-            Platform.runLater(adjustFontSizes);
-        });
-
-        // Ensure layout is set correctly on first load
-        // This code resolves issues with border positions being incorrect on initial
-        // load
-        stage.setOnShown(event -> {
-            Platform.runLater(() -> {
-                // Use the same margin for consistency
-                centerAndRight.setPrefWidth(scene.getWidth() - sideBar.getWidth() - BORDER_MARGIN);
-                centerAndRight.setPrefHeight(scene.getHeight() - BORDER_MARGIN);
-                centerAndRight.layout();
-                scrollPane.layout();
-                adjustFontSizes.run();
-            });
-        });
-        // Ensure layout is adjusted on first load
-        Platform.runLater(() -> {
-            // Immediately set correct width and height, without waiting for window resize
-            // events
-            centerAndRight.setPrefWidth(scene.getWidth() - sideBar.getWidth() - 10);
-            centerAndRight.setPrefHeight(scene.getHeight() - 10);
-
-            // Request immediate relayout
-            scrollPane.layout();
-            centerAndRight.layout();
-
-            // Adjust font sizes
+        PauseTransition layoutPause = new PauseTransition(Duration.millis(50));
+        layoutPause.setOnFinished(e -> {
             adjustFontSizes.run();
+            centerAndRight.layout();
+        });
+        layoutPause.play();
+
+        ChangeListener<Number> stageSizeListener = (obs, oldVal, newVal) -> {
+            layoutPause.play(); // 使用暂停过渡确保布局完成
+        };
+        
+        // 添加场景尺寸监听
+        scene.widthProperty().addListener(stageSizeListener);
+        scene.heightProperty().addListener(stageSizeListener);
+        
+        // 修改可见性监听器
+        scene.getRoot().visibleProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal) {
+                layoutPause.play();
+                Platform.runLater(() -> {
+                    centerAndRight.setPrefWidth(stage.getWidth() - sideBar.getWidth() - BORDER_MARGIN);
+                    centerAndRight.setPrefHeight(stage.getHeight() - BORDER_MARGIN);
+                    centerAndRight.layout();
+                });
+            }
         });
 
         return scene;
