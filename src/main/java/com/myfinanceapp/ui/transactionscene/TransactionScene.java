@@ -30,25 +30,23 @@ public class TransactionScene {
     }
 
     public static Scene createScene(Stage stage, double width, double height, User loggedUser,
-                                    ThemeService themeService) {
+            ThemeService themeService) {
         return createScene(stage, width, height, loggedUser, themeService, new CurrencyService("CNY"));
     }
 
-
-
     public static Scene createScene(Stage stage, double width, double height, User loggedUser,
-                                    ThemeService themeService, CurrencyService currencyService) {
+            ThemeService themeService, CurrencyService currencyService) {
         BorderPane root = new BorderPane();
         root.setStyle(themeService.getCurrentThemeStyle());
 
-        // 保存初始宽高，用于计算缩放比例
+        // Save initial width and height for scaling calculation
         final double INITIAL_WIDTH = width;
         final double INITIAL_HEIGHT = height;
 
         VBox sideBar = LeftSidebarFactory.createLeftSidebar(stage, "New", loggedUser, themeService, currencyService);
         root.setLeft(sideBar);
 
-        // 中间手动输入部分
+        // Center manual input section
         VBox centerBox = new VBox();
         centerBox.setStyle(
                 "-fx-border-color: #3282fa;" +
@@ -63,7 +61,7 @@ public class TransactionScene {
         Label topicLabel = new Label("Manual Import:");
         topicLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;" + themeService.getTextColorStyle());
 
-        // 日期选择器部分
+        // Date picker section
         Label dateLabel = new Label("Transaction Date");
         dateLabel.setStyle(themeService.getTextColorStyle());
 
@@ -143,7 +141,8 @@ public class TransactionScene {
         descriptionField.setPrefRowCount(3);
         descriptionField.setWrapText(true);
         descriptionField.setFocusTraversable(false);
-        descriptionField.getStyleClass().add(themeService.isDayMode() ? "day-theme-text-field" : "night-theme-text-field");
+        descriptionField.getStyleClass()
+                .add(themeService.isDayMode() ? "day-theme-text-field" : "night-theme-text-field");
         descriptionField.setVisible(false);
         descriptionField.setVisible(true);
         VBox descriptionBox = new VBox(descriptionLabel, descriptionField);
@@ -342,7 +341,7 @@ public class TransactionScene {
         centerBox.setSpacing(10);
         centerBox.setAlignment(Pos.CENTER);
 
-        // 右侧传输csv文件部分
+        // Right side CSV file import section
         VBox rightBar = new VBox();
         rightBar.setStyle(
                 "-fx-border-color: #3282FA;" +
@@ -358,9 +357,15 @@ public class TransactionScene {
         promptLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;" + themeService.getTextColorStyle());
         VBox.setMargin(promptLabel, new Insets(10, 0, 0, 0));
 
+        // Improve button styling only
+        String buttonBaseStyle = themeService.getButtonStyle() +
+                "-fx-font-weight: bold; " +
+                "-fx-border-radius: 15; " +
+                "-fx-min-height: 35;";
+
         Button importCSVButton = new Button("Select a file");
-        importCSVButton.setPrefWidth(100);
-        importCSVButton.setStyle(themeService.getButtonStyle() + "-fx-font-weight: bold; " + "-fx-border-radius: 15;");
+        importCSVButton.setPrefWidth(160);
+        importCSVButton.setStyle(buttonBaseStyle);
 
         importCSVButton.setOnAction(event -> {
             FileChooser fileChooser = new FileChooser();
@@ -372,6 +377,54 @@ public class TransactionScene {
             }
         });
 
+        // Add Reference Template button
+        Button downloadTemplateButton = new Button("Reference Template");
+        downloadTemplateButton.setPrefWidth(160);
+        downloadTemplateButton.setStyle(buttonBaseStyle);
+
+        downloadTemplateButton.setOnAction(event -> {
+            // Create a FileChooser object to open a file selection dialog. Users can choose
+            // the location and filename through this dialog.
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Save Template Excel");
+            fileChooser.setInitialFileName("template.xlsx");
+            // Set file chooser extension filter to allow users to select .xlsx format
+            // files.
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Excel Files", "*.xlsx"));
+            // Display the file save dialog and return the target file (destFile) selected
+            // by the user, which contains the file path and name.
+            File destFile = fileChooser.showSaveDialog(stage);
+            if (destFile != null) {
+                try {
+                    // Read template.xlsx from resources
+                    java.io.InputStream in = TransactionScene.class.getResourceAsStream("/template.xlsx");
+                    if (in == null) {
+                        throw new Exception("Template file not found in resources.");
+                    }
+                    // If the file stream 'in' is not null, copy the file content to the
+                    // user-specified target file destFile
+                    java.nio.file.Files.copy(in, destFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                    in.close();
+
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("Download Complete");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Excel template downloaded successfully!");
+                    alert.showAndWait();
+                } catch (Exception e) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Download Failed");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Failed to download template: " + e.getMessage());
+                    alert.showAndWait();
+                }
+            }
+        });
+
+        HBox fileButtonBox = new HBox(importCSVButton, downloadTemplateButton);
+        fileButtonBox.setSpacing(10);
+        fileButtonBox.setAlignment(Pos.CENTER);
+
         Label formatLabel = new Label("Your .CSV file should\ncontain the following columns:\n\n" +
                 "Transaction Date\n" +
                 "(format: YYYY-MM-DD, e.g. 2025-03-15)\n\n" +
@@ -381,7 +434,7 @@ public class TransactionScene {
                 "(currency type, e.g. CNY, USD)\n\n" +
                 "Amount\n" +
                 "(number format, e.g. 1234.56)\n\n" +
-                "Description\n" +   
+                "Description\n" +
                 "(transaction description)\n\n" +
                 "Category\n" +
                 "(income and expense category)\n\n" +
@@ -393,13 +446,13 @@ public class TransactionScene {
 
         rightBar.getChildren().addAll(
                 promptLabel,
-                importCSVButton,
+                fileButtonBox,
                 formatLabel);
 
         rightBar.setSpacing(10);
         rightBar.setAlignment(Pos.CENTER);
 
-        // GridPane布局设置
+        // GridPane layout settings
         GridPane centerAndRight = new GridPane();
         centerAndRight.setPadding(new Insets(20, 20, 20, 20));
         centerAndRight.setHgap(20);
@@ -426,7 +479,7 @@ public class TransactionScene {
         centerAndRight.add(centerBox, 0, 0);
         centerAndRight.add(rightBar, 1, 0);
 
-        // 确保框线可以竖直拉伸
+        // Ensure borders can stretch vertically
         GridPane.setVgrow(centerBox, Priority.ALWAYS);
         GridPane.setVgrow(rightBar, Priority.ALWAYS);
         GridPane.setHgrow(centerBox, Priority.ALWAYS);
@@ -458,7 +511,7 @@ public class TransactionScene {
         BorderPane.setMargin(scrollPane, new Insets(0));
 
         scrollPane.getStyleClass().add("scroll-pane");
-        
+
         root.setCenter(scrollPane);
         Scene scene = new Scene(root, width, height);
 
@@ -606,7 +659,7 @@ public class TransactionScene {
         String labelColor = themeService.isDayMode() ? "darkblue" : "white";
         scene.getStylesheets().add("data:,Label { -fx-text-fill: " + labelColor + "; }");
 
-        // 添加滚动条样式
+        // Add scrollbar styles
         String scrollbarStyle = """
                 .scroll-pane .scroll-bar:vertical {
                     -fx-background-color: #e0e0e0;
@@ -626,31 +679,35 @@ public class TransactionScene {
                 """;
         scene.getStylesheets().add("data:text/css," + scrollbarStyle);
 
-        // 创建一个方法来调整所有组件的字体大小
+        // Create a method to adjust all component font sizes
         Runnable adjustFontSizes = () -> {
             try {
-                // 计算当前窗口相对于初始窗口的缩放比例
+                // Calculate scaling ratio of current window relative to initial window
                 double scaleW = scene.getWidth() / INITIAL_WIDTH;
                 double scaleH = scene.getHeight() / INITIAL_HEIGHT;
                 double scale = Math.min(scaleW, scaleH);
-                
-                // 基础字体大小设置 - 可以调整这些基础值以适应不同窗口大小
+
+                // Base font size settings - can adjust these base values to suit different
+                // window sizes
                 double titleFontSize = 25 * scale;
                 double labelFontSize = 17 * scale;
                 double inputFontSize = 15 * scale;
                 double formatLabelFontSize = 15 * scale;
-                
-                // 确保字体大小有最小值和最大值限制，防止太小或太大
+
+                // Ensure font sizes have minimum and maximum limits to prevent too small or too
+                // large
                 titleFontSize = Math.max(14, Math.min(titleFontSize, 28));
                 labelFontSize = Math.max(10, Math.min(labelFontSize, 22));
                 inputFontSize = Math.max(9, Math.min(inputFontSize, 22));
                 formatLabelFontSize = Math.max(8, Math.min(formatLabelFontSize, 20));
-                
-                // 更新标题字体大小
-                topicLabel.setStyle("-fx-font-size: " + titleFontSize + "px; -fx-font-weight: bold;" + themeService.getTextColorStyle());
-                promptLabel.setStyle("-fx-font-size: " + titleFontSize + "px; -fx-font-weight: bold;" + themeService.getTextColorStyle());
-                
-                // 更新标签字体大小
+
+                // Update title font sizes
+                topicLabel.setStyle("-fx-font-size: " + titleFontSize + "px; -fx-font-weight: bold;"
+                        + themeService.getTextColorStyle());
+                promptLabel.setStyle("-fx-font-size: " + titleFontSize + "px; -fx-font-weight: bold;"
+                        + themeService.getTextColorStyle());
+
+                // Update label font sizes
                 dateLabel.setFont(Font.font(dateLabel.getFont().getFamily(), labelFontSize));
                 typeLabel.setFont(Font.font(typeLabel.getFont().getFamily(), labelFontSize));
                 currencyLabel.setFont(Font.font(currencyLabel.getFont().getFamily(), labelFontSize));
@@ -659,78 +716,79 @@ public class TransactionScene {
                 categoryLabel.setFont(Font.font(categoryLabel.getFont().getFamily(), labelFontSize));
                 methodLabel.setFont(Font.font(methodLabel.getFont().getFamily(), labelFontSize));
                 formatLabel.setFont(Font.font(formatLabel.getFont().getFamily(), formatLabelFontSize));
-                
-                // 更新按钮字体大小
+
+                // Update button font sizes
                 submitManualBtn.setStyle(submitManualBtn.getStyle() + "-fx-font-size: " + inputFontSize + "px;");
                 importCSVButton.setStyle(importCSVButton.getStyle() + "-fx-font-size: " + inputFontSize + "px;");
                 autoSortButton.setStyle(autoSortButton.getStyle() + "-fx-font-size: " + inputFontSize + "px;");
-                
-                // 调整按钮大小与字体成比例
+
+                // Adjust button size proportionate to font
                 double buttonHeight = 25 * scale;
-                buttonHeight = Math.max(20, Math.min(buttonHeight, 30)); // 限制按钮高度范围
+                buttonHeight = Math.max(20, Math.min(buttonHeight, 30)); // Limit button height range
                 submitManualBtn.setPrefHeight(buttonHeight);
                 importCSVButton.setPrefHeight(buttonHeight);
                 autoSortButton.setPrefHeight(buttonHeight);
-                
-                // 更新文本输入控件字体大小
+
+                // Update text input control font sizes
                 amountField.setStyle(amountField.getStyle() + "-fx-font-size: " + inputFontSize + "px;");
                 categoryField.setStyle(categoryField.getStyle() + "-fx-font-size: " + inputFontSize + "px;");
                 methodField.setStyle(methodField.getStyle() + "-fx-font-size: " + inputFontSize + "px;");
                 descriptionField.setStyle(descriptionField.getStyle() + "-fx-font-size: " + inputFontSize + "px;");
-                
-                // 调整文本输入框高度
+
+                // Adjust text input field heights
                 double fieldHeight = 28 * scale;
-                fieldHeight = Math.max(22, Math.min(fieldHeight, 35)); // 限制输入框高度范围
+                fieldHeight = Math.max(22, Math.min(fieldHeight, 35)); // Limit input field height range
                 amountField.setPrefHeight(fieldHeight);
                 categoryField.setPrefHeight(fieldHeight);
                 methodField.setPrefHeight(fieldHeight);
-                
-                // 描述框高度单独设置，可以更大一些
+
+                // Description field height set separately, can be larger
                 double descFieldHeight = 70 * scale;
-                descFieldHeight = Math.max(45, Math.min(descFieldHeight, 90)); // 限制描述框高度范围
+                descFieldHeight = Math.max(45, Math.min(descFieldHeight, 90)); // Limit description field height range
                 descriptionField.setPrefHeight(descFieldHeight);
-                
-                // 更新下拉菜单字体大小
+
+                // Update dropdown menu font sizes
                 typeCombo.setStyle(typeCombo.getStyle() + "-fx-font-size: " + inputFontSize + "px;");
                 currencyCombo.setStyle(currencyCombo.getStyle() + "-fx-font-size: " + inputFontSize + "px;");
-                
-                // 调整下拉菜单高度
+
+                // Adjust dropdown menu heights
                 typeCombo.setPrefHeight(fieldHeight);
                 currencyCombo.setPrefHeight(fieldHeight);
-                
-                // 更新日期选择器字体大小
+
+                // Update date picker font size
                 datePicker.setStyle(datePicker.getStyle() + "-fx-font-size: " + inputFontSize + "px;");
                 datePicker.setPrefHeight(fieldHeight);
-                
-                // 调整间距也随窗口大小变化
+
+                // Adjust spacing also with window size
                 double spacing = 10 * scale;
-                spacing = Math.max(5, Math.min(spacing, 15)); // 限制间距范围
+                spacing = Math.max(5, Math.min(spacing, 15)); // Limit spacing range
                 centerBox.setSpacing(spacing);
                 rightBar.setSpacing(spacing);
-                
-                // 调整内边距，确保内容在缩小时不会贴边
+
+                // Adjust padding to ensure content doesn't hug edges when shrunk
                 double padding = 20 * scale;
-                padding = Math.max(10, Math.min(padding, 25)); // 限制内边距范围
+                padding = Math.max(10, Math.min(padding, 25)); // Limit padding range
                 centerBox.setPadding(new Insets(padding));
                 rightBar.setPadding(new Insets(padding));
-                
-                // 重新计算最佳宽度和高度
+
+                // Recalculate optimal width and height
                 centerBox.autosize();
                 rightBar.autosize();
                 centerAndRight.autosize();
-                
-                // 请求滚动面板重新布局
+
+                // Request scroll pane to relayout
                 scrollPane.requestLayout();
             } catch (Exception e) {
                 System.err.println("Font adjustment error: " + e.getMessage());
                 e.printStackTrace();
             }
         };
-        
-        // 设置一个固定的边距常量，确保边框和窗口边缘始终保持这个距离
-        final int BORDER_MARGIN = 20; // 可以根据需要调整这个值
 
-        // 在监听器中使用这个固定边距
+        // Set a fixed margin constant to ensure borders and window edges always
+        // maintain this distance
+        final int BORDER_MARGIN = 20; // Can adjust this value as needed
+
+        // Use this fixed margin in the listener
         scene.widthProperty().addListener((obs, oldVal, newVal) -> {
             centerAndRight.setPrefWidth(newVal.doubleValue() - sideBar.getWidth() - BORDER_MARGIN);
             scrollPane.layout();
@@ -743,11 +801,12 @@ public class TransactionScene {
             Platform.runLater(adjustFontSizes);
         });
 
-        // 确保第一次加载时就正确设置布局
-        // 这段代码解决初始加载时边框位置不正确的问题
+        // Ensure layout is set correctly on first load
+        // This code resolves issues with border positions being incorrect on initial
+        // load
         stage.setOnShown(event -> {
             Platform.runLater(() -> {
-                // 使用相同的边距确保一致性
+                // Use the same margin for consistency
                 centerAndRight.setPrefWidth(scene.getWidth() - sideBar.getWidth() - BORDER_MARGIN);
                 centerAndRight.setPrefHeight(scene.getHeight() - BORDER_MARGIN);
                 centerAndRight.layout();
@@ -755,17 +814,18 @@ public class TransactionScene {
                 adjustFontSizes.run();
             });
         });
-        // 确保第一次加载时也调整布局
+        // Ensure layout is adjusted on first load
         Platform.runLater(() -> {
-            // 立即设置正确的宽度和高度，不等待窗口调整事件
+            // Immediately set correct width and height, without waiting for window resize
+            // events
             centerAndRight.setPrefWidth(scene.getWidth() - sideBar.getWidth() - 10);
             centerAndRight.setPrefHeight(scene.getHeight() - 10);
-            
-            // 请求立即重新布局
+
+            // Request immediate relayout
             scrollPane.layout();
             centerAndRight.layout();
-            
-            // 调整字体大小
+
+            // Adjust font sizes
             adjustFontSizes.run();
         });
 
