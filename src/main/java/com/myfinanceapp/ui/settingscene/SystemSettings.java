@@ -114,7 +114,7 @@ public class SystemSettings {
         HBox langBox = new HBox(20);
         langLabel.setFont(Font.font("Arial", 14));
         langLabel.setStyle(themeService.getTextColorStyle());
-        langCombo.getItems().addAll("English", "Chinese", "Spanish");
+        langCombo.getItems().addAll("English", "Chinese");
         langCombo.setValue("English");
         langCombo.getStyleClass().add(themeService.isDayMode() ? "day-theme-combo-box" : "night-theme-combo-box");
         langBox.getChildren().addAll(languagesIcon, langLabel, langCombo);
