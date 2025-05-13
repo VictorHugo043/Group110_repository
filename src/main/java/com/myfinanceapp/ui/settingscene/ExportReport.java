@@ -9,6 +9,7 @@ import com.myfinanceapp.ui.common.SettingsTopBarFactory;
 import com.myfinanceapp.ui.statusscene.StatusScene;
 import com.myfinanceapp.service.ThemeService;
 import com.myfinanceapp.service.CurrencyService;
+import com.myfinanceapp.service.LanguageService;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -25,7 +26,7 @@ import java.util.Objects;
  * "Export Report" interface: Allows users to select a date range and export a financial report as a PDF.
  */
 public class ExportReport {
-
+    private static final LanguageService languageService = LanguageService.getInstance();
     private static User currentUser;
     private static ExportReportService reportService;
 
@@ -88,7 +89,7 @@ public class ExportReport {
             // Fallback: Leave icon empty if resource is not found
         }
 
-        Label dateRangeLabel = new Label("Select Date Range");
+        Label dateRangeLabel = new Label(languageService.getTranslation("select_date_range"));
         dateRangeLabel.setStyle(
                 "-fx-text-fill: #3282FA;" +
                         "-fx-font-size: 16;" +
@@ -99,16 +100,16 @@ public class ExportReport {
         dateRangeHeader.setAlignment(Pos.CENTER_LEFT);
 
         DatePicker startDatePicker = new DatePicker();
-        startDatePicker.setPromptText("Start Date");
+        startDatePicker.setPromptText(languageService.getTranslation("start_date"));
         // Apply theme style class
         startDatePicker.getStyleClass().add(themeService.isDayMode() ? "day-theme-date-picker" : "night-theme-date-picker");
 
-        Label toLabel = new Label("to");
+        Label toLabel = new Label(languageService.getTranslation("to"));
         // Apply theme text color
         toLabel.setStyle(themeService.getTextColorStyle());
 
         DatePicker endDatePicker = new DatePicker();
-        endDatePicker.setPromptText("End Date");
+        endDatePicker.setPromptText(languageService.getTranslation("end_date"));
         // Apply theme style class
         endDatePicker.getStyleClass().add(themeService.isDayMode() ? "day-theme-date-picker" : "night-theme-date-picker");
 
@@ -116,17 +117,17 @@ public class ExportReport {
         datePickerRow.setAlignment(Pos.CENTER_LEFT);
 
         // Export button
-        Button exportButton = new Button("Export Report");
+        Button exportButton = new Button(languageService.getTranslation("export_report"));
         exportButton.setStyle(themeService.getButtonStyle());
 
         // Back to Status button
-        Button backBtn = new Button("Back to Status");
+        Button backBtn = new Button(languageService.getTranslation("back_to_status"));
         backBtn.setStyle(themeService.getButtonStyle());
         backBtn.setOnAction(e -> {
             StatusScene statusScene = new StatusScene(stage, width, height, loggedUser);
             stage.setScene(statusScene.createScene(themeService, currencyService));
-            StatusService statusService = new StatusService(statusScene, loggedUser, currencyService);
-            stage.setTitle("Finanger - Status");
+            StatusService statusService = new StatusService(statusScene, loggedUser, currencyService, languageService);
+            stage.setTitle("Finanger - " + languageService.getTranslation("status"));
         });
 
         // Export functionality
@@ -136,15 +137,15 @@ public class ExportReport {
             exportButton.setDisable(true); // Disable button during export
             reportService.handleExport(stage, startDatePicker.getValue(), endDatePicker.getValue())
                     .thenRun(() -> Platform.runLater(() -> {
-                        showAlert("Success", "Financial report exported successfully!");
+                        showAlert(languageService.getTranslation("success"), languageService.getTranslation("export_success"));
                         exportButton.setDisable(false);
                     }))
                     .exceptionally(throwable -> {
                         Platform.runLater(() -> {
-                            String errorMsg = "Failed to export report: " + throwable.getMessage();
+                            String errorMsg = languageService.getTranslation("export_failed") + ": " + throwable.getMessage();
                             System.err.println(errorMsg);
                             throwable.printStackTrace();
-                            showAlert("Error", errorMsg);
+                            showAlert(languageService.getTranslation("error"), errorMsg);
                             exportButton.setDisable(false);
                         });
                         return null;

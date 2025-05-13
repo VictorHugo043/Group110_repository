@@ -4,6 +4,7 @@ import com.myfinanceapp.model.Transaction;
 import com.myfinanceapp.model.User;
 import com.myfinanceapp.service.StatusService;
 import com.myfinanceapp.service.ThemeService;
+import com.myfinanceapp.service.LanguageService;
 import com.myfinanceapp.service.TransactionManagementService;
 import com.myfinanceapp.ui.common.LeftSidebarFactory;
 import com.myfinanceapp.ui.statusscene.StatusScene;
@@ -28,6 +29,7 @@ import javafx.util.converter.DoubleStringConverter;
 import java.util.List;
 
 public class TransactionManagementScene {
+    private static final LanguageService languageService = LanguageService.getInstance();
     private final Stage stage;
     private final double width;
     private final double height;
@@ -66,7 +68,7 @@ public class TransactionManagementScene {
         root.setStyle(themeService.getCurrentThemeStyle());
 
         // 使用相同的侧边栏
-        VBox sideBar = LeftSidebarFactory.createLeftSidebar(stage, "Transactions", currentUser, themeService, currencyService);
+        VBox sideBar = LeftSidebarFactory.createLeftSidebar(stage, "Status", currentUser, themeService, currencyService);
         root.setLeft(sideBar);
 
         // 主内容区
@@ -98,7 +100,7 @@ public class TransactionManagementScene {
         service.initializeFilters();  // 初始化筛选选项
 
         // 返回按钮
-        Button backButton = new Button("Back to Status");
+        Button backButton = new Button(languageService.getTranslation("back_to_status"));
         backButton.setStyle(themeService.getButtonStyle());
         backButton.setOnAction(e -> {
             // 获取当前窗口的实际大小
@@ -108,8 +110,8 @@ public class TransactionManagementScene {
             StatusScene statusScene = new StatusScene(stage, currentWidth, currentHeight, currentUser);
             Scene scene = statusScene.createScene(themeService, currencyService);
             stage.setScene(scene);
-            StatusService statusService = new StatusService(statusScene, currentUser, currencyService);
-            stage.setTitle("Finanger - Status");
+            StatusService statusService = new StatusService(statusScene, currentUser, currencyService, languageService);
+            stage.setTitle("Finanger - " + languageService.getTranslation("status"));
         });
 
         mainContent.getChildren().addAll(headerBox, filterBox, transactionTable, backButton);
@@ -123,7 +125,7 @@ public class TransactionManagementScene {
     }
 
     private HBox createHeader() {
-        Label title = new Label("Manage Your Transaction");
+        Label title = new Label(languageService.getTranslation("manage_transactions"));
         title.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;" + themeService.getTextColorStyle());
 
         HBox header = new HBox(title);
@@ -133,18 +135,18 @@ public class TransactionManagementScene {
 
     private HBox createFilterBox() {
         // 创建筛选下拉框
-        dateFilter = createFilterComboBox("Date");
-        typeFilter = createFilterComboBox("Type");
-        currencyFilter = createFilterComboBox("Currency");
-        categoryFilter = createFilterComboBox("Category");
-        paymentMethodFilter = createFilterComboBox("Payment Method");
+        dateFilter = createFilterComboBox(languageService.getTranslation("date"));
+        typeFilter = createFilterComboBox(languageService.getTranslation("transaction_type"));
+        currencyFilter = createFilterComboBox(languageService.getTranslation("currency"));
+        categoryFilter = createFilterComboBox(languageService.getTranslation("category"));
+        paymentMethodFilter = createFilterComboBox(languageService.getTranslation("payment_method"));
 
         // 重置按钮
-        Button resetButton = new Button("Reset the filter");
+        Button resetButton = new Button(languageService.getTranslation("reset_filter"));
         resetButton.setStyle(themeService.getButtonStyle());
         resetButton.setOnAction(e -> service.resetFilters());
 
-        Label filterLabel = new Label("Filter:");
+        Label filterLabel = new Label(languageService.getTranslation("filter") + ":");
         filterLabel.setStyle(themeService.getTextColorStyle());
 
         HBox filterBox = new HBox(10, filterLabel,
@@ -158,7 +160,7 @@ public class TransactionManagementScene {
     private ComboBox<String> createFilterComboBox(String name) {
         ComboBox<String> comboBox = new ComboBox<>();
         comboBox.setPromptText(name);
-        comboBox.setValue("All " + name);
+        comboBox.setValue(languageService.getTranslation("all"));
         // Apply theme style class
         comboBox.getStyleClass().add(themeService.isDayMode() ? "day-theme-combo-box" : "night-theme-combo-box");
 
@@ -191,7 +193,7 @@ public class TransactionManagementScene {
         });
 
         // 创建表格列
-        TableColumn<Transaction, String> dateCol = new TableColumn<>("Date");
+        TableColumn<Transaction, String> dateCol = new TableColumn<>(languageService.getTranslation("date"));
         dateCol.setCellValueFactory(new PropertyValueFactory<>("transactionDate"));
         dateCol.setCellFactory(TextFieldTableCell.forTableColumn());
         dateCol.setOnEditCommit(e -> {
@@ -208,7 +210,7 @@ public class TransactionManagementScene {
         });
         dateCol.setSortable(true);
 
-        TableColumn<Transaction, String> typeCol = new TableColumn<>("Type");
+        TableColumn<Transaction, String> typeCol = new TableColumn<>(languageService.getTranslation("transaction_type"));
         typeCol.setCellValueFactory(new PropertyValueFactory<>("transactionType"));
         typeCol.setCellFactory(TextFieldTableCell.forTableColumn());
         typeCol.setOnEditCommit(e -> {
@@ -218,7 +220,7 @@ public class TransactionManagementScene {
         });
         typeCol.setSortable(true);
 
-        TableColumn<Transaction, String> currencyCol = new TableColumn<>("Currency");
+        TableColumn<Transaction, String> currencyCol = new TableColumn<>(languageService.getTranslation("currency"));
         currencyCol.setCellValueFactory(new PropertyValueFactory<>("currency"));
         currencyCol.setCellFactory(TextFieldTableCell.forTableColumn());
         currencyCol.setOnEditCommit(e -> {
@@ -228,7 +230,7 @@ public class TransactionManagementScene {
         });
         currencyCol.setSortable(true);
 
-        TableColumn<Transaction, Double> amountCol = new TableColumn<>("Amount");
+        TableColumn<Transaction, Double> amountCol = new TableColumn<>(languageService.getTranslation("amount"));
         amountCol.setCellValueFactory(new PropertyValueFactory<>("amount"));
         amountCol.setCellFactory(TextFieldTableCell.forTableColumn(new DoubleStringConverter()));
         amountCol.setOnEditCommit(e -> {
@@ -238,7 +240,7 @@ public class TransactionManagementScene {
         });
         amountCol.setSortable(true);
 
-        TableColumn<Transaction, String> categoryCol = new TableColumn<>("Category");
+        TableColumn<Transaction, String> categoryCol = new TableColumn<>(languageService.getTranslation("category"));
         categoryCol.setCellValueFactory(new PropertyValueFactory<>("category"));
         categoryCol.setCellFactory(TextFieldTableCell.forTableColumn());
         categoryCol.setOnEditCommit(e -> {
@@ -248,7 +250,7 @@ public class TransactionManagementScene {
         });
         categoryCol.setSortable(true);
 
-        TableColumn<Transaction, String> paymentCol = new TableColumn<>("PaymentMethod");
+        TableColumn<Transaction, String> paymentCol = new TableColumn<>(languageService.getTranslation("payment_method"));
         paymentCol.setCellValueFactory(new PropertyValueFactory<>("paymentMethod"));
         paymentCol.setCellFactory(TextFieldTableCell.forTableColumn());
         paymentCol.setOnEditCommit(e -> {
@@ -258,7 +260,7 @@ public class TransactionManagementScene {
         });
         paymentCol.setSortable(true);
 
-        TableColumn<Transaction, String> descriptionCol = new TableColumn<>("Description");
+        TableColumn<Transaction, String> descriptionCol = new TableColumn<>(languageService.getTranslation("description"));
         descriptionCol.setCellValueFactory(new PropertyValueFactory<>("description"));
         descriptionCol.setCellFactory(TextFieldTableCell.forTableColumn());
         descriptionCol.setOnEditCommit(e -> {
@@ -277,10 +279,10 @@ public class TransactionManagementScene {
         });
 
         // 添加删除操作列
-        TableColumn<Transaction, Void> actionCol = new TableColumn<>("Action");
+        TableColumn<Transaction, Void> actionCol = new TableColumn<>(languageService.getTranslation("action"));
         actionCol.setPrefWidth(100);
         actionCol.setCellFactory(param -> new TableCell<>() {
-            private final Button deleteButton = new Button("Delete");
+            private final Button deleteButton = new Button(languageService.getTranslation("delete"));
             {
                 deleteButton.setStyle(themeService.getButtonStyle() + "-fx-font-size: 12px;");
                 deleteButton.setOnAction(event -> {

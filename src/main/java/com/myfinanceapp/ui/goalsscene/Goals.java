@@ -8,6 +8,7 @@ import com.myfinanceapp.service.TransactionDataService;
 import com.myfinanceapp.ui.common.SceneManager;
 import com.myfinanceapp.service.ThemeService;
 import com.myfinanceapp.service.CurrencyService;
+import com.myfinanceapp.service.LanguageService;
 
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -32,6 +33,8 @@ import java.util.List;
 import java.util.ArrayList;
 
 public class Goals {
+    private static final LanguageService languageService = LanguageService.getInstance();
+
     // 重载方法，兼容旧的调用方式
     public static Scene createScene(Stage stage, double width, double height, User loggedUser) {
         return createScene(stage, width, height, loggedUser, new ThemeService(), new CurrencyService("CNY"));
@@ -67,7 +70,7 @@ public class Goals {
 
         // If no goals, show a message
         if (userGoals.isEmpty()) {
-            Label noGoalsLabel = new Label("No goals found. Create your first goal!");
+            Label noGoalsLabel = new Label(languageService.getTranslation("no_goals_found"));
             noGoalsLabel.setStyle("-fx-font-size: 16px;" + themeService.getTextColorStyle());
             centerContent.getChildren().add(noGoalsLabel);
         } else {
@@ -145,6 +148,9 @@ public class Goals {
             layoutCards(centerGrid, allCards, newMaxCols);
         });
 
+        // 设置窗口标题
+        stage.setTitle("Finanger - " + languageService.getTranslation("goals"));
+
         return scene;
     }
 
@@ -221,9 +227,9 @@ public class Goals {
         deleteButton.setOnAction(event -> {
             // Confirm deletion with alert
             Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
-            confirmation.setTitle("Delete Goal");
-            confirmation.setHeaderText("Delete \"" + goal.getTitle() + "\"");
-            confirmation.setContentText("Are you sure you want to delete this goal? This action cannot be undone.");
+            confirmation.setTitle(languageService.getTranslation("delete_goal"));
+            confirmation.setHeaderText(languageService.getTranslation("delete_goal_header") + " \"" + goal.getTitle() + "\"");
+            confirmation.setContentText(languageService.getTranslation("delete_goal_confirmation"));
 
             // Show dialog and wait for user response
             confirmation.showAndWait().ifPresent(response -> {
@@ -242,9 +248,9 @@ public class Goals {
                     } catch (IOException e) {
                         // Show error message
                         Alert error = new Alert(Alert.AlertType.ERROR);
-                        error.setTitle("Error");
-                        error.setHeaderText("Failed to delete goal");
-                        error.setContentText("An error occurred: " + e.getMessage());
+                        error.setTitle(languageService.getTranslation("error"));
+                        error.setHeaderText(languageService.getTranslation("failed_to_delete_goal"));
+                        error.setContentText(languageService.getTranslation("error_occurred") + ": " + e.getMessage());
                         error.show();
                         e.printStackTrace();
                     }
@@ -276,11 +282,11 @@ public class Goals {
             switch (goal.getType()) {
                 case "SAVING":
                     double currentNetBalance = transactionService.calculateNetBalance();
-                    VBox targetAmountBox = createLabelPair("Target Amount",
+                    VBox targetAmountBox = createLabelPair(languageService.getTranslation("target_amount"),
                             GoalService.formatNumber(goal.getTargetAmount()) + " " + currency, themeService);
-                    VBox deadlineBox = createLabelPair("Deadline",
+                    VBox deadlineBox = createLabelPair(languageService.getTranslation("deadline"),
                             goal.getDeadline().format(formatter), themeService);
-                    VBox currentSavingsBox = createLabelPair("Current Savings",
+                    VBox currentSavingsBox = createLabelPair(languageService.getTranslation("current_savings"),
                             GoalService.formatNumber(currentNetBalance) + " " + currency, themeService);
                     textInfo.getChildren().addAll(targetAmountBox, deadlineBox, currentSavingsBox);
                     progress = GoalService.calculateSavingProgress(currentNetBalance, goal.getTargetAmount());
@@ -288,11 +294,11 @@ public class Goals {
 
                 case "DEBT_REPAYMENT":
                     double totalDebtRepayment = transactionService.calculateTotalAmountByCategory("Debt");
-                    VBox totalDebtBox = createLabelPair("Total Debt Amount",
+                    VBox totalDebtBox = createLabelPair(languageService.getTranslation("total_debt_amount"),
                             GoalService.formatNumber(goal.getTargetAmount()) + " " + currency, themeService);
-                    VBox repaymentDeadlineBox = createLabelPair("Repayment Deadline",
+                    VBox repaymentDeadlineBox = createLabelPair(languageService.getTranslation("repayment_deadline"),
                             goal.getDeadline().format(formatter), themeService);
-                    VBox amountPaidBox = createLabelPair("Amount Paid",
+                    VBox amountPaidBox = createLabelPair(languageService.getTranslation("amount_paid"),
                             GoalService.formatNumber(totalDebtRepayment) + " " + currency, themeService);
                     textInfo.getChildren().addAll(totalDebtBox, repaymentDeadlineBox, amountPaidBox);
                     progress = GoalService.calculateDebtProgress(totalDebtRepayment, goal.getTargetAmount());
@@ -301,11 +307,11 @@ public class Goals {
 
                 case "BUDGET_CONTROL":
                     double currentExpense = transactionService.calculateTotalExpense();
-                    VBox budgetCategoryBox = createLabelPair("Budget Category",
-                            goal.getCategory() != null ? goal.getCategory() : "General", themeService);
-                    VBox budgetAmountBox = createLabelPair("Budget Amount",
+                    VBox budgetCategoryBox = createLabelPair(languageService.getTranslation("budget_category"),
+                            goal.getCategory() != null ? goal.getCategory() : languageService.getTranslation("general"), themeService);
+                    VBox budgetAmountBox = createLabelPair(languageService.getTranslation("budget_amount"),
                             GoalService.formatNumber(goal.getTargetAmount()) + " " + currency, themeService);
-                    VBox currentExpensesBox = createLabelPair("Current Expenses",
+                    VBox currentExpensesBox = createLabelPair(languageService.getTranslation("current_expenses"),
                             GoalService.formatNumber(currentExpense) + " " + currency, themeService);
                     textInfo.getChildren().addAll(budgetCategoryBox, budgetAmountBox, currentExpensesBox);
                     progress = GoalService.calculateBudgetUsage(currentExpense, goal.getTargetAmount());
@@ -343,7 +349,7 @@ public class Goals {
             indicatorContainer.getChildren().addAll(arcGroup, progressLabel);
 
         } catch (IOException e) {
-            Label errorLabel = new Label("Error loading transaction data");
+            Label errorLabel = new Label(languageService.getTranslation("error_loading_transaction"));
             errorLabel.setStyle(themeService.getTextColorStyle());
             textInfo.getChildren().add(errorLabel);
             e.printStackTrace();
@@ -395,7 +401,7 @@ public class Goals {
                         themeService.getCurrentFormBackgroundStyle()
         );
 
-        Label title = new Label("Create a new goal");
+        Label title = new Label(languageService.getTranslation("create_new_goal"));
         title.setFont(Font.font("Arial", 18));
         title.setTextFill(Color.GRAY);
 
@@ -403,8 +409,8 @@ public class Goals {
         VBox textInfo = new VBox(8);
         textInfo.setAlignment(Pos.CENTER_LEFT);
         textInfo.setPadding(new Insets(10, 0, 0, 0));
-        Label instructionLabel = new Label("Click to create");
-        Label instructionLabel2 = new Label("a new financial goal");
+        Label instructionLabel = new Label(languageService.getTranslation("click_to_create"));
+        Label instructionLabel2 = new Label(languageService.getTranslation("new_financial_goal"));
         instructionLabel.setStyle(themeService.getTextColorStyle());
         instructionLabel2.setStyle(themeService.getTextColorStyle());
         textInfo.getChildren().addAll(instructionLabel, instructionLabel2);
