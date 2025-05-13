@@ -23,22 +23,54 @@ import javafx.stage.Stage;
 import java.util.Objects;
 
 /**
- * "Export Report" interface: Allows users to select a date range and export a financial report as a PDF.
+ * An export report interface for the Finanger application.
+ * This scene allows users to select a date range and export financial reports as PDF files.
+ * It features theme customization, internationalization support, and responsive layout.
  */
 public class ExportReport {
     private static final LanguageService languageService = LanguageService.getInstance();
     private static User currentUser;
     private static ExportReportService reportService;
 
-    // 重载方法，兼容旧的调用方式
+    /**
+     * Creates and returns an export report scene with default theme and currency settings.
+     *
+     * @param stage The stage to display the scene
+     * @param width The initial width of the scene
+     * @param height The initial height of the scene
+     * @param loggedUser The currently logged-in user
+     * @return A configured Scene object for the export report interface
+     */
     public static Scene createScene(Stage stage, double width, double height, User loggedUser) {
         return createScene(stage, width, height, loggedUser, new ThemeService(), new CurrencyService("CNY"));
     }
 
+    /**
+     * Creates and returns an export report scene with specified theme settings.
+     *
+     * @param stage The stage to display the scene
+     * @param width The initial width of the scene
+     * @param height The initial height of the scene
+     * @param loggedUser The currently logged-in user
+     * @param themeService The theme service to use for styling
+     * @return A configured Scene object for the export report interface
+     */
     public static Scene createScene(Stage stage, double width, double height, User loggedUser, ThemeService themeService) {
         return createScene(stage, width, height, loggedUser, themeService, new CurrencyService("CNY"));
     }
 
+    /**
+     * Creates and returns an export report scene with specified theme and currency settings.
+     * The scene includes date range selection, export controls, and navigation options.
+     *
+     * @param stage The stage to display the scene
+     * @param width The initial width of the scene
+     * @param height The initial height of the scene
+     * @param loggedUser The currently logged-in user
+     * @param themeService The theme service to use for styling
+     * @param currencyService The currency service to use for the application
+     * @return A configured Scene object for the export report interface
+     */
     public static Scene createScene(Stage stage, double width, double height, User loggedUser, ThemeService themeService, CurrencyService currencyService) {
         // Store current logged-in user
         currentUser = loggedUser;
@@ -179,7 +211,10 @@ public class ExportReport {
     }
 
     /**
-     * Simple alert dialog.
+     * Displays an alert dialog with the specified title and message.
+     *
+     * @param title The title of the alert dialog
+     * @param msg The message to display in the alert dialog
      */
     private static void showAlert(String title, String msg) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);

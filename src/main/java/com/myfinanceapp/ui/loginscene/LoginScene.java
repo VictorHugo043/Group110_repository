@@ -22,7 +22,10 @@ import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
 /**
- * 斜线分割的登录界面 (动态重排版本)
+ * A dynamic login scene for the Finanger application featuring a diagonal split design.
+ * This scene provides user authentication functionality with a responsive layout that
+ * automatically adjusts based on window size. It includes username/password fields,
+ * login button, and links to password reset and signup functionality.
  */
 public class LoginScene {
 
@@ -73,12 +76,26 @@ public class LoginScene {
     private static final double PANE_X_FRAC = 440.0 / INITIAL_WIDTH;
 
     /**
-     * 创建并返回此登录场景
+     * Creates and returns a login scene with default currency settings.
+     *
+     * @param stage The stage to display the scene
+     * @param width The initial width of the scene
+     * @param height The initial height of the scene
+     * @return A configured Scene object for the login interface
      */
     public static Scene createScene(Stage stage, double width, double height) {
         return createScene(stage, width, height, new CurrencyService("CNY"));
     }
 
+    /**
+     * Creates and returns a login scene with specified currency settings.
+     *
+     * @param stage The stage to display the scene
+     * @param width The initial width of the scene
+     * @param height The initial height of the scene
+     * @param currencyService The currency service to use for the application
+     * @return A configured Scene object for the login interface
+     */
     public static Scene createScene(Stage stage, double width, double height, CurrencyService currencyService) {
         // 准备一个root Group
         root = new Group();
@@ -104,6 +121,13 @@ public class LoginScene {
         return scene;
     }
 
+    /**
+     * Initializes the UI components for the login scene.
+     * Sets up the visual elements, event handlers, and authentication logic.
+     *
+     * @param stage The stage to display the scene
+     * @param currencyService The currency service to use for the application
+     */
     private static void initUI(Stage stage, CurrencyService currencyService) {
         // 1) 左侧多边形
         leftPolygon = new Polygon();
@@ -212,7 +236,9 @@ public class LoginScene {
     }
 
     /**
-     * 动态重排，每次窗口大小变化时调用
+     * Dynamically recalculates the layout of all UI components based on the current window size.
+     * This method is called whenever the window is resized to maintain proper proportions
+     * and positioning of all visual elements.
      */
     private static void relayout() {
         // 当前 Scene 尺寸
@@ -255,6 +281,12 @@ public class LoginScene {
         // ...
     }
 
+    /**
+     * Displays an alert dialog with the specified title and message.
+     *
+     * @param title The title of the alert dialog
+     * @param message The message to display in the alert dialog
+     */
     private static void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(title);

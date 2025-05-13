@@ -18,6 +18,17 @@ import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 
+/**
+ * A comprehensive user manual interface for the Finanger application.
+ * This scene provides users with detailed documentation about the application's features,
+ * including:
+ * - Interactive navigation with smooth scrolling
+ * - Responsive layout with dynamic resizing
+ * - Markdown to HTML conversion for content formatting
+ * - Theme-aware styling with day/night mode support
+ * The interface features a clean, professional design with proper margins,
+ * navigation controls, and a proceed to login button.
+ */
 public class UserManual {
 
     private static final double INITIAL_WIDTH = 800;
@@ -41,6 +52,16 @@ public class UserManual {
     // Content pane X fraction (starts at 0 since there's no sidebar)
     private static final double CONTENT_PANE_X_FRAC = 0.0;
 
+    /**
+     * Creates and returns a user manual scene with the specified dimensions.
+     * The scene includes a WebView for displaying formatted content, navigation controls,
+     * and a proceed to login button.
+     *
+     * @param stage The stage to display the scene
+     * @param width The initial width of the scene
+     * @param height The initial height of the scene
+     * @return A configured Scene object for the user manual interface
+     */
     public static Scene createScene(Stage stage, double width, double height) {
         root = new Group();
         Scene scene = new Scene(root, width, height);
@@ -126,6 +147,13 @@ public class UserManual {
         return scene;
     }
 
+    /**
+     * Dynamically recalculates the layout of UI components based on the current window size.
+     * This method ensures proper positioning and scaling of all elements, including:
+     * - Content polygon with margins
+     * - Content pane position and size
+     * - WebView dimensions
+     */
     private static void relayout() {
         double curWidth = root.getScene().getWidth();
         double curHeight = root.getScene().getHeight();
@@ -146,7 +174,18 @@ public class UserManual {
         vbox.setPrefSize(contentPane.getPrefWidth(), contentPane.getPrefHeight());
     }
 
-    // Improved Markdown to HTML conversion
+    /**
+     * Converts Markdown content to HTML with enhanced formatting and styling.
+     * This method handles:
+     * - Headings with custom IDs
+     * - Lists with proper indentation
+     * - Paragraphs and text formatting
+     * - Links with smooth scrolling
+     * - Bold text formatting
+     *
+     * @param markdown The Markdown content to convert
+     * @return The converted HTML content with proper styling and structure
+     */
     static String convertMarkdownToHtml(String markdown) {
         // Split the markdown into lines
         String[] lines = markdown.split("\n");
@@ -263,7 +302,17 @@ public class UserManual {
         return result;
     }
 
-    // User Manual Content (Markdown) with explicit IDs
+    /**
+     * Returns the comprehensive user manual content in Markdown format.
+     * The content includes:
+     * - Table of contents with navigation links
+     * - Detailed feature descriptions
+     * - Step-by-step usage instructions
+     * - Interface overview
+     * - Navigation guidelines
+     *
+     * @return A string containing the formatted Markdown content for the user manual
+     */
     private static String getUserManualContent() {
         return "# Finager User Manual {#finager-user-manual}\n\n" +
                 "Welcome to Finager, an AI-powered personal finance manager designed to help you take control of your money with ease. This user manual will guide you through the key features and functionalities of Finager, following the structure of the application's interface, starting with the left sidebar navigation and its corresponding subpages.\n\n" +

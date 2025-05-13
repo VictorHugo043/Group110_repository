@@ -27,6 +27,15 @@ import javafx.event.EventHandler;
 import java.io.IOException;
 import java.time.LocalDate;
 
+/**
+ * Scene class for editing existing financial goals.
+ * This class provides functionality for:
+ * - Editing existing financial goals with different types
+ * - Managing goal edit form with validation
+ * - Supporting multiple currencies and languages
+ * - Handling theme-specific styling
+ * - Enforcing minimum window dimensions
+ */
 public class EditGoalScene {
     private static final Logger logger = LoggerFactory.getLogger(EditGoalScene.class);
     private static final Font LABEL_FONT = Font.font("Arial", 14);
@@ -44,15 +53,51 @@ public class EditGoalScene {
     // 存储ThemeService实例
     private static ThemeService themeService;
 
-    // 重载方法，兼容旧的调用方式
+    /**
+     * Creates a scene for editing goals with default theme and currency services.
+     * This is an overloaded method that provides default service instances.
+     *
+     * @param stage The main application stage
+     * @param width The desired scene width
+     * @param height The desired scene height
+     * @param loggedUser The currently logged-in user
+     * @param goalToEdit The goal to be edited
+     * @return A Scene object for editing goals
+     */
     public static Scene createScene(Stage stage, double width, double height, User loggedUser, Goal goalToEdit) {
         return createScene(stage, width, height, loggedUser, goalToEdit, new ThemeService(), new CurrencyService("CNY"));
     }
 
+    /**
+     * Creates a scene for editing goals with a custom theme service.
+     * This is an overloaded method that provides a default currency service.
+     *
+     * @param stage The main application stage
+     * @param width The desired scene width
+     * @param height The desired scene height
+     * @param loggedUser The currently logged-in user
+     * @param goalToEdit The goal to be edited
+     * @param themeService The service for managing application theme
+     * @return A Scene object for editing goals
+     */
     public static Scene createScene(Stage stage, double width, double height, User loggedUser, Goal goalToEdit, ThemeService themeService) {
         return createScene(stage, width, height, loggedUser, goalToEdit, themeService, new CurrencyService("CNY"));
     }
 
+    /**
+     * Creates a scene for editing goals with custom theme and currency services.
+     * This method sets up the complete UI layout including form fields, validation,
+     * and navigation controls.
+     *
+     * @param stage The main application stage
+     * @param width The desired scene width
+     * @param height The desired scene height
+     * @param loggedUser The currently logged-in user
+     * @param goalToEdit The goal to be edited
+     * @param themeService The service for managing application theme
+     * @param currencyService The service for handling currency conversions
+     * @return A Scene object for editing goals
+     */
     public static Scene createScene(Stage stage, double width, double height, User loggedUser, Goal goalToEdit, ThemeService themeService, CurrencyService currencyService) {
         EditGoalScene.themeService = themeService; // 存储ThemeService实例
 
@@ -231,6 +276,12 @@ public class EditGoalScene {
         return scene;
     }
 
+    /**
+     * Gets the display text for a goal type.
+     *
+     * @param type The goal type identifier
+     * @return The translated display text for the goal type
+     */
     private static String getGoalTypeDisplay(String type) {
         switch (type) {
             case "SAVING":
@@ -244,6 +295,17 @@ public class EditGoalScene {
         }
     }
 
+    /**
+     * Creates a styled ComboBox with the specified items and adds it to the form grid.
+     *
+     * @param items Array of items to populate the ComboBox
+     * @param row Grid row index for placement
+     * @param grid The GridPane to add the ComboBox to
+     * @param labelText Text for the ComboBox label
+     * @param font Font to use for the label
+     * @param themeService Service for managing application theme
+     * @return The created ComboBox
+     */
     private static ComboBox<String> createComboBox(String[] items, int row, GridPane grid, String labelText, Font font, ThemeService themeService) {
         ComboBox<String> comboBox = new ComboBox<>();
         comboBox.getItems().addAll(items);
@@ -254,6 +316,17 @@ public class EditGoalScene {
         return comboBox;
     }
 
+    /**
+     * Creates a styled TextField and adds it to the form grid.
+     *
+     * @param promptText Placeholder text for the TextField
+     * @param row Grid row index for placement
+     * @param grid The GridPane to add the TextField to
+     * @param labelText Text for the TextField label
+     * @param font Font to use for the label
+     * @param themeService Service for managing application theme
+     * @return The created TextField
+     */
     private static TextField createTextField(String promptText, int row, GridPane grid, String labelText, Font font, ThemeService themeService) {
         TextField textField = new TextField();
         textField.setPromptText(promptText);
@@ -267,6 +340,16 @@ public class EditGoalScene {
         return textField;
     }
 
+    /**
+     * Creates a styled DatePicker and adds it to the form grid.
+     *
+     * @param row Grid row index for placement
+     * @param grid The GridPane to add the DatePicker to
+     * @param labelText Text for the DatePicker label
+     * @param font Font to use for the label
+     * @param themeService Service for managing application theme
+     * @return The created DatePicker
+     */
     private static DatePicker createDatePicker(int row, GridPane grid, String labelText, Font font, ThemeService themeService) {
         DatePicker datePicker = new DatePicker();
         datePicker.setPrefWidth(FIELD_WIDTH);
@@ -276,6 +359,14 @@ public class EditGoalScene {
         return datePicker;
     }
 
+    /**
+     * Creates a styled Button with the specified text and action handler.
+     *
+     * @param text Text to display on the button
+     * @param style CSS style string for the button
+     * @param action Event handler for button clicks
+     * @return The created Button
+     */
     private static Button createButton(String text, String style, EventHandler<ActionEvent> action) {
         Button button = new Button(text);
         if (style != null) {
@@ -286,6 +377,16 @@ public class EditGoalScene {
         return button;
     }
 
+    /**
+     * Adds a styled row to the form grid with a label and control.
+     *
+     * @param grid The GridPane to add the row to
+     * @param row Grid row index for placement
+     * @param labelText Text for the label
+     * @param control The control to add (TextField, ComboBox, etc.)
+     * @param font Font to use for the label
+     * @param themeService Service for managing application theme
+     */
     private static void addStyledRow(GridPane grid, int row, String labelText, Control control, Font font, ThemeService themeService) {
         Label label = new Label(labelText);
         label.setFont(font);

@@ -3,16 +3,38 @@ package com.myfinanceapp.service;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Service class for managing internationalization and localization in the application.
+ * This class implements the Singleton pattern to provide a centralized service for
+ * handling multiple languages and translations throughout the application.
+ * 
+ * The service supports:
+ * - Multiple language support (currently English and Chinese)
+ * - Dynamic language switching
+ * - Translation key management
+ * - Welcome messages and UI text translations
+ * - Error messages and notifications
+ */
 public class LanguageService {
     private static LanguageService instance;
     private String currentLanguage;
     private Map<String, Map<String, String>> translations;
 
+    /**
+     * Private constructor to enforce singleton pattern.
+     * Initializes the service with default language (English) and loads translations.
+     */
     private LanguageService() {
         this.currentLanguage = "English";
         initializeTranslations();
     }
 
+    /**
+     * Gets the singleton instance of LanguageService.
+     * Creates a new instance if one doesn't exist.
+     *
+     * @return The singleton instance of LanguageService
+     */
     public static LanguageService getInstance() {
         if (instance == null) {
             instance = new LanguageService();
@@ -20,6 +42,15 @@ public class LanguageService {
         return instance;
     }
 
+    /**
+     * Initializes the translation maps for all supported languages.
+     * Sets up translation keys and their corresponding values for:
+     * - UI elements
+     * - Welcome messages
+     * - Error messages
+     * - System notifications
+     * - User interface text
+     */
     private void initializeTranslations() {
         translations = new HashMap<>();
         
@@ -433,16 +464,34 @@ public class LanguageService {
         chinese.put("welcome_message", "欢迎使用财务助手。请随时询问任何财务相关的问题。");
     }
 
+    /**
+     * Gets the currently selected language.
+     *
+     * @return The current language code (e.g., "English", "Chinese")
+     */
     public String getCurrentLanguage() {
         return currentLanguage;
     }
 
+    /**
+     * Sets the current language for the application.
+     * This will affect all subsequent translation requests.
+     *
+     * @param language The language code to set (e.g., "English", "Chinese")
+     */
     public void setCurrentLanguage(String language) {
         if (translations.containsKey(language)) {
             this.currentLanguage = language;
         }
     }
 
+    /**
+     * Retrieves the translation for a given key in the current language.
+     * If the key is not found, returns the key itself.
+     *
+     * @param key The translation key to look up
+     * @return The translated string for the given key, or the key itself if not found
+     */
     public String getTranslation(String key) {
         Map<String, String> currentTranslations = translations.get(currentLanguage);
         return currentTranslations != null ? currentTranslations.getOrDefault(key, key) : key;

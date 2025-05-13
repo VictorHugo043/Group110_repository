@@ -11,6 +11,18 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+/**
+ * Service class for managing and manipulating transaction data in the application.
+ * This class provides functionality for:
+ * - Loading and displaying transactions
+ * - Filtering transactions by various criteria
+ * - Sorting transactions
+ * - Managing transaction data in a TableView
+ * - Updating and deleting transactions
+ * 
+ * The service integrates with JavaFX components to provide a responsive
+ * and interactive transaction management interface.
+ */
 public class TransactionManagementService {
     private final User currentUser;
     private final TransactionService txService;
@@ -18,13 +30,24 @@ public class TransactionManagementService {
     private FilteredList<Transaction> filteredTransactions;
     private TableView<Transaction> transactionTable;
 
-    // 筛选控件的引用
+    // Filter control references
     private ComboBox<String> dateFilter;
     private ComboBox<String> typeFilter;
     private ComboBox<String> currencyFilter;
     private ComboBox<String> categoryFilter;
     private ComboBox<String> paymentMethodFilter;
 
+    /**
+     * Constructs a new TransactionManagementService instance.
+     *
+     * @param currentUser The user whose transactions to manage
+     * @param transactionTable The TableView to display transactions
+     * @param dateFilter ComboBox for filtering by date
+     * @param typeFilter ComboBox for filtering by transaction type
+     * @param currencyFilter ComboBox for filtering by currency
+     * @param categoryFilter ComboBox for filtering by category
+     * @param paymentMethodFilter ComboBox for filtering by payment method
+     */
     public TransactionManagementService(User currentUser, TableView<Transaction> transactionTable,
                                         ComboBox<String> dateFilter, ComboBox<String> typeFilter,
                                         ComboBox<String> currencyFilter, ComboBox<String> categoryFilter,
@@ -42,20 +65,39 @@ public class TransactionManagementService {
         loadTransactions();
     }
 
+    /**
+     * Gets the observable list of all transactions.
+     *
+     * @return ObservableList containing all transactions
+     */
     public ObservableList<Transaction> getAllTransactions() {
         return allTransactions;
     }
 
+    /**
+     * Gets the filtered list of transactions.
+     *
+     * @return FilteredList containing filtered transactions
+     */
     public FilteredList<Transaction> getFilteredTransactions() {
         return filteredTransactions;
     }
 
+    /**
+     * Loads transactions for the current user and initializes the data structures.
+     */
     public void loadTransactions() {
         List<Transaction> transactions = txService.loadTransactions(currentUser);
         allTransactions = FXCollections.observableArrayList(transactions);
         filteredTransactions = new FilteredList<>(allTransactions);
     }
 
+    /**
+     * Gets unique values from transactions for a specific field.
+     *
+     * @param extractor Function to extract the desired field from a transaction
+     * @return List of unique values for the specified field
+     */
     public List<String> getUniqueValues(java.util.function.Function<Transaction, String> extractor) {
         Set<String> uniqueValues = allTransactions.stream()
                 .map(extractor)
@@ -64,6 +106,9 @@ public class TransactionManagementService {
         return new ArrayList<>(uniqueValues);
     }
 
+    /**
+     * Initializes all filter ComboBoxes with available options.
+     */
     public void initializeFilters() {
         // 更新各个筛选下拉框的选项
         updateComboBox(dateFilter, "Date", transaction -> transaction.getTransactionDate());
@@ -73,6 +118,10 @@ public class TransactionManagementService {
         updateComboBox(paymentMethodFilter, "Payment Method", transaction -> transaction.getPaymentMethod());
     }
 
+    /**
+     * Applies all active filters to the transaction list.
+     * Maintains the current sort order while applying filters.
+     */
     public void applyFilters() {
         // 暂时移除排序监听器以避免递归调用
         boolean hasSortOrder = transactionTable.getSortOrder().size() > 0;
@@ -119,6 +168,10 @@ public class TransactionManagementService {
         }
     }
 
+    /**
+     * Resets all filters to their default "All" values.
+     * Maintains the current sort order while resetting filters.
+     */
     public void resetFilters() {
         // 暂时移除排序监听器以避免递归调用
         boolean hasSortOrder = transactionTable.getSortOrder().size() > 0;
@@ -146,8 +199,9 @@ public class TransactionManagementService {
     }
 
     /**
-     * 对过滤后的数据应用排序
-     * @param comparator 排序比较器
+     * Applies sorting to the filtered transaction data.
+     *
+     * @param comparator The comparator to use for sorting
      */
     public void applySorting(Comparator<Transaction> comparator) {
         if (comparator == null) return;
@@ -156,6 +210,9 @@ public class TransactionManagementService {
         FXCollections.sort(allTransactions, comparator);
     }
 
+    /**
+     * Refreshes the options in all filter ComboBoxes while maintaining current selections.
+     */
     public void refreshFilterOptions() {
         // 临时保存当前筛选值
         String dateValue = dateFilter.getValue();
@@ -182,6 +239,13 @@ public class TransactionManagementService {
         applyFilters();
     }
 
+    /**
+     * Updates a ComboBox with unique values from transactions.
+     *
+     * @param comboBox The ComboBox to update
+     * @param name The name of the filter
+     * @param extractor Function to extract values from transactions
+     */
     private <T> void updateComboBox(ComboBox<String> comboBox, String name,
                                     java.util.function.Function<Transaction, String> extractor) {
         String currentValue = comboBox.getValue();
@@ -234,6 +298,13 @@ public class TransactionManagementService {
         setComboBoxValueSafely(comboBox, currentValue, "All " + name);
     }
 
+    /**
+     * Safely sets a value in a ComboBox, falling back to a default if the value is not available.
+     *
+     * @param comboBox The ComboBox to update
+     * @param value The value to set
+     * @param defaultValue The default value to use if the desired value is not available
+     */
     private void setComboBoxValueSafely(ComboBox<String> comboBox, String value, String defaultValue) {
         // 安全设置ComboBox的值
         if (value != null && comboBox.getItems().contains(value)) {
@@ -243,10 +314,16 @@ public class TransactionManagementService {
         }
     }
 
+    /**
+     * Deletes a transaction after user confirmation.
+     *
+     * @param transaction The transaction to delete
+     * @return true if the transaction was deleted, false if the operation was cancelled
+     */
     public boolean deleteTransaction(Transaction transaction) {
         // 显示确认对话框
         Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
-        confirmAlert.setTitle("���认删除");
+        confirmAlert.setTitle("确认删除");
         confirmAlert.setHeaderText("您确定要删除此交易记录吗？");
         confirmAlert.setContentText("日期: " + transaction.getTransactionDate() +
                 "\n类型: " + transaction.getTransactionType() +
@@ -281,6 +358,11 @@ public class TransactionManagementService {
         return false;
     }
 
+    /**
+     * Updates an existing transaction.
+     *
+     * @param transaction The transaction to update
+     */
     public void updateTransaction(Transaction transaction) {
         // 获取所有交易
         List<Transaction> transactions = txService.loadTransactions(currentUser);

@@ -17,27 +17,38 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 
 /**
- * 交易数据服务类，提供对用户交易数据的统计和分析功能
- * 数据文件路径：src/main/resources/transaction/{用户UID}.json
+ * Service class for managing and analyzing transaction data.
+ * This service provides functionality for:
+ * - Loading and parsing encrypted transaction data
+ * - Calculating financial summaries (income, expenses, balance)
+ * - Analyzing transactions by category and payment method
+ * - Secure data handling with encryption
+ * 
+ * The service stores transaction data in encrypted JSON files
+ * located at src/main/resources/transaction/{userUID}.json
  */
 public class TransactionDataService {
     private final String userUid;
     private static final Gson gson = new Gson();
-    private static final String FIXED_KEY = "MyFinanceAppSecretKey1234567890";  // 固定密钥
+    private static final String FIXED_KEY = "MyFinanceAppSecretKey1234567890";  // Fixed encryption key
     private static final String TRANSACTION_DIR = "src/main/resources/transaction";
 
     /**
-     * 构造函数
-     * @param userUid 用户唯一标识符，用于定位数据文件
+     * Constructs a new TransactionDataService instance.
+     *
+     * @param userUid The unique identifier of the user whose transactions to manage
      */
     public TransactionDataService(String userUid) {
         this.userUid = userUid;
     }
 
     /**
-     * 加载并解析交易数据
-     * @return JSONArray形式的交易数据
-     * @throws IOException 当文件读取失败时抛出
+     * Loads and decrypts transaction data from the user's file.
+     * The data is stored in an encrypted JSON format and is decrypted
+     * using a key derived from the user's ID.
+     *
+     * @return JSONArray containing the decrypted transaction data
+     * @throws IOException If there is an error reading or decrypting the file
      */
     JSONArray loadTransactionData() throws IOException {
         Path filePath = Paths.get(TRANSACTION_DIR, userUid + ".json");
@@ -65,7 +76,11 @@ public class TransactionDataService {
     }
 
     /**
-     * 获取加密密钥
+     * Derives an encryption key for the user's transaction data.
+     * Uses a fixed key and the user's ID to create a unique encryption key.
+     *
+     * @return A SecretKey for encrypting/decrypting the user's data
+     * @throws EncryptionException If there is an error deriving the key
      */
     private SecretKey getEncryptionKey() throws EncryptionException {
         // 使用固定密钥和用户ID派生加密密钥
@@ -74,9 +89,11 @@ public class TransactionDataService {
     }
 
     /**
-     * 计算总收入
-     * @return 总收入金额
-     * @throws IOException 当文件读取失败时抛出
+     * Calculates the total income from all transactions.
+     * Sums up the amounts of all transactions marked as "Income".
+     *
+     * @return The total income amount
+     * @throws IOException If there is an error reading the transaction data
      */
     public double calculateTotalIncome() throws IOException {
         JSONArray transactions = loadTransactionData();
@@ -91,9 +108,11 @@ public class TransactionDataService {
     }
 
     /**
-     * 计算总支出
-     * @return 总支出金额
-     * @throws IOException 当文件读取失败时抛出
+     * Calculates the total expenses from all transactions.
+     * Sums up the amounts of all transactions marked as "Expense".
+     *
+     * @return The total expense amount
+     * @throws IOException If there is an error reading the transaction data
      */
     public double calculateTotalExpense() throws IOException {
         JSONArray transactions = loadTransactionData();
@@ -108,19 +127,21 @@ public class TransactionDataService {
     }
 
     /**
-     * 计算净余额（收入-支出）
-     * @return 净余额
-     * @throws IOException 当文件读取失败时抛出
+     * Calculates the net balance (income minus expenses).
+     *
+     * @return The net balance amount
+     * @throws IOException If there is an error reading the transaction data
      */
     public double calculateNetBalance() throws IOException {
         return calculateTotalIncome() - calculateTotalExpense();
     }
 
     /**
-     * 计算指定类别的交易总金额
-     * @param category 要统计的类别名称
-     * @return 该类别下的总金额
-     * @throws IOException 当文件读取失败时抛出
+     * Calculates the total amount for transactions in a specific category.
+     *
+     * @param category The category to calculate the total for
+     * @return The total amount for the specified category
+     * @throws IOException If there is an error reading the transaction data
      */
     public double calculateTotalAmountByCategory(String category) throws IOException {
         JSONArray transactions = loadTransactionData();
@@ -135,9 +156,12 @@ public class TransactionDataService {
     }
 
     /**
-     * 按交易类别统计交易数量
-     * @return 包含类别及其对应数量的Map
-     * @throws IOException 当文件读取失败时抛出
+     * Counts the number of transactions in each category.
+     * Returns a map where keys are category names and values are the count
+     * of transactions in that category.
+     *
+     * @return Map of category names to transaction counts
+     * @throws IOException If there is an error reading the transaction data
      */
     public Map<String, Integer> countTransactionsByCategory() throws IOException {
         JSONArray transactions = loadTransactionData();
@@ -151,9 +175,12 @@ public class TransactionDataService {
     }
 
     /**
-     * 按支付方式统计交易数量
-     * @return 包含支付方式及其对应数量的Map
-     * @throws IOException 当文件读取失败时抛出
+     * Counts the number of transactions for each payment method.
+     * Returns a map where keys are payment method names and values are the count
+     * of transactions using that payment method.
+     *
+     * @return Map of payment method names to transaction counts
+     * @throws IOException If there is an error reading the transaction data
      */
     public Map<String, Integer> countTransactionsByPaymentMethod() throws IOException {
         JSONArray transactions = loadTransactionData();

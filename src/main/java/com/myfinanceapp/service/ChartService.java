@@ -10,6 +10,18 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Service class for managing financial data visualization through various chart types.
+ * This class provides functionality for:
+ * - Line charts showing income and expense trends
+ * - Bar charts for comparing income and expenses
+ * - Pie charts for expense category distribution
+ * - Dynamic date range visualization
+ * - Automatic chart scaling and formatting
+ * 
+ * The service handles data aggregation, currency conversion, and chart updates
+ * based on selected date ranges.
+ */
 public class ChartService {
     private final LineChart<String, Number> lineChart;
     private final BarChart<String, Number> barChart;
@@ -18,6 +30,16 @@ public class ChartService {
     private final User currentUser;
     private final CurrencyService currencyService;
 
+    /**
+     * Constructs a new ChartService instance.
+     *
+     * @param lineChart The line chart for showing trends
+     * @param barChart The bar chart for comparisons
+     * @param pieChart The pie chart for category distribution
+     * @param txService Service for accessing transaction data
+     * @param currentUser The user whose data to visualize
+     * @param currencyService Service for currency conversion
+     */
     public ChartService(LineChart<String, Number> lineChart, BarChart<String, Number> barChart,
                         PieChart pieChart, TransactionService txService, User currentUser, CurrencyService currencyService) {
         this.lineChart = lineChart;
@@ -28,12 +50,25 @@ public class ChartService {
         this.currencyService = currencyService;
     }
 
+    /**
+     * Updates all charts with data for the specified date range.
+     *
+     * @param startDate The start date for the data range
+     * @param endDate The end date for the data range
+     */
     public void updateAllCharts(LocalDate startDate, LocalDate endDate) {
         updateLineChart(startDate, endDate);
         updateBarChart(startDate, endDate);
         updatePieChart(startDate, endDate);
     }
 
+    /**
+     * Updates the line chart with income and expense trends.
+     * Shows daily data points with proper date formatting based on the date range.
+     *
+     * @param startDate The start date for the data range
+     * @param endDate The end date for the data range
+     */
     private void updateLineChart(LocalDate startDate, LocalDate endDate) {
         List<Transaction> transactions = getFilteredTransactions(startDate, endDate);
         long totalDays = endDate.toEpochDay() - startDate.toEpochDay() + 1;
@@ -72,6 +107,13 @@ public class ChartService {
         adjustXAxis(xAxis, totalDays);
     }
 
+    /**
+     * Updates the bar chart with grouped income and expense data.
+     * Groups data points based on the date range length for better visualization.
+     *
+     * @param startDate The start date for the data range
+     * @param endDate The end date for the data range
+     */
     private void updateBarChart(LocalDate startDate, LocalDate endDate) {
         List<Transaction> transactions = getFilteredTransactions(startDate, endDate);
         long totalDays = endDate.toEpochDay() - startDate.toEpochDay() + 1;
@@ -112,6 +154,13 @@ public class ChartService {
         adjustXAxis(xAxis, groupedDates.size());
     }
 
+    /**
+     * Updates the pie chart with expense category distribution.
+     * Shows the proportion of expenses in each category with currency conversion.
+     *
+     * @param startDate The start date for the data range
+     * @param endDate The end date for the data range
+     */
     private void updatePieChart(LocalDate startDate, LocalDate endDate) {
         List<Transaction> transactions = getFilteredTransactions(startDate, endDate);
         Map<String, Double> categoryTotals = transactions.stream()
@@ -127,6 +176,13 @@ public class ChartService {
         pieChart.setData(pieChartData);
     }
 
+    /**
+     * Filters transactions for the specified date range.
+     *
+     * @param startDate The start date for filtering
+     * @param endDate The end date for filtering
+     * @return List of transactions within the date range
+     */
     private List<Transaction> getFilteredTransactions(LocalDate startDate, LocalDate endDate) {
         List<Transaction> transactions = txService.loadTransactions(currentUser);
         return transactions.stream()
@@ -137,6 +193,14 @@ public class ChartService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Generates a list of dates between start and end dates.
+     *
+     * @param startDate The start date
+     * @param endDate The end date
+     * @param totalDays The total number of days in the range
+     * @return List of formatted date strings
+     */
     private List<String> generateDateList(LocalDate startDate, LocalDate endDate, long totalDays) {
         List<String> allDates = new ArrayList<>();
         LocalDate currentDate = startDate;
@@ -148,6 +212,14 @@ public class ChartService {
         return allDates;
     }
 
+    /**
+     * Generates a list of grouped dates for bar chart visualization.
+     *
+     * @param startDate The start date
+     * @param endDate The end date
+     * @param groupDays The number of days to group together
+     * @return List of formatted date range strings
+     */
     private List<String> generateGroupedDateList(LocalDate startDate, LocalDate endDate, int groupDays) {
         List<String> groupedDates = new ArrayList<>();
         LocalDate currentDate = startDate;
@@ -169,6 +241,15 @@ public class ChartService {
         return groupedDates;
     }
 
+    /**
+     * Gets the grouped date label for a specific date.
+     *
+     * @param date The date to get the group for
+     * @param startDate The start date of the range
+     * @param groupDays The number of days in each group
+     * @param totalDays The total number of days in the range
+     * @return Formatted date range string for the group
+     */
     private String getGroupedDate(LocalDate date, LocalDate startDate, int groupDays, long totalDays) {
         long daysSinceStart = date.toEpochDay() - startDate.toEpochDay();
         long groupIndex = daysSinceStart / groupDays;
@@ -185,6 +266,12 @@ public class ChartService {
         return label;
     }
 
+    /**
+     * Calculates the number of days to group together based on the total date range.
+     *
+     * @param totalDays The total number of days in the range
+     * @return The number of days to group together
+     */
     private int calculateGroupDays(long totalDays) {
         if (totalDays <= 30) return 1;
         if (totalDays <= 90) return 3;
@@ -192,12 +279,24 @@ public class ChartService {
         return 14;
     }
 
+    /**
+     * Gets the appropriate date formatter based on the date range length.
+     *
+     * @param totalDays The total number of days in the range
+     * @return DateTimeFormatter for formatting dates
+     */
     private DateTimeFormatter getFormatter(long totalDays) {
         return totalDays > 365 ?
                 DateTimeFormatter.ofPattern("yyyy-MM-dd") :
                 DateTimeFormatter.ofPattern("MM-dd");
     }
 
+    /**
+     * Adjusts the X-axis appearance based on the number of data points.
+     *
+     * @param xAxis The CategoryAxis to adjust
+     * @param totalDays The total number of days in the range
+     */
     private void adjustXAxis(CategoryAxis xAxis, long totalDays) {
         if (totalDays > 30) {
             xAxis.setTickLabelRotation(45);

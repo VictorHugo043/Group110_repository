@@ -18,11 +18,31 @@ import java.util.List;
 import javax.crypto.SecretKey;
 import java.nio.file.Files;
 
+/**
+ * Service class for managing financial transactions in the application.
+ * This class provides functionality for:
+ * - Adding new transactions
+ * - Loading existing transactions
+ * - Importing transactions from CSV files
+ * - Saving transactions with encryption
+ * - Validating transaction data
+ * 
+ * All transaction data is encrypted before storage and decrypted when retrieved
+ * to ensure data security.
+ */
 public class TransactionService {
     private static final String TRANSACTION_DIR = "src/main/resources/transaction/";
     private static final Gson gson = new Gson();
     private static final String FIXED_KEY = "MyFinanceAppSecretKey1234567890"; // Fixed key
 
+    /**
+     * Adds a new transaction for a user.
+     * Checks for duplicates before adding the transaction.
+     *
+     * @param user The user who owns the transaction
+     * @param newTx The new transaction to add
+     * @return true if the transaction was added successfully, false if it was a duplicate
+     */
     public boolean addTransaction(User user, Transaction newTx) {
         List<Transaction> allTxs = loadTransactions(user);
         for (Transaction t : allTxs) {
@@ -36,7 +56,11 @@ public class TransactionService {
     }
 
     /**
-     * Read <UID>.json file: which contains a JSON array format [ {...}, {...} ]
+     * Loads all transactions for a specific user from the encrypted storage.
+     * The transactions are stored in a JSON file named after the user's UID.
+     *
+     * @param user The user whose transactions to load
+     * @return A list of transactions for the user, or an empty list if none exist
      */
     public List<Transaction> loadTransactions(User user) {
         File dir = new File(TRANSACTION_DIR);
@@ -70,6 +94,15 @@ public class TransactionService {
         }
     }
 
+    /**
+     * Imports transactions from a CSV file for a user.
+     * Validates the CSV format and handles duplicate transactions.
+     * Shows appropriate alerts for success or failure.
+     *
+     * @param user The user to import transactions for
+     * @param csvFile The CSV file containing the transactions
+     * @throws IOException If there is an error reading the file
+     */
     public void importTransactionsFromCSV(User user, File csvFile) {
         List<Transaction> allTxs = loadTransactions(user);
         try (BufferedReader br = new BufferedReader(new FileReader(csvFile))) {
@@ -152,8 +185,12 @@ public class TransactionService {
         saveTransactions(user, allTxs);
     }
 
-    // Define a validateHeader method to verify if the CSV file header meets the
-    // expected format
+    /**
+     * Validates the header row of a CSV file to ensure it matches the expected format.
+     *
+     * @param headers The array of header strings from the CSV file
+     * @return true if the headers match the expected format, false otherwise
+     */
     private boolean validateHeader(String[] headers) {
         if (headers.length != 7) {
             return false;
@@ -167,7 +204,15 @@ public class TransactionService {
                 headers[6].trim().equals("Payment Method");
     }
 
-    // Save the user's transaction records to a JSON file
+    /**
+     * Saves a list of transactions for a user to encrypted storage.
+     * The transactions are encrypted before being saved to ensure data security.
+     *
+     * @param user The user who owns the transactions
+     * @param transactions The list of transactions to save
+     * @throws IOException If there is an error writing to the file
+     * @throws EncryptionException If there is an error encrypting the data
+     */
     public void saveTransactions(User user, List<Transaction> transactions) {
         File dir = new File(TRANSACTION_DIR);
         if (!dir.exists()) {
@@ -194,7 +239,12 @@ public class TransactionService {
     }
 
     /**
-     * Get encryption key
+     * Derives an encryption key for a user's transactions.
+     * Uses a fixed key and the user's ID to create a unique encryption key.
+     *
+     * @param user The user for whom to derive the key
+     * @return A SecretKey for encrypting/decrypting the user's transactions
+     * @throws EncryptionException If there is an error deriving the key
      */
     private static SecretKey getEncryptionKey(User user) throws EncryptionException {
         // Use fixed key and user ID to derive encryption key

@@ -7,8 +7,39 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import org.json.JSONObject; // 引入 JSONObject 类
 
+/**
+ * Service class for automatically categorizing financial transactions using AI.
+ * This service utilizes an external AI API to analyze transaction descriptions
+ * and determine the appropriate category for each transaction.
+ * 
+ * The service supports the following transaction categories:
+ * - Housing
+ * - Shopping
+ * - Gift
+ * - Food & Drink
+ * - Freelance
+ * - Transport
+ * - Groceries
+ * - Debt
+ * - Leisure
+ * - Healthcare
+ * - Utilities
+ * - Investment
+ * - Bonus
+ * - Salary
+ * - Others
+ */
 public class AISortingService {
 
+    /**
+     * Analyzes a transaction description and determines its appropriate category using AI.
+     * This method makes an API call to an AI service to analyze the description and
+     * returns the most suitable category from the predefined list.
+     *
+     * @param description The transaction description to analyze
+     * @return The determined category for the transaction, or an error message if the analysis fails
+     * @throws RuntimeException If there is an error during the API request
+     */
     public static String sort(String description) {
         try {
             // 设置 API 请求的 URL

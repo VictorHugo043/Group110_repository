@@ -28,6 +28,16 @@ import javafx.util.converter.DoubleStringConverter;
 
 import java.util.List;
 
+/**
+ * A comprehensive transaction management interface for the Finanger application.
+ * This scene provides users with tools to:
+ * - View and filter transactions
+ * - Edit transaction details
+ * - Delete transactions
+ * - Sort transactions by various criteria
+ * The interface features theme customization, internationalization support,
+ * and a responsive table layout with dynamic filtering capabilities.
+ */
 public class TransactionManagementScene {
     private static final LanguageService languageService = LanguageService.getInstance();
     private final Stage stage;
@@ -36,16 +46,24 @@ public class TransactionManagementScene {
     private final User currentUser;
     private TableView<Transaction> transactionTable;
     private ThemeService themeService;
-    private CurrencyService currencyService; // Add instance variable for CurrencyService
+    private CurrencyService currencyService;
     private TransactionManagementService service;
 
-    // 筛选控件
+    // Filter controls
     private ComboBox<String> dateFilter;
     private ComboBox<String> typeFilter;
     private ComboBox<String> currencyFilter;
     private ComboBox<String> categoryFilter;
     private ComboBox<String> paymentMethodFilter;
 
+    /**
+     * Constructs a new TransactionManagementScene with the specified parameters.
+     *
+     * @param stage The stage to display the scene
+     * @param width The initial width of the scene
+     * @param height The initial height of the scene
+     * @param currentUser The currently logged-in user
+     */
     public TransactionManagementScene(Stage stage, double width, double height, User currentUser) {
         this.stage = stage;
         this.width = width;
@@ -53,17 +71,36 @@ public class TransactionManagementScene {
         this.currentUser = currentUser;
     }
 
+    /**
+     * Creates and returns a transaction management scene with default theme settings.
+     *
+     * @return A configured Scene object for the transaction management interface
+     */
     public Scene createScene() {
         return createScene(new ThemeService());
     }
 
+    /**
+     * Creates and returns a transaction management scene with specified theme settings.
+     *
+     * @param themeService The theme service to use for styling
+     * @return A configured Scene object for the transaction management interface
+     */
     public Scene createScene(ThemeService themeService) {
         return createScene(themeService, new CurrencyService("CNY"));
     }
 
+    /**
+     * Creates and returns a transaction management scene with specified theme and currency settings.
+     * The scene includes a comprehensive transaction table with filtering and sorting capabilities.
+     *
+     * @param themeService The theme service to use for styling
+     * @param currencyService The currency service to use for the application
+     * @return A configured Scene object for the transaction management interface
+     */
     public Scene createScene(ThemeService themeService, CurrencyService currencyService) {
         this.themeService = themeService;
-        this.currencyService = currencyService; // Store the CurrencyService instance
+        this.currencyService = currencyService;
         BorderPane root = new BorderPane();
         root.setStyle(themeService.getCurrentThemeStyle());
 
@@ -90,7 +127,7 @@ public class TransactionManagementScene {
         // 初始化服务
         this.service = new TransactionManagementService(
                 currentUser, transactionTable, dateFilter, typeFilter,
-                currencyFilter, categoryFilter, paymentMethodFilter); // Removed currencyService from constructor
+                currencyFilter, categoryFilter, paymentMethodFilter);
 
         // 设置表格数据源
         transactionTable.setItems(service.getFilteredTransactions());
@@ -124,6 +161,11 @@ public class TransactionManagementScene {
         return scene;
     }
 
+    /**
+     * Creates the header section of the transaction management scene.
+     *
+     * @return An HBox containing the header components
+     */
     private HBox createHeader() {
         Label title = new Label(languageService.getTranslation("manage_transactions"));
         title.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;" + themeService.getTextColorStyle());
@@ -133,6 +175,12 @@ public class TransactionManagementScene {
         return header;
     }
 
+    /**
+     * Creates the filter controls section allowing users to filter transactions
+     * by various criteria such as date, type, currency, category, and payment method.
+     *
+     * @return An HBox containing the filter controls
+     */
     private HBox createFilterBox() {
         // 创建筛选下拉框
         dateFilter = createFilterComboBox(languageService.getTranslation("date"));
@@ -157,6 +205,12 @@ public class TransactionManagementScene {
         return filterBox;
     }
 
+    /**
+     * Creates a filter combo box with the specified name and applies theme styling.
+     *
+     * @param name The name/label for the filter combo box
+     * @return A configured ComboBox for filtering
+     */
     private ComboBox<String> createFilterComboBox(String name) {
         ComboBox<String> comboBox = new ComboBox<>();
         comboBox.setPromptText(name);
@@ -174,6 +228,10 @@ public class TransactionManagementScene {
         return comboBox;
     }
 
+    /**
+     * Creates and configures the main transaction table with columns for all transaction properties
+     * and functionality for editing and deleting transactions.
+     */
     private void createTransactionTable() {
         transactionTable = new TableView<>();
         transactionTable.setEditable(true);

@@ -16,18 +16,52 @@ import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
+/**
+ * An about page interface for the Finanger application.
+ * This scene displays information about the application, including its description
+ * and version details, with support for theme customization and internationalization.
+ */
 public class About {
     private static final LanguageService languageService = LanguageService.getInstance();
 
-    // 重载方法，兼容旧的调用方式
+    /**
+     * Creates and returns an about scene with default theme and currency settings.
+     *
+     * @param stage The stage to display the scene
+     * @param width The initial width of the scene
+     * @param height The initial height of the scene
+     * @param loggedUser The currently logged-in user
+     * @return A configured Scene object for the about interface
+     */
     public static Scene createScene(Stage stage, double width, double height, User loggedUser) {
         return createScene(stage, width, height, loggedUser, new ThemeService(), new CurrencyService("CNY"));
     }
 
+    /**
+     * Creates and returns an about scene with specified theme settings.
+     *
+     * @param stage The stage to display the scene
+     * @param width The initial width of the scene
+     * @param height The initial height of the scene
+     * @param loggedUser The currently logged-in user
+     * @param themeService The theme service to use for styling
+     * @return A configured Scene object for the about interface
+     */
     public static Scene createScene(Stage stage, double width, double height, User loggedUser, ThemeService themeService) {
         return createScene(stage, width, height, loggedUser, themeService, new CurrencyService("CNY"));
     }
 
+    /**
+     * Creates and returns an about scene with specified theme and currency settings.
+     *
+     * @param stage The stage to display the scene
+     * @param width The initial width of the scene
+     * @param height The initial height of the scene
+     * @param loggedUser The currently logged-in user
+     * @param themeService The theme service to use for styling
+     * @param currencyService The currency service to use for the application
+     * @return A configured Scene object for the about interface
+     */
     public static Scene createScene(Stage stage, double width, double height, User loggedUser, ThemeService themeService, CurrencyService currencyService) {
         // 整体 BorderPane
         BorderPane root = new BorderPane();
@@ -73,7 +107,16 @@ public class About {
     }
 
     /**
-     * 生成 About 界面的正文内容
+     * Creates the main content for the about page.
+     * Includes title, description, and navigation controls.
+     *
+     * @param stage The stage to display the scene
+     * @param width The initial width of the scene
+     * @param height The initial height of the scene
+     * @param loggedUser The currently logged-in user
+     * @param themeService The theme service to use for styling
+     * @param currencyService The currency service to use for the application
+     * @return A Pane containing the about page content
      */
     private static Pane createAboutContent(Stage stage, double width, double height, User loggedUser, ThemeService themeService, CurrencyService currencyService) {
         VBox container = new VBox(20);

@@ -21,24 +21,62 @@ import javafx.stage.Stage;
 import javafx.beans.value.ChangeListener;
 import com.myfinanceapp.ui.common.SceneManager;
 
+/**
+ * Factory class for creating and managing the settings top navigation bar.
+ * This class provides functionality for:
+ * - Creating a consistent top navigation bar across settings scenes
+ * - Managing tab navigation between different settings sections
+ * - Handling theme-specific styling of navigation elements
+ * - Supporting multilingual interface through LanguageService
+ * - Enforcing minimum window dimensions
+ */
 public class SettingsTopBarFactory {
     private static final double MIN_WINDOW_WIDTH = 800;
     private static final double MIN_WINDOW_HEIGHT = 450;
     private static final LanguageService languageService = LanguageService.getInstance();
 
-    // 存储窗口大小监听器的静态引用，以便能够移除它们
+    /** Static references to window size listeners for removal capability */
     private static ChangeListener<Number> widthListener;
     private static ChangeListener<Number> heightListener;
 
-    // 重载方法，兼容旧的调用方式
+    /**
+     * Creates a top navigation bar with default theme and currency services.
+     * This is an overloaded method that provides default service instances.
+     *
+     * @param stage The main application stage
+     * @param activeTab The currently selected tab
+     * @param loggedUser The currently logged-in user
+     * @return An HBox containing the top navigation bar
+     */
     public static HBox createTopBar(Stage stage, String activeTab, User loggedUser) {
         return createTopBar(stage, activeTab, loggedUser, new ThemeService(), new CurrencyService("CNY"));
     }
 
+    /**
+     * Creates a top navigation bar with a custom theme service.
+     * This is an overloaded method that provides a default currency service.
+     *
+     * @param stage The main application stage
+     * @param activeTab The currently selected tab
+     * @param loggedUser The currently logged-in user
+     * @param themeService The service for managing application theme
+     * @return An HBox containing the top navigation bar
+     */
     public static HBox createTopBar(Stage stage, String activeTab, User loggedUser, ThemeService themeService) {
         return createTopBar(stage, activeTab, loggedUser, themeService, new CurrencyService("CNY"));
     }
 
+    /**
+     * Creates a top navigation bar with custom theme and currency services.
+     * This method sets up window size constraints and creates the navigation tabs.
+     *
+     * @param stage The main application stage
+     * @param activeTab The currently selected tab
+     * @param loggedUser The currently logged-in user
+     * @param themeService The service for managing application theme
+     * @param currencyService The service for handling currency conversions
+     * @return An HBox containing the top navigation bar
+     */
     public static HBox createTopBar(Stage stage, String activeTab, User loggedUser, ThemeService themeService, CurrencyService currencyService) {
         // 确保窗口有最小尺寸限制
         stage.setMinWidth(MIN_WINDOW_WIDTH);
@@ -108,6 +146,15 @@ public class SettingsTopBarFactory {
         return topBar;
     }
 
+    /**
+     * Creates a single navigation tab with appropriate styling.
+     * The tab's appearance changes based on whether it is the currently selected tab.
+     *
+     * @param text The text to display on the tab
+     * @param isActive Whether this tab is currently selected
+     * @param themeService The service for managing application theme
+     * @return A VBox containing the styled tab
+     */
     private static VBox createOneTab(String text, boolean isActive, ThemeService themeService) {
         Label arrow = new Label("\u25BC");
         arrow.setVisible(isActive);
@@ -140,6 +187,13 @@ public class SettingsTopBarFactory {
         return tab;
     }
 
+    /**
+     * Updates the language of all navigation tabs.
+     * This method is called when the application language is changed.
+     *
+     * @param topBar The top navigation bar to update
+     * @param languageService The service for managing application language
+     */
     public static void updateLanguage(HBox topBar, LanguageService languageService) {
         for (int i = 0; i < topBar.getChildren().size(); i++) {
             VBox tab = (VBox) topBar.getChildren().get(i);
@@ -155,6 +209,13 @@ public class SettingsTopBarFactory {
         }
     }
 
+    /**
+     * Determines the translation key based on the current tab text.
+     * Used for language updates to maintain the correct tab labels.
+     *
+     * @param text The current tab text
+     * @return The corresponding translation key
+     */
     private static String getTranslationKeyFromText(String text) {
         if (text.contains("System") || text.contains("系统")) {
             return "system_settings";

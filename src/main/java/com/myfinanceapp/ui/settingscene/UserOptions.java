@@ -23,23 +23,60 @@ import javafx.stage.Stage;
 import java.util.Objects;
 
 /**
- * "User Options" 界面：允许更改用户名、更改安全问题、重置密码等
+ * A user options interface for the Finanger application.
+ * This scene allows users to manage their account settings including:
+ * - Username changes
+ * - Security question updates
+ * - Password reset functionality
+ * The interface features theme customization, internationalization support,
+ * and a responsive layout design.
  */
 public class UserOptions {
     private static final LanguageService languageService = LanguageService.getInstance();
 
-    // 假设当前已登录用户信息在此记录
+    // Current logged-in user information
     private static User currentUser;
 
-    // 重载方法，兼容旧的调用方式
+    /**
+     * Creates and returns a user options scene with default theme and currency settings.
+     *
+     * @param stage The stage to display the scene
+     * @param width The initial width of the scene
+     * @param height The initial height of the scene
+     * @param loggedUser The currently logged-in user
+     * @return A configured Scene object for the user options interface
+     */
     public static Scene createScene(Stage stage, double width, double height, User loggedUser) {
         return createScene(stage, width, height, loggedUser, new ThemeService(), new CurrencyService("CNY"));
     }
 
+    /**
+     * Creates and returns a user options scene with specified theme settings.
+     *
+     * @param stage The stage to display the scene
+     * @param width The initial width of the scene
+     * @param height The initial height of the scene
+     * @param loggedUser The currently logged-in user
+     * @param themeService The theme service to use for styling
+     * @return A configured Scene object for the user options interface
+     */
     public static Scene createScene(Stage stage, double width, double height, User loggedUser, ThemeService themeService) {
         return createScene(stage, width, height, loggedUser, themeService, new CurrencyService("CNY"));
     }
 
+    /**
+     * Creates and returns a user options scene with specified theme and currency settings.
+     * The scene includes various user account management options and navigation controls.
+     *
+     * @param stage The stage to display the scene
+     * @param width The initial width of the scene
+     * @param height The initial height of the scene
+     * @param loggedUser The currently logged-in user
+     * @param themeService The theme service to use for styling
+     * @param currencyService The currency service to use for the application
+     * @return A configured Scene object for the user options interface
+     * @throws IllegalStateException if no user is logged in
+     */
     public static Scene createScene(Stage stage, double width, double height, User loggedUser, ThemeService themeService, CurrencyService currencyService) {
         // 把当前登录用户保存，供下文使用
         currentUser = loggedUser;
@@ -303,7 +340,11 @@ public class UserOptions {
     }
 
     /**
-     * 简单的 Alert
+     * Displays an alert dialog with the specified title and message.
+     * Used for showing feedback to users after operations like username changes or security question updates.
+     *
+     * @param title The title of the alert dialog
+     * @param msg The message to display in the alert dialog
      */
     private static void showAlert(String title, String msg) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);

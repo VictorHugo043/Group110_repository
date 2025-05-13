@@ -10,18 +10,34 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
- * UserService 负责用户的注册、登录、查找和修改用户名，并确保 UID 始终不变。
+ * Service class for managing user accounts and authentication.
+ * This service provides functionality for:
+ * - User registration with secure password handling
+ * - User authentication and login
+ * - User profile management (username, password, security questions)
+ * - User data persistence in JSON format
+ * 
+ * The service ensures that user UIDs remain constant throughout the application
+ * and handles all user-related data operations securely.
  */
 public class UserService {
 
-    // 用户数据存储路径
+    /** Path to the JSON file storing user data */
     static final String USER_JSON_PATH = "src/main/resources/users.json";
 
     private static final Gson gson = new Gson();
     private static final Type USER_LIST_TYPE = new TypeToken<List<User>>() {}.getType();
 
     /**
-     * 注册用户：生成 UID，并追加到 JSON 文件中
+     * Registers a new user in the system.
+     * Generates a unique UID and salt for the user, and stores their information
+     * in the user database.
+     *
+     * @param username The desired username for the new account
+     * @param password The user's password
+     * @param secQuestion The security question for account recovery
+     * @param secAnswer The answer to the security question
+     * @return true if registration is successful, false if username already exists
      */
     public boolean registerUser(String username, String password, String secQuestion, String secAnswer) {
         List<User> users = loadUsers();
@@ -46,9 +62,12 @@ public class UserService {
         return true;
     }
 
-
     /**
-     * 用户登录校验
+     * Validates user login credentials.
+     *
+     * @param username The username to check
+     * @param password The password to verify
+     * @return true if credentials are valid, false otherwise
      */
     public boolean checkLogin(String username, String password) {
         List<User> users = loadUsers();
@@ -61,7 +80,11 @@ public class UserService {
     }
 
     /**
-     * 根据用户名查找用户
+     * Finds a user by their username.
+     * The search is case-insensitive.
+     *
+     * @param username The username to search for
+     * @return The User object if found, null otherwise
      */
     public User findUserByUsername(String username) {
         List<User> users = loadUsers();
@@ -74,7 +97,12 @@ public class UserService {
     }
 
     /**
-     * 通过 UID 查找用户（保证 UID 一直不变）
+     * Finds a user by their unique identifier (UID).
+     * This method ensures that user identification remains consistent
+     * throughout the application.
+     *
+     * @param uid The unique identifier to search for
+     * @return The User object if found, null otherwise
      */
     public User findUserByUid(String uid) {
         List<User> users = loadUsers();
@@ -86,9 +114,13 @@ public class UserService {
         return null;
     }
 
-
     /**
-     * 修改用户名（UID 保持不变）
+     * Updates a user's username while maintaining their UID.
+     * Ensures the new username is not already taken.
+     *
+     * @param oldUsername The current username
+     * @param newUsername The desired new username
+     * @return true if the update is successful, false if the new username is taken
      */
     public boolean updateUserName(String oldUsername, String newUsername) {
         List<User> users = loadUsers();
@@ -112,7 +144,12 @@ public class UserService {
     }
 
     /**
-     * 用户登录后获取完整的 User 对象
+     * Retrieves a complete User object after successful login.
+     * This method is used to get the full user profile after authentication.
+     *
+     * @param username The username used for login
+     * @param password The password used for login
+     * @return The complete User object if login is successful, null otherwise
      */
     public User loginGetUser(String username, String password) {
         List<User> users = loadUsers();
@@ -125,7 +162,11 @@ public class UserService {
     }
 
     /**
-     * 读取用户数据
+     * Loads all users from the JSON storage file.
+     * Creates a new empty list if the file doesn't exist.
+     * Ensures all users have a salt value for password security.
+     *
+     * @return List of all registered users
      */
     private static List<User> loadUsers() {
         File jsonFile = new File(USER_JSON_PATH);
@@ -152,7 +193,10 @@ public class UserService {
     }
 
     /**
-     * 保存用户数据
+     * Saves the current list of users to the JSON storage file.
+     * Uses UTF-8 encoding to ensure proper character handling.
+     *
+     * @param users The list of users to save
      */
     private static void saveUsers(List<User> users) {
         File jsonFile = new File(USER_JSON_PATH);
@@ -165,7 +209,12 @@ public class UserService {
     }
 
     /**
-     * 重设密码
+     * Updates a user's password.
+     * The user is identified by their UID to ensure consistency.
+     *
+     * @param uid The unique identifier of the user
+     * @param newPassword The new password to set
+     * @return true if the password was updated successfully, false if user not found
      */
     public boolean updatePassword(String uid, String newPassword) {
         List<User> users = loadUsers();
@@ -179,6 +228,15 @@ public class UserService {
         return false;
     }
 
+    /**
+     * Updates a user's security question and answer.
+     * The user is identified by their UID to ensure consistency.
+     *
+     * @param uid The unique identifier of the user
+     * @param newQuestion The new security question
+     * @param newAnswer The new answer to the security question
+     * @return true if the update was successful, false if user not found
+     */
     public boolean updateSecurityQuestion(String uid, String newQuestion, String newAnswer) {
         List<User> users = loadUsers();
         for (User user : users) {
@@ -191,5 +249,4 @@ public class UserService {
         }
         return false;
     }
-
 }

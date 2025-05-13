@@ -9,6 +9,11 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+/**
+ * Service class for handling AI chat interactions using the DeepSeek API.
+ * This class provides functionality to communicate with an AI model for generating
+ * chat completions and responses based on user input and system prompts.
+ */
 public class AiChatService {
     private static final String API_URL = "https://api.siliconflow.cn/v1/chat/completions";
     private static final String API_KEY = "sk-ijbuhipcfqfnwdbpmxqvsxgvhkktafpvxoizivjhwblqlent";
@@ -18,10 +23,24 @@ public class AiChatService {
     private static final Gson gson = new Gson();
 
     /**
-     * messages 示例:
-     *   List<Map<String,String>> messages = new ArrayList<>();
-     *   messages.add(Map.of("role","user","content","你好"));
-     *   messages.add(Map.of("role","assistant","content","你好呀"));
+     * Sends a chat completion request to the AI model and retrieves the response.
+     * The method handles the entire process of preparing the request, sending it to the API,
+     * and processing the response.
+     *
+     * Example usage:
+     * <pre>
+     * List<Map<String,String>> messages = new ArrayList<>();
+     * messages.add(Map.of("role","user","content","你好"));
+     * messages.add(Map.of("role","assistant","content","你好呀"));
+     * </pre>
+     *
+     * @param messages List of message maps containing the conversation history.
+     *                Each message should have "role" and "content" keys.
+     *                Roles can be "user", "assistant", or "system".
+     * @param systemPrompt Optional system prompt to guide the AI's behavior.
+     *                    Can be null or empty if no system prompt is needed.
+     * @return The AI's response as a String, or null if the request fails.
+     * @throws RuntimeException If there are network issues or API communication problems.
      */
     public static String chatCompletion(List<Map<String, String>> messages, String systemPrompt) {
         // 1) 先把用户这句话加入对话历史

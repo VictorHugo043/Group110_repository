@@ -19,6 +19,12 @@ import javafx.stage.Stage;
 
 import java.util.Objects;
 
+/**
+ * A password reset interface for the Finanger application.
+ * This scene provides functionality for users to reset their password using security questions.
+ * It features a responsive layout with a diagonal split design that automatically adjusts
+ * based on window size.
+ */
 public class ResetPassword {
 
     private static final double INITIAL_WIDTH = 800;
@@ -60,6 +66,15 @@ public class ResetPassword {
     // 找到的用户对象（缓存）
     private static User foundUser = null;
 
+    /**
+     * Creates and returns a password reset scene.
+     * The scene includes fields for username, security question, and new password.
+     *
+     * @param stage The stage to display the scene
+     * @param width The initial width of the scene
+     * @param height The initial height of the scene
+     * @return A configured Scene object for the password reset interface
+     */
     public static Scene createScene(Stage stage, double width, double height) {
         root = new Group();
         Scene scene = new Scene(root, width, height);
@@ -209,7 +224,9 @@ public class ResetPassword {
     }
 
     /**
-     * Step 1: 用户点击 "Check Question" => 验证用户名 => 显示其安全问题
+     * Handles the "Check Question" button click event.
+     * Validates the username and retrieves the user's security question.
+     * If successful, enables the answer and new password fields.
      */
     private static void handleCheckQuestion() {
         String uname = usernameField.getText().trim();
@@ -244,7 +261,10 @@ public class ResetPassword {
     }
 
     /**
-     * Step 2: 用户点击 "Reset Password"
+     * Handles the password reset process.
+     * Validates the security answer and updates the user's password if correct.
+     *
+     * @param stage The stage to display the scene
      */
     private static void handleReset(Stage stage) {
         if (foundUser == null) {
@@ -279,7 +299,9 @@ public class ResetPassword {
     }
 
     /**
-     * 动态重排多边形 + back按钮
+     * Dynamically recalculates the layout of all UI components based on the current window size.
+     * This method is called whenever the window is resized to maintain proper proportions
+     * and positioning of all visual elements.
      */
     private static void relayout() {
         double curW = root.getScene().getWidth();
@@ -314,6 +336,12 @@ public class ResetPassword {
         backBtn.toFront();
     }
 
+    /**
+     * Displays an alert dialog with the specified title and message.
+     *
+     * @param title The title of the alert dialog
+     * @param message The message to display in the alert dialog
+     */
     private static void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(title);
