@@ -7,6 +7,7 @@ import com.myfinanceapp.ui.statusscene.StatusScene;
 import com.myfinanceapp.service.StatusService;
 import com.myfinanceapp.service.ThemeService;
 import com.myfinanceapp.service.CurrencyService;
+import com.myfinanceapp.service.LanguageService;
 import javafx.animation.PauseTransition;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -23,6 +24,7 @@ import java.util.Objects;
 public class SystemSettings {
     private static ThemeService themeService = new ThemeService();
     public static CurrencyService currencyService; // Initialize with passed instance
+    private static LanguageService languageService = LanguageService.getInstance();
 
     // Overloaded method for backward compatibility
     public static Scene createScene(Stage stage, double width, double height, User loggedUser) {
@@ -90,10 +92,10 @@ public class SystemSettings {
         container.setPadding(new Insets(30));
 
         // Declare labels at method scope
-        Label langLabel = new Label("Languages");
-        Label nightLabel = new Label("Night/Daytime Mode");
-        Label sizeLabel = new Label("Window Size");
-        Label currencyLabel = new Label("Default Currency");
+        Label langLabel = new Label(languageService.getTranslation("languages"));
+        Label nightLabel = new Label(languageService.getTranslation("night_day_mode"));
+        Label sizeLabel = new Label(languageService.getTranslation("window_size"));
+        Label currencyLabel = new Label(languageService.getTranslation("default_currency"));
 
         // Declare ComboBoxes at method scope
         ComboBox<String> langCombo = new ComboBox<>();
@@ -115,8 +117,15 @@ public class SystemSettings {
         langLabel.setFont(Font.font("Arial", 14));
         langLabel.setStyle(themeService.getTextColorStyle());
         langCombo.getItems().addAll("English", "Chinese");
-        langCombo.setValue("English");
+        langCombo.setValue(languageService.getCurrentLanguage());
         langCombo.getStyleClass().add(themeService.isDayMode() ? "day-theme-combo-box" : "night-theme-combo-box");
+        langCombo.setOnAction(e -> {
+            String selectedLanguage = langCombo.getValue();
+            if (selectedLanguage != null) {
+                languageService.setCurrentLanguage(selectedLanguage);
+                updateLanguage(stage, root, outerBox, sideBar, topBar, container, langLabel, nightLabel, sizeLabel, currencyLabel, langCombo, nightCombo, sizeCombo, currencyCombo);
+            }
+        });
         langBox.getChildren().addAll(languagesIcon, langLabel, langCombo);
 
         // Night/Daytime
@@ -132,17 +141,26 @@ public class SystemSettings {
         HBox nightBox = new HBox(20);
         nightLabel.setFont(Font.font("Arial", 14));
         nightLabel.setStyle(themeService.getTextColorStyle());
-        nightCombo.getItems().addAll("Daytime", "Nighttime");
-        nightCombo.setValue(themeService.isDayMode() ? "Daytime" : "Nighttime");
+        
+        // 初始化夜间模式选项
+        String daytimeText = languageService.getTranslation("daytime");
+        String nighttimeText = languageService.getTranslation("nighttime");
+        nightCombo.getItems().addAll(daytimeText, nighttimeText);
+        nightCombo.setValue(themeService.isDayMode() ? daytimeText : nighttimeText);
         nightCombo.getStyleClass().add(themeService.isDayMode() ? "day-theme-combo-box" : "night-theme-combo-box");
+        
         nightCombo.setOnAction(e -> {
             String selectedMode = nightCombo.getValue();
-            PauseTransition debounce = new PauseTransition(Duration.millis(100));
-            debounce.setOnFinished(event -> {
-                themeService.setTheme(selectedMode.equals("Daytime"));
-                updateTheme(stage, root, outerBox, sideBar, topBar, container, langLabel, nightLabel, sizeLabel, currencyLabel, langCombo, nightCombo, sizeCombo, currencyCombo);
-            });
-            debounce.play();
+            if (selectedMode != null) {
+                PauseTransition debounce = new PauseTransition(Duration.millis(100));
+                debounce.setOnFinished(event -> {
+                    // 使用索引来判断模式，而不是文本比较
+                    boolean isDayMode = nightCombo.getItems().indexOf(selectedMode) == 0;
+                    themeService.setTheme(isDayMode);
+                    updateTheme(stage, root, outerBox, sideBar, topBar, container, langLabel, nightLabel, sizeLabel, currencyLabel, langCombo, nightCombo, sizeCombo, currencyCombo);
+                });
+                debounce.play();
+            }
         });
         nightBox.getChildren().addAll(dayIcon, nightLabel, nightCombo);
 
@@ -216,11 +234,12 @@ public class SystemSettings {
         // 按钮区
         HBox buttonBox = new HBox(30);
         buttonBox.setAlignment(Pos.CENTER);
-        Button resetBtn = new Button("Reset to Default");
+        Button resetBtn = new Button(languageService.getTranslation("reset_to_default"));
         resetBtn.setStyle(themeService.getButtonStyle());
         resetBtn.setOnAction(e -> {
             langCombo.setValue("English");
-            nightCombo.setValue("Daytime");
+            languageService.setCurrentLanguage("English");
+            nightCombo.setValue(nightCombo.getItems().get(0)); // 使用索引设置日间模式
             sizeCombo.setValue("1920x1080");
             stage.setWidth(1920);
             stage.setHeight(1080);
@@ -231,15 +250,16 @@ public class SystemSettings {
             debounce.setOnFinished(event -> {
                 themeService.setTheme(true); // Reset to Daytime
                 updateTheme(stage, root, outerBox, sideBar, topBar, container, langLabel, nightLabel, sizeLabel, currencyLabel, langCombo, nightCombo, sizeCombo, currencyCombo);
+                updateLanguage(stage, root, outerBox, sideBar, topBar, container, langLabel, nightLabel, sizeLabel, currencyLabel, langCombo, nightCombo, sizeCombo, currencyCombo);
             });
             debounce.play();
         });
-        Button backBtn = new Button("Back to Status");
+        Button backBtn = new Button(languageService.getTranslation("back_to_status"));
         backBtn.setStyle(themeService.getButtonStyle());
         backBtn.setOnAction(e -> {
             StatusScene statusScene = new StatusScene(stage, width, height, loggedUser);
             stage.setScene(statusScene.createScene(themeService, currencyService));
-            StatusService statusService = new StatusService(statusScene, loggedUser, currencyService);
+            StatusService statusService = new StatusService(statusScene, loggedUser, currencyService, languageService);
             stage.setTitle("Finanger - Status");
         });
 
@@ -351,5 +371,43 @@ public class SystemSettings {
         scene.getStylesheets().add("data:text/css," + themeService.getThemeStylesheet());
         scene.getRoot().applyCss();
         scene.getRoot().layout();
+    }
+
+    private static void updateLanguage(Stage stage, BorderPane root, VBox outerBox, VBox sideBar, HBox topBar, VBox container,
+                                     Label langLabel, Label nightLabel, Label sizeLabel, Label currencyLabel,
+                                     ComboBox<String> langCombo, ComboBox<String> nightCombo, ComboBox<String> sizeCombo, ComboBox<String> currencyCombo) {
+        // 更新标签文本
+        langLabel.setText(languageService.getTranslation("languages"));
+        nightLabel.setText(languageService.getTranslation("night_day_mode"));
+        sizeLabel.setText(languageService.getTranslation("window_size"));
+        currencyLabel.setText(languageService.getTranslation("default_currency"));
+
+        // 更新按钮文本
+        container.getChildren().stream()
+                .filter(node -> node instanceof HBox && ((HBox) node).getChildren().stream().anyMatch(child -> child instanceof Button))
+                .findFirst()
+                .ifPresent(hbox -> {
+                    HBox buttonBox = (HBox) hbox;
+                    Button resetBtn = (Button) buttonBox.getChildren().get(0);
+                    Button backBtn = (Button) buttonBox.getChildren().get(1);
+                    resetBtn.setText(languageService.getTranslation("reset_to_default"));
+                    backBtn.setText(languageService.getTranslation("back_to_status"));
+                });
+
+        // 更新夜间模式选项
+        String daytimeText = languageService.getTranslation("daytime");
+        String nighttimeText = languageService.getTranslation("nighttime");
+        int currentIndex = nightCombo.getItems().indexOf(nightCombo.getValue());
+        nightCombo.getItems().clear();
+        nightCombo.getItems().addAll(daytimeText, nighttimeText);
+        // 保持当前选择的模式
+        nightCombo.setValue(currentIndex >= 0 ? nightCombo.getItems().get(currentIndex) : 
+                          (themeService.isDayMode() ? daytimeText : nighttimeText));
+
+        // 更新顶部栏
+        SettingsTopBarFactory.updateLanguage(topBar, languageService);
+        
+        // 更新侧边栏
+        LeftSidebarFactory.updateLanguage(sideBar, languageService);
     }
 }

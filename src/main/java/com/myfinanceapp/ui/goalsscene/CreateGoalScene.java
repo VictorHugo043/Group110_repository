@@ -8,6 +8,7 @@ import com.myfinanceapp.ui.common.LeftSidebarFactory;
 import com.myfinanceapp.ui.common.SceneManager;
 import com.myfinanceapp.service.ThemeService;
 import com.myfinanceapp.service.CurrencyService;
+import com.myfinanceapp.service.LanguageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import javafx.geometry.Insets;
@@ -29,7 +30,12 @@ import java.time.LocalDate;
 public class CreateGoalScene {
     private static final Logger logger = LoggerFactory.getLogger(CreateGoalScene.class);
     private static final Font LABEL_FONT = Font.font("Arial", 14);
-    private static final String[] GOAL_TYPES = {"Saving Goal", "Debt Repayment Goal", "Budget Control Goal"};
+    private static final LanguageService languageService = LanguageService.getInstance();
+    private static final String[] GOAL_TYPES = {
+        languageService.getTranslation("saving_goal"),
+        languageService.getTranslation("debt_repayment_goal"),
+        languageService.getTranslation("budget_control_goal")
+    };
     private static final String[] CURRENCIES = {"CNY", "USD", "EUR", "JPY", "GBP"};
 
     // UI Constants
@@ -76,7 +82,7 @@ public class CreateGoalScene {
         );
 
         // Title
-        Label titleLabel = new Label("Create New Goal");
+        Label titleLabel = new Label(languageService.getTranslation("create_new_goal"));
         titleLabel.setFont(Font.font("Arial", 24));
         titleLabel.setStyle(themeService.getTextColorStyle());
 
@@ -90,24 +96,24 @@ public class CreateGoalScene {
         grid.prefWidthProperty().bind(mainBox.maxWidthProperty());
 
         // Goal type selection
-        ComboBox<String> typeCombo = createComboBox(GOAL_TYPES, 0, grid, "Type of your goal:", LABEL_FONT, themeService);
+        ComboBox<String> typeCombo = createComboBox(GOAL_TYPES, 0, grid, languageService.getTranslation("goal_type"), LABEL_FONT, themeService);
         typeCombo.prefWidthProperty().bind(grid.widthProperty().multiply(0.6));
 
         // Goal title field
-        TextField titleField = createTextField("Goal Title", 1, grid, "Goal title:", LABEL_FONT, themeService);
+        TextField titleField = createTextField(languageService.getTranslation("goal_title_prompt"), 1, grid, languageService.getTranslation("goal_title"), LABEL_FONT, themeService);
         titleField.prefWidthProperty().bind(grid.widthProperty().multiply(0.6));
 
         // Target amount field
-        TextField amountField = createTextField("Target Amount", 2, grid, "Target amount:", LABEL_FONT, themeService);
+        TextField amountField = createTextField(languageService.getTranslation("target_amount_prompt"), 2, grid, languageService.getTranslation("target_amount"), LABEL_FONT, themeService);
         amountField.prefWidthProperty().bind(grid.widthProperty().multiply(0.6));
 
         // Currency selection
-        ComboBox<String> currencyCombo = createComboBox(CURRENCIES, 3, grid, "Currency:", LABEL_FONT, themeService);
+        ComboBox<String> currencyCombo = createComboBox(CURRENCIES, 3, grid, languageService.getTranslation("currency"), LABEL_FONT, themeService);
         currencyCombo.getSelectionModel().selectFirst();
         currencyCombo.prefWidthProperty().bind(grid.widthProperty().multiply(0.6));
 
         // Deadline date picker
-        DatePicker deadlinePicker = createDatePicker(4, grid, "Deadline:", LABEL_FONT, themeService);
+        DatePicker deadlinePicker = createDatePicker(4, grid, languageService.getTranslation("deadline"), LABEL_FONT, themeService);
         deadlinePicker.prefWidthProperty().bind(grid.widthProperty().multiply(0.6));
 
         // Ensure deadline is in the future
@@ -120,7 +126,7 @@ public class CreateGoalScene {
         });
 
         // Category field (only visible for budget control goals)
-        TextField categoryField = createTextField("Category (for Budget Control)", 5, grid, "Category:", LABEL_FONT, themeService);
+        TextField categoryField = createTextField(languageService.getTranslation("category_prompt"), 5, grid, languageService.getTranslation("category"), LABEL_FONT, themeService);
         categoryField.prefWidthProperty().bind(grid.widthProperty().multiply(0.6));
         Label categoryLabel = (Label) grid.getChildren().stream()
                 .filter(node -> GridPane.getRowIndex(node) == 5 && GridPane.getColumnIndex(node) == 0)
@@ -145,7 +151,7 @@ public class CreateGoalScene {
         buttonBox.setAlignment(Pos.CENTER);
         buttonBox.prefWidthProperty().bind(grid.widthProperty());
 
-        Button saveButton = createButton("Save Goal", themeService.getButtonStyle(), event -> {
+        Button saveButton = createButton(languageService.getTranslation("save_goal"), themeService.getButtonStyle(), event -> {
             if (GoalFormService.validateForm(loggedUser, titleField, amountField, typeCombo, categoryField, deadlinePicker)) {
                 try {
                     Goal newGoal = GoalFormService.createNewGoal(
@@ -170,7 +176,7 @@ public class CreateGoalScene {
             }
         });
 
-        Button cancelButton = createButton("Cancel", themeService.getButtonStyle(), event -> {
+        Button cancelButton = createButton(languageService.getTranslation("cancel"), themeService.getButtonStyle(), event -> {
             // Navigate back to goals list with ThemeService and CurrencyService
             Scene goalsScene = Goals.createScene(stage, stage.getScene().getWidth(), stage.getScene().getHeight(), loggedUser, themeService, currencyService);
             SceneManager.switchScene(stage, goalsScene);
@@ -208,6 +214,9 @@ public class CreateGoalScene {
                 stage.setHeight(MIN_WINDOW_HEIGHT);
             }
         });
+
+        // 设置窗口标题
+        stage.setTitle("Finanger - " + languageService.getTranslation("create_new_goal"));
 
         return scene;
     }

@@ -8,6 +8,7 @@ import com.myfinanceapp.ui.common.LeftSidebarFactory;
 import com.myfinanceapp.ui.common.SceneManager;
 import com.myfinanceapp.service.ThemeService;
 import com.myfinanceapp.service.CurrencyService;
+import com.myfinanceapp.service.LanguageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import javafx.geometry.Insets;
@@ -29,6 +30,7 @@ import java.time.LocalDate;
 public class EditGoalScene {
     private static final Logger logger = LoggerFactory.getLogger(EditGoalScene.class);
     private static final Font LABEL_FONT = Font.font("Arial", 14);
+    private static final LanguageService languageService = LanguageService.getInstance();
     private static final String[] CURRENCIES = {"CNY", "USD", "EUR", "JPY", "GBP"};
 
     // UI Constants
@@ -78,7 +80,7 @@ public class EditGoalScene {
         );
 
         // Title
-        Label titleLabel = new Label("Edit Goal");
+        Label titleLabel = new Label(languageService.getTranslation("edit_goal"));
         titleLabel.setFont(Font.font("Arial", 24));
         titleLabel.setStyle(themeService.getTextColorStyle());
 
@@ -96,13 +98,13 @@ public class EditGoalScene {
         typeLabel.setFont(LABEL_FONT);
         typeLabel.setStyle(themeService.getTextColorStyle());
 
-        Tooltip tooltip = new Tooltip("Goal type cannot be modified");
+        Tooltip tooltip = new Tooltip(languageService.getTranslation("goal_type_cannot_modify"));
         tooltip.setStyle("-fx-font-size: 12px;" + themeService.getTextColorStyle());
         tooltip.setShowDelay(javafx.util.Duration.millis(100));
         tooltip.setHideDelay(javafx.util.Duration.millis(200));
         typeLabel.setTooltip(tooltip);
 
-        Label typeTitleLabel = new Label("Type of your goal:");
+        Label typeTitleLabel = new Label(languageService.getTranslation("goal_type"));
         typeTitleLabel.setFont(LABEL_FONT);
         typeTitleLabel.setStyle(themeService.getTextColorStyle());
 
@@ -110,22 +112,22 @@ public class EditGoalScene {
         grid.add(typeLabel, 1, 0);
 
         // Goal title field
-        TextField titleField = createTextField("Goal Title", 1, grid, "Goal title:", LABEL_FONT, themeService);
+        TextField titleField = createTextField(languageService.getTranslation("goal_title_prompt"), 1, grid, languageService.getTranslation("goal_title"), LABEL_FONT, themeService);
         titleField.setText(goalToEdit.getTitle());
         titleField.prefWidthProperty().bind(grid.widthProperty().multiply(0.6));
 
         // Target amount field
-        TextField amountField = createTextField("Target Amount", 2, grid, "Target amount:", LABEL_FONT, themeService);
+        TextField amountField = createTextField(languageService.getTranslation("target_amount_prompt"), 2, grid, languageService.getTranslation("target_amount"), LABEL_FONT, themeService);
         amountField.setText(String.valueOf(goalToEdit.getTargetAmount()));
         amountField.prefWidthProperty().bind(grid.widthProperty().multiply(0.6));
 
         // Currency selection
-        ComboBox<String> currencyCombo = createComboBox(CURRENCIES, 3, grid, "Currency:", LABEL_FONT, themeService);
+        ComboBox<String> currencyCombo = createComboBox(CURRENCIES, 3, grid, languageService.getTranslation("currency"), LABEL_FONT, themeService);
         currencyCombo.setValue(goalToEdit.getCurrency());
         currencyCombo.prefWidthProperty().bind(grid.widthProperty().multiply(0.6));
 
         // Deadline date picker
-        DatePicker deadlinePicker = createDatePicker(4, grid, "Deadline:", LABEL_FONT, themeService);
+        DatePicker deadlinePicker = createDatePicker(4, grid, languageService.getTranslation("deadline"), LABEL_FONT, themeService);
         deadlinePicker.setValue(goalToEdit.getDeadline());
         deadlinePicker.prefWidthProperty().bind(grid.widthProperty().multiply(0.6));
 
@@ -139,7 +141,7 @@ public class EditGoalScene {
         });
 
         // Category field (only visible for budget control goals)
-        TextField categoryField = createTextField("Category (for Budget Control)", 5, grid, "Category:", LABEL_FONT, themeService);
+        TextField categoryField = createTextField(languageService.getTranslation("category_prompt"), 5, grid, languageService.getTranslation("category"), LABEL_FONT, themeService);
         categoryField.prefWidthProperty().bind(grid.widthProperty().multiply(0.6));
         Label categoryLabel = (Label) grid.getChildren().stream()
                 .filter(node -> GridPane.getRowIndex(node) == 5 && GridPane.getColumnIndex(node) == 0)
@@ -160,7 +162,7 @@ public class EditGoalScene {
         buttonBox.setAlignment(Pos.CENTER);
         buttonBox.prefWidthProperty().bind(grid.widthProperty());
 
-        Button saveButton = createButton("Save Changes", themeService.getButtonStyle(), event -> {
+        Button saveButton = createButton(languageService.getTranslation("save_changes"), themeService.getButtonStyle(), event -> {
             if (GoalFormService.validateForm(loggedUser, titleField, amountField, null, categoryField, deadlinePicker)) {
                 try {
                     // Update the existing goal
@@ -179,12 +181,12 @@ public class EditGoalScene {
                     Scene goalsScene = Goals.createScene(stage, stage.getScene().getWidth(), stage.getScene().getHeight(), loggedUser, themeService, currencyService);
                     SceneManager.switchScene(stage, goalsScene);
                 } catch (IOException e) {
-                    logger.error("Failed to update goal", e);
+                    logger.error(languageService.getTranslation("failed_to_update_goal"), e);
                 }
             }
         });
 
-        Button cancelButton = createButton("Cancel", themeService.getButtonStyle(), event -> {
+        Button cancelButton = createButton(languageService.getTranslation("cancel"), themeService.getButtonStyle(), event -> {
             // Navigate back to goals list with ThemeService and CurrencyService
             Scene goalsScene = Goals.createScene(stage, stage.getScene().getWidth(), stage.getScene().getHeight(), loggedUser, themeService, currencyService);
             SceneManager.switchScene(stage, goalsScene);
@@ -223,17 +225,20 @@ public class EditGoalScene {
             }
         });
 
+        // 设置窗口标题
+        stage.setTitle("Finanger - " + languageService.getTranslation("edit_goal"));
+
         return scene;
     }
 
     private static String getGoalTypeDisplay(String type) {
         switch (type) {
             case "SAVING":
-                return "Saving Goal";
+                return languageService.getTranslation("saving_goal");
             case "DEBT_REPAYMENT":
-                return "Debt Repayment Goal";
+                return languageService.getTranslation("debt_repayment_goal");
             case "BUDGET_CONTROL":
-                return "Budget Control Goal";
+                return languageService.getTranslation("budget_control_goal");
             default:
                 return type;
         }

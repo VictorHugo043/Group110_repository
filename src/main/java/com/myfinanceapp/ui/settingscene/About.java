@@ -7,6 +7,7 @@ import com.myfinanceapp.ui.statusscene.StatusScene;
 import com.myfinanceapp.service.StatusService;
 import com.myfinanceapp.service.ThemeService;
 import com.myfinanceapp.service.CurrencyService;
+import com.myfinanceapp.service.LanguageService;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -16,6 +17,8 @@ import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 public class About {
+    private static final LanguageService languageService = LanguageService.getInstance();
+
     // 重载方法，兼容旧的调用方式
     public static Scene createScene(Stage stage, double width, double height, User loggedUser) {
         return createScene(stage, width, height, loggedUser, new ThemeService(), new CurrencyService("CNY"));
@@ -77,20 +80,11 @@ public class About {
         container.setAlignment(Pos.TOP_CENTER);
         container.setPadding(new Insets(30));
 
-        Label titleLabel = new Label("About Finanger");
+        Label titleLabel = new Label(languageService.getTranslation("about_finanger"));
         titleLabel.setFont(new Font(20));
         titleLabel.setStyle(themeService.getTextColorStyle());
 
-        Label descLabel = new Label(
-                "Finanger is an AI-powered personal finance manager designed to help you take control " +
-                        "of your money with ease. Whether you input transactions manually or import files, " +
-                        "Finanger keeps everything organized in one place.\n\n" +
-                        "Using smart AI, Finanger automatically categorizes your expenses, detects spending " +
-                        "patterns, and suggests personalized budgets and saving tips. Of course, you stay in " +
-                        "control — review and adjust any misclassifications at any time.\n\n" +
-                        "Smarter finance starts here. With Finanger, you're not just tracking money — " +
-                        "you're mastering it."
-        );
+        Label descLabel = new Label(languageService.getTranslation("about_description"));
         descLabel.setFont(new Font(14));
         descLabel.setWrapText(true);
         descLabel.setMaxWidth(500);
@@ -107,13 +101,13 @@ public class About {
         buttonBox.setAlignment(Pos.CENTER);
         buttonBox.setPadding(new Insets(20, 0, 0, 0));
 
-        Button backBtn = new Button("Back to Status");
+        Button backBtn = new Button(languageService.getTranslation("back_to_status"));
         backBtn.setStyle(themeService.getButtonStyle());
         backBtn.setOnAction(e -> {
             StatusScene statusScene = new StatusScene(stage, width, height, loggedUser);
             stage.setScene(statusScene.createScene(themeService, currencyService));
-            StatusService statusService = new StatusService(statusScene, loggedUser, currencyService);
-            stage.setTitle("Finanger - Status");
+            StatusService statusService = new StatusService(statusScene, loggedUser, currencyService, languageService);
+            stage.setTitle("Finanger - " + languageService.getTranslation("status"));
         });
 
         buttonBox.getChildren().add(backBtn);

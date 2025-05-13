@@ -6,6 +6,7 @@ import com.myfinanceapp.ui.signupscene.SignUp;
 import com.myfinanceapp.ui.statusscene.StatusScene;
 import com.myfinanceapp.service.StatusService;
 import com.myfinanceapp.service.CurrencyService;
+import com.myfinanceapp.service.LanguageService;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
@@ -179,7 +180,7 @@ public class LoginScene {
                 // Login successful, jump to Status scene
                 StatusScene statusScene = new StatusScene(stage, root.getScene().getWidth(), root.getScene().getHeight(), loggedUser);
                 stage.setScene(statusScene.createScene());
-                StatusService statusService = new StatusService(statusScene, loggedUser, currencyService); // Pass currencyService
+                StatusService statusService = new StatusService(statusScene, loggedUser, currencyService, LanguageService.getInstance()); // Pass currencyService and languageService
                 stage.setTitle("Finanger - Status");
                 showAlert("Success", "Login Successful!");
             } else {

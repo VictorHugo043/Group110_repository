@@ -32,13 +32,15 @@ public class StatusService {
     private final Parser mdParser = Parser.builder().build();
     private final HtmlRenderer mdRenderer = HtmlRenderer.builder().build();
     private final CurrencyService currencyService;
+    private final LanguageService languageService;
 
-    public StatusService(StatusScene scene, User currentUser, CurrencyService currencyService) {
+    public StatusService(StatusScene scene, User currentUser, CurrencyService currencyService, LanguageService languageService) {
         this.scene = scene;
         this.currentUser = currentUser;
         this.txService = new TransactionService();
         this.goalService = new GoalService();
         this.currencyService = currencyService;
+        this.languageService = languageService;
         this.chartService = new ChartService(scene.lineChart, scene.barChart, scene.pieChart, txService, currentUser, currencyService);
         initialize();
     }
@@ -112,7 +114,7 @@ public class StatusService {
     }
 
     private void initializeWelcomeMessage() {
-        String welcomeMsg = "Welcome to use the financial assistant. Please feel free to ask any financial questions you have.";
+        String welcomeMsg = languageService.getTranslation("welcome_message");
 
         // 添加到聊天历史
         Map<String, String> aiMsg = new HashMap<>();

@@ -59,6 +59,9 @@ public class StatusServiceTest {
     @Mock
     private ThemeService themeService;
 
+    @Mock
+    private LanguageService languageService;
+
     private StatusScene statusScene;
     private StatusService statusService;
     private User testUser;
@@ -96,7 +99,7 @@ public class StatusServiceTest {
                 );
 
                 // 创建 StatusService
-                statusService = new StatusService(statusScene, testUser, currencyService);
+                statusService = new StatusService(statusScene, testUser, currencyService, languageService);
 
                 // 使用反射注入 mock 对象
                 java.lang.reflect.Field txField = StatusService.class.getDeclaredField("txService");

@@ -4,6 +4,7 @@ import com.myfinanceapp.model.Transaction;
 import com.myfinanceapp.model.User;
 import com.myfinanceapp.service.TransactionService;
 import com.myfinanceapp.service.ThemeService;
+import com.myfinanceapp.service.LanguageService;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -27,6 +28,8 @@ import java.time.LocalDate;
 import java.text.ParseException;
 
 public class TransactionScene {
+    private static final LanguageService languageService = LanguageService.getInstance();
+
     // Overloaded method for backward compatibility
     public static Scene createScene(Stage stage, double width, double height, User loggedUser) {
         return createScene(stage, width, height, loggedUser, new ThemeService());
@@ -57,15 +60,15 @@ public class TransactionScene {
         centerBox.setMaxHeight(Double.MAX_VALUE);
         VBox.setVgrow(centerBox, Priority.ALWAYS);
 
-        Label topicLabel = new Label("Manual Import:");
+        Label topicLabel = new Label(languageService.getTranslation("manual_import"));
         topicLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;" + themeService.getTextColorStyle());
 
         // Date picker section
-        Label dateLabel = new Label("Transaction Date");
+        Label dateLabel = new Label(languageService.getTranslation("transaction_date"));
         dateLabel.setStyle(themeService.getTextColorStyle());
 
         DatePicker datePicker = new DatePicker();
-        datePicker.setPromptText("Select date");
+        datePicker.setPromptText(languageService.getTranslation("select_date"));
         datePicker.getStyleClass().add(themeService.isDayMode() ? "day-theme-date-picker" : "night-theme-date-picker");
         datePicker.setVisible(false);
         datePicker.setVisible(true);
@@ -90,13 +93,16 @@ public class TransactionScene {
         VBox dateBox = new VBox(dateLabel, datePicker);
         dateBox.setAlignment(Pos.CENTER);
 
-        Label typeLabel = new Label("Transaction Type");
+        Label typeLabel = new Label(languageService.getTranslation("transaction_type"));
         typeLabel.setStyle(themeService.getTextColorStyle());
         ComboBox<String> typeCombo = new ComboBox<>();
-        typeCombo.getItems().addAll("Income", "Expense");
+        typeCombo.getItems().addAll(
+            languageService.getTranslation("income"),
+            languageService.getTranslation("expense")
+        );
         typeCombo.setMaxWidth(200);
         typeCombo.setPrefWidth(150);
-        typeCombo.setValue("Expense");
+        typeCombo.setValue(languageService.getTranslation("expense"));
         typeCombo.setFocusTraversable(false);
         typeCombo.getStyleClass().add(themeService.isDayMode() ? "day-theme-combo-box" : "night-theme-combo-box");
         typeCombo.setVisible(false);
@@ -104,7 +110,7 @@ public class TransactionScene {
         VBox typeBox = new VBox(typeLabel, typeCombo);
         typeBox.setAlignment(Pos.CENTER);
 
-        Label currencyLabel = new Label("Currency");
+        Label currencyLabel = new Label(languageService.getTranslation("currency"));
         currencyLabel.setStyle(themeService.getTextColorStyle());
         ComboBox<String> currencyCombo = new ComboBox<>();
         currencyCombo.getItems().addAll("CNY", "USD", "EUR");
@@ -118,10 +124,10 @@ public class TransactionScene {
         VBox currencyBox = new VBox(currencyLabel, currencyCombo);
         currencyBox.setAlignment(Pos.CENTER);
 
-        Label amountLabel = new Label("Amount");
+        Label amountLabel = new Label(languageService.getTranslation("amount"));
         amountLabel.setStyle(themeService.getTextColorStyle());
         TextField amountField = new TextField();
-        amountField.setPromptText("Please enter amount");
+        amountField.setPromptText(languageService.getTranslation("enter_amount"));
         amountField.setMaxWidth(200);
         amountField.setPrefWidth(150);
         amountField.setFocusTraversable(false);
@@ -131,10 +137,10 @@ public class TransactionScene {
         VBox amountBox = new VBox(amountLabel, amountField);
         amountBox.setAlignment(Pos.CENTER);
 
-        Label descriptionLabel = new Label("Description");
+        Label descriptionLabel = new Label(languageService.getTranslation("description"));
         descriptionLabel.setStyle(themeService.getTextColorStyle());
         TextArea descriptionField = new TextArea();
-        descriptionField.setPromptText("Enter transaction description");
+        descriptionField.setPromptText(languageService.getTranslation("enter_description"));
         descriptionField.setMaxWidth(200);
         descriptionField.setPrefWidth(150);
         descriptionField.setPrefRowCount(3);
@@ -147,15 +153,15 @@ public class TransactionScene {
         VBox descriptionBox = new VBox(descriptionLabel, descriptionField);
         descriptionBox.setAlignment(Pos.CENTER);
 
-        Button autoSortButton = new Button("Auto-sorting");
+        Button autoSortButton = new Button(languageService.getTranslation("auto_sorting"));
         autoSortButton.setStyle(themeService.getButtonStyle() + "-fx-font-weight: bold; " + "-fx-border-radius: 15;");
         autoSortButton.setMaxWidth(100);
         autoSortButton.setPrefWidth(100);
 
-        Label categoryLabel = new Label("Category");
+        Label categoryLabel = new Label(languageService.getTranslation("category"));
         categoryLabel.setStyle(themeService.getTextColorStyle());
         TextField categoryField = new TextField();
-        categoryField.setPromptText("e.g., Salary, Rent, Utilities");
+        categoryField.setPromptText(languageService.getTranslation("category_example"));
         categoryField.setMaxWidth(200);
         categoryField.setPrefWidth(150);
         categoryField.setFocusTraversable(false);
@@ -169,10 +175,10 @@ public class TransactionScene {
         VBox categoryBox = new VBox(categoryLabel, categoryAndButton);
         categoryBox.setAlignment(Pos.CENTER);
 
-        Label methodLabel = new Label("Payment Method");
+        Label methodLabel = new Label(languageService.getTranslation("payment_method"));
         methodLabel.setStyle(themeService.getTextColorStyle());
         TextField methodField = new TextField();
-        methodField.setPromptText("e.g., Cash, PayPal, Bank Transfer");
+        methodField.setPromptText(languageService.getTranslation("payment_method_example"));
         methodField.setMaxWidth(200);
         methodField.setPrefWidth(150);
         methodField.setFocusTraversable(false);
@@ -186,9 +192,9 @@ public class TransactionScene {
             String description = descriptionField.getText();
             if (description.isEmpty()) {
                 Alert alert = new Alert(Alert.AlertType.WARNING);
-                alert.setTitle("Warning");
+                alert.setTitle(languageService.getTranslation("warning"));
                 alert.setHeaderText(null);
-                alert.setContentText("Please enter a description first");
+                alert.setContentText(languageService.getTranslation("enter_description_first"));
                 alert.showAndWait();
                 return;
             }
@@ -198,14 +204,14 @@ public class TransactionScene {
                 categoryField.setText(category);
             } catch (Exception e) {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Error");
+                alert.setTitle(languageService.getTranslation("error"));
                 alert.setHeaderText(null);
-                alert.setContentText("Failed to auto-sort category: " + e.getMessage());
+                alert.setContentText(languageService.getTranslation("auto_sort_failed") + ": " + e.getMessage());
                 alert.showAndWait();
             }
         });
 
-        Button submitManualBtn = new Button("Submit");
+        Button submitManualBtn = new Button(languageService.getTranslation("submit"));
         submitManualBtn.setMaxWidth(150);
         submitManualBtn.setPrefWidth(100);
         submitManualBtn.setStyle(themeService.getButtonStyle() + "-fx-font-weight: bold; " + "-fx-border-radius: 15;");
@@ -220,9 +226,9 @@ public class TransactionScene {
                     categoryField.getText().isEmpty() ||
                     methodField.getText().isEmpty()) {
                 Alert alert = new Alert(Alert.AlertType.WARNING);
-                alert.setTitle("Missing Information");
+                alert.setTitle(languageService.getTranslation("missing_info"));
                 alert.setHeaderText(null);
-                alert.setContentText("Please fill in all blanks before submitting");
+                alert.setContentText(languageService.getTranslation("fill_all_blanks"));
                 alert.showAndWait();
                 return;
             }
@@ -264,28 +270,27 @@ public class TransactionScene {
                 }
             } catch (ParseException | NumberFormatException e) {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Invalid Date");
+                alert.setTitle(languageService.getTranslation("invalid_date"));
                 alert.setHeaderText(null);
-                alert.setContentText("Please enter a valid date in format yyyy-MM-dd\n" +
-                        "Month must be 1-12 and day must be 1-31");
+                alert.setContentText(languageService.getTranslation("invalid_date_format"));
                 alert.showAndWait();
                 return;
             }
 
             if (!categoryField.getText().matches("^[a-zA-Z\\s]+$")) {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Invalid Category");
+                alert.setTitle(languageService.getTranslation("invalid_category"));
                 alert.setHeaderText(null);
-                alert.setContentText("Category must contain only English letters");
+                alert.setContentText(languageService.getTranslation("category_english_only"));
                 alert.showAndWait();
                 return;
             }
 
             if (!methodField.getText().matches("^[a-zA-Z\\s]+$")) {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Invalid Payment Method");
+                alert.setTitle(languageService.getTranslation("invalid_payment_method"));
                 alert.setHeaderText(null);
-                alert.setContentText("Payment method must contain only English letters");
+                alert.setContentText(languageService.getTranslation("payment_method_english_only"));
                 alert.showAndWait();
                 return;
             }
@@ -295,9 +300,9 @@ public class TransactionScene {
                 amount = Double.parseDouble(amountField.getText());
             } catch (NumberFormatException e) {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Invalid Amount");
+                alert.setTitle(languageService.getTranslation("invalid_amount"));
                 alert.setHeaderText(null);
-                alert.setContentText("Please type in a valid number");
+                alert.setContentText(languageService.getTranslation("enter_valid_number"));
                 alert.showAndWait();
                 return;
             }
@@ -321,9 +326,9 @@ public class TransactionScene {
             descriptionField.clear();
 
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("Transaction Added");
+            alert.setTitle(languageService.getTranslation("transaction_added"));
             alert.setHeaderText(null);
-            alert.setContentText("Transaction has been successfully added.");
+            alert.setContentText(languageService.getTranslation("transaction_success"));
             alert.showAndWait();
         });
 
@@ -352,7 +357,7 @@ public class TransactionScene {
         rightBar.setMaxHeight(Double.MAX_VALUE);
         VBox.setVgrow(rightBar, Priority.ALWAYS);
 
-        Label promptLabel = new Label("File Import:");
+        Label promptLabel = new Label(languageService.getTranslation("file_import"));
         promptLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;" + themeService.getTextColorStyle());
         VBox.setMargin(promptLabel, new Insets(10, 0, 0, 0));
 
@@ -362,7 +367,7 @@ public class TransactionScene {
                 "-fx-border-radius: 15; " +
                 "-fx-min-height: 35;";
 
-        Button importCSVButton = new Button("Select a file");
+        Button importCSVButton = new Button(languageService.getTranslation("select_file"));
         importCSVButton.setPrefWidth(160);
         importCSVButton.setStyle(buttonBaseStyle);
 
@@ -377,43 +382,35 @@ public class TransactionScene {
         });
 
         // Add Reference Template button
-        Button downloadTemplateButton = new Button("Reference Template");
+        Button downloadTemplateButton = new Button(languageService.getTranslation("reference_template"));
         downloadTemplateButton.setPrefWidth(160);
         downloadTemplateButton.setStyle(buttonBaseStyle);
 
         downloadTemplateButton.setOnAction(event -> {
-            // Create a FileChooser object to open a file selection dialog. Users can choose
-            // the location and filename through this dialog.
             FileChooser fileChooser = new FileChooser();
-            fileChooser.setTitle("Save Template CSV");
+            fileChooser.setTitle(languageService.getTranslation("save_template_csv"));
             fileChooser.setInitialFileName("template.csv");
-            // Set file chooser extension filter to allow users to select .csv format files.
             fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV Files", "*.csv"));
-            // Display the file save dialog and return the target file (destFile) selected
-            // by the user, which contains the file path and name.
             File destFile = fileChooser.showSaveDialog(stage);
             if (destFile != null) {
                 try {
-                    // Read template.csv from resources/template folder
                     java.io.InputStream in = TransactionScene.class.getResourceAsStream("/template/template.csv");
                     if (in == null) {
-                        throw new Exception("Template file not found in resources/template folder.");
+                        throw new Exception(languageService.getTranslation("template_not_found"));
                     }
-                    // If the file stream 'in' is not null, copy the file content to the
-                    // user-specified target file destFile
                     java.nio.file.Files.copy(in, destFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
                     in.close();
 
                     Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                    alert.setTitle("Download Complete");
+                    alert.setTitle(languageService.getTranslation("download_complete"));
                     alert.setHeaderText(null);
-                    alert.setContentText("CSV template downloaded successfully!");
+                    alert.setContentText(languageService.getTranslation("template_download_success"));
                     alert.showAndWait();
                 } catch (Exception e) {
                     Alert alert = new Alert(Alert.AlertType.ERROR);
-                    alert.setTitle("Download Failed");
+                    alert.setTitle(languageService.getTranslation("download_failed"));
                     alert.setHeaderText(null);
-                    alert.setContentText("Failed to download template: " + e.getMessage());
+                    alert.setContentText(languageService.getTranslation("template_download_failed") + ": " + e.getMessage());
                     alert.showAndWait();
                 }
             }
@@ -423,21 +420,7 @@ public class TransactionScene {
         fileButtonBox.setSpacing(10);
         fileButtonBox.setAlignment(Pos.CENTER);
 
-        Label formatLabel = new Label("Your .CSV file should\ncontain the following columns:\n\n" +
-                "Transaction Date\n" +
-                "(format: YYYY-MM-DD, e.g. 2025-03-15)\n\n" +
-                "Transaction Type\n" +
-                "(only: Income / Expense)\n\n" +
-                "Currency\n" +
-                "(currency type, e.g. CNY, USD)\n\n" +
-                "Amount\n" +
-                "(number format, e.g. 1234.56)\n\n" +
-                "Description\n" +
-                "(transaction description)\n\n" +
-                "Category\n" +
-                "(income and expense category)\n\n" +
-                "Payment Method\n" +
-                "(payment method)");
+        Label formatLabel = new Label(languageService.getTranslation("csv_format_guide"));
         formatLabel.setFont(new Font(11));
         formatLabel.setStyle(themeService.getTextColorStyle());
         VBox.setMargin(formatLabel, new Insets(10, 0, 20, 0));

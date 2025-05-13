@@ -2,6 +2,7 @@ package com.myfinanceapp.ui.statusscene;
 
 import com.myfinanceapp.model.User;
 import com.myfinanceapp.service.StatusService;
+import com.myfinanceapp.service.LanguageService;
 import com.myfinanceapp.ui.common.LeftSidebarFactory;
 import com.myfinanceapp.ui.transactionscene.TransactionManagementScene;
 import com.myfinanceapp.service.ThemeService;
@@ -26,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 public class StatusScene {
+    private static final LanguageService languageService = LanguageService.getInstance();
     private final User currentUser;
     private final Stage stage;
     private final double width;
@@ -128,7 +130,7 @@ public class StatusScene {
                 ".scroll-pane > .corner { -fx-background-color: " + backgroundColor + "; }");
 
         // Initialize StatusService with CurrencyService
-        StatusService statusService = new StatusService(this, currentUser, currencyService);
+        StatusService statusService = new StatusService(this, currentUser, currencyService, languageService);
 
         return scene;
     }
@@ -138,7 +140,7 @@ public class StatusScene {
         topBorder.setStyle("-fx-border-color: #3282FA; -fx-border-radius: 20; -fx-background-radius: 20; -fx-border-width: 2;" + themeService.getCurrentFormBackgroundStyle());
         topBorder.setPadding(new Insets(15));
 
-        Label title = new Label("Income and Expenses");
+        Label title = new Label(languageService.getTranslation("income_and_expenses"));
         title.setFont(Font.font(20));
         title.setStyle(themeService.getTextColorStyle());
         title.setWrapText(true);
@@ -154,32 +156,35 @@ public class StatusScene {
         controlColumn.setHalignment(HPos.LEFT);
         controlGrid.getColumnConstraints().addAll(labelColumn, controlColumn);
 
-        Label startDateLabel = new Label("Start Date");
+        Label startDateLabel = new Label(languageService.getTranslation("start_date"));
         startDateLabel.setWrapText(true);
         startDateLabel.setStyle(themeService.getTextColorStyle());
         startDatePicker = new DatePicker();
-        startDatePicker.setPromptText("Select start date");
+        startDatePicker.setPromptText(languageService.getTranslation("select_start_date"));
         startDatePicker.setPrefWidth(150);
         startDatePicker.getStyleClass().add(themeService.isDayMode() ? "day-theme-date-picker" : "night-theme-date-picker");
         controlGrid.add(startDateLabel, 0, 0);
         controlGrid.add(startDatePicker, 1, 0);
 
-        Label endDateLabel = new Label("End Date");
+        Label endDateLabel = new Label(languageService.getTranslation("end_date"));
         endDateLabel.setWrapText(true);
         endDateLabel.setStyle(themeService.getTextColorStyle());
         endDatePicker = new DatePicker();
-        endDatePicker.setPromptText("Select end date");
+        endDatePicker.setPromptText(languageService.getTranslation("select_end_date"));
         endDatePicker.setPrefWidth(150);
         endDatePicker.getStyleClass().add(themeService.isDayMode() ? "day-theme-date-picker" : "night-theme-date-picker");
         controlGrid.add(endDateLabel, 0, 1);
         controlGrid.add(endDatePicker, 1, 1);
 
-        Label chartTypeLabel = new Label("Chart Type");
+        Label chartTypeLabel = new Label(languageService.getTranslation("chart_type"));
         chartTypeLabel.setWrapText(true);
         chartTypeLabel.setStyle(themeService.getTextColorStyle());
         chartTypeCombo = new ComboBox<>();
-        chartTypeCombo.getItems().addAll("Line graph", "Bar graph");
-        chartTypeCombo.setValue("Line graph");
+        chartTypeCombo.getItems().addAll(
+            languageService.getTranslation("line_graph"),
+            languageService.getTranslation("bar_graph")
+        );
+        chartTypeCombo.setValue(languageService.getTranslation("line_graph"));
         chartTypeCombo.setPrefWidth(150);
         chartTypeCombo.getStyleClass().add(themeService.isDayMode() ? "day-theme-combo-box" : "night-theme-combo-box");
         controlGrid.add(chartTypeLabel, 0, 2);
@@ -208,18 +213,18 @@ public class StatusScene {
         // Create LineChart
         CategoryAxis xAxis = new CategoryAxis();
         NumberAxis yAxis = new NumberAxis();
-        xAxis.setLabel("Date");
-        yAxis.setLabel("Amount");
+        xAxis.setLabel(languageService.getTranslation("date"));
+        yAxis.setLabel(languageService.getTranslation("amount"));
         lineChart = new LineChart<>(xAxis, yAxis);
-        lineChart.setTitle("Ex/In Trend");
+        lineChart.setTitle(languageService.getTranslation("ex_in_trend"));
 
         // Create BarChart
         CategoryAxis barXAxis = new CategoryAxis();
         NumberAxis barYAxis = new NumberAxis();
-        barXAxis.setLabel("Date");
-        barYAxis.setLabel("Amount");
+        barXAxis.setLabel(languageService.getTranslation("date"));
+        barYAxis.setLabel(languageService.getTranslation("amount"));
         barChart = new BarChart<>(barXAxis, barYAxis);
-        barChart.setTitle("Ex/In Trend");
+        barChart.setTitle(languageService.getTranslation("ex_in_trend"));
 
         // Reduce spacing between chart and "Date" label
         barXAxis.setTickLabelGap(5); // Reduce gap between tick labels
@@ -284,10 +289,10 @@ public class StatusScene {
         // Switch between line and bar chart based on selection
         chartTypeCombo.setOnAction(e -> {
             chartPane.getChildren().clear();
-            if ("Bar graph".equals(chartTypeCombo.getValue())) {
+            if (languageService.getTranslation("bar_graph").equals(chartTypeCombo.getValue())) {
                 chartPane.getChildren().add(barChartScrollPane);
             } else {
-                chartPane.getChildren().add(lineChart); // Fixed syntax error
+                chartPane.getChildren().add(lineChart);
             }
         });
 
@@ -311,7 +316,7 @@ public class StatusScene {
         categoryPane.setStyle("-fx-border-color: #3282FA; -fx-border-radius: 20; -fx-background-radius: 20; -fx-border-width: 2;" + themeService.getCurrentFormBackgroundStyle());
         categoryPane.setPadding(new Insets(15));
 
-        Label title = new Label("Category Proportion Analysis");
+        Label title = new Label(languageService.getTranslation("category_proportion"));
         title.setFont(Font.font(16));
         title.setStyle(themeService.getTextColorStyle());
         title.setWrapText(true);
@@ -376,12 +381,12 @@ public class StatusScene {
         txPane.setStyle("-fx-border-color: #3282FA; -fx-border-radius: 20; -fx-background-radius: 20; -fx-border-width: 2;" + themeService.getCurrentFormBackgroundStyle());
         txPane.setPadding(new Insets(15));
 
-        Label title = new Label("Recent Transactions");
+        Label title = new Label(languageService.getTranslation("recent_transactions"));
         title.setFont(Font.font(16));
         title.setStyle(themeService.getTextColorStyle());
         title.setWrapText(true);
 
-        Button manageBtn = new Button("Manage All Transactions");
+        Button manageBtn = new Button(languageService.getTranslation("manage_transactions"));
         manageBtn.setStyle(themeService.getButtonStyle());
         manageBtn.setOnAction(e -> openTransactionManagement());
 
@@ -417,13 +422,13 @@ public class StatusScene {
         aiPane.setStyle("-fx-border-color: #3282FA; -fx-border-radius: 20; -fx-background-radius: 20; -fx-border-width: 2;" + themeService.getCurrentFormBackgroundStyle());
         aiPane.setPadding(new Insets(15));
 
-        Label title = new Label("Ask Your AI Assistant:");
+        Label title = new Label(languageService.getTranslation("ask_ai_assistant"));
         title.setFont(Font.font(16));
         title.setStyle(themeService.getTextColorStyle());
         title.setWrapText(true);
 
         questionArea = new TextArea();
-        questionArea.setPromptText("Type your question...");
+        questionArea.setPromptText(languageService.getTranslation("type_question"));
         questionArea.setPrefHeight(80);
         questionArea.setWrapText(true);
         String backgroundColor = themeService.isDayMode() ? "white" : "#3C3C3C";
@@ -454,7 +459,7 @@ public class StatusScene {
         sugPane.setStyle("-fx-border-color: #3282FA; -fx-border-radius: 20; -fx-background-radius: 20; -fx-border-width: 2;" + themeService.getCurrentFormBackgroundStyle());
         sugPane.setPadding(new Insets(15));
 
-        Label title = new Label("Suggestion");
+        Label title = new Label(languageService.getTranslation("suggestion"));
         title.setFont(Font.font(16));
         title.setStyle(themeService.getTextColorStyle());
         title.setWrapText(true);
@@ -472,7 +477,7 @@ public class StatusScene {
             suggestionsWebView.getEngine().setUserStyleSheetLocation("data:text/css," + getDefaultMarkdownCss(themeService.isDayMode()));
         }
 
-        moreBtn = new Button("More>");
+        moreBtn = new Button(languageService.getTranslation("more"));
         moreBtn.setStyle(themeService.getButtonStyle());
         moreBtn.setOnAction(e -> showChatHistory());
 
@@ -500,7 +505,7 @@ public class StatusScene {
 
     private void showChatHistory() {
         Stage historyStage = new Stage();
-        historyStage.setTitle("Chat History");
+        historyStage.setTitle(languageService.getTranslation("chat_history"));
 
         WebView historyView = new WebView();
         historyView.setPrefSize(600, 400);
@@ -525,12 +530,12 @@ public class StatusScene {
 
             if ("user".equals(role)) {
                 htmlContent.append("<div class='user-message'>")
-                        .append("<strong>You:</strong> ")
+                        .append("<strong>").append(languageService.getTranslation("you")).append(": </strong>")
                         .append(content)
                         .append("</div>");
             } else if ("assistant".equals(role)) {
                 htmlContent.append("<div class='assistant-message'>")
-                        .append("<strong>Assistant:</strong> ")
+                        .append("<strong>").append(languageService.getTranslation("assistant")).append(": </strong>")
                         .append(content)
                         .append("</div>");
             }

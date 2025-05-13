@@ -7,6 +7,7 @@ import com.myfinanceapp.ui.settingscene.UserOptions;
 import com.myfinanceapp.ui.settingscene.ExportReport;
 import com.myfinanceapp.service.ThemeService;
 import com.myfinanceapp.service.CurrencyService;
+import com.myfinanceapp.service.LanguageService;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -23,6 +24,7 @@ import com.myfinanceapp.ui.common.SceneManager;
 public class SettingsTopBarFactory {
     private static final double MIN_WINDOW_WIDTH = 800;
     private static final double MIN_WINDOW_HEIGHT = 450;
+    private static final LanguageService languageService = LanguageService.getInstance();
 
     // 存储窗口大小监听器的静态引用，以便能够移除它们
     private static ChangeListener<Number> widthListener;
@@ -66,10 +68,16 @@ public class SettingsTopBarFactory {
         topBar.setPadding(new Insets(0, 0, 0, 0));
         topBar.setAlignment(Pos.BOTTOM_LEFT);
 
-        VBox systemSettingsTab = createOneTab("System Settings", activeTab.equals("System Settings"), themeService);
-        VBox userOptionsTab = createOneTab("User Options", activeTab.equals("User Options"), themeService);
-        VBox exportReportTab = createOneTab("Export Report", activeTab.equals("Export Report"), themeService);
-        VBox aboutTab = createOneTab("About", activeTab.equals("About"), themeService);
+        // 获取当前语言的标签文本
+        String systemSettingsText = languageService.getTranslation("system_settings");
+        String userOptionsText = languageService.getTranslation("user_options");
+        String exportReportText = languageService.getTranslation("export_report");
+        String aboutText = languageService.getTranslation("about");
+
+        VBox systemSettingsTab = createOneTab(systemSettingsText, activeTab.equals("System Settings"), themeService);
+        VBox userOptionsTab = createOneTab(userOptionsText, activeTab.equals("User Options"), themeService);
+        VBox exportReportTab = createOneTab(exportReportText, activeTab.equals("Export Report"), themeService);
+        VBox aboutTab = createOneTab(aboutText, activeTab.equals("About"), themeService);
 
         // 获取当前窗口尺寸
         double currentWidth = Math.max(stage.getWidth(), MIN_WINDOW_WIDTH);
@@ -130,5 +138,33 @@ public class SettingsTopBarFactory {
         VBox tab = new VBox(2, arrow, tabLabel);
         tab.setAlignment(Pos.BOTTOM_CENTER);
         return tab;
+    }
+
+    public static void updateLanguage(HBox topBar, LanguageService languageService) {
+        for (int i = 0; i < topBar.getChildren().size(); i++) {
+            VBox tab = (VBox) topBar.getChildren().get(i);
+            Label tabLabel = (Label) tab.getChildren().get(1);
+            
+            // 根据标签的文本内容确定对应的翻译键
+            String currentText = tabLabel.getText();
+            String translationKey = getTranslationKeyFromText(currentText);
+            
+            if (!translationKey.isEmpty()) {
+                tabLabel.setText(languageService.getTranslation(translationKey));
+            }
+        }
+    }
+
+    private static String getTranslationKeyFromText(String text) {
+        if (text.contains("System") || text.contains("系统")) {
+            return "system_settings";
+        } else if (text.contains("User") || text.contains("用户")) {
+            return "user_options";
+        } else if (text.contains("Export") || text.contains("导出")) {
+            return "export_report";
+        } else if (text.contains("About") || text.contains("关于")) {
+            return "about";
+        }
+        return "";
     }
 }

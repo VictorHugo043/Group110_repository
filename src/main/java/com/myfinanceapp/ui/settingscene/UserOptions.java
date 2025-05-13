@@ -9,6 +9,7 @@ import com.myfinanceapp.ui.statusscene.StatusScene;
 import com.myfinanceapp.service.StatusService;
 import com.myfinanceapp.service.ThemeService;
 import com.myfinanceapp.service.CurrencyService;
+import com.myfinanceapp.service.LanguageService;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -25,6 +26,7 @@ import java.util.Objects;
  * "User Options" 界面：允许更改用户名、更改安全问题、重置密码等
  */
 public class UserOptions {
+    private static final LanguageService languageService = LanguageService.getInstance();
 
     // 假设当前已登录用户信息在此记录
     private static User currentUser;
@@ -78,7 +80,7 @@ public class UserOptions {
         );
 
         // ========== 右上角显示当前用户名 ===========
-        Label currentUserLabel = new Label("Current Username: " + (loggedUser != null ? loggedUser.getUsername() : "N/A"));
+        Label currentUserLabel = new Label(languageService.getTranslation("current_username") + ": " + (loggedUser != null ? loggedUser.getUsername() : "N/A"));
         currentUserLabel.setStyle("-fx-text-fill: #3282FA; -fx-font-weight: bold;");
         currentUserLabel.setFont(new Font(14));
 
@@ -95,7 +97,7 @@ public class UserOptions {
         } catch (Exception e) {
             // fallback: do nothing
         }
-        Label resetUserLabel = new Label("Reset Username");
+        Label resetUserLabel = new Label(languageService.getTranslation("reset_username"));
         resetUserLabel.setStyle(
                 "-fx-text-fill: #3282FA;" +
                         "-fx-font-size: 16;" +
@@ -106,14 +108,14 @@ public class UserOptions {
         resetUserHeader.setAlignment(Pos.CENTER_LEFT);
 
         TextField newUsernameField = new TextField();
-        newUsernameField.setPromptText("New username");
+        newUsernameField.setPromptText(languageService.getTranslation("new_username"));
         // Apply theme style class for TextField
         newUsernameField.getStyleClass().add(themeService.isDayMode() ? "day-theme-text-field" : "night-theme-text-field");
         // Force refresh to ensure style is applied
         newUsernameField.setVisible(false);
         newUsernameField.setVisible(true);
 
-        Button saveUserBtn = new Button("save");
+        Button saveUserBtn = new Button(languageService.getTranslation("save"));
         saveUserBtn.setStyle(themeService.getButtonStyle());
 
         // 创建 UserService 实例
@@ -122,7 +124,7 @@ public class UserOptions {
         saveUserBtn.setOnAction(e -> {
             String newU = newUsernameField.getText().trim();
             if (newU.isEmpty()) {
-                showAlert("Error", "Username cannot be empty!");
+                showAlert(languageService.getTranslation("error"), languageService.getTranslation("username_empty"));
                 return;
             }
             String oldName = currentUser.getUsername();
@@ -130,10 +132,10 @@ public class UserOptions {
 
             if (success) {
                 currentUser.setUsername(newU);
-                showAlert("Success", "Username updated!");
-                currentUserLabel.setText("Current Username: " + newU);
+                showAlert(languageService.getTranslation("success"), languageService.getTranslation("username_updated"));
+                currentUserLabel.setText(languageService.getTranslation("current_username") + ": " + newU);
             } else {
-                showAlert("Error", "Failed to update username!");
+                showAlert(languageService.getTranslation("error"), languageService.getTranslation("username_update_failed"));
             }
         });
 
@@ -150,7 +152,7 @@ public class UserOptions {
         } catch (Exception e) {
             // fallback
         }
-        Label resetSecLabel = new Label("Reset Security Question");
+        Label resetSecLabel = new Label(languageService.getTranslation("reset_security_question"));
         resetSecLabel.setStyle(
                 "-fx-text-fill: #3282FA;" +
                         "-fx-font-size: 16;" +
@@ -161,10 +163,10 @@ public class UserOptions {
 
         ComboBox<String> questionCombo = new ComboBox<>();
         questionCombo.getItems().addAll(
-                "What is your favorite book?",
-                "What is your mother's maiden name?",
-                "What is your best friend's name?",
-                "What city were you born in?"
+                languageService.getTranslation("security_question_1"),
+                languageService.getTranslation("security_question_2"),
+                languageService.getTranslation("security_question_3"),
+                languageService.getTranslation("security_question_4")
         );
         questionCombo.setValue(currentUser.getSecurityQuestion());
         // Apply theme style class for ComboBox
@@ -173,7 +175,7 @@ public class UserOptions {
         questionCombo.setVisible(false);
         questionCombo.setVisible(true);
 
-        Label ansLabel = new Label("Your answer:");
+        Label ansLabel = new Label(languageService.getTranslation("your_answer"));
         ansLabel.setStyle("-fx-text-fill: #3282FA; -fx-font-weight: bold;");
 
         TextField ansField = new TextField(currentUser.getSecurityAnswer());
@@ -183,14 +185,14 @@ public class UserOptions {
         ansField.setVisible(false);
         ansField.setVisible(true);
 
-        Button saveSecBtn = new Button("save");
+        Button saveSecBtn = new Button(languageService.getTranslation("save"));
         saveSecBtn.setStyle(themeService.getButtonStyle());
 
         saveSecBtn.setOnAction(e -> {
             String q = questionCombo.getValue();
             String a = ansField.getText().trim();
             if (a.isEmpty()) {
-                showAlert("Error", "Answer cannot be empty!");
+                showAlert(languageService.getTranslation("error"), languageService.getTranslation("answer_empty"));
                 return;
             }
 
@@ -199,9 +201,9 @@ public class UserOptions {
             if (updated) {
                 currentUser.setSecurityQuestion(q);
                 currentUser.setSecurityAnswer(a);
-                showAlert("Success", "Security question updated!");
+                showAlert(languageService.getTranslation("success"), languageService.getTranslation("security_question_updated"));
             } else {
-                showAlert("Error", "Failed to update question!");
+                showAlert(languageService.getTranslation("error"), languageService.getTranslation("security_question_update_failed"));
             }
         });
 
@@ -221,7 +223,7 @@ public class UserOptions {
         } catch (Exception e) {
         }
 
-        Label resetPassLabel = new Label("Reset Password ➜");
+        Label resetPassLabel = new Label(languageService.getTranslation("reset_password") + " ➜");
         resetPassLabel.setStyle(
                 "-fx-text-fill: #3282FA;" +
                         "-fx-font-size: 16;" +
@@ -233,17 +235,17 @@ public class UserOptions {
         resetPassRow.setOnMouseClicked(e -> {
             Scene resetScene = ResetPassword.createScene(stage, width, height);
             stage.setScene(resetScene);
-            stage.setTitle("Reset Password");
+            stage.setTitle(languageService.getTranslation("reset_password"));
         });
 
         // ========== Bottom: Back to Status ==========
-        Button backBtn = new Button("Back to Status");
+        Button backBtn = new Button(languageService.getTranslation("back_to_status"));
         backBtn.setStyle(themeService.getButtonStyle());
         backBtn.setOnAction(e -> {
             StatusScene statusScene = new StatusScene(stage, width, height, loggedUser);
             stage.setScene(statusScene.createScene(themeService, currencyService));
-            StatusService statusService = new StatusService(statusScene, loggedUser, currencyService);
-            stage.setTitle("Finanger - Status");
+            StatusService statusService = new StatusService(statusScene, loggedUser, currencyService, languageService);
+            stage.setTitle("Finanger - " + languageService.getTranslation("status"));
         });
 
         // ========== 组装outerBox内容 ==========
