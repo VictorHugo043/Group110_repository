@@ -14,10 +14,25 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+/**
+ * A terms of use display interface for the Finanger application.
+ * This scene presents the application's terms of use in a scrollable text area
+ * with a professional layout including a header and navigation controls.
+ */
 public class TermofUse {
     private static final double INITIAL_WIDTH = 800;
     private static final double INITIAL_HEIGHT = 450;
 
+    /**
+     * Creates and returns a terms of use scene.
+     * The scene displays the terms of use text in a scrollable area with
+     * navigation controls and proper formatting.
+     *
+     * @param stage The stage to display the scene
+     * @param width The initial width of the scene
+     * @param height The initial height of the scene
+     * @return A configured Scene object for the terms of use interface
+     */
     public static Scene createScene(Stage stage, double width, double height) {
         BorderPane root = new BorderPane();
         root.setPrefSize(width, height);
@@ -83,6 +98,13 @@ public class TermofUse {
         return scene;
     }
 
+    /**
+     * Loads the terms of use content from a resource file.
+     * Reads the text file and returns its contents as a string.
+     *
+     * @param resourcePath The path to the terms of use text file
+     * @return The contents of the terms of use file as a string
+     */
     private static String loadTermsContent(String resourcePath) {
         StringBuilder sb = new StringBuilder();
         try (InputStream is = TermofUse.class.getResourceAsStream(resourcePath);

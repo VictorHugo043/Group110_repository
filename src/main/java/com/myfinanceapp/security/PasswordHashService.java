@@ -7,8 +7,12 @@ import java.util.Base64;
 import java.nio.charset.StandardCharsets;
 
 /**
- * 提供密码哈希功能的服务类。
- * 使用Argon2id算法进行密码哈希，提供抗暴力破解和抗彩虹表攻击的保护。
+ * Service class providing password hashing functionality using Argon2id.
+ * This class implements secure password hashing with the following features:
+ * - Uses Argon2id algorithm for memory-hard password hashing
+ * - Provides resistance against brute-force and rainbow table attacks
+ * - Includes salt generation and verification
+ * - Configurable memory usage, iterations, and parallelism
  * 
  * @author Finanger Team
  * @version 1.0
@@ -22,15 +26,19 @@ public final class PasswordHashService {
     );
 
     private PasswordHashService() {
-        // 私有构造函数，防止实例化
+        // Private constructor to prevent instantiation
     }
 
     /**
-     * 对密码进行哈希处理
+     * Hashes a password using Argon2id algorithm.
+     * This method:
+     * - Generates a cryptographically secure random salt
+     * - Applies the Argon2id hashing algorithm with configured parameters
+     * - Returns the hash result along with the salt and parameters
      *
-     * @param password 原始密码
-     * @return 包含哈希值、盐值和参数的PasswordHashResult对象
-     * @throws PasswordHashException 如果哈希过程中发生错误
+     * @param password The password to be hashed
+     * @return A PasswordHashResult object containing the hash, salt, and parameters
+     * @throws PasswordHashException If an error occurs during the hashing process
      */
     public static PasswordHashResult hashPassword(String password) throws PasswordHashException {
         try {
@@ -62,12 +70,16 @@ public final class PasswordHashService {
     }
 
     /**
-     * 验证密码
+     * Verifies a password against a stored hash.
+     * This method:
+     * - Uses the Argon2id algorithm to verify the password
+     * - Compares the computed hash with the stored hash
+     * - Returns true if the password matches, false otherwise
      *
-     * @param password 待验证的密码
-     * @param hash 存储的哈希值
-     * @return 如果密码匹配返回true，否则返回false
-     * @throws PasswordHashException 如果验证过程中发生错误
+     * @param password The password to verify
+     * @param hash The stored hash to verify against
+     * @return true if the password matches the hash, false otherwise
+     * @throws PasswordHashException If an error occurs during the verification process
      */
     public static boolean verifyPassword(String password, String hash) throws PasswordHashException {
         try {
@@ -78,9 +90,10 @@ public final class PasswordHashService {
     }
 
     /**
-     * 生成随机盐
+     * Generates a cryptographically secure random salt.
+     * The salt length is configured in EncryptionConfig.Argon2.SALT_LENGTH.
      *
-     * @return 随机生成的盐字节数组
+     * @return A byte array containing the random salt
      */
     private static byte[] generateSalt() {
         byte[] salt = new byte[EncryptionConfig.Argon2.SALT_LENGTH];
@@ -89,19 +102,30 @@ public final class PasswordHashService {
     }
 
     /**
-     * 密码哈希结果对象
+     * Record class representing the result of a password hashing operation.
+     * Contains the hash, salt, and Argon2 parameters used for hashing.
+     *
+     * @param hash The hashed password
+     * @param salt The salt used in the hashing process
+     * @param params The Argon2 parameters used for hashing
      */
     public record PasswordHashResult(String hash, String salt, Argon2Params params) {
     }
 
     /**
-     * Argon2参数对象
+     * Record class representing the parameters used in Argon2 hashing.
+     * Contains memory usage, iteration count, and parallelism settings.
+     *
+     * @param memory Memory usage in KB
+     * @param iterations Number of iterations
+     * @param parallelism Degree of parallelism
      */
     public record Argon2Params(int memory, int iterations, int parallelism) {
     }
 
     /**
-     * 密码哈希异常类
+     * Exception class for password hashing-related errors.
+     * Used to wrap and propagate hashing/verification errors with meaningful messages.
      */
     public static class PasswordHashException extends Exception {
         public PasswordHashException(String message, Throwable cause) {

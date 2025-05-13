@@ -15,7 +15,9 @@ import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
 /**
- * 主窗口，斜线分割，但使用动态重排：根据窗口大小实时计算坐标
+ * The main window of the Finanger application, featuring a dynamic split design with responsive layout.
+ * This class extends JavaFX's Application class and serves as the entry point for the application.
+ * The window features a diagonal split design that automatically adjusts based on window size.
  */
 public class MainWindow extends Application {
 
@@ -62,6 +64,12 @@ public class MainWindow extends Application {
     private final double arrowBtnXFrac = 570.0/INITIAL_WIDTH;
     private final double arrowBtnYFrac = 170.0/INITIAL_HEIGHT;
 
+    /**
+     * Initializes and displays the main window of the application.
+     * Sets up the initial window size based on screen resolution and creates the UI components.
+     *
+     * @param stage The primary stage for this application, onto which the application scene can be set
+     */
     @Override
     public void start(Stage stage) {
         root = new Group();
@@ -96,7 +104,10 @@ public class MainWindow extends Application {
     }
 
     /**
-     * 初始化UI控件和多边形
+     * Initializes the UI components including polygons, labels, and buttons.
+     * Sets up the visual elements and their event handlers.
+     *
+     * @param stage The primary stage for this application
      */
     private void initUI(Stage stage) {
         // ============ 创建多边形 ============
@@ -137,7 +148,9 @@ public class MainWindow extends Application {
     }
 
     /**
-     * 每当窗口大小改变，就调用此方法重新计算多边形顶点和控件坐标
+     * Dynamically recalculates the layout of all UI components based on the current window size.
+     * This method is called whenever the window is resized to maintain proper proportions
+     * and positioning of all visual elements.
      */
     private void relayout() {
         double curWidth = root.getScene().getWidth();
@@ -171,6 +184,12 @@ public class MainWindow extends Application {
         arrowButton.setLayoutY(arrowBtnYFrac * curHeight);
     }
 
+    /**
+     * The main entry point for the application.
+     * Launches the JavaFX application.
+     *
+     * @param args Command line arguments passed to the application
+     */
     public static void main(String[] args) {
         launch(args);
     }

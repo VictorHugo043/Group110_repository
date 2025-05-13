@@ -21,20 +21,59 @@ import javafx.util.Duration;
 
 import java.util.Objects;
 
+/**
+ * A system settings interface for the Finanger application.
+ * This scene allows users to configure various system-wide settings including:
+ * - Language preferences
+ * - Theme selection (day/night mode)
+ * - Window size
+ * - Default currency
+ * The interface features theme customization and internationalization support.
+ */
 public class SystemSettings {
     private static ThemeService themeService = new ThemeService();
     public static CurrencyService currencyService; // Initialize with passed instance
     private static LanguageService languageService = LanguageService.getInstance();
 
-    // Overloaded method for backward compatibility
+    /**
+     * Creates and returns a system settings scene with default theme and currency settings.
+     *
+     * @param stage The stage to display the scene
+     * @param width The initial width of the scene
+     * @param height The initial height of the scene
+     * @param loggedUser The currently logged-in user
+     * @return A configured Scene object for the system settings interface
+     */
     public static Scene createScene(Stage stage, double width, double height, User loggedUser) {
         return createScene(stage, width, height, loggedUser, new ThemeService(), new CurrencyService("CNY"));
     }
 
+    /**
+     * Creates and returns a system settings scene with specified theme settings.
+     *
+     * @param stage The stage to display the scene
+     * @param width The initial width of the scene
+     * @param height The initial height of the scene
+     * @param loggedUser The currently logged-in user
+     * @param themeService The theme service to use for styling
+     * @return A configured Scene object for the system settings interface
+     */
     public static Scene createScene(Stage stage, double width, double height, User loggedUser, ThemeService themeService) {
         return createScene(stage, width, height, loggedUser, themeService, new CurrencyService("CNY"));
     }
 
+    /**
+     * Creates and returns a system settings scene with specified theme and currency settings.
+     * The scene includes various configuration options and navigation controls.
+     *
+     * @param stage The stage to display the scene
+     * @param width The initial width of the scene
+     * @param height The initial height of the scene
+     * @param loggedUser The currently logged-in user
+     * @param themeService The theme service to use for styling
+     * @param currencyService The currency service to use for the application
+     * @return A configured Scene object for the system settings interface
+     */
     public static Scene createScene(Stage stage, double width, double height, User loggedUser, ThemeService themeService, CurrencyService currencyService) {
         SystemSettings.themeService = themeService; // Update the shared instance
         SystemSettings.currencyService = currencyService; // Update the shared instance
@@ -84,7 +123,18 @@ public class SystemSettings {
     }
 
     /**
-     * 中心的设置表单
+     * Creates the main settings form with all configuration options.
+     * Includes language selection, theme toggle, window size options, and currency settings.
+     *
+     * @param stage The stage to display the scene
+     * @param width The initial width of the scene
+     * @param height The initial height of the scene
+     * @param loggedUser The currently logged-in user
+     * @param root The root BorderPane of the scene
+     * @param outerBox The outer container for the settings form
+     * @param sideBar The sidebar navigation component
+     * @param topBar The top navigation bar
+     * @return A Pane containing the settings form
      */
     private static Pane createSettingsForm(Stage stage, double width, double height, User loggedUser, BorderPane root, VBox outerBox, VBox sideBar, HBox topBar) {
         VBox container = new VBox(20);
@@ -269,7 +319,23 @@ public class SystemSettings {
     }
 
     /**
-     * 更新主题样式
+     * Updates the theme of all UI components based on the current theme settings.
+     * This method is called whenever the theme is changed to ensure consistent styling.
+     *
+     * @param stage The stage containing the scene
+     * @param root The root BorderPane of the scene
+     * @param outerBox The outer container for the settings form
+     * @param sideBar The sidebar navigation component
+     * @param topBar The top navigation bar
+     * @param container The main container for settings
+     * @param langLabel The language selection label
+     * @param nightLabel The theme selection label
+     * @param sizeLabel The window size selection label
+     * @param currencyLabel The currency selection label
+     * @param langCombo The language selection combo box
+     * @param nightCombo The theme selection combo box
+     * @param sizeCombo The window size selection combo box
+     * @param currencyCombo The currency selection combo box
      */
     private static void updateTheme(Stage stage, BorderPane root, VBox outerBox, VBox sideBar, HBox topBar, VBox container,
                                     Label langLabel, Label nightLabel, Label sizeLabel, Label currencyLabel,
@@ -373,6 +439,25 @@ public class SystemSettings {
         scene.getRoot().layout();
     }
 
+    /**
+     * Updates the language of all UI components based on the current language settings.
+     * This method is called whenever the language is changed to ensure consistent text display.
+     *
+     * @param stage The stage containing the scene
+     * @param root The root BorderPane of the scene
+     * @param outerBox The outer container for the settings form
+     * @param sideBar The sidebar navigation component
+     * @param topBar The top navigation bar
+     * @param container The main container for settings
+     * @param langLabel The language selection label
+     * @param nightLabel The theme selection label
+     * @param sizeLabel The window size selection label
+     * @param currencyLabel The currency selection label
+     * @param langCombo The language selection combo box
+     * @param nightCombo The theme selection combo box
+     * @param sizeCombo The window size selection combo box
+     * @param currencyCombo The currency selection combo box
+     */
     private static void updateLanguage(Stage stage, BorderPane root, VBox outerBox, VBox sideBar, HBox topBar, VBox container,
                                      Label langLabel, Label nightLabel, Label sizeLabel, Label currencyLabel,
                                      ComboBox<String> langCombo, ComboBox<String> nightCombo, ComboBox<String> sizeCombo, ComboBox<String> currencyCombo) {

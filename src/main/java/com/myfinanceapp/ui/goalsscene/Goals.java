@@ -32,14 +32,47 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.ArrayList;
 
+/**
+ * Main scene class for displaying and managing financial goals.
+ * This class provides functionality for:
+ * - Displaying a grid of goal cards with progress indicators
+ * - Creating new goals
+ * - Editing existing goals
+ * - Deleting goals
+ * - Supporting multiple currencies and languages
+ * - Handling theme-specific styling
+ * - Responsive layout that adapts to window size
+ */
 public class Goals {
     private static final LanguageService languageService = LanguageService.getInstance();
 
-    // 重载方法，兼容旧的调用方式
+    /**
+     * Creates a scene for displaying goals with default theme and currency services.
+     * This is an overloaded method that provides default service instances.
+     *
+     * @param stage The main application stage
+     * @param width The desired scene width
+     * @param height The desired scene height
+     * @param loggedUser The currently logged-in user
+     * @return A Scene object for displaying goals
+     */
     public static Scene createScene(Stage stage, double width, double height, User loggedUser) {
         return createScene(stage, width, height, loggedUser, new ThemeService(), new CurrencyService("CNY"));
     }
 
+    /**
+     * Creates a scene for displaying goals with custom theme and currency services.
+     * This method sets up the complete UI layout including goal cards, progress indicators,
+     * and navigation controls.
+     *
+     * @param stage The main application stage
+     * @param width The desired scene width
+     * @param height The desired scene height
+     * @param loggedUser The currently logged-in user
+     * @param themeService The service for managing application theme
+     * @param currencyService The service for handling currency conversions
+     * @return A Scene object for displaying goals
+     */
     public static Scene createScene(Stage stage, double width, double height, User loggedUser, ThemeService themeService, CurrencyService currencyService) {
         BorderPane root = new BorderPane();
         root.setStyle(themeService.getCurrentThemeStyle());
@@ -154,6 +187,12 @@ public class Goals {
         return scene;
     }
 
+    /**
+     * Calculates the maximum number of columns for the goal grid based on window width.
+     *
+     * @param windowWidth The current window width
+     * @return The maximum number of columns that can fit in the window
+     */
     private static int calculateMaxColumns(double windowWidth) {
         // 根据窗口宽度计算每行显示的目标卡片数量
         // 假设每个卡片最小宽度为300px，间距为20px
@@ -163,6 +202,14 @@ public class Goals {
         return Math.max(1, maxCols);
     }
 
+    /**
+     * Creates a container with a title and value label pair.
+     *
+     * @param title The title text
+     * @param value The value text
+     * @param themeService Service for managing application theme
+     * @return A VBox containing the styled label pair
+     */
     private static VBox createLabelPair(String title, String value, ThemeService themeService) {
         VBox container = new VBox(2);  // 2 pixels spacing between labels
         container.setAlignment(Pos.CENTER_LEFT);
@@ -182,6 +229,16 @@ public class Goals {
         return container;
     }
 
+    /**
+     * Creates a card displaying a single goal with its progress and controls.
+     *
+     * @param goal The goal to display
+     * @param stage The main application stage
+     * @param loggedUser The currently logged-in user
+     * @param themeService Service for managing application theme
+     * @param currencyService Service for handling currency conversions
+     * @return A VBox containing the styled goal card
+     */
     private static VBox createGoalCard(Goal goal, Stage stage, User loggedUser, ThemeService themeService, CurrencyService currencyService) {
         VBox card = new VBox(15);
         card.setAlignment(Pos.CENTER);
@@ -387,6 +444,15 @@ public class Goals {
         return card;
     }
 
+    /**
+     * Creates a card for adding new goals.
+     *
+     * @param stage The main application stage
+     * @param loggedUser The currently logged-in user
+     * @param themeService Service for managing application theme
+     * @param currencyService Service for handling currency conversions
+     * @return A VBox containing the styled "create new goal" card
+     */
     private static VBox createCreateNewGoalCard(Stage stage, User loggedUser, ThemeService themeService, CurrencyService currencyService) {
         VBox card = new VBox(15);
         card.setAlignment(Pos.CENTER);
@@ -447,7 +513,13 @@ public class Goals {
         return card;
     }
 
-    // 新增辅助方法：布局卡片
+    /**
+     * Arranges goal cards in a grid layout.
+     *
+     * @param grid The GridPane to arrange cards in
+     * @param cards List of card VBoxes to arrange
+     * @param maxCols Maximum number of columns in the grid
+     */
     private static void layoutCards(GridPane grid, List<VBox> cards, int maxCols) {
         // 添加列约束
         for (int i = 0; i < maxCols; i++) {

@@ -20,6 +20,19 @@ import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.html.HtmlRenderer;
 import javafx.application.Platform;
 
+/**
+ * Service class for managing the financial status dashboard of the application.
+ * This class handles the display and interaction of financial data including:
+ * - Transaction summaries
+ * - Financial charts and graphs
+ * - Date range selection
+ * - AI-powered financial analysis
+ * - Real-time data updates
+ *
+ * The service integrates multiple components including transaction data,
+ * financial goals, currency conversion, and AI chat functionality to provide
+ * a comprehensive financial overview.
+ */
 public class StatusService {
     private final User currentUser;
     private final TransactionService txService;
@@ -34,6 +47,14 @@ public class StatusService {
     private final CurrencyService currencyService;
     private final LanguageService languageService;
 
+    /**
+     * Constructs a new StatusService instance.
+     *
+     * @param scene The StatusScene instance to manage
+     * @param currentUser The currently logged-in user
+     * @param currencyService Service for handling currency conversions
+     * @param languageService Service for handling internationalization
+     */
     public StatusService(StatusScene scene, User currentUser, CurrencyService currencyService, LanguageService languageService) {
         this.scene = scene;
         this.currentUser = currentUser;
@@ -45,6 +66,11 @@ public class StatusService {
         initialize();
     }
 
+    /**
+     * Initializes the status dashboard with default settings and event handlers.
+     * Sets up date pickers, initializes charts, and establishes event listeners
+     * for user interactions.
+     */
     void initialize() {
         // 初始化日期为本月1日起到今天
         LocalDate today = LocalDate.now();
@@ -113,6 +139,10 @@ public class StatusService {
         initializeWelcomeMessage();
     }
 
+    /**
+     * Initializes and displays the welcome message in the chat interface.
+     * The message is retrieved from the language service and rendered using Markdown.
+     */
     private void initializeWelcomeMessage() {
         String welcomeMsg = languageService.getTranslation("welcome_message");
 
@@ -131,6 +161,12 @@ public class StatusService {
         updateWebView(welcomeHtml);
     }
 
+    /**
+     * Updates the summary labels showing total income and expenses for the selected date range.
+     *
+     * @param startDate The start date of the period
+     * @param endDate The end date of the period
+     */
     void updateSummaryLabels(LocalDate startDate, LocalDate endDate) {
         List<Transaction> transactions = txService.loadTransactions(currentUser);
         transactions = transactions.stream()
@@ -158,6 +194,14 @@ public class StatusService {
                 "-fx-background-color: #E0F0FF; -fx-text-fill: #3282FA; -fx-border-radius: 30; -fx-background-radius: 30; -fx-padding: 10 20 10 20;");
     }
 
+    /**
+     * Updates the transaction list display for the selected date range.
+     * Transactions are sorted by date in descending order and displayed with
+     * converted currency amounts.
+     *
+     * @param startDate The start date of the period
+     * @param endDate The end date of the period
+     */
     void updateTransactions(LocalDate startDate, LocalDate endDate) {
         List<Transaction> transactions = txService.loadTransactions(currentUser);
         scene.transactionsBox.getChildren().clear();
@@ -177,6 +221,11 @@ public class StatusService {
                 });
     }
 
+    /**
+     * Handles AI chat requests from the user.
+     * Processes the user's question, gathers relevant financial data,
+     * and displays the AI's response in a progressive manner.
+     */
     void handleAIRequest() {
         String userInput = scene.questionArea.getText().trim();
         if (!userInput.isEmpty()) {
@@ -275,6 +324,12 @@ public class StatusService {
         }
     }
 
+    /**
+     * Updates the WebView component with the provided HTML content.
+     * This method is used to display formatted chat messages and AI responses.
+     *
+     * @param html The HTML content to display
+     */
     private void updateWebView(String html) {
         // Wrap the HTML content in a proper HTML structure with a theme-based body
         String wrappedHtml = "<!DOCTYPE html><html><head>" +

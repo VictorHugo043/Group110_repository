@@ -22,6 +22,12 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+/**
+ * Service class for managing financial goals in the application.
+ * This class provides functionality for creating, reading, updating, and deleting financial goals,
+ * as well as calculating progress and formatting goal-related data.
+ * All goal data is encrypted before storage and decrypted when retrieved.
+ */
 public class GoalService {
     private static final String GOALS_DIRECTORY_PATH = "src/main/resources/goals/";
     private static final ObjectMapper objectMapper = new ObjectMapper()
@@ -29,22 +35,29 @@ public class GoalService {
             .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     private static final Logger logger = LoggerFactory.getLogger(GoalService.class);
-    private static final String FIXED_KEY = "MyFinanceAppSecretKey1234567890";  // 固定密钥
+    private static final String FIXED_KEY = "MyFinanceAppSecretKey1234567890";  // Fixed encryption key
 
     /**
-     * 获取用户的目标列表
+     * Retrieves all goals associated with a specific user.
+     *
+     * @param user The user whose goals are to be retrieved
+     * @return A list of goals belonging to the user. Returns an empty list if no goals exist or if an error occurs
      */
     public static List<Goal> getUserGoals(User user) {
         try {
             return getAllGoals(user);
         } catch (IOException e) {
-            logger.error("加载目标失败", e);
+            logger.error("Failed to load goals", e);
             return new ArrayList<>();
         }
     }
 
     /**
-     * 添加新目标
+     * Adds a new financial goal for a user.
+     *
+     * @param goal The goal to be added
+     * @param user The user who owns the goal
+     * @throws IOException If there is an error saving the goal
      */
     public static void addGoal(Goal goal, User user) throws IOException {
         List<Goal> existingGoals = getAllGoals(user);
@@ -55,7 +68,9 @@ public class GoalService {
     }
 
     /**
-     * 设置目标ID（如果未提供则生成）
+     * Sets a unique identifier for a goal if one is not already present.
+     *
+     * @param goal The goal to set the ID for
      */
     private static void setGoalId(Goal goal) {
         if (goal.getId() == null || goal.getId().isEmpty()) {
@@ -64,7 +79,10 @@ public class GoalService {
     }
 
     /**
-     * 设置用户ID（如果未提供且用户存在）
+     * Associates a goal with a user by setting the user ID.
+     *
+     * @param goal The goal to set the user ID for
+     * @param user The user to associate with the goal
      */
     private static void setUserId(Goal goal, User user) {
         if (user != null && (goal.getUserId() == null || goal.getUserId().isEmpty())) {
@@ -73,7 +91,12 @@ public class GoalService {
     }
 
     /**
-     * 更新目标
+     * Updates an existing financial goal.
+     *
+     * @param goal The updated goal data
+     * @param loggedUser The user performing the update
+     * @throws IOException If there is an error saving the updated goal
+     * @throws SecurityException If the user is not authorized to update the goal
      */
     public static void updateGoal(Goal goal, User loggedUser) throws IOException {
         // Validate user permissions
@@ -97,7 +120,11 @@ public class GoalService {
     }
 
     /**
-     * 删除目标
+     * Deletes a specific goal for a user.
+     *
+     * @param goalId The ID of the goal to delete
+     * @param user The user who owns the goal
+     * @throws IOException If there is an error saving the updated goals list
      */
     public static void deleteGoal(String goalId, User user) throws IOException {
         List<Goal> existingGoals = getAllGoals(user);
@@ -106,7 +133,11 @@ public class GoalService {
     }
 
     /**
-     * 获取所有目标（不过滤）
+     * Retrieves all goals for a user from the encrypted storage.
+     *
+     * @param user The user whose goals are to be retrieved
+     * @return A list of all goals for the user
+     * @throws IOException If there is an error reading or decrypting the goals
      */
     private static List<Goal> getAllGoals(User user) throws IOException {
         File goalsFile = getGoalsFile(user);
@@ -127,7 +158,11 @@ public class GoalService {
     }
 
     /**
-     * 保存目标到文件
+     * Saves a list of goals to encrypted storage.
+     *
+     * @param goals The list of goals to save
+     * @param user The user who owns the goals
+     * @throws IOException If there is an error saving or encrypting the goals
      */
     public static void saveGoals(List<Goal> goals, User user) throws IOException {
         ensureDirectoryExists();
@@ -145,7 +180,7 @@ public class GoalService {
     }
 
     /**
-     * 确保目录存在
+     * Ensures that the goals directory exists, creating it if necessary.
      */
     private static void ensureDirectoryExists() {
         File directory = new File(GOALS_DIRECTORY_PATH);
@@ -155,7 +190,10 @@ public class GoalService {
     }
 
     /**
-     * 获取目标文件
+     * Gets the file object for storing a user's goals.
+     *
+     * @param user The user whose goals file is needed
+     * @return A File object representing the user's goals file
      */
     private static File getGoalsFile(User user) {
         String fileName = user.getUid() + ".json";
@@ -163,7 +201,11 @@ public class GoalService {
     }
 
     /**
-     * 获取加密密钥
+     * Derives an encryption key for a user's goals.
+     *
+     * @param user The user for whom to derive the key
+     * @return A SecretKey for encrypting/decrypting the user's goals
+     * @throws EncryptionException If there is an error deriving the key
      */
     private static SecretKey getEncryptionKey(User user) throws EncryptionException {
         // 使用固定密钥和用户ID派生加密密钥
@@ -172,7 +214,11 @@ public class GoalService {
     }
 
     /**
-     * 计算储蓄目标的进度百分比
+     * Calculates the progress percentage for a saving goal.
+     *
+     * @param currentBalance The current amount saved
+     * @param targetAmount The target amount to save
+     * @return The progress percentage (0-100)
      */
     public static double calculateSavingProgress(double currentBalance, double targetAmount) {
         if (targetAmount <= 0) return 0;
@@ -180,7 +226,11 @@ public class GoalService {
     }
 
     /**
-     * 计算债务还款目标的进度百分比
+     * Calculates the progress percentage for a debt repayment goal.
+     *
+     * @param amountPaid The amount paid towards the debt
+     * @param totalDebt The total debt amount
+     * @return The progress percentage (0-100)
      */
     public static double calculateDebtProgress(double amountPaid, double totalDebt) {
         if (totalDebt <= 0) return 0;
@@ -188,7 +238,11 @@ public class GoalService {
     }
 
     /**
-     * 计算预算使用百分比
+     * Calculates the budget usage percentage.
+     *
+     * @param currentExpense The current expense amount
+     * @param budgetAmount The total budget amount
+     * @return The budget usage percentage
      */
     public static double calculateBudgetUsage(double currentExpense, double budgetAmount) {
         if (budgetAmount <= 0) return 0;
@@ -196,7 +250,10 @@ public class GoalService {
     }
 
     /**
-     * 格式化数字，避免科学计数法
+     * Formats a number to avoid scientific notation.
+     *
+     * @param number The number to format
+     * @return A formatted string representation of the number
      */
     public static String formatNumber(double number) {
         java.math.BigDecimal bd = new java.math.BigDecimal(number);
@@ -206,7 +263,12 @@ public class GoalService {
     }
 
     /**
-     * 获取目标进度指示器的颜色
+     * Gets the appropriate color for a goal's progress indicator.
+     *
+     * @param goalType The type of goal (SAVING, DEBT_REPAYMENT, BUDGET_CONTROL)
+     * @param progress The current progress percentage
+     * @param isCompleted Whether the goal is completed
+     * @return The appropriate color for the progress indicator
      */
     public static javafx.scene.paint.Color getProgressColor(String goalType, double progress, boolean isCompleted) {
         switch (goalType) {
@@ -222,7 +284,12 @@ public class GoalService {
     }
 
     /**
-     * 获取目标进度指示器的文本
+     * Gets the text to display for a goal's progress indicator.
+     *
+     * @param goalType The type of goal (SAVING, DEBT_REPAYMENT, BUDGET_CONTROL)
+     * @param progress The current progress percentage
+     * @param isCompleted Whether the goal is completed
+     * @return The text to display for the progress indicator
      */
     public static String getProgressText(String goalType, double progress, boolean isCompleted) {
         switch (goalType) {
@@ -238,7 +305,11 @@ public class GoalService {
     }
 
     /**
-     * 获取目标进度指示器的字体大小
+     * Gets the appropriate font size for a goal's progress indicator.
+     *
+     * @param goalType The type of goal (SAVING, DEBT_REPAYMENT, BUDGET_CONTROL)
+     * @param isCompleted Whether the goal is completed
+     * @return The font size for the progress indicator
      */
     public static int getProgressFontSize(String goalType, boolean isCompleted) {
         if (goalType.equals("DEBT_REPAYMENT") && isCompleted) {

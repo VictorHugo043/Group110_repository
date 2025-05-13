@@ -22,22 +22,40 @@ import javafx.scene.Scene;
 
 import java.util.Objects;
 
+/**
+ * Factory class for creating and managing the application's left sidebar navigation.
+ * This class provides functionality for:
+ * - Creating a consistent sidebar layout across different scenes
+ * - Managing navigation between different sections of the application
+ * - Handling theme-specific styling of sidebar elements
+ * - Supporting multilingual interface through LanguageService
+ */
 public class LeftSidebarFactory {
     private static final LanguageService languageService = LanguageService.getInstance();
 
     /**
-     * 创建左侧边栏，支持传入一个 selectedButton 表示哪个按钮是"选中"。
-     * 可取值如 "Status", "Goals", "New", "Settings", "Logout" 等
-     * 重载方法，兼容旧的调用方式
+     * Creates a left sidebar with the specified selected button highlighted.
+     * This is an overloaded method that provides default ThemeService and CurrencyService instances.
+     *
+     * @param stage The main application stage
+     * @param selectedButton The currently selected navigation button
+     * @param loggedUser The currently logged-in user
+     * @return A VBox containing the sidebar layout
      */
     public static VBox createLeftSidebar(Stage stage, String selectedButton, User loggedUser) {
         return createLeftSidebar(stage, selectedButton, loggedUser, new ThemeService(), new CurrencyService("CNY"));
     }
 
     /**
-     * 创建左侧边栏，支持传入一个 selectedButton 表示哪个按钮是"选中"。
-     * 可取值如 "Status", "Goals", "New", "Settings", "Logout" 等
-     * 增加 CurrencyService 参数以确保货币设置的一致性
+     * Creates a left sidebar with the specified selected button highlighted.
+     * Includes theme and currency service parameters for consistent styling and currency handling.
+     *
+     * @param stage The main application stage
+     * @param selectedButton The currently selected navigation button
+     * @param loggedUser The currently logged-in user
+     * @param themeService The service for managing application theme
+     * @param currencyService The service for handling currency conversions
+     * @return A VBox containing the sidebar layout
      */
     public static VBox createLeftSidebar(Stage stage, String selectedButton, User loggedUser, ThemeService themeService, CurrencyService currencyService) {
         VBox sideBar = new VBox(15);
@@ -77,7 +95,10 @@ public class LeftSidebarFactory {
     }
 
     /**
-     * 根据选中的按钮获取欢迎消息
+     * Gets the welcome message based on the currently selected section.
+     *
+     * @param selectedButton The currently selected navigation button
+     * @return The localized welcome message for the selected section
      */
     private static String getWelcomeMessage(String selectedButton) {
         String messageKey;
@@ -102,8 +123,18 @@ public class LeftSidebarFactory {
     }
 
     /**
-     * 生成单个按钮Box，可根据 isActive 决定是否覆盖竖线
-     * 增加 CurrencyService 参数以传递给目标场景
+     * Creates a navigation button box with appropriate styling and click handling.
+     * The button's appearance changes based on whether it is the currently selected section.
+     *
+     * @param stage The main application stage
+     * @param translationKey The key for button text translation
+     * @param defaultIcon The icon to show when button is not selected
+     * @param selectedIcon The icon to show when button is selected
+     * @param isActive Whether this button represents the currently selected section
+     * @param loggedUser The currently logged-in user
+     * @param themeService The service for managing application theme
+     * @param currencyService The service for handling currency conversions
+     * @return An HBox containing the styled navigation button
      */
     private static HBox createSidebarButtonBox(Stage stage, String translationKey, String defaultIcon, String selectedIcon, boolean isActive, User loggedUser, ThemeService themeService, CurrencyService currencyService) {
         Label label = new Label(languageService.getTranslation(translationKey));
@@ -194,6 +225,13 @@ public class LeftSidebarFactory {
         return box;
     }
 
+    /**
+     * Updates the language of all sidebar elements.
+     * This method is called when the application language is changed.
+     *
+     * @param sideBar The sidebar VBox to update
+     * @param languageService The service for managing application language
+     */
     public static void updateLanguage(VBox sideBar, LanguageService languageService) {
         // 更新欢迎消息
         Label welcomeLabel = (Label) sideBar.getChildren().get(0);
@@ -218,7 +256,11 @@ public class LeftSidebarFactory {
     }
 
     /**
-     * 根据当前文本获取对应的消息键
+     * Determines the message key based on the current welcome text.
+     * Used for language updates to maintain the correct welcome message.
+     *
+     * @param text The current welcome text
+     * @return The corresponding message key for translation
      */
     private static String getMessageKeyFromText(String text) {
         if (text.contains("Welcome back") || text.contains("欢迎回来")) {
@@ -234,7 +276,11 @@ public class LeftSidebarFactory {
     }
 
     /**
-     * 根据当前文本获取对应的翻译键
+     * Determines the translation key based on the current button text.
+     * Used for language updates to maintain the correct button labels.
+     *
+     * @param text The current button text
+     * @return The corresponding translation key
      */
     private static String getTranslationKeyFromText(String text) {
         if (text.contains("Status") || text.contains("状态")) {

@@ -26,6 +26,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * A comprehensive status dashboard for the Finanger application.
+ * This scene provides users with a detailed overview of their financial status through:
+ * - Income and expense trend visualization (line/bar charts)
+ * - Category proportion analysis (pie chart)
+ * - Recent transactions list
+ * - AI-powered financial assistant
+ * The interface features theme customization, internationalization support,
+ * and a responsive layout design with dynamic chart resizing.
+ */
 public class StatusScene {
     private static final LanguageService languageService = LanguageService.getInstance();
     private final User currentUser;
@@ -35,7 +45,7 @@ public class StatusScene {
     public List<Map<String, String>> chatHistory = new ArrayList<>();
     private Button moreBtn;
 
-    // UI 组件
+    // UI Components
     public DatePicker startDatePicker;
     public DatePicker endDatePicker;
     public ComboBox<String> chartTypeCombo;
@@ -50,9 +60,17 @@ public class StatusScene {
     public VBox transactionsBox;
     public StackPane chartPane;
     public ThemeService themeService;
-    private CurrencyService currencyService; // Add instance variable for CurrencyService
+    private CurrencyService currencyService;
     private ScrollPane pieChartScrollPane;
 
+    /**
+     * Constructs a new StatusScene with the specified parameters.
+     *
+     * @param stage The stage to display the scene
+     * @param width The initial width of the scene
+     * @param height The initial height of the scene
+     * @param loggedUser The currently logged-in user
+     */
     public StatusScene(Stage stage, double width, double height, User loggedUser) {
         this.stage = stage;
         this.width = width;
@@ -60,10 +78,23 @@ public class StatusScene {
         this.currentUser = loggedUser;
     }
 
+    /**
+     * Creates and returns a status scene with default theme and currency settings.
+     *
+     * @return A configured Scene object for the status interface
+     */
     public Scene createScene() {
         return createScene(new ThemeService(), new CurrencyService("CNY"));
     }
 
+    /**
+     * Creates and returns a status scene with specified theme and currency settings.
+     * The scene includes various financial visualizations and management tools.
+     *
+     * @param themeService The theme service to use for styling
+     * @param currencyService The currency service to use for the application
+     * @return A configured Scene object for the status interface
+     */
     public Scene createScene(ThemeService themeService, CurrencyService currencyService) {
         this.themeService = themeService;
         this.currencyService = currencyService; // Store the CurrencyService instance
@@ -135,6 +166,12 @@ public class StatusScene {
         return scene;
     }
 
+    /**
+     * Creates the top section of the status scene containing date range controls,
+     * chart type selection, and the main financial trend visualization.
+     *
+     * @return A Pane containing the top section components
+     */
     private Pane createTopPane() {
         BorderPane topBorder = new BorderPane();
         topBorder.setStyle("-fx-border-color: #3282FA; -fx-border-radius: 20; -fx-background-radius: 20; -fx-border-width: 2;" + themeService.getCurrentFormBackgroundStyle());
@@ -311,6 +348,12 @@ public class StatusScene {
         return topBorder;
     }
 
+    /**
+     * Creates the category proportion analysis section with a pie chart
+     * showing the distribution of expenses across different categories.
+     *
+     * @return A Pane containing the category analysis components
+     */
     private Pane createCategoryPane() {
         BorderPane categoryPane = new BorderPane();
         categoryPane.setStyle("-fx-border-color: #3282FA; -fx-border-radius: 20; -fx-background-radius: 20; -fx-border-width: 2;" + themeService.getCurrentFormBackgroundStyle());
@@ -376,6 +419,12 @@ public class StatusScene {
         return categoryPane;
     }
 
+    /**
+     * Creates the recent transactions section displaying a list of
+     * the user's most recent financial transactions.
+     *
+     * @return A Pane containing the recent transactions components
+     */
     private Pane createTransactionsPane() {
         BorderPane txPane = new BorderPane();
         txPane.setStyle("-fx-border-color: #3282FA; -fx-border-radius: 20; -fx-background-radius: 20; -fx-border-width: 2;" + themeService.getCurrentFormBackgroundStyle());
@@ -409,6 +458,9 @@ public class StatusScene {
         return txPane;
     }
 
+    /**
+     * Opens the transaction management scene for detailed transaction handling.
+     */
     private void openTransactionManagement() {
         double currentWidth = stage.getWidth();
         double currentHeight = stage.getHeight();
@@ -417,6 +469,12 @@ public class StatusScene {
         stage.setScene(scene);
     }
 
+    /**
+     * Creates the AI assistant section allowing users to ask questions
+     * about their financial status and receive AI-powered suggestions.
+     *
+     * @return A Pane containing the AI assistant components
+     */
     private Pane createAIPane() {
         BorderPane aiPane = new BorderPane();
         aiPane.setStyle("-fx-border-color: #3282FA; -fx-border-radius: 20; -fx-background-radius: 20; -fx-border-width: 2;" + themeService.getCurrentFormBackgroundStyle());
@@ -454,6 +512,12 @@ public class StatusScene {
         return aiPane;
     }
 
+    /**
+     * Creates the suggestions section displaying AI-generated financial
+     * recommendations and insights.
+     *
+     * @return A Pane containing the suggestions components
+     */
     private Pane createSuggestionPane() {
         BorderPane sugPane = new BorderPane();
         sugPane.setStyle("-fx-border-color: #3282FA; -fx-border-radius: 20; -fx-background-radius: 20; -fx-border-width: 2;" + themeService.getCurrentFormBackgroundStyle());
@@ -487,6 +551,12 @@ public class StatusScene {
         return sugPane;
     }
 
+    /**
+     * Generates default CSS styles for the markdown content based on the current theme.
+     *
+     * @param isDayMode Whether the application is in day mode
+     * @return A string containing the CSS styles
+     */
     private String getDefaultMarkdownCss(boolean isDayMode) {
         if (isDayMode) {
             return "body { background-color: white; color: black; margin: 0; padding: 0; } " +
@@ -503,6 +573,10 @@ public class StatusScene {
         }
     }
 
+    /**
+     * Displays the chat history in a new window, showing the conversation
+     * between the user and the AI assistant.
+     */
     private void showChatHistory() {
         Stage historyStage = new Stage();
         historyStage.setTitle(languageService.getTranslation("chat_history"));

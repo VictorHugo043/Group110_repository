@@ -14,10 +14,25 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+/**
+ * A privacy policy display interface for the Finanger application.
+ * This scene presents the application's privacy policy in a scrollable text area
+ * with a professional layout including a header and navigation controls.
+ */
 public class PrivacyPolicy {
     private static final double INITIAL_WIDTH = 800;
     private static final double INITIAL_HEIGHT = 450;
 
+    /**
+     * Creates and returns a privacy policy scene.
+     * The scene displays the privacy policy text in a scrollable area with
+     * navigation controls and proper formatting.
+     *
+     * @param stage The stage to display the scene
+     * @param width The initial width of the scene
+     * @param height The initial height of the scene
+     * @return A configured Scene object for the privacy policy interface
+     */
     public static Scene createScene(Stage stage, double width, double height) {
         BorderPane root = new BorderPane();
         root.setPrefSize(width, height);
@@ -77,6 +92,13 @@ public class PrivacyPolicy {
         return scene;
     }
 
+    /**
+     * Loads the privacy policy content from a resource file.
+     * Reads the text file and returns its contents as a string.
+     *
+     * @param resourcePath The path to the privacy policy text file
+     * @return The contents of the privacy policy file as a string
+     */
     private static String loadPolicyContent(String resourcePath) {
         StringBuilder sb = new StringBuilder();
         try (InputStream is = PrivacyPolicy.class.getResourceAsStream(resourcePath);

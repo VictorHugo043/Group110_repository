@@ -3,11 +3,20 @@ package com.myfinanceapp.ui.common;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+/**
+ * Utility class for managing scene transitions in the JavaFX application.
+ * This class provides functionality for:
+ * - Switching between scenes while maintaining window dimensions
+ * - Ensuring consistent window size during scene transitions
+ */
 public class SceneManager {
     /**
-     * 切换场景时保持窗口大小
-     * @param stage 当前舞台
-     * @param newScene 新场景
+     * Switches to a new scene while preserving the current window dimensions.
+     * This method ensures that the window size remains consistent during scene transitions
+     * by explicitly setting the width and height before and after the scene change.
+     *
+     * @param stage The current application stage
+     * @param newScene The new scene to display
      */
     public static void switchScene(Stage stage, Scene newScene) {
         // 保存当前尺寸

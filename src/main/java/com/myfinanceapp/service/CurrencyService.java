@@ -1,5 +1,14 @@
 package com.myfinanceapp.service;
 
+/**
+ * Service class for handling currency conversions and currency-related operations.
+ * This service provides functionality for:
+ * - Converting amounts between different currencies (USD, CNY, EUR)
+ * - Managing the user's selected currency preference
+ * - Using fixed exchange rates for conversions
+ * 
+ * The service uses USD as the base currency for all conversions.
+ */
 public class CurrencyService {
     // Fixed exchange rates with USD as the base currency
     private static final double USD_TO_CNY = 7.1;
@@ -9,22 +18,40 @@ public class CurrencyService {
 
     private String selectedCurrency;
 
+    /**
+     * Constructs a new CurrencyService instance with the specified initial currency.
+     * If no currency is specified, defaults to USD.
+     *
+     * @param initialCurrency The initial currency to use (USD, CNY, or EUR)
+     */
     public CurrencyService(String initialCurrency) {
         this.selectedCurrency = initialCurrency != null ? initialCurrency : "USD";
     }
 
+    /**
+     * Gets the currently selected currency.
+     *
+     * @return The currently selected currency code (USD, CNY, or EUR)
+     */
     public String getSelectedCurrency() {
         return selectedCurrency;
     }
 
+    /**
+     * Sets the currency to use for conversions and display.
+     *
+     * @param currency The currency code to set (USD, CNY, or EUR)
+     */
     public void setSelectedCurrency(String currency) {
         this.selectedCurrency = currency;
     }
 
     /**
      * Converts an amount from the source currency to the selected currency.
+     * The conversion is done through USD as the base currency.
+     *
      * @param amount The amount to convert
-     * @param sourceCurrency The currency of the amount
+     * @param sourceCurrency The currency of the amount (USD, CNY, or EUR)
      * @return The converted amount in the selected currency
      */
     public double convertCurrency(double amount, String sourceCurrency) {

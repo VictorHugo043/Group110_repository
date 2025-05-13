@@ -21,6 +21,15 @@ import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 import java.util.Objects;
 
+/**
+ * A registration interface for the Finanger application.
+ * This scene provides a user-friendly sign-up process with:
+ * - Username and password creation
+ * - Security question setup
+ * - Terms of use and privacy policy acceptance
+ * The interface features a split design with background image,
+ * responsive layout, and dynamic resizing capabilities.
+ */
 public class SignUp {
 
     private static final double INITIAL_WIDTH = 800;
@@ -32,15 +41,15 @@ public class SignUp {
     private static Pane rightPane;
     private static VBox vbox;
 
-    // 将固定坐标转换为比例（相对于 800×450）
-    // 左侧多边形: (0,0), (480,0), (280,450), (0,450)
+    // Convert fixed coordinates to proportions (relative to 800×450)
+    // Left polygon: (0,0), (480,0), (280,450), (0,450)
     private static final double[] LEFT_POLY_FRACS = {
             0.0, 0.0,
             480.0 / INITIAL_WIDTH, 0.0,
             280.0 / INITIAL_WIDTH, 1.0,
             0.0, 1.0
     };
-    // 右侧多边形: (480,0), (800,0), (800,450), (280,450)
+    // Right polygon: (480,0), (800,0), (800,450), (280,450)
     private static final double[] RIGHT_POLY_FRACS = {
             480.0 / INITIAL_WIDTH, 0.0,
             1.0, 0.0,
@@ -48,16 +57,25 @@ public class SignUp {
             280.0 / INITIAL_WIDTH, 1.0
     };
 
-    // rightPane 原先 layoutX = 440, 即 440/800 = 0.55
+    // rightPane originally layoutX = 440, i.e., 440/800 = 0.55
     private static final double RIGHT_PANE_X_FRAC = 440.0 / INITIAL_WIDTH;
 
-    // 用户输入控件（后面不需要重排坐标，因为它们在 VBox 内自动排列）
+    // User input controls (no need to recalculate coordinates as they are automatically arranged in VBox)
     private static TextField usernameField;
     private static PasswordField passwordField;
     private static CheckBox agreeCheckBox;
     private static ComboBox<String> securityQuestionCombo;
     private static TextField securityAnswerField;
 
+    /**
+     * Creates and returns a sign-up scene with the specified dimensions.
+     * The scene includes user registration form and navigation controls.
+     *
+     * @param stage The stage to display the scene
+     * @param width The initial width of the scene
+     * @param height The initial height of the scene
+     * @return A configured Scene object for the sign-up interface
+     */
     public static Scene createScene(Stage stage, double width, double height) {
         root = new Group();
         Scene scene = new Scene(root, width, height);
@@ -233,6 +251,10 @@ public class SignUp {
         return scene;
     }
 
+    /**
+     * Dynamically recalculates the layout of UI components based on the current window size.
+     * This method ensures proper positioning and scaling of all elements.
+     */
     private static void relayout() {
         double curWidth = root.getScene().getWidth();
         double curHeight = root.getScene().getHeight();
@@ -260,6 +282,13 @@ public class SignUp {
         vbox.setPrefSize(rightPane.getPrefWidth(), rightPane.getPrefHeight());
     }
 
+    /**
+     * Displays an alert dialog with the specified title and message.
+     * Used for showing feedback to users during the registration process.
+     *
+     * @param title The title of the alert dialog
+     * @param message The message to display in the alert dialog
+     */
     private static void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(title);

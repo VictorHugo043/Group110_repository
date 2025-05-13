@@ -49,6 +49,13 @@ import javax.crypto.SecretKey;
 
 /**
  * Service class for handling financial report export functionality.
+ * This class provides comprehensive functionality for generating and exporting
+ * financial reports in PDF format, including:
+ * - Transaction summaries
+ * - Financial charts and visualizations
+ * - Detailed transaction listings
+ * - Currency conversion
+ * - Secure data handling
  */
 public class ExportReportService {
 
@@ -58,9 +65,16 @@ public class ExportReportService {
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private static final DateTimeFormatter FILE_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
     private static final Gson gson = new Gson();
-    private static final String FIXED_KEY = "MyFinanceAppSecretKey1234567890";  // 固定密钥
+    private static final String FIXED_KEY = "MyFinanceAppSecretKey1234567890";  // Fixed encryption key
     final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
+    /**
+     * Constructs a new ExportReportService instance.
+     *
+     * @param txService Service for handling transaction data
+     * @param currentUser The user for whom to generate reports
+     * @param currencyService Service for handling currency conversions
+     */
     public ExportReportService(TransactionService txService, User currentUser, CurrencyService currencyService) {
         this.txService = txService;
         this.currentUser = currentUser;
@@ -68,16 +82,23 @@ public class ExportReportService {
     }
 
     /**
-     * 获取加密密钥
+     * Derives an encryption key for the current user's data.
+     * Uses a fixed key and the user's ID to create a unique encryption key.
+     *
+     * @return A SecretKey for encrypting/decrypting the user's data
+     * @throws EncryptionException If there is an error deriving the key
      */
     private SecretKey getEncryptionKey() throws EncryptionException {
-        // 使用固定密钥和用户ID派生加密密钥
-        byte[] salt = currentUser.getUid().getBytes();  // 使用用户ID作为盐值
+        byte[] salt = currentUser.getUid().getBytes();
         return EncryptionService.deriveKey(FIXED_KEY, salt);
     }
 
     /**
-     * 加载并解析交易数据
+     * Loads and decrypts transaction data for the current user.
+     *
+     * @return A list of transactions for the current user
+     * @throws IOException If there is an error reading the transaction file
+     * @throws EncryptionException If there is an error decrypting the data
      */
     private List<Transaction> loadTransactions() throws IOException, EncryptionException {
         String filePath = "src/main/resources/transaction/" + currentUser.getUid() + ".json";
@@ -98,7 +119,19 @@ public class ExportReportService {
     }
 
     /**
-     * Handles the export process: validates dates, generates charts, and saves PDF.
+     * Handles the export process for financial reports.
+     * This method:
+     * - Validates date ranges
+     * - Opens a file chooser for saving the report
+     * - Generates charts and visualizations
+     * - Creates and saves the PDF report
+     *
+     * @param stage The JavaFX stage for showing the file chooser
+     * @param startDate The start date for the report period
+     * @param endDate The end date for the report period
+     * @return A CompletableFuture that completes when the export is finished
+     * @throws IllegalArgumentException If the date range is invalid
+     * @throws RuntimeException If there is an error during export
      */
     public CompletableFuture<Void> handleExport(Stage stage, LocalDate startDate, LocalDate endDate) {
         return CompletableFuture.runAsync(() -> {
@@ -158,7 +191,21 @@ public class ExportReportService {
     }
 
     /**
-     * Generates the PDF report with charts, summary, and transaction details.
+     * Generates a PDF report containing financial data, charts, and transaction details.
+     * The report includes:
+     * - Title and user information
+     * - Date range
+     * - Income and expense trends
+     * - Expense category breakdown
+     * - Financial summary
+     * - Detailed transaction listing
+     *
+     * @param file The file to save the PDF to
+     * @param startDate The start date for the report period
+     * @param endDate The end date for the report period
+     * @param lineChart The chart showing income/expense trends
+     * @param pieChart The chart showing expense categories
+     * @throws Exception If there is an error generating the PDF
      */
     void generatePDF(File file, LocalDate startDate, LocalDate endDate,
                      LineChart<String, Number> lineChart, PieChart pieChart) throws Exception {
@@ -254,7 +301,11 @@ public class ExportReportService {
     }
 
     /**
-     * Captures a JavaFX chart as an image for PDF inclusion.
+     * Captures a JavaFX chart as an image for inclusion in the PDF report.
+     *
+     * @param chart The JavaFX chart to capture
+     * @return A ByteArrayOutputStream containing the chart image
+     * @throws Exception If there is an error capturing the chart
      */
     ByteArrayOutputStream captureChartAsImage(javafx.scene.Node chart) throws Exception {
         // Ensure chart has a size for rendering
@@ -311,7 +362,8 @@ public class ExportReportService {
     }
 
     /**
-     * Shuts down the executor service after each export.
+     * Shuts down the executor service used for asynchronous operations.
+     * Waits for pending tasks to complete before shutting down.
      */
     private void shutdownExecutor() {
         executorService.shutdown();
@@ -326,7 +378,8 @@ public class ExportReportService {
     }
 
     /**
-     * Shuts down the executor service when the service is no longer needed.
+     * Shuts down the service and its resources.
+     * Should be called when the service is no longer needed.
      */
     public void shutdown() {
         shutdownExecutor();

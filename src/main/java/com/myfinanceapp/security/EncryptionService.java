@@ -8,8 +8,13 @@ import java.security.SecureRandom;
 import java.util.Base64;
 
 /**
- * 提供AES加密和解密功能的服务类。
- * 使用AES-256-GCM模式进行加密，提供数据完整性和认证。
+ * Service class providing AES encryption and decryption functionality.
+ * This class implements secure data encryption using AES-256-GCM mode, which provides
+ * both confidentiality and authenticity. It includes methods for:
+ * - Encrypting data with AES-256-GCM
+ * - Decrypting data with authentication
+ * - Key derivation using PBKDF2
+ * - Secure random IV generation
  * 
  * @author Finanger Team
  * @version 1.0
@@ -18,16 +23,21 @@ public final class EncryptionService {
     private static final SecureRandom secureRandom = new SecureRandom();
 
     private EncryptionService() {
-        // 私有构造函数，防止实例化
+        // Private constructor to prevent instantiation
     }
 
     /**
-     * 加密数据
+     * Encrypts the given data using AES-256-GCM encryption.
+     * This method:
+     * - Generates a random initialization vector (IV)
+     * - Initializes the cipher in encryption mode
+     * - Encrypts the data with authentication
+     * - Returns the encrypted data along with the IV and key ID
      *
-     * @param data 要加密的数据
-     * @param key 加密密钥
-     * @return 包含加密数据、IV和密钥ID的EncryptedData对象
-     * @throws EncryptionException 如果加密过程中发生错误
+     * @param data The data to be encrypted
+     * @param key The encryption key to use
+     * @return An EncryptedData object containing the encrypted data, IV, and key ID
+     * @throws EncryptionException If an error occurs during the encryption process
      */
     public static EncryptedData encrypt(String data, SecretKey key) throws EncryptionException {
         try {
@@ -54,12 +64,17 @@ public final class EncryptionService {
     }
 
     /**
-     * 解密数据
+     * Decrypts the given encrypted data using AES-256-GCM decryption.
+     * This method:
+     * - Decodes the IV and encrypted data from Base64
+     * - Initializes the cipher in decryption mode
+     * - Verifies the authentication tag
+     * - Returns the decrypted data
      *
-     * @param encryptedData 包含加密数据、IV和密钥ID的EncryptedData对象
-     * @param key 解密密钥
-     * @return 解密后的原始数据
-     * @throws EncryptionException 如果解密过程中发生错误
+     * @param encryptedData The EncryptedData object containing the encrypted data, IV, and key ID
+     * @param key The decryption key to use
+     * @return The decrypted data as a string
+     * @throws EncryptionException If an error occurs during the decryption process
      */
     public static String decrypt(EncryptedData encryptedData, SecretKey key) throws EncryptionException {
         try {
@@ -81,12 +96,16 @@ public final class EncryptionService {
     }
 
     /**
-     * 从密码派生密钥
+     * Derives a cryptographic key from a password using PBKDF2.
+     * This method:
+     * - Uses PBKDF2 with HMAC-SHA256 for key derivation
+     * - Applies the configured number of iterations
+     * - Generates a key of the specified length
      *
-     * @param password 用户密码
-     * @param salt 盐值
-     * @return 派生出的SecretKey对象
-     * @throws EncryptionException 如果密钥派生过程中发生错误
+     * @param password The password to derive the key from
+     * @param salt The salt to use in the key derivation
+     * @return A SecretKey object suitable for AES encryption
+     * @throws EncryptionException If an error occurs during key derivation
      */
     public static SecretKey deriveKey(String password, byte[] salt) throws EncryptionException {
         try {
@@ -105,9 +124,10 @@ public final class EncryptionService {
     }
 
     /**
-     * 生成随机IV
+     * Generates a cryptographically secure random initialization vector.
+     * The IV length is configured in EncryptionConfig.AES.GCM_IV_LENGTH.
      *
-     * @return 随机生成的IV字节数组
+     * @return A byte array containing the random IV
      */
     private static byte[] generateIV() {
         byte[] iv = new byte[EncryptionConfig.AES.GCM_IV_LENGTH];
@@ -116,23 +136,30 @@ public final class EncryptionService {
     }
 
     /**
-     * 生成密钥ID
+     * Generates a unique identifier for a key.
+     * The key ID is derived from the first 8 characters of the Base64-encoded key.
      *
-     * @param key 密钥
-     * @return 密钥ID字符串
+     * @param key The key to generate an ID for
+     * @return A string containing the key ID
      */
     private static String generateKeyId(SecretKey key) {
         return Base64.getEncoder().encodeToString(key.getEncoded()).substring(0, 8);
     }
 
     /**
-     * 加密数据的结果对象
+     * Record class representing the result of an encryption operation.
+     * Contains the encrypted data, initialization vector, and key ID.
+     *
+     * @param data The encrypted data in Base64 format
+     * @param iv The initialization vector in Base64 format
+     * @param keyId The identifier of the key used for encryption
      */
     public record EncryptedData(String data, String iv, String keyId) {
     }
 
     /**
-     * 加密异常类
+     * Exception class for encryption-related errors.
+     * Used to wrap and propagate encryption/decryption errors with meaningful messages.
      */
     public static class EncryptionException extends Exception {
         public EncryptionException(String message, Throwable cause) {
