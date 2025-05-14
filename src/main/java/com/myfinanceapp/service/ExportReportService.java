@@ -2,6 +2,9 @@ package com.myfinanceapp.service;
 
 import com.myfinanceapp.model.Transaction;
 import com.myfinanceapp.model.User;
+import com.itextpdf.io.font.PdfEncodings;
+import com.itextpdf.kernel.font.PdfFont;
+import com.itextpdf.kernel.font.PdfFontFactory;
 import com.itextpdf.io.image.ImageDataFactory;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
@@ -62,6 +65,7 @@ public class ExportReportService {
     private final TransactionService txService;
     private final User currentUser;
     private final CurrencyService currencyService;
+    private final LanguageService languageService;
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private static final DateTimeFormatter FILE_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
     private static final Gson gson = new Gson();
@@ -79,6 +83,7 @@ public class ExportReportService {
         this.txService = txService;
         this.currentUser = currentUser;
         this.currencyService = currencyService;
+        this.languageService = LanguageService.getInstance();
     }
 
     /**
@@ -213,28 +218,36 @@ public class ExportReportService {
              PdfDocument pdf = new PdfDocument(writer);
              Document document = new Document(pdf)) {
 
+            // 设置字体
+            PdfFont font = getFont();
+            document.setFont(font);
+
             // Title
-            document.add(new Paragraph("Financial Report")
+            document.add(new Paragraph(languageService.getTranslation("financial_report"))
                     .setFontSize(20)
                     .setBold()
                     .setTextAlignment(TextAlignment.CENTER));
             // Add username
-            document.add(new Paragraph("User: " + currentUser.getUsername())
+            document.add(new Paragraph(languageService.getTranslation("user") + ": " + currentUser.getUsername())
                     .setFontSize(12)
                     .setTextAlignment(TextAlignment.CENTER));
             // Date range
-            document.add(new Paragraph(String.format("Date Range: %s to %s", startDate.format(DATE_FORMATTER), endDate.format(DATE_FORMATTER)))
+            document.add(new Paragraph(String.format("%s: %s %s %s", 
+                    languageService.getTranslation("date_range"),
+                    startDate.format(DATE_FORMATTER),
+                    languageService.getTranslation("to"),
+                    endDate.format(DATE_FORMATTER)))
                     .setFontSize(12)
                     .setTextAlignment(TextAlignment.CENTER));
 
             // 1. Visualizations
-            document.add(new Paragraph("\n1. Income and Expense Trend").setFontSize(14).setBold());
+            document.add(new Paragraph("\n1. " + languageService.getTranslation("income_and_expenses")).setFontSize(14).setBold());
             ByteArrayOutputStream lineChartImage = captureChartAsImage(lineChart);
             document.add(new Image(ImageDataFactory.create(lineChartImage.toByteArray()))
                     .setWidth(500)
                     .setAutoScaleHeight(true));
 
-            document.add(new Paragraph("\n2. Expense by Category").setFontSize(14).setBold());
+            document.add(new Paragraph("\n2. " + languageService.getTranslation("category_proportion")).setFontSize(14).setBold());
             ByteArrayOutputStream pieChartImage = captureChartAsImage(pieChart);
             document.add(new Image(ImageDataFactory.create(pieChartImage.toByteArray()))
                     .setWidth(300)
@@ -270,26 +283,32 @@ public class ExportReportService {
                     .orElse("N/A");
 
             String currencySymbol = currencyService.getSelectedCurrency();
-            document.add(new Paragraph("\n3. Financial Summary").setFontSize(14).setBold());
-            document.add(new Paragraph(String.format("Total Income: %.2f %s", totalIncome, currencySymbol)));
-            document.add(new Paragraph(String.format("Total Expense: %.2f %s", totalExpense, currencySymbol)));
-            document.add(new Paragraph(String.format("Net Balance: %.2f %s", totalIncome - totalExpense, currencySymbol)));
-            document.add(new Paragraph(String.format("Top Expense Category: %s", topCategory)));
+            document.add(new Paragraph("\n3. " + languageService.getTranslation("financial_summary")).setFontSize(14).setBold());
+            document.add(new Paragraph(String.format("%s: %.2f %s", 
+                    languageService.getTranslation("total_income"), totalIncome, currencySymbol)));
+            document.add(new Paragraph(String.format("%s: %.2f %s", 
+                    languageService.getTranslation("total_expense"), totalExpense, currencySymbol)));
+            document.add(new Paragraph(String.format("%s: %.2f %s", 
+                    languageService.getTranslation("net_balance"), totalIncome - totalExpense, currencySymbol)));
+            document.add(new Paragraph(String.format("%s: %s", 
+                    languageService.getTranslation("top_expense_category"), topCategory)));
 
             // 3. Transaction Details
-            document.add(new Paragraph("\n4. Transaction Details").setFontSize(14).setBold());
+            document.add(new Paragraph("\n4. " + languageService.getTranslation("transaction_details")).setFontSize(14).setBold());
             Table table = new Table(new float[]{100, 80, 80, 80, 100, 100});
-            table.addHeaderCell("Date");
-            table.addHeaderCell("Type");
-            table.addHeaderCell("Amount");
-            table.addHeaderCell("Currency");
-            table.addHeaderCell("Category");
-            table.addHeaderCell("Payment Method");
+            table.setFont(font);  // 设置表格字体
+            
+            table.addHeaderCell(languageService.getTranslation("date"));
+            table.addHeaderCell(languageService.getTranslation("transaction_type"));
+            table.addHeaderCell(languageService.getTranslation("amount"));
+            table.addHeaderCell(languageService.getTranslation("currency"));
+            table.addHeaderCell(languageService.getTranslation("category"));
+            table.addHeaderCell(languageService.getTranslation("payment_method"));
 
             for (Transaction t : transactions) {
                 double convertedAmount = currencyService.convertCurrency(t.getAmount(), t.getCurrency());
                 table.addCell(t.getTransactionDate());
-                table.addCell(t.getTransactionType());
+                table.addCell(languageService.getTranslation(t.getTransactionType().toLowerCase()));
                 table.addCell(String.format("%.2f %s", convertedAmount, currencySymbol));
                 table.addCell(t.getCurrency());
                 table.addCell(t.getCategory());
@@ -383,5 +402,21 @@ public class ExportReportService {
      */
     public void shutdown() {
         shutdownExecutor();
+    }
+
+    private PdfFont getFont() throws IOException {
+        // 尝试加载系统中文字体，如果失败则使用默认字体
+        try {
+            // 尝试加载微软雅黑字体
+            return PdfFontFactory.createFont("C:\\Windows\\Fonts\\msyh.ttc,0", PdfEncodings.IDENTITY_H);
+        } catch (IOException e) {
+            try {
+                // 尝试加载宋体
+                return PdfFontFactory.createFont("C:\\Windows\\Fonts\\simsun.ttc,0", PdfEncodings.IDENTITY_H);
+            } catch (IOException ex) {
+                // 如果都失败，使用默认字体
+                return PdfFontFactory.createFont();
+            }
+        }
     }
 }

@@ -216,6 +216,28 @@ public class LanguageService {
         english.put("action", "Action");
         english.put("delete", "Delete");
         
+        // Add export report translations
+        english.put("financial_report", "Financial Report");
+        english.put("user", "User");
+        english.put("date_range", "Date Range");
+        english.put("to", "to");
+        english.put("income_and_expenses", "Income and Expense Trend");
+        english.put("category_proportion", "Expense by Category");
+        english.put("financial_summary", "Financial Summary");
+        english.put("total_income", "Total Income");
+        english.put("total_expense", "Total Expense");
+        english.put("net_balance", "Net Balance");
+        english.put("top_expense_category", "Top Expense Category");
+        english.put("transaction_details", "Transaction Details");
+        english.put("date", "Date");
+        english.put("transaction_type", "Type");
+        english.put("amount", "Amount");
+        english.put("currency", "Currency");
+        english.put("category", "Category");
+        english.put("payment_method", "Payment Method");
+        english.put("income", "Income");
+        english.put("expense", "Expense");
+        
         translations.put("English", english);
 
         // Chinese translations
@@ -376,6 +398,28 @@ public class LanguageService {
         chinese.put("all", "全部");
         chinese.put("action", "操作");
         chinese.put("delete", "删除");
+        
+        // Add export report translations
+        chinese.put("financial_report", "财务报表");
+        chinese.put("user", "用户");
+        chinese.put("date_range", "日期范围");
+        chinese.put("to", "至");
+        chinese.put("income_and_expenses", "收支趋势");
+        chinese.put("category_proportion", "支出类别占比");
+        chinese.put("financial_summary", "财务摘要");
+        chinese.put("total_income", "总收入");
+        chinese.put("total_expense", "总支出");
+        chinese.put("net_balance", "净余额");
+        chinese.put("top_expense_category", "主要支出类别");
+        chinese.put("transaction_details", "交易明细");
+        chinese.put("date", "日期");
+        chinese.put("transaction_type", "类型");
+        chinese.put("amount", "金额");
+        chinese.put("currency", "货币");
+        chinese.put("category", "类别");
+        chinese.put("payment_method", "支付方式");
+        chinese.put("income", "收入");
+        chinese.put("expense", "支出");
         
         translations.put("Chinese", chinese);
 
