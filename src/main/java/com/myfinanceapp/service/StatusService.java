@@ -32,6 +32,9 @@ import javafx.application.Platform;
  * The service integrates multiple components including transaction data,
  * financial goals, currency conversion, and AI chat functionality to provide
  * a comprehensive financial overview.
+ *
+ * @author SE_Group110
+ * @version 4.0
  */
 public class StatusService {
     private final User currentUser;
@@ -72,16 +75,16 @@ public class StatusService {
      * for user interactions.
      */
     void initialize() {
-        // 初始化日期为本月1日起到今天
+        // Initialize dates from the first day of current month to today
         LocalDate today = LocalDate.now();
         startDate = today.withDayOfMonth(1);
         endDate = today;
 
-        // 设置 DatePicker 默认值
+        // Set DatePicker default values
         scene.startDatePicker.setValue(startDate);
         scene.endDatePicker.setValue(endDate);
 
-        // 限制 DatePicker 不可选择未来日期
+        // Restrict DatePicker to prevent future date selection
         scene.startDatePicker.setDayCellFactory(picker -> new DateCell() {
             @Override
             public void updateItem(LocalDate date, boolean empty) {
@@ -97,12 +100,12 @@ public class StatusService {
             }
         });
 
-        // 初始化数据
+        // Initialize data
         updateSummaryLabels(startDate, endDate);
         chartService.updateAllCharts(startDate, endDate);
         updateTransactions(startDate, endDate);
 
-        // 绑定日期选择事件
+        // Bind date selection events
         ChangeListener<LocalDate> dateChangeListener = (obs, oldValue, newValue) -> {
             if (scene.startDatePicker.getValue() != null && scene.endDatePicker.getValue() != null) {
                 startDate = scene.startDatePicker.getValue();
@@ -112,7 +115,7 @@ public class StatusService {
                     chartService.updateAllCharts(startDate, endDate);
                     updateTransactions(startDate, endDate);
                 } else {
-                    // 如果开始日期晚于结束日期，重置为旧值
+                    // If start date is after end date, reset to old value
                     scene.startDatePicker.setValue(oldValue);
                     startDate = oldValue;
                 }
@@ -122,7 +125,7 @@ public class StatusService {
         scene.startDatePicker.valueProperty().addListener(dateChangeListener);
         scene.endDatePicker.valueProperty().addListener(dateChangeListener);
 
-        // 图表类型切换
+        // Chart type switching
         scene.chartTypeCombo.setOnAction(e -> {
             scene.chartPane.getChildren().clear();
             if ("Line graph".equals(scene.chartTypeCombo.getValue())) {
@@ -135,7 +138,7 @@ public class StatusService {
 
         scene.sendBtn.setOnAction(e -> handleAIRequest());
 
-        // 添加初始化欢迎消息
+        // Add initial welcome message
         initializeWelcomeMessage();
     }
 
@@ -146,16 +149,16 @@ public class StatusService {
     private void initializeWelcomeMessage() {
         String welcomeMsg = languageService.getTranslation("welcome_message");
 
-        // 添加到聊天历史
+        // Add to chat history
         Map<String, String> aiMsg = new HashMap<>();
         aiMsg.put("role", "assistant");
         aiMsg.put("content", welcomeMsg);
         chatMessages.add(aiMsg);
 
-        // 更新StatusScene的聊天历史
+        // Update StatusScene's chat history
         scene.chatHistory = chatMessages;
 
-        // 显示欢迎消息
+        // Display welcome message
         Node doc = mdParser.parse(welcomeMsg);
         String welcomeHtml = mdRenderer.render(doc);
         updateWebView(welcomeHtml);
@@ -232,25 +235,25 @@ public class StatusService {
             scene.questionArea.setDisable(true);
             scene.sendBtn.setDisable(true);
 
-            // 保存用户问题到聊天历史
+            // Save user question to chat history
             Map<String, String> userMsg = new HashMap<>();
             userMsg.put("role", "user");
             userMsg.put("content", userInput);
             chatMessages.add(userMsg);
 
-            // 获取交易数据
+            // Get transaction data
             List<Transaction> txList = txService.loadTransactions(currentUser);
             StringBuilder dataSummary = new StringBuilder();
-            dataSummary.append("以下是我的财务交易数据，每条格式：Date, Type, Currency, Amount, Category, PaymentMethod:\n");
+            dataSummary.append("Here is my financial transaction data, each entry format: Date, Type, Currency, Amount, Category, PaymentMethod:\n");
             for (Transaction tx : txList) {
                 dataSummary.append(String.format("- %s, %s, %s, %.2f, %s, %s\n",
                         tx.getTransactionDate(), tx.getTransactionType(), tx.getCurrency(),
                         tx.getAmount(), tx.getCategory(), tx.getPaymentMethod()));
             }
 
-            // 获取目标数据
+            // Get goal data
             List<Goal> goalsList = goalService.getUserGoals(currentUser);
-            dataSummary.append("\n以下是我的财务目标数据，每条格式：Type, Title, Target Amount, Current Amount, Deadline, Category, Currency:\n");
+            dataSummary.append("\nHere is my financial goal data, each entry format: Type, Title, Target Amount, Current Amount, Deadline, Category, Currency:\n");
             for (Goal goal : goalsList) {
                 dataSummary.append(String.format("- %s, %s, %.2f, %.2f, %s, %s, %s\n",
                         goal.getType(), goal.getTitle(), goal.getTargetAmount(),
@@ -258,29 +261,29 @@ public class StatusService {
                         goal.getCurrency()));
             }
 
-            String systemPrompt = "现在你是我的专属财务管理助手，我希望你解答我有关个人财务的问题。请注意，你当且仅当回答有关财务相关的问题，当用户问出与其个人财务或财务相关知识无关的问题后，你应当拒绝回答。并且回答应全部使用英文。\n" +
-                    "这是我的财务数据结构:\n" +
-                    "1. 交易数据: Transaction Date(YYYY-MM-DD), Type(Income/Expense), Currency, Amount, Category, PaymentMethod\n" +
-                    "2. 目标数据: Type(SAVING/DEBT_REPAYMENT/BUDGET_CONTROL), Title, Target Amount, Current Amount, Deadline, Category, Currency\n" +
-                    "下面是我目前的数据：\n" + dataSummary +
-                    "\n用户的问题是： " + userInput;
+            String systemPrompt = "You are now my personal financial management assistant. I want you to answer my questions about personal finance. Please note that you should only answer questions related to personal finance or financial knowledge. If the user asks questions unrelated to their personal finance or financial knowledge, you should decline to answer. All responses should be in English.\n" +
+                    "Here is my financial data structure:\n" +
+                    "1. Transaction data: Transaction Date(YYYY-MM-DD), Type(Income/Expense), Currency, Amount, Category, PaymentMethod\n" +
+                    "2. Goal data: Type(SAVING/DEBT_REPAYMENT/BUDGET_CONTROL), Title, Target Amount, Current Amount, Deadline, Category, Currency\n" +
+                    "Here is my current data:\n" + dataSummary +
+                    "\nUser's question: " + userInput;
 
             String answer = AiChatService.chatCompletion(chatMessages, systemPrompt);
             if (answer != null) {
-                // 保存AI回答到聊天历史
+                // Save AI response to chat history
                 Map<String, String> aiMsg = new HashMap<>();
                 aiMsg.put("role", "assistant");
                 aiMsg.put("content", answer);
                 chatMessages.add(aiMsg);
-                // 更新StatusScene的聊天历史
+                // Update StatusScene's chat history
                 scene.chatHistory = chatMessages;
-                // 清空webview
+                // Clear webview
                 updateWebView("");
 
-                // 使用统一的分块处理方式
+                // Use unified chunk processing
                 new Thread(() -> {
                     try {
-                        // 使用渐进式显示
+                        // Use progressive display
                         int chunkSize = 100;
                         StringBuilder partialBuilder = new StringBuilder();
 
@@ -299,7 +302,7 @@ public class StatusService {
                             }
                         }
 
-                        // 最后完整显示一次，确保全部内容都显示出来
+                        // Final complete display to ensure all content is shown
                         Node finalDoc = mdParser.parse(answer);
                         String finalHtml = mdRenderer.render(finalDoc);
                         Platform.runLater(() -> updateWebView(finalHtml));
@@ -311,8 +314,8 @@ public class StatusService {
                     }
                 }).start();
             } else {
-                // 出错
-                Node doc = mdParser.parse("AI 请求失败，未能获取答复");
+                // Error occurred
+                Node doc = mdParser.parse("AI request failed, unable to get response");
                 String failHtml = mdRenderer.render(doc);
                 updateWebView(failHtml);
 
@@ -344,7 +347,7 @@ public class StatusService {
                 "</div></body></html>";
         scene.suggestionsWebView.getEngine().loadContent(wrappedHtml);
 
-        // 使用JavaScript滚动到底部
+        // Use JavaScript to scroll to bottom
         scene.suggestionsWebView.getEngine().getLoadWorker().stateProperty().addListener((obs, oldState, newState) -> {
             if (newState == javafx.concurrent.Worker.State.SUCCEEDED) {
                 scene.suggestionsWebView.getEngine().executeScript(

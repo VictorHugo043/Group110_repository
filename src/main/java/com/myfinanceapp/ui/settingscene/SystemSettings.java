@@ -31,6 +31,9 @@ import java.util.HashMap;
  * - Window size
  * - Default currency
  * The interface features theme customization and internationalization support.
+ *
+ * @author SE_Group110
+ * @version 4.0
  */
 public class SystemSettings {
     private static ThemeService themeService = new ThemeService();
@@ -82,19 +85,19 @@ public class SystemSettings {
         BorderPane root = new BorderPane();
         root.setStyle(themeService.getCurrentThemeStyle());
 
-        // 左侧导航栏：与 Status 一致，但 Settings 选中
+        // Left sidebar: Settings selected
         VBox sideBar = LeftSidebarFactory.createLeftSidebar(stage, "Settings", loggedUser, themeService, currencyService);
         root.setLeft(sideBar);
 
-        // 中心容器：包含顶部选项栏 + 设置表单，共用同一个圆角边框
+        // Center container: Contains top options bar + settings form, sharing the same rounded border
         HBox centerBox = new HBox();
         centerBox.setAlignment(Pos.CENTER);
 
-        // container：垂直叠放 topBar(顶部直线圆角) + outerBox(底部圆角)
+        // Container: Vertically stacked topBar (top straight rounded) + outerBox (bottom rounded)
         VBox container = new VBox(0);
         container.setAlignment(Pos.CENTER);
 
-        // outerBox：顶部直线、底部圆角的外框
+        // OuterBox: Top straight, bottom rounded border
         VBox outerBox = new VBox(0);
         outerBox.setMaxWidth(600);
         outerBox.setMaxHeight(400);
@@ -107,9 +110,9 @@ public class SystemSettings {
                         themeService.getCurrentFormBackgroundStyle()
         );
 
-        // 1) 顶部 Tab 栏 (与外Box同背景)
+        // 1) Top Tab bar (same background as outerBox)
         HBox topBar = SettingsTopBarFactory.createTopBar(stage, "System Settings", loggedUser, themeService, currencyService);
-        // 2) 表单
+        // 2) Settings form
         Pane settingsForm = createSettingsForm(stage, width, height, loggedUser, root, outerBox, sideBar, topBar);
 
         outerBox.getChildren().addAll(settingsForm);
@@ -155,7 +158,7 @@ public class SystemSettings {
         ComboBox<String> sizeCombo = new ComboBox<>();
         ComboBox<String> currencyCombo = new ComboBox<>();
 
-        // 语言
+        // Language selection
         ImageView languagesIcon = new ImageView();
         languagesIcon.setFitWidth(20);
         languagesIcon.setFitHeight(20);
@@ -163,21 +166,21 @@ public class SystemSettings {
             Image icon = new Image(Objects.requireNonNull(SystemSettings.class.getResource("/pictures/languages_icon.png")).toExternalForm());
             languagesIcon.setImage(icon);
         } catch (Exception e) {
-            // fallback: do nothing
+            // Fallback: do nothing
         }
         HBox langBox = new HBox(20);
         langLabel.setFont(Font.font("Arial", 14));
         langLabel.setStyle(themeService.getTextColorStyle());
-        // 创建语言显示映射
+        // Create language display mapping
         Map<String, String> languageDisplayMap = new HashMap<>();
         languageDisplayMap.put("English", "English");
         languageDisplayMap.put("Chinese", "中文");
         
-        // 添加选项并设置显示文本
+        // Add options and set display text
         langCombo.getItems().addAll("English", "Chinese");
         langCombo.setValue(languageService.getCurrentLanguage());
         
-        // 设置单元格工厂来显示本地化的语言名称
+        // Set cell factory to display localized language names
         langCombo.setCellFactory(lv -> new ListCell<String>() {
             @Override
             protected void updateItem(String item, boolean empty) {
@@ -190,7 +193,7 @@ public class SystemSettings {
             }
         });
         
-        // 设置按钮单元格工厂
+        // Set button cell factory
         langCombo.setButtonCell(new ListCell<String>() {
             @Override
             protected void updateItem(String item, boolean empty) {
@@ -213,7 +216,7 @@ public class SystemSettings {
         });
         langBox.getChildren().addAll(languagesIcon, langLabel, langCombo);
 
-        // Night/Daytime
+        // Night/Day mode selection
         ImageView dayIcon = new ImageView();
         dayIcon.setFitWidth(20);
         dayIcon.setFitHeight(20);
@@ -221,13 +224,13 @@ public class SystemSettings {
             Image icon = new Image(Objects.requireNonNull(SystemSettings.class.getResource("/pictures/day_icon.png")).toExternalForm());
             dayIcon.setImage(icon);
         } catch (Exception e) {
-            // fallback: do nothing
+            // Fallback: do nothing
         }
         HBox nightBox = new HBox(20);
         nightLabel.setFont(Font.font("Arial", 14));
         nightLabel.setStyle(themeService.getTextColorStyle());
         
-        // 初始化夜间模式选项
+        // Initialize night mode options
         String daytimeText = languageService.getTranslation("daytime");
         String nighttimeText = languageService.getTranslation("nighttime");
         nightCombo.getItems().addAll(daytimeText, nighttimeText);
@@ -239,7 +242,7 @@ public class SystemSettings {
             if (selectedMode != null) {
                 PauseTransition debounce = new PauseTransition(Duration.millis(100));
                 debounce.setOnFinished(event -> {
-                    // 使用索引来判断模式，而不是文本比较
+                    // Use index to determine mode instead of text comparison
                     boolean isDayMode = nightCombo.getItems().indexOf(selectedMode) == 0;
                     themeService.setTheme(isDayMode);
                     updateTheme(stage, root, outerBox, sideBar, topBar, container, langLabel, nightLabel, sizeLabel, currencyLabel, langCombo, nightCombo, sizeCombo, currencyCombo);
@@ -249,7 +252,7 @@ public class SystemSettings {
         });
         nightBox.getChildren().addAll(dayIcon, nightLabel, nightCombo);
 
-        // Window Size
+        // Window size selection
         ImageView windowIcon = new ImageView();
         windowIcon.setFitWidth(20);
         windowIcon.setFitHeight(20);
@@ -257,21 +260,21 @@ public class SystemSettings {
             Image icon = new Image(Objects.requireNonNull(SystemSettings.class.getResource("/pictures/window_icon.png")).toExternalForm());
             windowIcon.setImage(icon);
         } catch (Exception e) {
-            // fallback: do nothing
+            // Fallback: do nothing
         }
         HBox sizeBox = new HBox(20);
         sizeLabel.setFont(Font.font("Arial", 14));
         sizeLabel.setStyle(themeService.getTextColorStyle());
         sizeCombo.getItems().addAll(
+                "1440x900",  // WXGA+
                 "1920x1080", // Full HD
                 "1680x1050", // WSXGA+
                 "1600x1000", // 16:10
-                "1440x900",  // WXGA+
                 "1366x768",  // HD
                 "1280x800",  // WXGA
                 "1280x720"   // HD
         );
-        sizeCombo.setValue("1920x1080");
+        sizeCombo.setValue("1440x900");
         sizeCombo.getStyleClass().add(themeService.isDayMode() ? "day-theme-combo-box" : "night-theme-combo-box");
         sizeCombo.setOnAction(e -> {
             String selectedSize = sizeCombo.getValue();
@@ -281,11 +284,11 @@ public class SystemSettings {
                     double newWidth = Double.parseDouble(dimensions[0]);
                     double newHeight = Double.parseDouble(dimensions[1]);
 
-                    // 调整窗口大小
+                    // Adjust window size
                     stage.setWidth(newWidth);
                     stage.setHeight(newHeight);
 
-                    // 居中显示窗口
+                    // Center window display
                     stage.centerOnScreen();
 
                 } catch (NumberFormatException ex) {
@@ -295,7 +298,7 @@ public class SystemSettings {
         });
         sizeBox.getChildren().addAll(windowIcon, sizeLabel, sizeCombo);
 
-        // Default Currency
+        // Default currency selection
         ImageView currencyIcon = new ImageView();
         currencyIcon.setFitWidth(20);
         currencyIcon.setFitHeight(20);
@@ -303,7 +306,7 @@ public class SystemSettings {
             Image icon = new Image(Objects.requireNonNull(SystemSettings.class.getResource("/pictures/currency_icon.png")).toExternalForm());
             currencyIcon.setImage(icon);
         } catch (Exception e) {
-            // fallback: do nothing
+            // Fallback: do nothing
         }
         HBox currencyBox = new HBox(20);
         currencyLabel.setFont(Font.font("Arial", 14));
@@ -316,7 +319,7 @@ public class SystemSettings {
         });
         currencyBox.getChildren().addAll(currencyIcon, currencyLabel, currencyCombo);
 
-        // 按钮区
+        // Button area
         HBox buttonBox = new HBox(30);
         buttonBox.setAlignment(Pos.CENTER);
         Button resetBtn = new Button(languageService.getTranslation("reset_to_default"));
@@ -324,16 +327,16 @@ public class SystemSettings {
         resetBtn.setOnAction(e -> {
             langCombo.setValue("English");
             languageService.setCurrentLanguage("English");
-            nightCombo.setValue(nightCombo.getItems().get(0)); // 使用索引设置日间模式
-            sizeCombo.setValue("1920x1080");
-            stage.setWidth(1920);
-            stage.setHeight(1080);
+            nightCombo.setValue(nightCombo.getItems().get(0)); // Use index to set daytime mode
+            sizeCombo.setValue("1440x900");
+            stage.setWidth(1440);
+            stage.setHeight(900);
             stage.centerOnScreen();
             currencyCombo.setValue("CNY");
             currencyService.setSelectedCurrency("CNY");
             PauseTransition debounce = new PauseTransition(Duration.millis(100));
             debounce.setOnFinished(event -> {
-                themeService.setTheme(true); // Reset to Daytime
+                themeService.setTheme(true); // Reset to daytime
                 updateTheme(stage, root, outerBox, sideBar, topBar, container, langLabel, nightLabel, sizeLabel, currencyLabel, langCombo, nightCombo, sizeCombo, currencyCombo);
                 updateLanguage(stage, root, outerBox, sideBar, topBar, container, langLabel, nightLabel, sizeLabel, currencyLabel, langCombo, nightCombo, sizeCombo, currencyCombo);
             });
@@ -375,7 +378,7 @@ public class SystemSettings {
     private static void updateTheme(Stage stage, BorderPane root, VBox outerBox, VBox sideBar, HBox topBar, VBox container,
                                     Label langLabel, Label nightLabel, Label sizeLabel, Label currencyLabel,
                                     ComboBox<String> langCombo, ComboBox<String> nightCombo, ComboBox<String> sizeCombo, ComboBox<String> currencyCombo) {
-        // 更新根节点和主要容器样式
+        // Update root node and main container styles
         root.setStyle(themeService.getCurrentThemeStyle());
         outerBox.setStyle(
                 "-fx-border-color: #3282FA;" +
@@ -390,7 +393,7 @@ public class SystemSettings {
                         "-fx-border-width: 0 2 0 0;"
         );
 
-        // 更新标签样式
+        // Update label styles
         langLabel.setStyle(themeService.getTextColorStyle());
         nightLabel.setStyle(themeService.getTextColorStyle());
         sizeLabel.setStyle(themeService.getTextColorStyle());
@@ -398,7 +401,7 @@ public class SystemSettings {
         Label welcomeLabel = (Label) sideBar.getChildren().get(0);
         welcomeLabel.setStyle(themeService.getTextColorStyle());
 
-        // 更新 ComboBox 样式
+        // Update ComboBox styles
         for (ComboBox<?> comboBox : new ComboBox<?>[]{langCombo, nightCombo, sizeCombo, currencyCombo}) {
             comboBox.getStyleClass().removeAll("day-theme-combo-box", "night-theme-combo-box");
             comboBox.getStyleClass().add(themeService.isDayMode() ? "day-theme-combo-box" : "night-theme-combo-box");
@@ -406,7 +409,7 @@ public class SystemSettings {
             comboBox.layout();
         }
 
-        // 更新侧边栏按钮样式
+        // Update sidebar button styles
         for (int i = 1; i < sideBar.getChildren().size(); i++) {
             HBox buttonBox = (HBox) sideBar.getChildren().get(i);
             Label buttonLabel = (Label) buttonBox.getChildren().get(0);
@@ -432,7 +435,7 @@ public class SystemSettings {
             }
         }
 
-        // 更新顶部栏样式
+        // Update top bar styles
         for (int i = 0; i < topBar.getChildren().size(); i++) {
             VBox tab = (VBox) topBar.getChildren().get(i);
             Label arrow = (Label) tab.getChildren().get(0);
@@ -456,7 +459,7 @@ public class SystemSettings {
             }
         }
 
-        // 更新按钮样式
+        // Update button styles
         container.getChildren().stream()
                 .filter(node -> node instanceof HBox && ((HBox) node).getChildren().stream().anyMatch(child -> child instanceof Button))
                 .findFirst()
@@ -464,7 +467,7 @@ public class SystemSettings {
                         .filter(child -> child instanceof Button)
                         .forEach(button -> ((Button) button).setStyle(themeService.getButtonStyle())));
 
-        // 更新 CSS 样式表
+        // Update CSS stylesheet
         Scene scene = stage.getScene();
         if (scene.getStylesheets().size() > 1) {
             scene.getStylesheets().remove(scene.getStylesheets().size() - 1);
@@ -496,13 +499,13 @@ public class SystemSettings {
     private static void updateLanguage(Stage stage, BorderPane root, VBox outerBox, VBox sideBar, HBox topBar, VBox container,
                                      Label langLabel, Label nightLabel, Label sizeLabel, Label currencyLabel,
                                      ComboBox<String> langCombo, ComboBox<String> nightCombo, ComboBox<String> sizeCombo, ComboBox<String> currencyCombo) {
-        // 更新标签文本
+        // Update label texts
         langLabel.setText(languageService.getTranslation("languages"));
         nightLabel.setText(languageService.getTranslation("night_day_mode"));
         sizeLabel.setText(languageService.getTranslation("window_size"));
         currencyLabel.setText(languageService.getTranslation("default_currency"));
 
-        // 更新按钮文本
+        // Update button texts
         container.getChildren().stream()
                 .filter(node -> node instanceof HBox && ((HBox) node).getChildren().stream().anyMatch(child -> child instanceof Button))
                 .findFirst()
@@ -514,20 +517,20 @@ public class SystemSettings {
                     backBtn.setText(languageService.getTranslation("back_to_status"));
                 });
 
-        // 更新夜间模式选项
+        // Update night mode options
         String daytimeText = languageService.getTranslation("daytime");
         String nighttimeText = languageService.getTranslation("nighttime");
         int currentIndex = nightCombo.getItems().indexOf(nightCombo.getValue());
         nightCombo.getItems().clear();
         nightCombo.getItems().addAll(daytimeText, nighttimeText);
-        // 保持当前选择的模式
+        // Maintain current selection
         nightCombo.setValue(currentIndex >= 0 ? nightCombo.getItems().get(currentIndex) : 
                           (themeService.isDayMode() ? daytimeText : nighttimeText));
 
-        // 更新顶部栏
+        // Update top bar
         SettingsTopBarFactory.updateLanguage(topBar, languageService);
         
-        // 更新侧边栏
+        // Update sidebar
         LeftSidebarFactory.updateLanguage(sideBar, languageService);
     }
 }

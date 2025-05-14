@@ -26,6 +26,9 @@ import java.util.Objects;
  * An export report interface for the Finanger application.
  * This scene allows users to select a date range and export financial reports as PDF files.
  * It features theme customization, internationalization support, and responsive layout.
+ *
+ * @author SE_Group110
+ * @version 4.0
  */
 public class ExportReport {
     private static final LanguageService languageService = LanguageService.getInstance();

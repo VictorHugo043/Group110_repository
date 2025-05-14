@@ -30,6 +30,9 @@ import java.util.Objects;
  * - Password reset functionality
  * The interface features theme customization, internationalization support,
  * and a responsive layout design.
+ *
+ * @author SE_Group110
+ * @version 4.0
  */
 public class UserOptions {
     private static final LanguageService languageService = LanguageService.getInstance();
@@ -78,7 +81,7 @@ public class UserOptions {
      * @throws IllegalStateException if no user is logged in
      */
     public static Scene createScene(Stage stage, double width, double height, User loggedUser, ThemeService themeService, CurrencyService currencyService) {
-        // 把当前登录用户保存，供下文使用
+        // Store current logged-in user for later use
         currentUser = loggedUser;
         if (currentUser == null) {
             throw new IllegalStateException("No logged user!");
@@ -87,22 +90,22 @@ public class UserOptions {
         BorderPane root = new BorderPane();
         root.setStyle(themeService.getCurrentThemeStyle());
 
-        // 左侧边栏: "Settings" 选中
+        // Left sidebar: "Settings" selected
         VBox sideBar = LeftSidebarFactory.createLeftSidebar(stage, "Settings", loggedUser, themeService, currencyService);
         root.setLeft(sideBar);
 
-        // 中心：与 SystemSettings/ About 等相同
+        // Center: Same layout as SystemSettings/About
         HBox centerBox = new HBox();
         centerBox.setAlignment(Pos.CENTER);
 
-        // 外部容器
+        // Outer container
         VBox container = new VBox(0);
         container.setAlignment(Pos.CENTER);
 
-        // 顶部Tab栏: "User Options" 选中
+        // Top tab bar: "User Options" selected
         HBox topBar = SettingsTopBarFactory.createTopBar(stage, "User Options", loggedUser, themeService, currencyService);
 
-        // 下部圆角容器
+        // Bottom rounded container
         VBox outerBox = new VBox(20);
         outerBox.setPadding(new Insets(25));
         outerBox.setAlignment(Pos.TOP_LEFT);
@@ -116,7 +119,7 @@ public class UserOptions {
                         themeService.getCurrentFormBackgroundStyle()
         );
 
-        // ========== 右上角显示当前用户名 ===========
+        // ========== Top right: Display current username ===========
         Label currentUserLabel = new Label(languageService.getTranslation("current_username") + ": " + (loggedUser != null ? loggedUser.getUsername() : "N/A"));
         currentUserLabel.setStyle("-fx-text-fill: #3282FA; -fx-font-weight: bold;");
         currentUserLabel.setFont(new Font(14));
@@ -132,7 +135,7 @@ public class UserOptions {
             Image icon = new Image(Objects.requireNonNull(UserOptions.class.getResource("/pictures/user_icon.png")).toExternalForm());
             userIcon.setImage(icon);
         } catch (Exception e) {
-            // fallback: do nothing
+            // Fallback: do nothing
         }
         Label resetUserLabel = new Label(languageService.getTranslation("reset_username"));
         resetUserLabel.setStyle(
@@ -155,7 +158,7 @@ public class UserOptions {
         Button saveUserBtn = new Button(languageService.getTranslation("save"));
         saveUserBtn.setStyle(themeService.getButtonStyle());
 
-        // 创建 UserService 实例
+        // Create UserService instance
         UserService userService = new UserService();
 
         saveUserBtn.setOnAction(e -> {
@@ -187,7 +190,7 @@ public class UserOptions {
             Image icon = new Image(Objects.requireNonNull(UserOptions.class.getResource("/pictures/security_icon.png")).toExternalForm());
             secIcon.setImage(icon);
         } catch (Exception e) {
-            // fallback
+            // Fallback: do nothing
         }
         Label resetSecLabel = new Label(languageService.getTranslation("reset_security_question"));
         resetSecLabel.setStyle(
@@ -258,6 +261,7 @@ public class UserOptions {
             Image icon = new Image(Objects.requireNonNull(UserOptions.class.getResource("/pictures/key_icon.png")).toExternalForm());
             passIcon.setImage(icon);
         } catch (Exception e) {
+            // Fallback: do nothing
         }
 
         Label resetPassLabel = new Label(languageService.getTranslation("reset_password") + " ➜");
@@ -285,7 +289,7 @@ public class UserOptions {
             stage.setTitle("Finanger - " + languageService.getTranslation("status"));
         });
 
-        // ========== 组装outerBox内容 ==========
+        // ========== Assemble outerBox content ==========
         outerBox.getChildren().addAll(
                 topRightBox,
                 resetUserHeader,

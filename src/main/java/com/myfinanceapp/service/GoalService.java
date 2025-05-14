@@ -27,6 +27,9 @@ import java.util.stream.Collectors;
  * This class provides functionality for creating, reading, updating, and deleting financial goals,
  * as well as calculating progress and formatting goal-related data.
  * All goal data is encrypted before storage and decrypted when retrieved.
+ *
+ * @author SE_Group110
+ * @version 4.0
  */
 public class GoalService {
     private static final String GOALS_DIRECTORY_PATH = "src/main/resources/goals/";
@@ -185,7 +188,7 @@ public class GoalService {
     private static void ensureDirectoryExists() {
         File directory = new File(GOALS_DIRECTORY_PATH);
         if (!directory.exists() && !directory.mkdirs()) {
-            logger.error("创建目录失败: {}", directory.getAbsolutePath());
+            logger.error("Failed to create directory: {}", directory.getAbsolutePath());
         }
     }
 
@@ -208,8 +211,8 @@ public class GoalService {
      * @throws EncryptionException If there is an error deriving the key
      */
     private static SecretKey getEncryptionKey(User user) throws EncryptionException {
-        // 使用固定密钥和用户ID派生加密密钥
-        byte[] salt = user.getUid().getBytes();  // 使用用户ID作为盐值
+        // Use fixed key and user ID to derive encryption key
+        byte[] salt = user.getUid().getBytes();  // Use user ID as salt
         return EncryptionService.deriveKey(FIXED_KEY, salt);
     }
 

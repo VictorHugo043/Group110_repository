@@ -18,6 +18,9 @@ import java.io.InputStreamReader;
  * A privacy policy display interface for the Finanger application.
  * This scene presents the application's privacy policy in a scrollable text area
  * with a professional layout including a header and navigation controls.
+ *
+ * @author SE_Group110
+ * @version 4.0
  */
 public class PrivacyPolicy {
     private static final double INITIAL_WIDTH = 800;

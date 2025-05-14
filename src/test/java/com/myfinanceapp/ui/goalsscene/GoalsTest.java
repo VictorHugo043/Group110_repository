@@ -24,6 +24,17 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+/**
+ * Unit test class for the Goals scene.
+ * This class contains tests for goals scene functionality including:
+ * - Scene creation with various parameters
+ * - User goals display
+ * - Scene dimension handling
+ * - Null user handling
+ *
+ * @author SE_Group110
+ * @version 4.0
+ */
 @ExtendWith({MockitoExtension.class, ApplicationExtension.class})
 class GoalsTest {
 
@@ -36,6 +47,13 @@ class GoalsTest {
     private Scene scene;
     
 
+    /**
+     * Tests scene creation with valid parameters.
+     * Verifies that:
+     * - Scene is created successfully
+     * - Scene dimensions are set correctly
+     * - Empty goals list is handled properly
+     */
     @Test
     void createSceneWithValidParameters() {
         try (MockedStatic<GoalService> mockedGoalService = Mockito.mockStatic(GoalService.class)) {
@@ -50,6 +68,13 @@ class GoalsTest {
         }
     }
     
+    /**
+     * Tests scene creation with null user.
+     * Verifies that:
+     * - Scene can be created without a user
+     * - Empty goals list is returned for null user
+     * - No null pointer exceptions occur
+     */
     @Test
     void createSceneWithNullUser() {
         try (MockedStatic<GoalService> mockedGoalService = Mockito.mockStatic(GoalService.class)) {
@@ -62,6 +87,13 @@ class GoalsTest {
         }
     }
     
+    /**
+     * Tests scene creation with user goals.
+     * Verifies that:
+     * - Scene is created with multiple goals
+     * - Goals are properly displayed
+     * - Goal titles are correctly set
+     */
     @Test
     void createSceneWithUserGoals() {
         // Create simplified mocks with only the properties that are actually used
@@ -84,6 +116,13 @@ class GoalsTest {
         }
     }
     
+    /**
+     * Tests scene creation with zero dimensions.
+     * Verifies that:
+     * - Scene can be created with zero dimensions
+     * - Scene dimensions are set correctly
+     * - Empty goals list is handled properly
+     */
     @Test
     void createSceneWithZeroDimensions() {
         try (MockedStatic<GoalService> mockedGoalService = Mockito.mockStatic(GoalService.class)) {

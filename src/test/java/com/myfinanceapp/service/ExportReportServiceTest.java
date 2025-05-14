@@ -41,6 +41,19 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+/**
+ * Unit test class for the ExportReportService.
+ * This class contains tests for report export functionality including:
+ * - PDF report generation
+ * - Chart image capture
+ * - Date range validation
+ * - File chooser handling
+ * - Transaction data processing
+ * - Executor service management
+ *
+ * @author SE_Group110
+ * @version 4.0
+ */
 @ExtendWith(MockitoExtension.class)
 @ExtendWith(ApplicationExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -67,6 +80,14 @@ public class ExportReportServiceTest {
     private LocalDate endDate;
     private File tempFile;
 
+    /**
+     * Sets up the test environment before each test.
+     * Initializes user, dates, and temporary file.
+     * Configures mock objects and reflection-based field access.
+     *
+     * @throws NoSuchFieldException if field access fails
+     * @throws IllegalAccessException if field modification fails
+     */
     @BeforeEach
     void setUp() throws NoSuchFieldException, IllegalAccessException {
         user = new User("testUser", "password", "question", "answer");
@@ -86,12 +107,22 @@ public class ExportReportServiceTest {
         tempFile = tempDir.resolve("testReport.pdf").toFile();
     }
 
+    /**
+     * Cleans up resources after each test.
+     * Shuts down the executor service.
+     */
     @AfterEach
     void tearDown() {
         exportReportService.shutdown();
     }
 
-    // Helper method to create a valid 1x1 PNG image
+    /**
+     * Creates a valid 1x1 PNG image for testing.
+     * Used for mocking chart image capture functionality.
+     *
+     * @return byte array containing a valid PNG image
+     * @throws IOException if image creation fails
+     */
     private byte[] createValidPngImage() throws IOException {
         BufferedImage image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
         image.setRGB(0, 0, 0xFFFFFFFF); // Set pixel to white
@@ -100,6 +131,17 @@ public class ExportReportServiceTest {
         return baos.toByteArray();
     }
 
+    /**
+     * Tests successful report export with valid dates.
+     * Verifies that:
+     * - PDF file is created
+     * - Transactions are loaded
+     * - Charts are updated
+     * - PDF generation is called
+     *
+     * @param robot TestFX robot for UI interaction
+     * @throws Exception if test execution fails
+     */
     @Test
     void testHandleExport_ValidDates_SuccessfulExport(FxRobot robot) throws Exception {
         // Arrange
@@ -169,6 +211,10 @@ public class ExportReportServiceTest {
         verify(chartService).updateAllCharts(startDate, endDate);
     }
 
+    /**
+     * Tests report export with null dates.
+     * Verifies that appropriate exception is thrown.
+     */
     @Test
     void testHandleExport_NullDates_ThrowsException() {
         // Act & Assert
@@ -180,6 +226,10 @@ public class ExportReportServiceTest {
         assertEquals("Failed to export report: Please select both start and end dates!", exception.getCause().getMessage());
     }
 
+    /**
+     * Tests report export with invalid date range.
+     * Verifies that appropriate exception is thrown when start date is after end date.
+     */
     @Test
     void testHandleExport_InvalidDateRange_ThrowsException() {
         LocalDate invalidStartDate = LocalDate.of(2025, 4, 15);
@@ -191,6 +241,17 @@ public class ExportReportServiceTest {
         assertEquals("Failed to export report: Start date must be before end date!", exception.getCause().getMessage());
     }
 
+    /**
+     * Tests report export when file chooser is cancelled.
+     * Verifies that:
+     * - No PDF file is created
+     * - generatePDF is not called
+     * - Transactions are still loaded
+     * - Charts are still updated
+     *
+     * @param robot TestFX robot for UI interaction
+     * @throws Exception if test execution fails
+     */
     @Test
     void testHandleExport_FileChooserCancelled_DoesNotGeneratePDF(FxRobot robot) throws Exception {
         Transaction transaction = new Transaction();
@@ -245,6 +306,15 @@ public class ExportReportServiceTest {
         verify(chartService).updateAllCharts(startDate, endDate);
     }
 
+    /**
+     * Tests PDF generation with valid data.
+     * Verifies that:
+     * - PDF file is created
+     * - PDF contains content
+     * - Chart images are captured
+     *
+     * @throws Exception if test execution fails
+     */
     @Test
     void testGeneratePDF_ValidData_GeneratesPDF() throws Exception {
         Transaction transaction1 = new Transaction();
@@ -281,6 +351,10 @@ public class ExportReportServiceTest {
         }
     }
 
+    /**
+     * Tests executor service shutdown.
+     * Verifies that the executor service is properly terminated.
+     */
     @Test
     void testShutdown_ExecutorServiceTerminates() {
         exportReportService.shutdown();

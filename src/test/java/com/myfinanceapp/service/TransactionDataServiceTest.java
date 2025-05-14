@@ -11,11 +11,27 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+/**
+ * Unit test class for the TransactionDataService.
+ * This class contains tests for transaction data analysis functionality including:
+ * - Total income calculation
+ * - Total expense calculation
+ * - Net balance calculation
+ * - Category-based amount calculation
+ * - Transaction counting by category
+ * - Transaction counting by payment method
+ *
+ * @author SE_Group110
+ * @version 4.0
+ */
 class TransactionDataServiceTest {
 
     private TransactionDataService transactionDataService;
 
-    //  模拟 JSON 交易数据
+    /**
+     * Mock JSON transaction data for testing.
+     * Contains a mix of income and expense transactions with different categories and payment methods.
+     */
     private final String mockJsonData = "["
             + "{ \"transactionType\": \"Income\", \"amount\": 1000.0, \"category\": \"Salary\", \"paymentMethod\": \"Bank Transfer\" },"
             + "{ \"transactionType\": \"Expense\", \"amount\": 200.0, \"category\": \"Groceries\", \"paymentMethod\": \"Credit Card\" },"
@@ -24,67 +40,108 @@ class TransactionDataServiceTest {
             + "{ \"transactionType\": \"Expense\", \"amount\": 100.0, \"category\": \"Groceries\", \"paymentMethod\": \"Debit Card\" }"
             + "]";
 
+    /**
+     * Sets up the test environment before each test.
+     * Creates a TransactionDataService instance with mock data and configures it to return predefined JSON data.
+     *
+     * @throws IOException if there is an error during setup
+     */
     @BeforeEach
     void setUp() throws IOException {
-        // 1️ 创建 TransactionDataService 实例（使用 mock UID）
+        // Create TransactionDataService instance with mock UID
         transactionDataService = Mockito.spy(new TransactionDataService("testUser"));
 
-        // 2️ 使用 Mockito 模拟 loadTransactionData() 方法，避免真实文件操作
+        // Mock loadTransactionData() method to avoid real file operations
         doReturn(new JSONArray(mockJsonData)).when(transactionDataService).loadTransactionData();
     }
 
+    /**
+     * Tests total income calculation.
+     * Verifies that the sum of all income transactions is calculated correctly.
+     * Expected result: 1000 + 500 = 1500
+     *
+     * @throws IOException if there is an error during calculation
+     */
     @Test
     void calculateTotalIncome() throws IOException {
-        //  1000 + 500 = 1500
         double totalIncome = transactionDataService.calculateTotalIncome();
-        assertEquals(1500.0, totalIncome, 0.01, "总收入计算错误");
+        assertEquals(1500.0, totalIncome, 0.01, "Total income calculation error");
     }
 
+    /**
+     * Tests total expense calculation.
+     * Verifies that the sum of all expense transactions is calculated correctly.
+     * Expected result: 200 + 150 + 100 = 450
+     *
+     * @throws IOException if there is an error during calculation
+     */
     @Test
     void calculateTotalExpense() throws IOException {
-        //  200 + 150 + 100 = 450
         double totalExpense = transactionDataService.calculateTotalExpense();
-        assertEquals(450.0, totalExpense, 0.01, "总支出计算错误");
+        assertEquals(450.0, totalExpense, 0.01, "Total expense calculation error");
     }
 
+    /**
+     * Tests net balance calculation.
+     * Verifies that the difference between total income and total expense is calculated correctly.
+     * Expected result: (1500 - 450) = 1050
+     *
+     * @throws IOException if there is an error during calculation
+     */
     @Test
     void calculateNetBalance() throws IOException {
-        //  (1500 - 450) = 1050
         double netBalance = transactionDataService.calculateNetBalance();
-        assertEquals(1050.0, netBalance, 0.01, "净余额计算错误");
+        assertEquals(1050.0, netBalance, 0.01, "Net balance calculation error");
     }
 
+    /**
+     * Tests category-based total amount calculation.
+     * Verifies that the sum of transactions for specific categories is calculated correctly.
+     * Tests both expense and income categories.
+     *
+     * @throws IOException if there is an error during calculation
+     */
     @Test
     void calculateTotalAmountByCategory() throws IOException {
-        //  测试 "Groceries" 类别的总金额 (200 + 100)
+        // Test total amount for "Groceries" category (200 + 100)
         double groceriesTotal = transactionDataService.calculateTotalAmountByCategory("Groceries");
-        assertEquals(300.0, groceriesTotal, 0.01, "类别 Groceries 总金额计算错误");
+        assertEquals(300.0, groceriesTotal, 0.01, "Total amount for Groceries category calculation error");
 
-        //  测试 "Salary" 类别的总金额 (1000)
+        // Test total amount for "Salary" category (1000)
         double salaryTotal = transactionDataService.calculateTotalAmountByCategory("Salary");
-        assertEquals(1000.0, salaryTotal, 0.01, "类别 Salary 总金额计算错误");
+        assertEquals(1000.0, salaryTotal, 0.01, "Total amount for Salary category calculation error");
     }
 
+    /**
+     * Tests transaction counting by category.
+     * Verifies that the number of transactions for each category is counted correctly.
+     *
+     * @throws IOException if there is an error during counting
+     */
     @Test
     void countTransactionsByCategory() throws IOException {
-        //  期望的交易类别统计
         Map<String, Integer> categoryCounts = transactionDataService.countTransactionsByCategory();
 
-        assertEquals(2, categoryCounts.get("Groceries"), "类别 Groceries 交易次数错误");
-        assertEquals(1, categoryCounts.get("Entertainment"), "类别 Entertainment 交易次数错误");
-        assertEquals(1, categoryCounts.get("Salary"), "类别 Salary 交易次数错误");
-        assertEquals(1, categoryCounts.get("Freelance"), "类别 Freelance 交易次数错误");
+        assertEquals(2, categoryCounts.get("Groceries"), "Transaction count for Groceries category error");
+        assertEquals(1, categoryCounts.get("Entertainment"), "Transaction count for Entertainment category error");
+        assertEquals(1, categoryCounts.get("Salary"), "Transaction count for Salary category error");
+        assertEquals(1, categoryCounts.get("Freelance"), "Transaction count for Freelance category error");
     }
 
+    /**
+     * Tests transaction counting by payment method.
+     * Verifies that the number of transactions for each payment method is counted correctly.
+     *
+     * @throws IOException if there is an error during counting
+     */
     @Test
     void countTransactionsByPaymentMethod() throws IOException {
-        //  期望的支付方式统计
         Map<String, Integer> paymentMethodCounts = transactionDataService.countTransactionsByPaymentMethod();
 
-        assertEquals(1, paymentMethodCounts.get("Bank Transfer"), "支付方式 Bank Transfer 交易次数错误");
-        assertEquals(1, paymentMethodCounts.get("PayPal"), "支付方式 PayPal 交易次数错误");
-        assertEquals(1, paymentMethodCounts.get("Credit Card"), "支付方式 Credit Card 交易次数错误");
-        assertEquals(1, paymentMethodCounts.get("Cash"), "支付方式 Cash 交易次数错误");
-        assertEquals(1, paymentMethodCounts.get("Debit Card"), "支付方式 Debit Card 交易次数错误");
+        assertEquals(1, paymentMethodCounts.get("Bank Transfer"), "Transaction count for Bank Transfer payment method error");
+        assertEquals(1, paymentMethodCounts.get("PayPal"), "Transaction count for PayPal payment method error");
+        assertEquals(1, paymentMethodCounts.get("Credit Card"), "Transaction count for Credit Card payment method error");
+        assertEquals(1, paymentMethodCounts.get("Cash"), "Transaction count for Cash payment method error");
+        assertEquals(1, paymentMethodCounts.get("Debit Card"), "Transaction count for Debit Card payment method error");
     }
 }

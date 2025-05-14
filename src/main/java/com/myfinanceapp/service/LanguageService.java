@@ -14,6 +14,9 @@ import java.util.Map;
  * - Translation key management
  * - Welcome messages and UI text translations
  * - Error messages and notifications
+ *
+ * @author SE_Group110
+ * @version 4.0
  */
 public class LanguageService {
     private static LanguageService instance;

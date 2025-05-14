@@ -14,8 +14,8 @@ import java.nio.charset.StandardCharsets;
  * - Includes salt generation and verification
  * - Configurable memory usage, iterations, and parallelism
  * 
- * @author Finanger Team
- * @version 1.0
+ * @author SE_Group110
+ * @version 4.0
  */
 public final class PasswordHashService {
     private static final SecureRandom secureRandom = new SecureRandom();
@@ -42,10 +42,10 @@ public final class PasswordHashService {
      */
     public static PasswordHashResult hashPassword(String password) throws PasswordHashException {
         try {
-            // 生成随机盐
+            // Generate random salt
             byte[] salt = generateSalt();
             
-            // 执行密码哈希
+            // Perform password hashing
             String hash = argon2.hash(
                 EncryptionConfig.Argon2.ITERATIONS,
                 EncryptionConfig.Argon2.MEMORY,
@@ -54,7 +54,7 @@ public final class PasswordHashService {
                 StandardCharsets.UTF_8
             );
             
-            // 返回哈希结果
+            // Return hash result
             return new PasswordHashResult(
                 hash,
                 Base64.getEncoder().encodeToString(salt),
@@ -65,7 +65,7 @@ public final class PasswordHashService {
                 )
             );
         } catch (Exception e) {
-            throw new PasswordHashException("密码哈希处理时发生错误", e);
+            throw new PasswordHashException("Error occurred during password hashing", e);
         }
     }
 
@@ -85,7 +85,7 @@ public final class PasswordHashService {
         try {
             return argon2.verify(hash, password.toCharArray());
         } catch (Exception e) {
-            throw new PasswordHashException("密码验证时发生错误", e);
+            throw new PasswordHashException("Error occurred during password verification", e);
         }
     }
 

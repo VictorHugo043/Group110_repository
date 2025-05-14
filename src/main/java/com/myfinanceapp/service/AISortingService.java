@@ -5,7 +5,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import org.json.JSONObject; // 引入 JSONObject 类
+import org.json.JSONObject;
 
 /**
  * Service class for automatically categorizing financial transactions using AI.
@@ -28,6 +28,9 @@ import org.json.JSONObject; // 引入 JSONObject 类
  * - Bonus
  * - Salary
  * - Others
+ *
+ * @author SE_Group110
+ * @version 4.0
  */
 public class AISortingService {
 
@@ -42,12 +45,12 @@ public class AISortingService {
      */
     public static String sort(String description) {
         try {
-            // 设置 API 请求的 URL
+            // Set API request URL
             String urlString = "https://api.siliconflow.cn/v1/chat/completions";
             URL url = new URL(urlString);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
-            // 设置请求方法和请求头
+            // Set request method and headers
             connection.setRequestMethod("POST");
             connection.setRequestProperty("Authorization",
                     "Bearer sk-ijbuhipcfqfnwdbpmxqvsxgvhkktafpvxoizivjhwblqlent");
@@ -55,9 +58,9 @@ public class AISortingService {
             connection.setDoOutput(true);
 
             String prompt = description
-                    + " 根据以上对一次交易的描述区分一下交易类型，供你选择的交易类型有：Housing, Shopping, Gift, Food & Drink, Freelance, Transport, Groceries, Debt, Leisure, Healthcare, Utilities, Investment, Bonus, Salary, Others. 你的所有回答只需包含你判定的类型就够了";
+                    + " Based on the above transaction description, categorize it into one of the following types: Housing, Shopping, Gift, Food & Drink, Freelance, Transport, Groceries, Debt, Leisure, Healthcare, Utilities, Investment, Bonus, Salary, Others. Your response should only include the determined category.";
 
-            // 构建请求的 JSON 数据
+            // Build request JSON data
             String jsonInputString = "{\n" +
                     "    \"model\": \"Qwen/Qwen2.5-72B-Instruct\",\n" +
                     "    \"messages\": [\n" +
@@ -72,13 +75,13 @@ public class AISortingService {
                     "    ]\n" +
                     "}";
 
-            // 发送请求数据
+            // Send request data
             try (OutputStream os = connection.getOutputStream()) {
                 byte[] input = jsonInputString.getBytes("utf-8");
                 os.write(input, 0, input.length);
             }
 
-            // 读取响应内容
+            // Read response content
             BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
             String inputLine;
             StringBuilder response = new StringBuilder();
@@ -87,7 +90,7 @@ public class AISortingService {
             }
             in.close();
 
-            // 解析 JSON 响应并提取回答内容
+            // Parse JSON response and extract answer content
             JSONObject jsonResponse = new JSONObject(response.toString());
             String content = jsonResponse.getJSONArray("choices")
                     .getJSONObject(0)

@@ -9,15 +9,36 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Unit test class for the AiChatService.
+ * This class contains tests for AI chat completion functionality including:
+ * - API error handling
+ * - Network exception handling
+ * - Response validation
+ *
+ * @author SE_Group110
+ * @version 4.0
+ */
 class AiChatServiceTest {
 
     private List<Map<String, String>> messages;
 
+    /**
+     * Sets up test environment before each test.
+     * Initializes an empty message list for testing.
+     */
     @BeforeEach
     void setUp() {
         messages = new ArrayList<>();
     }
 
+    /**
+     * Tests chat completion with API error handling.
+     * Verifies that:
+     * - Service handles empty input gracefully
+     * - Returns a non-null response even with invalid input
+     * - Maintains service stability during API errors
+     */
     @Test
     void chatCompletion_apiError() {
         // Arrange
@@ -32,6 +53,13 @@ class AiChatServiceTest {
         assertNotNull(response, "Response should not be null even with potentially invalid input");
     }
 
+    /**
+     * Tests chat completion with network exception handling.
+     * Verifies that:
+     * - Service handles network issues gracefully
+     * - Returns a non-null response when network is available
+     * - Maintains service stability during network problems
+     */
     @Test
     void chatCompletion_networkException() {
         // Arrange

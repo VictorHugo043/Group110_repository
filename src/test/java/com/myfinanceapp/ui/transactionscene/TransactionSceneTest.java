@@ -20,6 +20,18 @@ import org.testfx.framework.junit5.ApplicationExtension;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+/**
+ * Unit test class for the TransactionScene.
+ * This class contains tests for transaction scene functionality including:
+ * - Scene creation and initialization
+ * - UI component validation
+ * - Manual input controls testing
+ * - Auto-sorting feature verification
+ * - File import functionality testing
+ *
+ * @author SE_Group110
+ * @version 4.0
+ */
 @ExtendWith(ApplicationExtension.class)
 class TransactionSceneTest {
 
@@ -31,6 +43,10 @@ class TransactionSceneTest {
 
     private User testUser;
 
+    /**
+     * Sets up the test environment before each test.
+     * Initializes mock objects and creates a test user with predefined values.
+     */
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
@@ -39,12 +55,24 @@ class TransactionSceneTest {
         testUser.setPassword("password");
     }
 
+    /**
+     * Tests the creation of the transaction scene.
+     * Verifies that:
+     * - Scene is created successfully
+     * - Scene is not null
+     */
     @Test
     void createScene_shouldReturnNonNullScene() {
         Scene scene = TransactionScene.createScene(stageMock, 800, 600, testUser);
         assertNotNull(scene);
     }
 
+    /**
+     * Tests the dimensions of the transaction scene.
+     * Verifies that:
+     * - Scene width is set correctly
+     * - Scene height is set correctly
+     */
     @Test
     void createScene_shouldHaveCorrectDimensions() {
         Scene scene = TransactionScene.createScene(stageMock, 800, 600, testUser);
@@ -52,12 +80,23 @@ class TransactionSceneTest {
         assertEquals(600, scene.getHeight());
     }
 
+    /**
+     * Tests the root container of the transaction scene.
+     * Verifies that:
+     * - Root node is a BorderPane
+     */
     @Test
     void createScene_shouldContainBorderPaneAsRoot() {
         Scene scene = TransactionScene.createScene(stageMock, 800, 600, testUser);
         assertTrue(scene.getRoot() instanceof BorderPane);
     }
 
+    /**
+     * Tests the left sidebar of the transaction scene.
+     * Verifies that:
+     * - Left section is not null
+     * - Left section is a VBox
+     */
     @Test
     void createScene_shouldContainLeftSidebar() {
         Scene scene = TransactionScene.createScene(stageMock, 800, 600, testUser);
@@ -66,25 +105,44 @@ class TransactionSceneTest {
         assertTrue(root.getLeft() instanceof VBox);
     }
 
+    /**
+     * Tests the center and right sections of the transaction scene.
+     * Verifies that:
+     * - Center section is a GridPane
+     * - GridPane contains two columns
+     * - First column is a VBox (centerBox)
+     * - Second column is a VBox (rightBar)
+     */
     @Test
     void createScene_shouldContainCenterAndRightBoxes() {
         Scene scene = TransactionScene.createScene(stageMock, 800, 600, testUser);
         BorderPane root = (BorderPane) scene.getRoot();
         assertNotNull(root.getCenter());
-        // 修改：确保centerAndRight是GridPane
         assertTrue(root.getCenter() instanceof GridPane);
 
         GridPane centerAndRight = (GridPane) root.getCenter();
-        assertEquals(2, centerAndRight.getChildren().size()); // GridPane有两个列
-        assertTrue(centerAndRight.getChildren().get(0) instanceof VBox); // centerBox
-        assertTrue(centerAndRight.getChildren().get(1) instanceof VBox); // rightBar
+        assertEquals(2, centerAndRight.getChildren().size());
+        assertTrue(centerAndRight.getChildren().get(0) instanceof VBox);
+        assertTrue(centerAndRight.getChildren().get(1) instanceof VBox);
     }
 
+    /**
+     * Tests the manual input controls in the transaction scene.
+     * Verifies that all required input controls are properly initialized:
+     * - Date field
+     * - Type combo box
+     * - Currency combo box
+     * - Amount field
+     * - Category field
+     * - Payment method field
+     * - Submit button
+     * Also verifies default values for combo boxes.
+     */
     @Test
     void createScene_shouldInitializeManualInputControls() {
         Scene scene = TransactionScene.createScene(stageMock, 800, 600, testUser);
         BorderPane root = (BorderPane) scene.getRoot();
-        GridPane centerAndRight = (GridPane) root.getCenter(); // 修改为GridPane
+        GridPane centerAndRight = (GridPane) root.getCenter();
         VBox centerBox = (VBox) centerAndRight.getChildren().get(0);
 
         // Find manual input form controls
@@ -134,12 +192,17 @@ class TransactionSceneTest {
         assertNotNull(methodField, "Method field should exist");
         assertNotNull(submitButton, "Submit button should exist");
 
-        // Verify default values
         assertEquals("Expense", typeCombo.getValue());
         assertEquals("CNY", currencyCombo.getValue());
     }
 
-
+    /**
+     * Tests the auto-sorting button in the transaction scene.
+     * Verifies that:
+     * - Auto-sort button exists
+     * - Button text is correct
+     * - Button has correct style
+     */
     @Test
     void createScene_shouldInitializeAutoSortingButton() {
         Scene scene = TransactionScene.createScene(stageMock, 800, 600, testUser);
@@ -147,7 +210,6 @@ class TransactionSceneTest {
         HBox centerAndRight = (HBox) root.getCenter();
         VBox centerBox = (VBox) centerAndRight.getChildren().get(0);
 
-        // 查找自动分类按钮
         Button autoSortButton = null;
         for (int i = 0; i < centerBox.getChildren().size(); i++) {
             if (centerBox.getChildren().get(i) instanceof VBox) {
@@ -169,6 +231,16 @@ class TransactionSceneTest {
         assertTrue(autoSortButton.getStyle().contains("-fx-background-color: #E0F0FF"));
     }
 
+    /**
+     * Tests the description area in the transaction scene.
+     * Verifies that:
+     * - Description text area exists
+     * - Description label exists
+     * - Label text is correct
+     * - Text area has correct prompt text
+     * - Text area has correct row count
+     * - Text area has word wrap enabled
+     */
     @Test
     void createScene_shouldInitializeDescriptionArea() {
         Scene scene = TransactionScene.createScene(stageMock, 800, 600, testUser);
@@ -199,15 +271,20 @@ class TransactionSceneTest {
         assertTrue(descriptionArea.isWrapText());
     }
 
-
+    /**
+     * Tests the file import controls in the transaction scene.
+     * Verifies that:
+     * - Import button exists
+     * - CSV instructions label exists
+     * - Button text is correct
+     */
     @Test
     void createScene_shouldInitializeFileImportControls() {
         Scene scene = TransactionScene.createScene(stageMock, 800, 600, testUser);
         BorderPane root = (BorderPane) scene.getRoot();
-        GridPane centerAndRight = (GridPane) root.getCenter(); // 修改为GridPane
+        GridPane centerAndRight = (GridPane) root.getCenter();
         VBox rightBar = (VBox) centerAndRight.getChildren().get(1);
 
-        // Find file import button and instructions
         Button importButton = null;
         Label instructionsLabel = null;
 
@@ -224,6 +301,5 @@ class TransactionSceneTest {
         assertNotNull(instructionsLabel, "CSV instructions label should exist");
         assertEquals("Select a file", importButton.getText());
     }
-
 }
 

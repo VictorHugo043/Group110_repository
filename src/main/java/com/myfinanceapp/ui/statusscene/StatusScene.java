@@ -35,6 +35,9 @@ import java.util.Map;
  * - AI-powered financial assistant
  * The interface features theme customization, internationalization support,
  * and a responsive layout design with dynamic chart resizing.
+ *
+ * @author SE_Group110
+ * @version 4.0
  */
 public class StatusScene {
     private static final LanguageService languageService = LanguageService.getInstance();

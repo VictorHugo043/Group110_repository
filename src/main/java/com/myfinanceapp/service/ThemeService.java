@@ -11,6 +11,9 @@ package com.myfinanceapp.service;
  * The service supports two themes:
  * - Day mode: Light theme with white backgrounds and dark text
  * - Night mode: Dark theme with dark backgrounds and light text
+ *
+ * @author SE_Group110
+ * @version 4.0
  */
 public class ThemeService {
     private boolean isDayMode;

@@ -29,6 +29,9 @@ import java.util.Objects;
  * - Managing navigation between different sections of the application
  * - Handling theme-specific styling of sidebar elements
  * - Supporting multilingual interface through LanguageService
+ *
+ * @author SE_Group110
+ * @version 4.0
  */
 public class LeftSidebarFactory {
     private static final LanguageService languageService = LanguageService.getInstance();
@@ -63,20 +66,20 @@ public class LeftSidebarFactory {
         sideBar.setAlignment(Pos.TOP_LEFT);
         sideBar.setPrefWidth(170);
 
-        // 在 sideBar 的右侧画一条 2px 蓝色竖线
+        // Draw a 2px blue vertical line on the right side of sideBar
         sideBar.setStyle(
                 themeService.getCurrentThemeStyle() +
                         "-fx-border-color: #3282FA;" +
                         "-fx-border-width: 0 2 0 0;"
         );
 
-        // 根据 selectedButton 设置顶部文字
+        // Set top text based on selectedButton
         String labelText = getWelcomeMessage(selectedButton);
         Label welcomeLabel = new Label(labelText);
         welcomeLabel.setFont(new Font(18));
         welcomeLabel.setStyle(themeService.getTextColorStyle());
 
-        // 创建五个按钮，判断哪个是选中
+        // Create five buttons and determine which one is selected
         HBox statusBox   = createSidebarButtonBox(stage, "status",   "status_icon_default.png",   "status_icon_selected.png",   selectedButton.equals("Status"), loggedUser, themeService, currencyService);
         HBox goalsBox    = createSidebarButtonBox(stage, "goals",    "goals_icon_default.png",    "goals_icon_selected.png",    selectedButton.equals("Goals"), loggedUser, themeService, currencyService);
         HBox settingsBox = createSidebarButtonBox(stage, "settings", "settings_icon_default.png", "settings_icon_selected.png", selectedButton.equals("Settings"), loggedUser, themeService, currencyService);
@@ -139,7 +142,7 @@ public class LeftSidebarFactory {
     private static HBox createSidebarButtonBox(Stage stage, String translationKey, String defaultIcon, String selectedIcon, boolean isActive, User loggedUser, ThemeService themeService, CurrencyService currencyService) {
         Label label = new Label(languageService.getTranslation(translationKey));
         label.setFont(new Font(14));
-        label.setPrefSize(isActive ? 172 : 170, 40); // 选中时多2px
+        label.setPrefSize(isActive ? 172 : 170, 40); // Add 2px when selected
         label.setAlignment(Pos.CENTER_LEFT);
         label.setPadding(new Insets(0, 10, 0, 20));
 
@@ -155,7 +158,7 @@ public class LeftSidebarFactory {
         label.setGraphicTextGap(10);
 
         if (isActive) {
-            // 选中样式
+            // Selected style
             label.setStyle(
                     themeService.getCurrentThemeStyle() +
                             "-fx-text-fill: #3282FA; " +
@@ -165,7 +168,7 @@ public class LeftSidebarFactory {
                             "-fx-background-radius: 8 0 0 8;"
             );
         } else {
-            // 未选中样式
+            // Unselected style
             label.setStyle(
                     "-fx-background-color: " + (themeService.isDayMode() ? "#E0F0FF" : "#4A6FA5") + "; " +
                             themeService.getTextColorStyle() +
@@ -176,15 +179,15 @@ public class LeftSidebarFactory {
             );
         }
 
-        // 点击事件，根据按钮 text 做不同跳转
+        // Click event, different navigation based on button text
         label.setOnMouseClicked(e -> {
-            // 获取当前窗口的实际大小
+            // Get current window size
             double currentWidth = stage.getScene().getWidth();
             double currentHeight = stage.getScene().getHeight();
 
             switch (translationKey) {
                 case "status":
-                    // 跳转 Status
+                    // Navigate to Status
                     StatusScene statusScene = new StatusScene(stage, currentWidth, currentHeight, loggedUser);
                     Scene newStatusScene = statusScene.createScene(themeService, currencyService);
                     SceneManager.switchScene(stage, newStatusScene);
@@ -233,18 +236,18 @@ public class LeftSidebarFactory {
      * @param languageService The service for managing application language
      */
     public static void updateLanguage(VBox sideBar, LanguageService languageService) {
-        // 更新欢迎消息
+        // Update welcome message
         Label welcomeLabel = (Label) sideBar.getChildren().get(0);
         String currentText = welcomeLabel.getText();
         String messageKey = getMessageKeyFromText(currentText);
         welcomeLabel.setText(languageService.getTranslation(messageKey));
 
-        // 更新导航按钮
+        // Update navigation buttons
         for (int i = 1; i < sideBar.getChildren().size(); i++) {
             HBox buttonBox = (HBox) sideBar.getChildren().get(i);
             Label buttonLabel = (Label) buttonBox.getChildren().get(0);
             
-            // 根据按钮的文本内容确定对应的翻译键
+            // Determine translation key based on button text
             String currentButtonText = buttonLabel.getText();
             String translationKey = getTranslationKeyFromText(currentButtonText);
             

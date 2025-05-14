@@ -16,8 +16,8 @@ import java.util.Base64;
  * - Key derivation using PBKDF2
  * - Secure random IV generation
  * 
- * @author Finanger Team
- * @version 1.0
+ * @author SE_Group110
+ * @version 4.0
  */
 public final class EncryptionService {
     private static final SecureRandom secureRandom = new SecureRandom();
@@ -41,25 +41,25 @@ public final class EncryptionService {
      */
     public static EncryptedData encrypt(String data, SecretKey key) throws EncryptionException {
         try {
-            // 生成随机IV
+            // Generate random IV
             byte[] iv = generateIV();
             
-            // 初始化加密器
+            // Initialize cipher
             Cipher cipher = Cipher.getInstance(EncryptionConfig.AES.ALGORITHM);
             GCMParameterSpec spec = new GCMParameterSpec(EncryptionConfig.AES.GCM_TAG_LENGTH, iv);
             cipher.init(Cipher.ENCRYPT_MODE, key, spec);
             
-            // 执行加密
+            // Perform encryption
             byte[] encryptedData = cipher.doFinal(data.getBytes());
             
-            // 返回加密结果
+            // Return encryption result
             return new EncryptedData(
                 Base64.getEncoder().encodeToString(encryptedData),
                 Base64.getEncoder().encodeToString(iv),
                 generateKeyId(key)
             );
         } catch (Exception e) {
-            throw new EncryptionException("加密数据时发生错误", e);
+            throw new EncryptionException("Error occurred during data encryption", e);
         }
     }
 
@@ -78,20 +78,20 @@ public final class EncryptionService {
      */
     public static String decrypt(EncryptedData encryptedData, SecretKey key) throws EncryptionException {
         try {
-            // 解码IV和加密数据
+            // Decode IV and encrypted data
             byte[] iv = Base64.getDecoder().decode(encryptedData.iv());
             byte[] encryptedBytes = Base64.getDecoder().decode(encryptedData.data());
             
-            // 初始化解密器
+            // Initialize cipher
             Cipher cipher = Cipher.getInstance(EncryptionConfig.AES.ALGORITHM);
             GCMParameterSpec spec = new GCMParameterSpec(EncryptionConfig.AES.GCM_TAG_LENGTH, iv);
             cipher.init(Cipher.DECRYPT_MODE, key, spec);
             
-            // 执行解密
+            // Perform decryption
             byte[] decryptedBytes = cipher.doFinal(encryptedBytes);
             return new String(decryptedBytes);
         } catch (Exception e) {
-            throw new EncryptionException("解密数据时发生错误", e);
+            throw new EncryptionException("Error occurred during data decryption", e);
         }
     }
 
@@ -119,7 +119,7 @@ public final class EncryptionService {
             byte[] keyBytes = factory.generateSecret(spec).getEncoded();
             return new SecretKeySpec(keyBytes, "AES");
         } catch (Exception e) {
-            throw new EncryptionException("派生密钥时发生错误", e);
+            throw new EncryptionException("Error occurred during key derivation", e);
         }
     }
 

@@ -4,8 +4,25 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Unit test class for the CurrencyService.
+ * This class contains tests for currency-related functionality including:
+ * - Currency selection and retrieval
+ * - Currency conversion between different currencies
+ * - Default currency handling
+ * - Null value handling
+ *
+ * @author SE_Group110
+ * @version 4.0
+ */
 class CurrencyServiceTest {
 
+    /**
+     * Tests the getSelectedCurrency method.
+     * Verifies that:
+     * - Valid initial currency is correctly returned
+     * - Null initial currency defaults to USD
+     */
     @Test
     void getSelectedCurrency() {
         // Test with valid initial currency
@@ -17,6 +34,12 @@ class CurrencyServiceTest {
         assertEquals("USD", service.getSelectedCurrency());
     }
 
+    /**
+     * Tests the setSelectedCurrency method.
+     * Verifies that:
+     * - Currency can be changed to a valid value
+     * - Null currency is handled correctly
+     */
     @Test
     void setSelectedCurrency() {
         CurrencyService service = new CurrencyService("USD");
@@ -30,6 +53,18 @@ class CurrencyServiceTest {
         assertNull(service.getSelectedCurrency());
     }
 
+    /**
+     * Tests the convertCurrency method.
+     * Verifies currency conversion for various scenarios:
+     * - Same currency conversion (no change)
+     * - USD to CNY conversion
+     * - USD to EUR conversion
+     * - CNY to USD conversion
+     * - EUR to USD conversion
+     * - CNY to EUR conversion
+     * - EUR to CNY conversion
+     * All conversions are tested with a precision of 0.001
+     */
     @Test
     void convertCurrency() {
         CurrencyService service = new CurrencyService("USD");

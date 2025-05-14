@@ -26,25 +26,28 @@ import javafx.stage.Stage;
  * This scene provides user authentication functionality with a responsive layout that
  * automatically adjusts based on window size. It includes username/password fields,
  * login button, and links to password reset and signup functionality.
+ *
+ * @author SE_Group110
+ * @version 4.0
  */
 public class LoginScene {
 
-    // 原始设计尺寸
+    // Original design dimensions
     private static final double INITIAL_WIDTH = 800;
     private static final double INITIAL_HEIGHT = 450;
 
-    // 主容器
+    // Main container
     private static Group root;
 
-    // 多边形: leftPolygon, rightPolygon
+    // Polygons: leftPolygon, rightPolygon
     private static Polygon leftPolygon;
     private static Polygon rightPolygon;
 
-    // Pane rightPane (原先 layoutX=440)
+    // Pane rightPane (original layoutX=440)
     private static Pane rightPane;
     private static VBox vbox;
 
-    // 表单控件
+    // Form controls
     private static Label titleLabel;
     private static HBox userBox;
     private static HBox passBox;
@@ -52,10 +55,10 @@ public class LoginScene {
     private static Button loginButton;
     private static HBox signUpBox;
 
-    // ========== 多边形的比例坐标 ==========
+    // ========== Polygon proportional coordinates ==========
 
-    // leftPolygon 原先: (0,0)->(480,0)->(280,height)->(0,height)
-    // 转换成基于 (INITIAL_WIDTH, INITIAL_HEIGHT) 的 fraction:
+    // leftPolygon original: (0,0)->(480,0)->(280,height)->(0,height)
+    // Convert to fractions based on (INITIAL_WIDTH, INITIAL_HEIGHT):
     private static final double[] LEFT_POLY_FRACTIONS = {
             0.0, 0.0,
             480.0/INITIAL_WIDTH, 0.0,
@@ -63,7 +66,7 @@ public class LoginScene {
             0.0, 1.0
     };
 
-    // rightPolygon 原先: (480,0)->(width,0)->(width,height)->(280,height)
+    // rightPolygon original: (480,0)->(width,0)->(width,height)->(280,height)
     private static final double[] RIGHT_POLY_FRACTIONS = {
             480.0/INITIAL_WIDTH, 0.0,
             1.0, 0.0,
@@ -71,7 +74,7 @@ public class LoginScene {
             280.0/INITIAL_WIDTH, 1.0
     };
 
-    // Pane 的 layoutX 原先是 440
+    // Pane's layoutX was originally 440
     // => 440/800 = 0.55
     private static final double PANE_X_FRAC = 440.0 / INITIAL_WIDTH;
 
@@ -97,25 +100,25 @@ public class LoginScene {
      * @return A configured Scene object for the login interface
      */
     public static Scene createScene(Stage stage, double width, double height, CurrencyService currencyService) {
-        // 准备一个root Group
+        // Prepare a root Group
         root = new Group();
 
-        // 生成 Scene，设初始大小
+        // Generate Scene with initial size
         Scene scene = new Scene(root, width, height);
 
-        // 允许拉伸
+        // Allow resizing
         stage.setResizable(true);
         stage.setMinWidth(800);
         stage.setMinHeight(450);
 
-        // 初始化 UI 节点
+        // Initialize UI nodes
         initUI(stage, currencyService);
 
-        // 监听 scene 大小变化 -> relayout
+        // Listen for scene size changes -> relayout
         scene.widthProperty().addListener((obs, oldVal, newVal) -> relayout());
         scene.heightProperty().addListener((obs, oldVal, newVal) -> relayout());
 
-        // 初次布局
+        // Initial layout
         relayout();
 
         return scene;
@@ -129,36 +132,36 @@ public class LoginScene {
      * @param currencyService The currency service to use for the application
      */
     private static void initUI(Stage stage, CurrencyService currencyService) {
-        // 1) 左侧多边形
+        // 1) Left polygon
         leftPolygon = new Polygon();
-        // 用图片填充
+        // Fill with image
         Image coinImage = new Image(
                 LoginScene.class.getResource("/pictures/coin.png").toExternalForm()
         );
         leftPolygon.setFill(new ImagePattern(coinImage, 0, 0, 1, 1, true));
 
-        // 2) 右侧多边形
+        // 2) Right polygon
         rightPolygon = new Polygon();
         rightPolygon.setFill(Color.web("#93D2F3"));
 
         root.getChildren().addAll(leftPolygon, rightPolygon);
 
-        // 3) 右侧 Pane (原先 layoutX=440)
+        // 3) Right Pane (original layoutX=440)
         rightPane = new Pane();
         root.getChildren().add(rightPane);
 
-        // 在 rightPane 中放 VBox
+        // Place VBox in rightPane
         vbox = new VBox(25);
         vbox.setPadding(new Insets(30));
         vbox.setAlignment(Pos.CENTER);
         rightPane.getChildren().add(vbox);
 
-        // =========== 构建表单控件 ===========
+        // =========== Build form controls ===========
         titleLabel = new Label("Finanger");
         titleLabel.setFont(Font.font("Arial", FontWeight.BOLD, 36));
         titleLabel.setTextFill(Color.WHITE);
 
-        // 用户名
+        // Username
         Label userLabel = new Label("Username:");
         userLabel.setTextFill(Color.WHITE);
         TextField usernameField = new TextField();
@@ -166,7 +169,7 @@ public class LoginScene {
         userBox = new HBox(10, userLabel, usernameField);
         userBox.setAlignment(Pos.CENTER);
 
-        // 密码
+        // Password
         Label passLabel = new Label(" Password:");
         passLabel.setTextFill(Color.WHITE);
         PasswordField passwordField = new PasswordField();
@@ -178,17 +181,17 @@ public class LoginScene {
         forgotLink = new Hyperlink("Forgot password?");
         forgotLink.setTextFill(Color.DARKBLUE);
         forgotLink.setOnAction(e -> {
-            // 跳转到 ResetPassword 界面
+            // Navigate to ResetPassword interface
             Scene resetScene = ResetPassword.createScene(stage, root.getScene().getWidth(), root.getScene().getHeight());
             stage.setScene(resetScene);
             stage.setTitle("Finanger - Reset Password");
         });
 
-        // 登录按钮
+        // Login button
         loginButton = new Button("Log in ➜");
         loginButton.setPrefWidth(160);
         loginButton.setStyle("-fx-background-color: #3377ff; -fx-text-fill: white; -fx-font-weight: bold;");
-        // 点击验证
+        // Click to verify
         loginButton.setOnAction(e -> {
             String uname = usernameField.getText();
             String pass = passwordField.getText();
@@ -241,11 +244,11 @@ public class LoginScene {
      * and positioning of all visual elements.
      */
     private static void relayout() {
-        // 当前 Scene 尺寸
+        // Current Scene dimensions
         double curWidth = root.getScene().getWidth();
         double curHeight = root.getScene().getHeight();
 
-        // ========== 1) 重算 leftPolygon 顶点 ==========
+        // ========== 1) Recalculate leftPolygon vertices ==========
         leftPolygon.getPoints().setAll(
                 LEFT_POLY_FRACTIONS[0]*curWidth, LEFT_POLY_FRACTIONS[1]*curHeight,
                 LEFT_POLY_FRACTIONS[2]*curWidth, LEFT_POLY_FRACTIONS[3]*curHeight,
@@ -253,7 +256,7 @@ public class LoginScene {
                 LEFT_POLY_FRACTIONS[6]*curWidth, LEFT_POLY_FRACTIONS[7]*curHeight
         );
 
-        // ========== 2) 重算 rightPolygon 顶点 ==========
+        // ========== 2) Recalculate rightPolygon vertices ==========
         rightPolygon.getPoints().setAll(
                 RIGHT_POLY_FRACTIONS[0]*curWidth, RIGHT_POLY_FRACTIONS[1]*curHeight,
                 RIGHT_POLY_FRACTIONS[2]*curWidth, RIGHT_POLY_FRACTIONS[3]*curHeight,
@@ -261,21 +264,21 @@ public class LoginScene {
                 RIGHT_POLY_FRACTIONS[6]*curWidth, RIGHT_POLY_FRACTIONS[7]*curHeight
         );
 
-        // ========== 3) 重算 rightPane 的位置、大小 ==========
-        // 原先 layoutX=440 => fraction=440/800=0.55
+        // ========== 3) Recalculate rightPane position and size ==========
+        // Original layoutX=440 => fraction=440/800=0.55
         double paneX = PANE_X_FRAC * curWidth; // left pos
         rightPane.setLayoutX(paneX);
 
-        // Pane 的宽度 = 剩余部分
+        // Pane width = remaining space
         double paneWidth = curWidth - paneX;
-        double paneHeight = curHeight; // 占满高度
+        double paneHeight = curHeight; // Full height
         rightPane.setPrefSize(paneWidth, paneHeight);
 
-        // 让 VBox 大小也随之调整
+        // Adjust VBox size accordingly
         vbox.setPrefSize(paneWidth, paneHeight);
-        // 也可以根据需要自定义，不一定要全填
+        // Can be customized as needed, doesn't have to fill completely
 
-        // (可选) 文字大小也可跟随变动:
+        // (Optional) Text size can also scale:
         // double scale = curWidth / INITIAL_WIDTH;
         // titleLabel.setFont(Font.font("Arial", FontWeight.BOLD, 36 * scale));
         // ...

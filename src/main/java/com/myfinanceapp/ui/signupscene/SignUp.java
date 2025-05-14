@@ -29,6 +29,9 @@ import java.util.Objects;
  * - Terms of use and privacy policy acceptance
  * The interface features a split design with background image,
  * responsive layout, and dynamic resizing capabilities.
+ *
+ * @author SE_Group110
+ * @version 4.0
  */
 public class SignUp {
 
@@ -80,12 +83,12 @@ public class SignUp {
         root = new Group();
         Scene scene = new Scene(root, width, height);
 
-        // 设置最小窗口尺寸
+        // Set minimum window dimensions
         stage.setMinWidth(INITIAL_WIDTH);
         stage.setMinHeight(INITIAL_HEIGHT);
         stage.setResizable(true);
 
-        // === 左右多边形 ===
+        // === Left and right polygons ===
         leftPolygon = new Polygon();
         Image bgImage = new Image(Objects.requireNonNull(SignUp.class.getResource("/pictures/signupbg.png")).toExternalForm());
         leftPolygon.setFill(new ImagePattern(bgImage, 0, 0, 1, 1, true));
@@ -95,7 +98,7 @@ public class SignUp {
 
         root.getChildren().addAll(leftPolygon, rightPolygon);
 
-        // === 右侧 Pane 和 VBox ===
+        // === Right Pane and VBox ===
         rightPane = new Pane();
         root.getChildren().add(rightPane);
 
@@ -104,7 +107,7 @@ public class SignUp {
         vbox.setPadding(new Insets(30));
         rightPane.getChildren().add(vbox);
 
-        // === 标题区 ===
+        // === Title area ===
         Label mainTitle = new Label("Sign Up to");
         mainTitle.setFont(Font.font("PingFang SC", FontWeight.BOLD, 32));
         mainTitle.setTextFill(Color.WHITE);
@@ -123,7 +126,7 @@ public class SignUp {
         titleBox.setMaxWidth(Region.USE_PREF_SIZE);
         vbox.getChildren().add(titleBox);
 
-        // === 用户名和密码输入区域 ===
+        // === Username and password input area ===
         Label userLabel = new Label("Set Your Username:");
         userLabel.setFont(Font.font("Arial", FontWeight.BOLD, 10));
         userLabel.setTextFill(Color.WHITE);
@@ -147,7 +150,7 @@ public class SignUp {
         questionLabel.setFont(Font.font("Arial", FontWeight.BOLD, 12));
         questionLabel.setTextFill(Color.WHITE);
 
-        // 准备几个常用问题
+        // Prepare common security questions
         securityQuestionCombo = new ComboBox<>();
         securityQuestionCombo.getItems().addAll(
                 "What is your favorite book?",
@@ -155,7 +158,7 @@ public class SignUp {
                 "What is your best friend's name?",
                 "What city were you born in?"
         );
-        securityQuestionCombo.setValue("What is your favorite book?"); // 默认
+        securityQuestionCombo.setValue("What is your favorite book?"); // Default
 
         VBox questionContainer = new VBox(5, questionLabel, securityQuestionCombo);
         questionContainer.setAlignment(Pos.CENTER_LEFT);
@@ -171,10 +174,10 @@ public class SignUp {
         VBox answerContainer = new VBox(5, answerLabel, securityAnswerField);
         answerContainer.setAlignment(Pos.CENTER_LEFT);
 
-        // 在 vbox.getChildren().addAll(userBox, passBox); 后面插入
+        // Insert after vbox.getChildren().addAll(userBox, passBox)
         vbox.getChildren().addAll(questionContainer, answerContainer);
 
-        // === Next 按钮和协议 ===
+        // === Next button and agreements ===
         Button nextBtn = new Button("Next ➜");
         nextBtn.setPrefWidth(140);
         nextBtn.setStyle("-fx-background-color: #3377ff; -fx-text-fill: white; -fx-font-weight: bold;");
@@ -201,7 +204,7 @@ public class SignUp {
                 showAlert("Success", "User registered successfully!");
                 // Redirect to UserManual scene instead of LoginScene
                 Scene userManualScene = UserManual.createScene(stage, root.getScene().getWidth(), root.getScene().getHeight());
-                SceneManager.switchScene(stage, userManualScene);  // 使用SceneManager替代直接设置
+                SceneManager.switchScene(stage, userManualScene);  // Use SceneManager instead of direct setting
                 stage.setTitle("Finanger - User Manual");
             } else {
                 showAlert("Error", "Username already exists!");
@@ -243,7 +246,7 @@ public class SignUp {
 
         vbox.getChildren().addAll(nextBtn, agreeBox, alreadyLink);
 
-        // 添加动态重排监听
+        // Add dynamic layout listener
         scene.widthProperty().addListener((obs, oldVal, newVal) -> relayout());
         scene.heightProperty().addListener((obs, oldVal, newVal) -> relayout());
         relayout();
@@ -259,7 +262,7 @@ public class SignUp {
         double curWidth = root.getScene().getWidth();
         double curHeight = root.getScene().getHeight();
 
-        // 重新计算左侧多边形坐标
+        // Recalculate left polygon coordinates
         leftPolygon.getPoints().setAll(
                 LEFT_POLY_FRACS[0] * curWidth, LEFT_POLY_FRACS[1] * curHeight,
                 LEFT_POLY_FRACS[2] * curWidth, LEFT_POLY_FRACS[3] * curHeight,
@@ -267,7 +270,7 @@ public class SignUp {
                 LEFT_POLY_FRACS[6] * curWidth, LEFT_POLY_FRACS[7] * curHeight
         );
 
-        // 重新计算右侧多边形坐标
+        // Recalculate right polygon coordinates
         rightPolygon.getPoints().setAll(
                 RIGHT_POLY_FRACS[0] * curWidth, RIGHT_POLY_FRACS[1] * curHeight,
                 RIGHT_POLY_FRACS[2] * curWidth, RIGHT_POLY_FRACS[3] * curHeight,
@@ -275,7 +278,7 @@ public class SignUp {
                 RIGHT_POLY_FRACS[6] * curWidth, RIGHT_POLY_FRACS[7] * curHeight
         );
 
-        // 重新计算 rightPane 的位置和大小
+        // Recalculate rightPane position and size
         double paneX = RIGHT_PANE_X_FRAC * curWidth;
         rightPane.setLayoutX(paneX);
         rightPane.setPrefSize(curWidth - paneX, curHeight);

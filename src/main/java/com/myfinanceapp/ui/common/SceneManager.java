@@ -8,6 +8,9 @@ import javafx.stage.Stage;
  * This class provides functionality for:
  * - Switching between scenes while maintaining window dimensions
  * - Ensuring consistent window size during scene transitions
+ *
+ * @author SE_Group110
+ * @version 4.0
  */
 public class SceneManager {
     /**
@@ -19,18 +22,18 @@ public class SceneManager {
      * @param newScene The new scene to display
      */
     public static void switchScene(Stage stage, Scene newScene) {
-        // 保存当前尺寸
+        // Save current dimensions
         double width = stage.getWidth();
         double height = stage.getHeight();
         
-        // 先设置窗口尺寸
+        // Set window dimensions first
         stage.setWidth(width);
         stage.setHeight(height);
         
-        // 然后设置新场景
+        // Then set the new scene
         stage.setScene(newScene);
         
-        // 再次确保窗口尺寸
+        // Ensure window dimensions again
         stage.setWidth(width);
         stage.setHeight(height);
     }

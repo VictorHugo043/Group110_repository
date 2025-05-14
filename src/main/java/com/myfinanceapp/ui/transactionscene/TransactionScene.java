@@ -27,19 +27,62 @@ import java.io.File;
 import java.time.LocalDate;
 import java.text.ParseException;
 
+/**
+ * A comprehensive transaction interface for the Finanger application.
+ * This scene provides users with tools to:
+ * - Manually input transaction details
+ * - Import transactions from CSV files
+ * - Auto-categorize transactions using AI
+ * - Download transaction templates
+ * The interface features theme customization, internationalization support,
+ * and a responsive layout design with dynamic font sizing.
+ *
+ * @author SE_Group110
+ * @version 4.0
+ */
 public class TransactionScene {
     private static final LanguageService languageService = LanguageService.getInstance();
 
-    // Overloaded method for backward compatibility
+    /**
+     * Creates and returns a transaction scene with default theme settings.
+     *
+     * @param stage The stage to display the scene
+     * @param width The initial width of the scene
+     * @param height The initial height of the scene
+     * @param loggedUser The currently logged-in user
+     * @return A configured Scene object for the transaction interface
+     */
     public static Scene createScene(Stage stage, double width, double height, User loggedUser) {
         return createScene(stage, width, height, loggedUser, new ThemeService());
     }
 
+    /**
+     * Creates and returns a transaction scene with specified theme settings.
+     *
+     * @param stage The stage to display the scene
+     * @param width The initial width of the scene
+     * @param height The initial height of the scene
+     * @param loggedUser The currently logged-in user
+     * @param themeService The theme service to use for styling
+     * @return A configured Scene object for the transaction interface
+     */
     public static Scene createScene(Stage stage, double width, double height, User loggedUser,
             ThemeService themeService) {
         return createScene(stage, width, height, loggedUser, themeService, new CurrencyService("CNY"));
     }
 
+    /**
+     * Creates and returns a transaction scene with specified theme and currency settings.
+     * The scene includes manual transaction input and CSV file import capabilities.
+     *
+     * @param stage The stage to display the scene
+     * @param width The initial width of the scene
+     * @param height The initial height of the scene
+     * @param loggedUser The currently logged-in user
+     * @param themeService The theme service to use for styling
+     * @param currencyService The currency service to use for the application
+     * @return A configured Scene object for the transaction interface
+     */
     public static Scene createScene(Stage stage, double width, double height, User loggedUser,
             ThemeService themeService, CurrencyService currencyService) {
         BorderPane root = new BorderPane();
@@ -635,15 +678,13 @@ public class TransactionScene {
                 double scaleH = currentHeight / 600;
                 double scale = Math.min(scaleW, scaleH);
 
-                // Base font size settings - can adjust these base values to suit different
-                // window sizes
+                // Base font size settings - can adjust these base values to suit different window sizes
                 double titleFontSize = 25 * scale;
                 double labelFontSize = 17 * scale;
                 double inputFontSize = 13 * scale;
                 double formatLabelFontSize = 15 * scale;
 
-                // Ensure font sizes have minimum and maximum limits to prevent too small or too
-                // large
+                // Ensure font sizes have minimum and maximum limits to prevent too small or too large
                 titleFontSize = Math.max(14, Math.min(titleFontSize, 28));
                 labelFontSize = Math.max(10, Math.min(labelFontSize, 22));
                 inputFontSize = Math.max(6, Math.min(inputFontSize, 18));
@@ -754,8 +795,7 @@ public class TransactionScene {
             }
         };
 
-        // Set a fixed margin constant to ensure borders and window edges always
-        // maintain this distance
+        // Set a fixed margin constant to ensure borders and window edges always maintain this distance
         final int BORDER_MARGIN = 20; // Can adjust this value as needed
 
         PauseTransition layoutPause = new PauseTransition(Duration.millis(50));

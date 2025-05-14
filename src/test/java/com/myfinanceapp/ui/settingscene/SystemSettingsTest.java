@@ -16,6 +16,17 @@ import org.testfx.framework.junit5.ApplicationExtension;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+/**
+ * Unit test class for the SystemSettings scene.
+ * This class contains tests for system settings functionality including:
+ * - Scene creation and initialization
+ * - UI structure validation
+ * - Style property verification
+ * - Component hierarchy testing
+ *
+ * @author SE_Group110
+ * @version 4.0
+ */
 @ExtendWith(ApplicationExtension.class)
 class SystemSettingsTest {
 
@@ -25,11 +36,22 @@ class SystemSettingsTest {
     @Mock
     private User mockUser;
 
+    /**
+     * Sets up the test environment before each test.
+     * Initializes mock objects for Stage and User.
+     */
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
     }
 
+    /**
+     * Tests the creation of the system settings scene.
+     * Verifies that:
+     * - Scene is created successfully
+     * - Scene dimensions are set correctly
+     * - Scene is properly initialized
+     */
     @Test
     void createScene_shouldReturnNonNullScene() {
         // Arrange
@@ -45,6 +67,13 @@ class SystemSettingsTest {
         assertEquals(height, scene.getHeight(), "Scene height should match provided height");
     }
     
+    /**
+     * Tests the root structure of the system settings scene.
+     * Verifies that:
+     * - Root node is a BorderPane
+     * - Left and center sections are properly initialized
+     * - Section types are correct (VBox and HBox)
+     */
     @Test
     void createScene_shouldHaveCorrectRootStructure() {
         // Arrange
@@ -64,6 +93,12 @@ class SystemSettingsTest {
         assertTrue(root.getCenter() instanceof HBox, "Center section should be HBox");
     }
     
+    /**
+     * Tests the style properties of the system settings scene.
+     * Verifies that:
+     * - Root node has correct background color
+     * - Style properties are properly applied
+     */
     @Test
     void createScene_shouldHaveCorrectStyle() {
         // Arrange
@@ -78,6 +113,16 @@ class SystemSettingsTest {
         assertEquals("-fx-background-color: white;", root.getStyle(), "Root should have white background");
     }
     
+    /**
+     * Tests the component hierarchy of the system settings scene.
+     * Verifies that:
+     * - Center box is properly initialized
+     * - Component hierarchy is correct
+     * - Child components are of correct type
+     * 
+     * Note: This test assumes a specific component structure
+     * and may need adjustment based on actual implementation.
+     */
     @Test
     void createScene_shouldIncludeSettingsComponents() {
         // Arrange

@@ -28,6 +28,9 @@ import javafx.stage.Stage;
  * - Theme-aware styling with day/night mode support
  * The interface features a clean, professional design with proper margins,
  * navigation controls, and a proceed to login button.
+ *
+ * @author SE_Group110
+ * @version 4.0
  */
 public class UserManual {
 

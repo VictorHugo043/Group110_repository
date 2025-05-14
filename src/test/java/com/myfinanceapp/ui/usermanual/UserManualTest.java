@@ -23,6 +23,18 @@ import org.testfx.util.WaitForAsyncUtils;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+/**
+ * Unit test class for the UserManual scene.
+ * This class contains tests for user manual functionality including:
+ * - Scene creation and initialization
+ * - UI component validation
+ * - Layout and styling verification
+ * - Markdown to HTML conversion
+ * - Navigation functionality
+ *
+ * @author SE_Group110
+ * @version 4.0
+ */
 @ExtendWith(ApplicationExtension.class)
 public class UserManualTest {
 
@@ -30,11 +42,21 @@ public class UserManualTest {
     private Scene scene;
     private UserManual userManual;
 
+    /**
+     * Sets up the test environment before running tests.
+     * Note: Headless mode is disabled to avoid Monocle dependency.
+     */
     @BeforeAll
     public static void setupHeadless() {
         // Headless mode disabled to avoid Monocle dependency
     }
 
+    /**
+     * Initializes the test scene and stage.
+     * Creates and displays the user manual scene with specified dimensions.
+     *
+     * @param stage The primary stage for the application
+     */
     @Start
     public void start(Stage stage) {
         this.stage = stage;
@@ -48,6 +70,12 @@ public class UserManualTest {
         WaitForAsyncUtils.waitForFxEvents();
     }
 
+    /**
+     * Sets up the test environment before each test.
+     * Configures the stage dimensions and waits for UI updates.
+     *
+     * @param robot The FxRobot instance for UI interaction
+     */
     @BeforeEach
     public void setUp(FxRobot robot) {
         robot.sleep(2000);
@@ -59,6 +87,14 @@ public class UserManualTest {
         WaitForAsyncUtils.waitForFxEvents();
     }
 
+    /**
+     * Tests the creation of the user manual scene.
+     * Verifies that:
+     * - Scene is created successfully
+     * - Scene dimensions are set correctly
+     *
+     * @param robot The FxRobot instance for UI interaction
+     */
     @Test
     public void testSceneCreation(FxRobot robot) {
         System.out.println("testSceneCreation: Scene width = " + scene.getWidth() + ", height = " + scene.getHeight());
@@ -67,6 +103,16 @@ public class UserManualTest {
         assertEquals(450, scene.getHeight(), "Scene height should be 450");
     }
 
+    /**
+     * Tests the content polygon in the user manual scene.
+     * Verifies that:
+     * - Polygon exists
+     * - Fill color is white
+     * - Stroke color is #93D2F3
+     * - Stroke width is 2
+     *
+     * @param robot The FxRobot instance for UI interaction
+     */
     @Test
     public void testContentPolygon(FxRobot robot) {
         Polygon contentPolygon = robot.lookup(n -> n instanceof Polygon).queryAs(Polygon.class);
@@ -77,6 +123,14 @@ public class UserManualTest {
         System.out.println("Polygon points: " + contentPolygon.getPoints());
     }
 
+    /**
+     * Tests the content pane and VBox layout.
+     * Verifies that:
+     * - Content pane exists
+     * - VBox exists with correct spacing and padding
+     *
+     * @param robot The FxRobot instance for UI interaction
+     */
     @Test
     public void testContentPaneAndVBox(FxRobot robot) {
         Pane contentPane = robot.lookup(n -> n instanceof Pane).queryAs(Pane.class);
@@ -88,6 +142,16 @@ public class UserManualTest {
         assertEquals(20, vbox.getPadding().getTop(), "VBox padding top should be 20");
     }
 
+    /**
+     * Tests the title label in the user manual scene.
+     * Verifies that:
+     * - Title label exists
+     * - Text content is correct
+     * - Font properties are set correctly
+     * - Text color is dark blue
+     *
+     * @param robot The FxRobot instance for UI interaction
+     */
     @Test
     public void testTitleLabel(FxRobot robot) {
         Label title = robot.lookup(n -> n instanceof Label && "Finager User Manual".equals(((Label) n).getText())).queryAs(Label.class);
@@ -98,6 +162,14 @@ public class UserManualTest {
         assertEquals(Color.DARKBLUE, title.getTextFill(), "Title text fill should be dark blue");
     }
 
+    /**
+     * Tests the WebView component in the user manual scene.
+     * Verifies that:
+     * - WebView exists
+     * - Border color and width are set correctly
+     *
+     * @param robot The FxRobot instance for UI interaction
+     */
     @Test
     public void testWebView(FxRobot robot) {
         WebView webView = robot.lookup(n -> n instanceof WebView).queryAs(WebView.class);
@@ -106,6 +178,16 @@ public class UserManualTest {
         assertTrue(webView.getStyle().contains("-fx-border-width: 2px"), "WebView should have correct border width");
     }
 
+    /**
+     * Tests the proceed button in the user manual scene.
+     * Verifies that:
+     * - Button exists
+     * - Text content is correct
+     * - Width is set correctly
+     * - Style properties are set correctly
+     *
+     * @param robot The FxRobot instance for UI interaction
+     */
     @Test
     public void testProceedButton(FxRobot robot) {
         Button proceedButton = robot.lookup(n -> n instanceof Button && "Proceed to Login ➜".equals(((Button) n).getText())).queryAs(Button.class);
@@ -116,6 +198,14 @@ public class UserManualTest {
         assertTrue(proceedButton.getStyle().contains("-fx-text-fill: white"), "Button should have white text");
     }
 
+    /**
+     * Tests the proceed button action.
+     * Verifies that:
+     * - Button click navigates to login scene
+     * - Stage title is updated correctly
+     *
+     * @param robot The FxRobot instance for UI interaction
+     */
     @Test
     public void testProceedButtonAction(FxRobot robot) {
         Scene mockScene = new Scene(new javafx.scene.Group(), 800, 450);
@@ -132,6 +222,15 @@ public class UserManualTest {
         }
     }
 
+    /**
+     * Tests the relayout functionality when window size changes.
+     * Verifies that:
+     * - Content polygon adjusts correctly
+     * - Content pane dimensions update correctly
+     * - Margins are calculated correctly
+     *
+     * @param robot The FxRobot instance for UI interaction
+     */
     @Test
     public void testRelayout(FxRobot robot) {
         robot.interact(() -> {
@@ -145,7 +244,7 @@ public class UserManualTest {
         Pane contentPane = robot.lookup(n -> n instanceof Pane).queryAs(Pane.class);
         assertNotNull(contentPane, "Content pane should not be null");
 
-        // Margins for polygon
+        // Calculate margins for polygon
         double xMargin = 0.02 * 1000; // 20
         double yMargin = 0.02 * 600;  // 12
         double[] expectedPoints = {
@@ -165,12 +264,20 @@ public class UserManualTest {
         // Log pane dimensions
         System.out.println("testRelayout: Pane layoutX = " + contentPane.getLayoutX() + ", prefWidth = " + contentPane.getPrefWidth() + ", prefHeight = " + contentPane.getPrefHeight());
 
-        // Adjusted pane height to match actual behavior
+        // Verify pane dimensions
         assertEquals(xMargin, contentPane.getLayoutX(), 0.1, "Content pane X position should match");
         assertEquals(1000 - 2 * xMargin, contentPane.getPrefWidth(), 0.1, "Content pane width should match");
         assertEquals(560.0, contentPane.getPrefHeight(), 0.1, "Content pane height should match");
     }
 
+    /**
+     * Tests the Markdown to HTML conversion functionality.
+     * Verifies that:
+     * - Headings with IDs are converted correctly
+     * - Lists are converted correctly
+     * - Bold text is converted correctly
+     * - Links are converted correctly
+     */
     @Test
     public void testMarkdownToHtmlConversion() {
         String markdown = "# Heading {#id1}\n- Item 1\n- Item 2\n**Bold** text [Link](#id1)";

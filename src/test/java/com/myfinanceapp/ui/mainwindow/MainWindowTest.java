@@ -22,6 +22,18 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.Mockito.*;
 
+/**
+ * Unit test class for the MainWindow.
+ * This class contains tests for main window functionality including:
+ * - Application startup
+ * - Stage configuration
+ * - UI component initialization
+ * - Scene management
+ * - JavaFX thread handling
+ *
+ * @author SE_Group110
+ * @version 4.0
+ */
 @ExtendWith({MockitoExtension.class, ApplicationExtension.class})
 class MainWindowTest {
 
@@ -30,11 +42,27 @@ class MainWindowTest {
     @Mock
     private Stage stageMock;
 
+    /**
+     * Initializes the test environment with a JavaFX stage.
+     * Called by TestFX framework before each test.
+     *
+     * @param stage The JavaFX stage provided by TestFX
+     */
     @Start
     private void start(Stage stage) {
         this.stage = stage;
     }
 
+    /**
+     * Tests the application startup process.
+     * Verifies that:
+     * - Stage is properly configured
+     * - UI components are initialized
+     * - Scene is created and set
+     * - Window properties are set correctly
+     *
+     * @throws Exception if reflection or thread operations fail
+     */
     @Test
     void testStart() throws Exception {
         // Run on JavaFX thread to avoid toolkit errors
@@ -94,6 +122,12 @@ class MainWindowTest {
         Thread.sleep(1000);
     }
 
+    /**
+     * Tests the main method of the application.
+     * Verifies that:
+     * - Application.launch is called with correct arguments
+     * - Main method properly initializes the application
+     */
     @Test
     void testMain() {
         // Testing the main method involves Application.launch which is static

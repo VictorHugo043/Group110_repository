@@ -1,17 +1,21 @@
+/* Base chart style with transparent background */
 .chart {
     -fx-background-color: transparent;
 }
 
+/* Style for pie chart labels */
 .chart-pie-label {
     -fx-font-size: 12px;
 }
 
+/* Container for pie charts with scrolling capability */
 .pie-chart-container {
     -fx-max-height: 400px;
     -fx-overflow-y: auto;
     -fx-background-color: transparent;
 }
 
+/* Legend style for side-positioned pie charts */
 .pie-chart-legend-side .chart-legend {
     -fx-wrap-text: true;
     -fx-max-width: 200px;
@@ -20,6 +24,7 @@
     -fx-background-color: transparent;
 }
 
+/* Legend style for bottom-positioned pie charts */
 .pie-chart-legend-bottom .chart-legend {
     -fx-wrap-text: true;
     -fx-font-size: 12px;
@@ -28,6 +33,7 @@
     -fx-alignment: center;
 }
 
+/* Individual legend item style for bottom-positioned pie charts */
 .pie-chart-legend-bottom .legend-item {
     -fx-pref-width: 120px;
     -fx-wrap-text: true;
@@ -35,11 +41,13 @@
     -fx-alignment: center;
 }
 
+/* Pie chart size constraints */
 .pie-chart {
     -fx-pref-width: 200px; /* Reduced width to fit smaller windows */
     -fx-max-width: 200px;
 }
 
+/* Bar chart bar width */
 .bar-chart .chart-bar {
     -fx-bar-width: 10px;
 }

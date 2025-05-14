@@ -6,16 +6,39 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Unit test class for the UserService.
+ * This class contains tests for user management functionality including:
+ * - User registration
+ * - Login verification
+ * - User search by username and UID
+ * - Username updates
+ * - Password updates
+ * - Security question management
+ *
+ * @author SE_Group110
+ * @version 4.0
+ */
 class UserServiceTest {
 
     private UserService userService;
 
+    /**
+     * Sets up the test environment before each test.
+     * Initializes a new UserService instance.
+     */
     @BeforeEach
     void setUp() {
-        // Initialize the UserService instance before each test
         userService = new UserService();
     }
 
+    /**
+     * Tests user registration functionality.
+     * Verifies that:
+     * - New users can be registered successfully
+     * - UID is generated automatically
+     * - Duplicate usernames are rejected
+     */
     @Test
     void registerUser() {
         // Test successful registration
@@ -33,6 +56,12 @@ class UserServiceTest {
         assertFalse(result);
     }
 
+    /**
+     * Tests login verification functionality.
+     * Verifies that:
+     * - Correct credentials allow login
+     * - Incorrect password is rejected
+     */
     @Test
     void checkLogin() {
         // Register a user first
@@ -47,6 +76,12 @@ class UserServiceTest {
         assertFalse(result);
     }
 
+    /**
+     * Tests user search by username functionality.
+     * Verifies that:
+     * - Existing users can be found
+     * - Non-existent users return null
+     */
     @Test
     void findUserByUsername() {
         // Register a user
@@ -62,6 +97,12 @@ class UserServiceTest {
         assertNull(user);
     }
 
+    /**
+     * Tests user search by UID functionality.
+     * Verifies that:
+     * - Users can be found by their UID
+     * - Non-existent UIDs return null
+     */
     @Test
     void findUserByUid() {
         // Register a user and get UID
@@ -79,6 +120,12 @@ class UserServiceTest {
         assertNull(foundUser);
     }
 
+    /**
+     * Tests username update functionality.
+     * Verifies that:
+     * - Usernames can be updated successfully
+     * - Updates to existing usernames are rejected
+     */
     @Test
     void updateUserName() {
         // Register a user
@@ -102,7 +149,12 @@ class UserServiceTest {
         assertFalse(result);  // Expecting failure due to username conflict
     }
 
-
+    /**
+     * Tests user retrieval after login functionality.
+     * Verifies that:
+     * - Users can be retrieved after successful login
+     * - Failed login returns null
+     */
     @Test
     void loginGetUser() {
         // Register a user
@@ -118,6 +170,12 @@ class UserServiceTest {
         assertNull(user);
     }
 
+    /**
+     * Tests password update functionality.
+     * Verifies that:
+     * - Passwords can be updated successfully
+     * - Updates with invalid UIDs are rejected
+     */
     @Test
     void updatePassword() {
         // Register a user
@@ -137,6 +195,12 @@ class UserServiceTest {
         assertFalse(result);
     }
 
+    /**
+     * Tests security question update functionality.
+     * Verifies that:
+     * - Security questions can be updated successfully
+     * - Updates with invalid UIDs are rejected
+     */
     @Test
     void updateSecurityQuestion() {
         // Register a user

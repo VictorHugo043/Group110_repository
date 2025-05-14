@@ -18,14 +18,17 @@ import javafx.stage.Stage;
  * The main window of the Finanger application, featuring a dynamic split design with responsive layout.
  * This class extends JavaFX's Application class and serves as the entry point for the application.
  * The window features a diagonal split design that automatically adjusts based on window size.
+ *
+ * @author SE_Group110
+ * @version 4.0
  */
 public class MainWindow extends Application {
 
-    // 原始设计尺寸
+    // Original design dimensions
     private static final double INITIAL_WIDTH = 800;
     private static final double INITIAL_HEIGHT = 450;
 
-    // 记录UI控件 & 多边形
+    // UI controls & polygons
     private Group root;
     private Polygon whitePolygon;
     private Polygon bluePolygon;
@@ -33,10 +36,10 @@ public class MainWindow extends Application {
     private Label sloganLabel;
     private Button arrowButton;
 
-    // =========== 各节点的原始"比率"数据 ===========
+    // =========== Original "ratio" data for each node ===========
 
-    // 白色多边形 (4个顶点)，原先坐标: (0,0)->(500,0)->(300,450)->(0,450)
-    // 转化为 (xFrac,yFrac)
+    // White polygon (4 vertices), original coordinates: (0,0)->(500,0)->(300,450)->(0,450)
+    // Converted to (xFrac,yFrac)
     private final double[] whitePolyFractions = {
             0.0, 0.0,
             500.0/INITIAL_WIDTH, 0.0,
@@ -44,7 +47,7 @@ public class MainWindow extends Application {
             0.0, 450.0/INITIAL_HEIGHT
     };
 
-    // 蓝色多边形 (4个顶点)，原先: (500,0)->(800,0)->(800,450)->(300,450)
+    // Blue polygon (4 vertices), original: (500,0)->(800,0)->(800,450)->(300,450)
     private final double[] bluePolyFractions = {
             500.0/INITIAL_WIDTH, 0.0,
             1.0, 0.0,
@@ -52,15 +55,15 @@ public class MainWindow extends Application {
             300.0/INITIAL_WIDTH, 1.0
     };
 
-    // welcomeLabel 原先 (x=50, y=80)
+    // welcomeLabel original (x=50, y=80)
     private final double welcomeLabelXFrac = 50.0/INITIAL_WIDTH;
     private final double welcomeLabelYFrac = 80.0/INITIAL_HEIGHT;
 
-    // sloganLabel 原先 (x=50, y=150)
+    // sloganLabel original (x=50, y=150)
     private final double sloganLabelXFrac = 50.0/INITIAL_WIDTH;
     private final double sloganLabelYFrac = 150.0/INITIAL_HEIGHT;
 
-    // arrowButton 原先 (x=570, y=170)
+    // arrowButton original (x=570, y=170)
     private final double arrowBtnXFrac = 570.0/INITIAL_WIDTH;
     private final double arrowBtnYFrac = 170.0/INITIAL_HEIGHT;
 
@@ -73,31 +76,31 @@ public class MainWindow extends Application {
     @Override
     public void start(Stage stage) {
         root = new Group();
-    // 调整初始窗口大小为屏幕分辨率的80%
-    java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
-    double screenWidth = screenSize.getWidth();
-    double screenHeight = screenSize.getHeight();
-    
-    // 计算合适的窗口大小
-    double windowWidth = Math.min(1600, screenWidth * 0.8);
-    double windowHeight = Math.min(900, screenHeight * 0.8);
+        // Adjust initial window size to 80% of screen resolution
+        java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
+        double screenWidth = screenSize.getWidth();
+        double screenHeight = screenSize.getHeight();
+        
+        // Calculate appropriate window size
+        double windowWidth = Math.min(1600, screenWidth * 0.8);
+        double windowHeight = Math.min(900, screenHeight * 0.8);
  
- Scene scene = new Scene(root, windowWidth, windowHeight);
+        Scene scene = new Scene(root, windowWidth, windowHeight);
 
         stage.setTitle("Finanger - Welcome");
         stage.setScene(scene);
-        stage.setResizable(true); // 允许拉伸
+        stage.setResizable(true); // Allow resizing
         stage.setMinWidth(800);
         stage.setMinHeight(450);
 
-        // 初始化UI
+        // Initialize UI
         initUI(stage);
 
-        // 监听Scene大小变化，实时重排
+        // Listen for Scene size changes, real-time rearrangement
         scene.widthProperty().addListener((obs, oldVal, newVal) -> relayout());
         scene.heightProperty().addListener((obs, oldVal, newVal) -> relayout());
 
-        // 首次布局
+        // Initial layout
         relayout();
 
         stage.show();
@@ -110,7 +113,7 @@ public class MainWindow extends Application {
      * @param stage The primary stage for this application
      */
     private void initUI(Stage stage) {
-        // ============ 创建多边形 ============
+        // ============ Create polygons ============
         whitePolygon = new Polygon();
         whitePolygon.setFill(Color.WHITE);
 
@@ -140,7 +143,7 @@ public class MainWindow extends Application {
 
         arrowButton.setOnAction(e -> {
             Scene loginScene = LoginScene.createScene(stage, root.getScene().getWidth(), root.getScene().getHeight());
-            SceneManager.switchScene(stage, loginScene);  // 使用SceneManager替代直接设置
+            SceneManager.switchScene(stage, loginScene);  // Use SceneManager instead of direct setting
             stage.setTitle("Finanger - Login");
         });
 
@@ -156,7 +159,7 @@ public class MainWindow extends Application {
         double curWidth = root.getScene().getWidth();
         double curHeight = root.getScene().getHeight();
 
-        // ============ 重算白色多边形的坐标 ============
+        // ============ Recalculate white polygon coordinates ============
         whitePolygon.getPoints().setAll(
                 whitePolyFractions[0] * curWidth, whitePolyFractions[1] * curHeight,
                 whitePolyFractions[2] * curWidth, whitePolyFractions[3] * curHeight,
@@ -164,7 +167,7 @@ public class MainWindow extends Application {
                 whitePolyFractions[6] * curWidth, whitePolyFractions[7] * curHeight
         );
 
-        // ============ 重算蓝色多边形的坐标 ============
+        // ============ Recalculate blue polygon coordinates ============
         bluePolygon.getPoints().setAll(
                 bluePolyFractions[0] * curWidth, bluePolyFractions[1] * curHeight,
                 bluePolyFractions[2] * curWidth, bluePolyFractions[3] * curHeight,
@@ -172,8 +175,7 @@ public class MainWindow extends Application {
                 bluePolyFractions[6] * curWidth, bluePolyFractions[7] * curHeight
         );
 
-        // ============ 重算 Label/按钮坐标 ============
-
+        // ============ Recalculate Label/button coordinates ============
         welcomeLabel.setLayoutX(welcomeLabelXFrac * curWidth);
         welcomeLabel.setLayoutY(welcomeLabelYFrac * curHeight);
 

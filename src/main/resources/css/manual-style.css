@@ -1,3 +1,4 @@
+/* Base body style for the manual */
 body {
     font-family: Arial, sans-serif;
     font-size: 14px;
@@ -10,7 +11,7 @@ body {
     box-sizing: border-box; /* Ensure padding is included in width */
 }
 
-/* Headings */
+/* Heading styles */
 h1 {
     font-size: 24px;
     font-weight: bold;
@@ -32,7 +33,7 @@ h3 {
     margin: 10px 0 8px 0;
 }
 
-/* Lists */
+/* List styles */
 ul {
     margin: 5px 0 10px 0;
     padding-left: 30px;
@@ -42,12 +43,12 @@ li {
     margin: 5px 0;
 }
 
-/* Paragraphs */
+/* Paragraph styles */
 p {
     margin: 10px 0;
 }
 
-/* Links (for Table of Contents) */
+/* Link styles for Table of Contents */
 a {
     color: #00008B; /* Dark blue for links */
     text-decoration: underline;
@@ -57,12 +58,12 @@ a:hover {
     color: #3377ff;
 }
 
-/* Strong text (bold) */
+/* Bold text style */
 strong {
     font-weight: bold;
 }
 
-/* Ensure nested lists are properly indented */
+/* Nested list indentation */
 ul ul {
     margin: 0;
     padding-left: 20px;

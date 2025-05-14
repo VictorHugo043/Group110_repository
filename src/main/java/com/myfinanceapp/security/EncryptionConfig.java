@@ -6,8 +6,8 @@ package com.myfinanceapp.security;
  * It provides a centralized location for all encryption-related settings to ensure consistency
  * and maintainability across the application.
  * 
- * @author Finanger Team
- * @version 1.0
+ * @author SE_Group110
+ * @version 4.0
  */
 public final class EncryptionConfig {
     private EncryptionConfig() {

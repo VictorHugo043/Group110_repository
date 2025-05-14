@@ -29,6 +29,9 @@ import com.myfinanceapp.ui.common.SceneManager;
  * - Handling theme-specific styling of navigation elements
  * - Supporting multilingual interface through LanguageService
  * - Enforcing minimum window dimensions
+ *
+ * @author SE_Group110
+ * @version 4.0
  */
 public class SettingsTopBarFactory {
     private static final double MIN_WINDOW_WIDTH = 800;
@@ -78,11 +81,11 @@ public class SettingsTopBarFactory {
      * @return An HBox containing the top navigation bar
      */
     public static HBox createTopBar(Stage stage, String activeTab, User loggedUser, ThemeService themeService, CurrencyService currencyService) {
-        // 确保窗口有最小尺寸限制
+        // Ensure minimum window size constraints
         stage.setMinWidth(MIN_WINDOW_WIDTH);
         stage.setMinHeight(MIN_WINDOW_HEIGHT);
 
-        // 如果还没有设置监听器，添加监听器
+        // Add listeners if not already set
         if (widthListener == null) {
             widthListener = (obs, oldVal, newVal) -> {
                 if (newVal.doubleValue() < MIN_WINDOW_WIDTH) {
@@ -101,12 +104,12 @@ public class SettingsTopBarFactory {
             stage.heightProperty().addListener(heightListener);
         }
 
-        // 创建顶部栏
+        // Create top bar
         HBox topBar = new HBox(10);
         topBar.setPadding(new Insets(0, 0, 0, 0));
         topBar.setAlignment(Pos.BOTTOM_LEFT);
 
-        // 获取当前语言的标签文本
+        // Get current language tab texts
         String systemSettingsText = languageService.getTranslation("system_settings");
         String userOptionsText = languageService.getTranslation("user_options");
         String exportReportText = languageService.getTranslation("export_report");
@@ -117,11 +120,11 @@ public class SettingsTopBarFactory {
         VBox exportReportTab = createOneTab(exportReportText, activeTab.equals("Export Report"), themeService);
         VBox aboutTab = createOneTab(aboutText, activeTab.equals("About"), themeService);
 
-        // 获取当前窗口尺寸
+        // Get current window dimensions
         double currentWidth = Math.max(stage.getWidth(), MIN_WINDOW_WIDTH);
         double currentHeight = Math.max(stage.getHeight(), MIN_WINDOW_HEIGHT);
 
-        // 设置点击事件
+        // Set click events
         aboutTab.setOnMouseClicked(e -> {
             Scene newScene = About.createScene(stage, currentWidth, currentHeight, loggedUser, themeService, currencyService);
             SceneManager.switchScene(stage, newScene);
@@ -199,7 +202,7 @@ public class SettingsTopBarFactory {
             VBox tab = (VBox) topBar.getChildren().get(i);
             Label tabLabel = (Label) tab.getChildren().get(1);
             
-            // 根据标签的文本内容确定对应的翻译键
+            // Determine translation key based on tab text
             String currentText = tabLabel.getText();
             String translationKey = getTranslationKeyFromText(currentText);
             

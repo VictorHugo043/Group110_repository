@@ -19,6 +19,9 @@ import java.util.*;
  * 
  * The service ensures that user UIDs remain constant throughout the application
  * and handles all user-related data operations securely.
+ *
+ * @author SE_Group110
+ * @version 4.0
  */
 public class UserService {
 
@@ -42,17 +45,17 @@ public class UserService {
     public boolean registerUser(String username, String password, String secQuestion, String secAnswer) {
         List<User> users = loadUsers();
 
-        // 检查是否存在相同用户名
+        // Check if username already exists
         for (User u : users) {
             if (u.getUsername().equalsIgnoreCase(username)) {
-                return false; // 用户名已存在
+                return false; // Username already exists
             }
         }
 
-        // 生成唯一 UID
+        // Generate unique UID
         String uid = UUID.randomUUID().toString();
 
-        // 创建新用户时生成盐值
+        // Generate salt when creating new user
         byte[] saltBytes = new byte[16];
         new java.security.SecureRandom().nextBytes(saltBytes);
         String salt = java.util.Base64.getEncoder().encodeToString(saltBytes);
@@ -107,7 +110,7 @@ public class UserService {
     public User findUserByUid(String uid) {
         List<User> users = loadUsers();
         for (User u : users) {
-            if (u.getUid().equals(uid)) {  // 修正：u.getUid() 而不是 getUid()
+            if (u.getUid().equals(uid)) {  // Fixed: u.getUid() instead of getUid()
                 return u;
             }
         }
@@ -127,14 +130,14 @@ public class UserService {
 
         for (User u : users) {
             if (u.getUsername().equalsIgnoreCase(oldUsername)) {
-                // 确保新用户名没有被占用
+                // Ensure new username is not taken
                 for (User existingUser : users) {
                     if (existingUser.getUsername().equalsIgnoreCase(newUsername)) {
-                        return false; // 新用户名已存在
+                        return false; // New username already exists
                     }
                 }
 
-                // 修改用户名但保持 UID 不变
+                // Update username while keeping UID unchanged
                 u.setUsername(newUsername);
                 saveUsers(users);
                 return true;
@@ -177,7 +180,7 @@ public class UserService {
         try (Reader reader = new InputStreamReader(new FileInputStream(jsonFile), StandardCharsets.UTF_8)) {
             List<User> users = gson.fromJson(reader, USER_LIST_TYPE);
             if (users != null) {
-                // 确保每个用户都有盐值
+                // Ensure each user has a salt value
                 for (User user : users) {
                     if (user.getSalt() == null) {
                         user.setSalt(user.generateSalt());

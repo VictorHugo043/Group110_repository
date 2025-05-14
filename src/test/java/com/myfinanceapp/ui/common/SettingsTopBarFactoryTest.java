@@ -15,6 +15,17 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 
+/**
+ * Unit test class for the SettingsTopBarFactory.
+ * This class contains tests for settings top bar UI component functionality including:
+ * - Top bar creation and structure
+ * - Tab selection states
+ * - Style and layout properties
+ * - Tab order and hierarchy
+ *
+ * @author SE_Group110
+ * @version 4.0
+ */
 @ExtendWith(MockitoExtension.class)
 class SettingsTopBarFactoryTest {
 
@@ -24,11 +35,27 @@ class SettingsTopBarFactoryTest {
     @Mock
     private User mockUser;
     
+    /**
+     * Sets up the test environment before each test.
+     * Initializes mock objects for Stage and User.
+     */
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
     }
 
+    /**
+     * Tests the creation and properties of the settings top bar.
+     * Verifies:
+     * - Top bar structure and component count
+     * - Tab styles for active and inactive states
+     * - Arrow indicator visibility
+     * - Tab order and hierarchy
+     * - Common properties for all tabs
+     * 
+     * Note: This test requires JavaFX thread initialization.
+     * For proper testing, consider using TestFX framework.
+     */
     @Test
     void createTopBar() {
         try {

@@ -27,6 +27,17 @@ import java.util.List;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
+/**
+ * Unit test class for the TransactionManagementScene.
+ * This class contains tests for transaction management functionality including:
+ * - Scene creation and initialization
+ * - Transaction table creation and configuration
+ * - Theme service integration
+ * - Transaction data handling
+ *
+ * @author SE_Group110
+ * @version 4.0
+ */
 public class TransactionManagementSceneTest extends ApplicationTest {
 
     private TransactionManagementScene scene;
@@ -46,17 +57,26 @@ public class TransactionManagementSceneTest extends ApplicationTest {
     private double testWidth = 1600;
     private double testHeight = 900;
 
+    /**
+     * Initializes the JavaFX environment before running tests.
+     * This is required for JavaFX component testing.
+     */
     @BeforeClass
     public static void setupJFX() {
-        // 初始化JavaFX环境
         new JFXPanel();
     }
 
+    /**
+     * Sets up the test environment before each test.
+     * Initializes mock objects and configures their behavior:
+     * - Theme service mock with predefined styles
+     * - Scene object with test dimensions
+     */
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        // 配置模拟对象行为
+        // Configure mock object behavior
         when(mockThemeService.getCurrentThemeStyle()).thenReturn("-fx-background-color: white;");
         when(mockThemeService.getButtonStyle()).thenReturn("-fx-background-color: blue; -fx-text-fill: white;");
         when(mockThemeService.getTextColorStyle()).thenReturn("-fx-text-fill: black;");
@@ -64,17 +84,25 @@ public class TransactionManagementSceneTest extends ApplicationTest {
         when(mockThemeService.getTableHeaderStyle()).thenReturn("header-style");
         when(mockThemeService.isDayMode()).thenReturn(true);
 
-        // 创建场景对象
+        // Create scene object
         scene = new TransactionManagementScene(mockStage, testWidth, testHeight, mockUser);
     }
 
-
+    /**
+     * Tests the creation of the transaction management scene.
+     * Verifies that:
+     * - Scene is created successfully
+     * - Transaction data is properly initialized
+     * - Service integration works correctly
+     * 
+     * Note: This test focuses on non-UI aspects as UI testing requires JavaFX thread.
+     */
     @Test
     public void testCreateScene() {
-        // 准备测试数据
+        // Prepare test data
         ObservableList<Transaction> testData = FXCollections.observableArrayList();
 
-        // 创建交易对象
+        // Create transaction object
         Transaction transaction = new Transaction();
         transaction.setTransactionDate("2023-01-01");
         transaction.setTransactionType("Income");
@@ -87,44 +115,53 @@ public class TransactionManagementSceneTest extends ApplicationTest {
 
         FilteredList<Transaction> filteredData = new FilteredList<>(testData);
 
-        // 模拟服务行为
+        // Mock service behavior
         when(mockService.getFilteredTransactions()).thenReturn(filteredData);
 
         try {
-            // 初始化场景的服务引用
+            // Initialize scene's service reference
             Field serviceField = TransactionManagementScene.class.getDeclaredField("service");
             serviceField.setAccessible(true);
             serviceField.set(scene, mockService);
 
-            // 创建场景并验证
+            // Create scene and verify
             Scene javaFxScene = scene.createScene(mockThemeService);
             assertNotNull("Scene should be created successfully", javaFxScene);
 
-            // 注意：这里只验证非UI方面的功能，因为UI测试需要JavaFX线程
+            // Note: Only non-UI aspects are verified as UI testing requires JavaFX thread
         } catch (Exception e) {
             fail("Exception occurred: " + e.getMessage());
         }
     }
 
+    /**
+     * Tests the creation of the transaction table.
+     * Verifies that:
+     * - Table is created successfully
+     * - Table is editable
+     * - Theme service is properly integrated
+     * 
+     * Uses reflection to access private methods and fields for testing.
+     */
     @Test
     public void testCreateTransactionTable() {
         try {
-            // 设置必要的依赖
+            // Set up required dependencies
             Field themeServiceField = TransactionManagementScene.class.getDeclaredField("themeService");
             themeServiceField.setAccessible(true);
             themeServiceField.set(scene, mockThemeService);
 
-            // 使用反射调用私有方法
+            // Call private method using reflection
             Method createTableMethod = TransactionManagementScene.class.getDeclaredMethod("createTransactionTable");
             createTableMethod.setAccessible(true);
             createTableMethod.invoke(scene);
 
-            // 获取创建的表格
+            // Get created table
             Field tableField = TransactionManagementScene.class.getDeclaredField("transactionTable");
             tableField.setAccessible(true);
             TableView<Transaction> table = (TableView<Transaction>) tableField.get(scene);
 
-            // 验证表格属性
+            // Verify table properties
             assertNotNull("Table should be created", table);
             assertTrue("Table should be editable", table.isEditable());
         } catch (Exception e) {
