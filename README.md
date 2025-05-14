@@ -68,7 +68,7 @@
 | **JavaFX FXML** (`javafx-fxml`)         | `21`        |
 | **JavaFX Swing** (`javafx-swing`)       | `21`        |
 | **JavaFX Web** (`javafx-web`)           | `21`        |
-| **Gson** (`gson`)                        | `2.10.1`    |
+| **Gson** (`gson`)                       | `2.10.1`    |
 | **Jackson Databind** (`jackson-databind`) | `2.13.0`  |
 | **Jackson JSR310** (`jackson-datatype-jsr310`) | `2.13.0` |
 | **SLF4J API** (`slf4j-api`)             | `1.7.36`    |
@@ -83,57 +83,112 @@
 
 | Dependency                               | Version     |
 |------------------------------------------|-------------|
-| **JUnit 4** (`junit`)                    | `RELEASE`   |
+| **JUnit 4** (`junit`)                    | `4.13.2`    |
 | **JUnit 5** (`junit-jupiter`)            | `RELEASE`   |
 | **Mockito Core** (`mockito-core`)        | `5.7.0`     |
 | **Mockito JUnit** (`mockito-junit-jupiter`) | `5.8.0` |
 | **TestFX Core** (`testfx-core`)          | `4.0.18`    |
 | **TestFX JUnit5** (`testfx-junit5`)      | `4.0.18`    |
+| **TestFX JUnit** (`testfx-junit`)        | `4.0.18`    |
 
 
 ---
 
 ## **Project Structure**
-```bash
+```
 Finanger/
 │
 ├── src/
 │   ├── main/
-│   │   ├── java/com.myfinanceapp/
-│   │   │   ├── model/                 # Data models (Goal, Transaction, User)
-│   │   │   ├── security/              # Security-related components (EncryptionConfig, EncryptionService, PasswordHashService)
-│   │   │   ├── service/               # Business logic and services (AIChatService, TransactionService, UserService, etc.)
-│   │   │   └── ui/                    # User Interface components
-│   │   │       ├── common/           # Shared UI components (LeftSidebarFactory, SceneManager, SettingsTopBarFactory)
-│   │   │       ├── goalsscene/       # Goal management UI (CreateGoalScene, EditGoalScene, Goals)
-│   │   │       ├── loginscene/       # Login UI (LoginScene, ResetPassword)
-│   │   │       ├── mainwindow/       # Main application window (MainWindow)
-│   │   │       ├── registrationterms/ # Legal agreement UI (PrivacyPolicy, TermOfUse)
-│   │   │       ├── settingscene/     # Settings UI (About, ExportReport, SystemSettings, UserOptions)
-│   │   │       ├── signupscene/      # Sign-up UI (SignUp)
-│   │   │       ├── statusscene/      # Status display UI (StatusScene)
-│   │   │       ├── transactionscene/ # Transaction management UI (TransactionManagementScene)
-│   │   │       └── usermanual/       # User manual/help UI (UserManual)
-│   │   └── FinanceApp                # Main application entry point
+│   │   ├── java/com/myfinanceapp/
+│   │   │   ├── model/                 # Data models and entities
+│   │   │   │   ├── Goal.java         # Goal data model
+│   │   │   │   ├── Transaction.java  # Transaction data model
+│   │   │   │   └── User.java         # User data model
+│   │   │   │
+│   │   │   ├── security/             # Security and encryption
+│   │   │   │   ├── EncryptionConfig.java
+│   │   │   │   ├── EncryptionService.java
+│   │   │   │   └── PasswordHashService.java
+│   │   │   │
+│   │   │   ├── service/              # Business logic services
+│   │   │   │   ├── AIChatService.java
+│   │   │   │   ├── AISortingService.java
+│   │   │   │   ├── TransactionService.java
+│   │   │   │   └── UserService.java
+│   │   │   │
+│   │   │   ├── ui/                   # User Interface components
+│   │   │   │   ├── common/          # Shared UI components
+│   │   │   │   ├── goalsscene/      # Goal management UI
+│   │   │   │   ├── loginscene/      # Login and authentication UI
+│   │   │   │   ├── mainwindow/      # Main application window
+│   │   │   │   ├── registrationterms/ # Legal agreements UI
+│   │   │   │   ├── settingscene/    # Settings and preferences UI
+│   │   │   │   ├── signupscene/     # User registration UI
+│   │   │   │   ├── statusscene/     # Financial status display
+│   │   │   │   ├── transactionscene/ # Transaction management UI
+│   │   │   │   └── usermanual/      # Help and documentation UI
+│   │   │   │
+│   │   │   └── FinanceApp.java      # Application entry point
+│   │   │
+│   │   └── resources/
+│   │       ├── css/                 # Stylesheets
+│   │       │   ├── manual-style.css
+│   │       │   └── markdown-day.css
+│   │       │
+│   │       ├── goals/              # Goal data storage
+│   │       │   └── *.json
+│   │       │
+│   │       ├── pictures/           # UI assets and images
+│   │       │
+│   │       ├── terms/             # Legal documents
+│   │       │   ├── PrivacyPolicy.txt
+│   │       │   └── TermOfUse.txt
+│   │       │
+│   │       └── transaction/       # Transaction data storage
+│   │           └── *.json
+│   │
+│   └── test/
+│       └── java/com/myfinanceapp/
+│           ├── model/             # Model unit tests
+│           ├── security/          # Security component tests
+│           ├── service/           # Service layer tests
+│           ├── ui/               # UI component tests
+│           └── FinanceAppTest.java
 │
-├── resources/
-│   ├── css/                          # Stylesheets (manual-style.css, markdown-day.css)
-│   ├── goals/                        # Goal-related JSON data (1.json, additional JSON files)
-│   ├── pictures/                     # UI image assets (icons, backgrounds, etc.)
-│   ├── terms/                        # Legal and policy documents (PrivacyPolicy.txt, TermOfUse.txt)
-│   └── transaction/                  # Transaction data (1.json, additional JSON files like users.json)
-│
-├── test/
-│   └── java/com.myfinanceapp/
-│       ├── model/                   # Unit tests for data models
-│       ├── security/               # Unit tests for security components
-│       ├── service/                # Unit tests for business logic/services
-│       ├── ui/                     # Unit tests for UI components
-│       └── FinanceAppTest          # Main application test entry
-│
-├── target/                         # Compiled output files
-├── .gitignore                      # Git ignore configuration
-├── pom.xml                         # Maven project configuration
-└── README.md                       # Project documentation
+├── target/                      # Compiled output
+├── .gitignore                  # Git ignore rules
+├── pom.xml                     # Maven configuration
+└── README.md                   # Project documentation
 ```
+
+## **Installation Instructions**
+
+1. **Prerequisites**
+   - Ensure you have Java 21 installed
+   - Install Maven 3.8.6 or later
+   - Set up your Java environment variables
+
+2. **Build and Run**
+   ```bash
+   # Clone the repository
+   git clone https://github.com/your-username/Group110_repository.git
+   
+   # Navigate to project directory
+   cd Group110_repository
+   
+   # Build the project
+   mvn clean install
+   
+   # Run the application
+   mvn javafx:run
+   ```
+
+## **License**
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## **Contact**
+
+For any questions or concerns, please contact the team members listed above or create an issue in the repository.
 
