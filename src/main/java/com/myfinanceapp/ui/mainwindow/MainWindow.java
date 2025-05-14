@@ -13,6 +13,7 @@ import javafx.scene.shape.Polygon;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
+import java.util.Objects;
 
 /**
  * The main window of the Finanger application, featuring a dynamic split design with responsive layout.
@@ -92,6 +93,16 @@ public class MainWindow extends Application {
         stage.setResizable(true); // Allow resizing
         stage.setMinWidth(800);
         stage.setMinHeight(450);
+
+        // Set window icon
+        try {
+            javafx.scene.image.Image icon = new javafx.scene.image.Image(
+                Objects.requireNonNull(getClass().getResource("/pictures/logo.png")).toExternalForm()
+            );
+            stage.getIcons().add(icon);
+        } catch (Exception e) {
+            System.err.println("[Warning] Failed to load window icon: " + e.getMessage());
+        }
 
         // Initialize UI
         initUI(stage);

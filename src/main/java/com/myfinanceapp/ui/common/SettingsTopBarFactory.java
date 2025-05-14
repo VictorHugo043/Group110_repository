@@ -128,21 +128,25 @@ public class SettingsTopBarFactory {
         aboutTab.setOnMouseClicked(e -> {
             Scene newScene = About.createScene(stage, currentWidth, currentHeight, loggedUser, themeService, currencyService);
             SceneManager.switchScene(stage, newScene);
+            stage.setTitle("Finanger - " + languageService.getTranslation("about"));
         });
 
         systemSettingsTab.setOnMouseClicked(e -> {
             Scene newScene = SystemSettings.createScene(stage, currentWidth, currentHeight, loggedUser, themeService, currencyService);
             SceneManager.switchScene(stage, newScene);
+            stage.setTitle("Finanger - " + languageService.getTranslation("system_settings"));
         });
 
         userOptionsTab.setOnMouseClicked(e -> {
             Scene newScene = UserOptions.createScene(stage, currentWidth, currentHeight, loggedUser, themeService, currencyService);
             SceneManager.switchScene(stage, newScene);
+            stage.setTitle("Finanger - " + languageService.getTranslation("user_options"));
         });
 
         exportReportTab.setOnMouseClicked(e -> {
             Scene newScene = ExportReport.createScene(stage, currentWidth, currentHeight, loggedUser, themeService, currencyService);
             SceneManager.switchScene(stage, newScene);
+            stage.setTitle("Finanger - " + languageService.getTranslation("export_report"));
         });
 
         topBar.getChildren().addAll(systemSettingsTab, userOptionsTab, exportReportTab, aboutTab);

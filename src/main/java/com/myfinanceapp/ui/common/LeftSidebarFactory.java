@@ -192,18 +192,22 @@ public class LeftSidebarFactory {
                     Scene newStatusScene = statusScene.createScene(themeService, currencyService);
                     SceneManager.switchScene(stage, newStatusScene);
                     StatusService statusService = new StatusService(statusScene, loggedUser, currencyService, languageService);
+                    stage.setTitle("Finanger - " + languageService.getTranslation("status"));
                     break;
                 case "goals":
                     Scene goalsScene = Goals.createScene(stage, currentWidth, currentHeight, loggedUser, themeService, currencyService);
                     SceneManager.switchScene(stage, goalsScene);
+                    stage.setTitle("Finanger - " + languageService.getTranslation("goals"));
                     break;
                 case "new":
                     Scene transactionScene = TransactionScene.createScene(stage, currentWidth, currentHeight, loggedUser, themeService, currencyService);
                     SceneManager.switchScene(stage, transactionScene);
+                    stage.setTitle("Finanger - " + languageService.getTranslation("new"));
                     break;
                 case "settings":
                     Scene settingsScene = SystemSettings.createScene(stage, currentWidth, currentHeight, loggedUser, themeService, currencyService);
                     SceneManager.switchScene(stage, settingsScene);
+                    stage.setTitle("Finanger - " + languageService.getTranslation("system_settings"));
                     break;
                 case "logout":
                     Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, languageService.getTranslation("logout_confirmation"));
