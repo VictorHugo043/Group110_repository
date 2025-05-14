@@ -20,6 +20,8 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import java.util.Objects;
+import java.util.Map;
+import java.util.HashMap;
 
 /**
  * A system settings interface for the Finanger application.
@@ -166,8 +168,41 @@ public class SystemSettings {
         HBox langBox = new HBox(20);
         langLabel.setFont(Font.font("Arial", 14));
         langLabel.setStyle(themeService.getTextColorStyle());
+        // 创建语言显示映射
+        Map<String, String> languageDisplayMap = new HashMap<>();
+        languageDisplayMap.put("English", "English");
+        languageDisplayMap.put("Chinese", "中文");
+        
+        // 添加选项并设置显示文本
         langCombo.getItems().addAll("English", "Chinese");
         langCombo.setValue(languageService.getCurrentLanguage());
+        
+        // 设置单元格工厂来显示本地化的语言名称
+        langCombo.setCellFactory(lv -> new ListCell<String>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(languageDisplayMap.get(item));
+                }
+            }
+        });
+        
+        // 设置按钮单元格工厂
+        langCombo.setButtonCell(new ListCell<String>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(languageDisplayMap.get(item));
+                }
+            }
+        });
+        
         langCombo.getStyleClass().add(themeService.isDayMode() ? "day-theme-combo-box" : "night-theme-combo-box");
         langCombo.setOnAction(e -> {
             String selectedLanguage = langCombo.getValue();
