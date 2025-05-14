@@ -35,6 +35,9 @@ import java.time.LocalDate;
  * - Supporting multiple currencies and languages
  * - Handling theme-specific styling
  * - Enforcing minimum window dimensions
+ *
+ * @author SE_Group110
+ * @version 4.0
  */
 public class CreateGoalScene {
     private static final Logger logger = LoggerFactory.getLogger(CreateGoalScene.class);
@@ -116,7 +119,7 @@ public class CreateGoalScene {
         mainBox.setAlignment(Pos.CENTER);
         mainBox.setPadding(new Insets(MAIN_PADDING));
 
-        // 绑定主容器最大宽度到窗口宽度
+        // Bind main container max width to window width
         mainBox.maxWidthProperty().bind(
                 root.widthProperty()
                         .subtract(sideBar.widthProperty())
@@ -134,7 +137,7 @@ public class CreateGoalScene {
         grid.setVgap(15);
         grid.setAlignment(Pos.CENTER);
 
-        // 绑定网格宽度到主容器宽度
+        // Bind grid width to main container width
         grid.prefWidthProperty().bind(mainBox.maxWidthProperty());
 
         // Goal type selection
@@ -224,7 +227,7 @@ public class CreateGoalScene {
             SceneManager.switchScene(stage, goalsScene);
         });
 
-        // 绑定按钮宽度
+        // Bind button width
         saveButton.prefWidthProperty().bind(buttonBox.widthProperty().multiply(0.2));
         cancelButton.prefWidthProperty().bind(buttonBox.widthProperty().multiply(0.2));
 
@@ -238,13 +241,13 @@ public class CreateGoalScene {
         centerContainer.setAlignment(Pos.CENTER);
         root.setCenter(centerContainer);
 
-        // 创建场景
+        // Create scene
         Scene scene = new Scene(root, finalWidth, finalHeight);
 
         // Add dynamic theme stylesheet for ComboBox, DatePicker, and TextField
         scene.getStylesheets().add("data:text/css," + themeService.getThemeStylesheet());
 
-        // 添加窗口大小变化监听器
+        // Add window size change listener
         scene.widthProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal.doubleValue() < MIN_WINDOW_WIDTH) {
                 stage.setWidth(MIN_WINDOW_WIDTH);
@@ -257,7 +260,7 @@ public class CreateGoalScene {
             }
         });
 
-        // 设置窗口标题
+        // Set window title
         stage.setTitle("Finanger - " + languageService.getTranslation("create_new_goal"));
 
         return scene;

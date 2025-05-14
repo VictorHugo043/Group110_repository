@@ -24,13 +24,16 @@ import java.util.Objects;
  * This scene provides functionality for users to reset their password using security questions.
  * It features a responsive layout with a diagonal split design that automatically adjusts
  * based on window size.
+ *
+ * @author SE_Group110
+ * @version 4.0
  */
 public class ResetPassword {
 
     private static final double INITIAL_WIDTH = 800;
     private static final double INITIAL_HEIGHT = 450;
 
-    // 多边形相关
+    // Polygon related
     private static Group root;
     private static Polygon leftPolygon;
     private static Polygon rightPolygon;
@@ -38,7 +41,7 @@ public class ResetPassword {
     private static VBox vbox;
     private static Button backBtn;
 
-    // 比例数组
+    // Proportional arrays
     private static final double[] LEFT_POLY_FRACS = {
             0.0, 0.0,
             480.0/INITIAL_WIDTH, 0.0,
@@ -53,17 +56,17 @@ public class ResetPassword {
     };
     private static final double RIGHT_PANE_X_FRAC = 440.0/INITIAL_WIDTH;
 
-    // 输入控件
+    // Input controls
     private static TextField usernameField;
     private static Label questionLabel;
     private static TextField answerField;
     private static PasswordField newPasswordField;
 
-    // 按钮
+    // Buttons
     private static Button checkQuestionBtn;
     private static Button resetPassBtn;
 
-    // 找到的用户对象（缓存）
+    // Found user object (cached)
     private static User foundUser = null;
 
     /**
@@ -83,7 +86,7 @@ public class ResetPassword {
         stage.setMinHeight(INITIAL_HEIGHT);
         stage.setResizable(true);
 
-        // ========== 1) 创建 back 按钮并加到root ==========
+        // ========== 1) Create back button and add to root ==========
         backBtn = new Button("back");
         backBtn.setStyle(
                 "-fx-background-color: #A3D1FF;" +
@@ -94,14 +97,13 @@ public class ResetPassword {
         );
         backBtn.setPrefSize(60, 30);
 
-        // 点击后回到登录界面
+        // Return to login interface when clicked
         backBtn.setOnAction(e->{
             stage.setScene(LoginScene.createScene(stage, root.getScene().getWidth(), root.getScene().getHeight()));
             stage.setTitle("Finanger - Login");
         });
-        // 先把它放到root
 
-        // =========== 左侧背景多边形 ===========
+        // =========== Left background polygon ===========
         leftPolygon = new Polygon();
         Image leftBg = new Image(
                 Objects.requireNonNull(ResetPassword.class.getResource("/pictures/resetbg.png")).toExternalForm()
@@ -113,7 +115,7 @@ public class ResetPassword {
 
         root.getChildren().addAll(leftPolygon, rightPolygon);
 
-        // =========== 右侧 Pane + VBox ===========
+        // =========== Right Pane + VBox ===========
         rightPane = new Pane();
         root.getChildren().add(rightPane);
 
@@ -122,7 +124,7 @@ public class ResetPassword {
         vbox.setPadding(new Insets(30));
         rightPane.getChildren().add(vbox);
 
-        // =========== 标题区 ===========
+        // =========== Title area ===========
         Label titleLabel = new Label("Reset Password");
         titleLabel.setFont(Font.font("Arial", FontWeight.BOLD, 36));
         titleLabel.setTextFill(Color.WHITE);
@@ -135,9 +137,9 @@ public class ResetPassword {
         titleBox.setAlignment(Pos.CENTER);
         vbox.getChildren().add(titleBox);
 
-        // =========== Step 1: 输入 Username, 点击 [Check Question] ===========
+        // =========== Step 1: Enter Username, click [Check Question] ===========
 
-        // Username row (单行: label + textfield)
+        // Username row (single line: label + textfield)
         Label userLabel = new Label("Username:");
         userLabel.setFont(Font.font("Arial", FontWeight.BOLD, 12));
         userLabel.setTextFill(Color.WHITE);
@@ -153,9 +155,9 @@ public class ResetPassword {
         checkQuestionBtn.setStyle("-fx-background-color: #3377ff; -fx-text-fill: white; -fx-font-weight: bold;");
         checkQuestionBtn.setOnAction(e -> handleCheckQuestion());
 
-        // =========== Step 2: 显示安全问题 + 输入答案 & 新密码 ===========
+        // =========== Step 2: Display security question + input answer & new password ===========
 
-        // Security question row (两行: label, then question text)
+        // Security question row (two lines: label, then question text)
         Label questionLbl = new Label("Your Security Question:");
         questionLbl.setFont(Font.font("Arial", FontWeight.BOLD, 12));
         questionLbl.setTextFill(Color.WHITE);
@@ -167,7 +169,7 @@ public class ResetPassword {
         VBox questionContainer = new VBox(5, questionLbl, questionLabel);
         questionContainer.setAlignment(Pos.CENTER_LEFT);
 
-        // Answer row (两行: label, then textfield)
+        // Answer row (two lines: label, then textfield)
         Label ansLbl = new Label("Your answer:");
         ansLbl.setFont(Font.font("Arial", FontWeight.BOLD, 12));
         ansLbl.setTextFill(Color.WHITE);
@@ -177,7 +179,7 @@ public class ResetPassword {
         VBox answerContainer = new VBox(5, ansLbl, answerField);
         answerContainer.setAlignment(Pos.CENTER_LEFT);
 
-        // New password row (两行: label, then textfield)
+        // New password row (two lines: label, then textfield)
         Label newPassLbl = new Label("Enter New Password:");
         newPassLbl.setFont(Font.font("Arial", FontWeight.BOLD, 12));
         newPassLbl.setTextFill(Color.WHITE);
@@ -193,13 +195,13 @@ public class ResetPassword {
         resetPassBtn.setStyle("-fx-background-color: #3377ff; -fx-text-fill: white; -fx-font-weight: bold;");
         resetPassBtn.setOnAction(e -> handleReset(stage));
 
-        // 初始先禁用 question, answer, newPass, resetBtn
+        // Initially disable question, answer, newPass, resetBtn
         questionLabel.setDisable(true);
         answerField.setDisable(true);
         newPasswordField.setDisable(true);
         resetPassBtn.setDisable(true);
 
-        // 组装
+        // Assemble components
         vbox.getChildren().addAll(
                 userHBox,
                 checkQuestionBtn,
@@ -208,16 +210,15 @@ public class ResetPassword {
                 newPassContainer,
                 resetPassBtn
         );
-        // 在所有多边形、Pane 添加完之后：
-        root.getChildren().add(backBtn);// 然后
+        // After all polygons and Pane are added:
+        root.getChildren().add(backBtn);
         backBtn.toFront();
 
-
-        // 监听 scene大小，动态重排
+        // Listen for scene size changes, dynamically rearrange
         scene.widthProperty().addListener((obs,oldV,newV)-> relayout());
         scene.heightProperty().addListener((obs,oldV,newV)-> relayout());
 
-        // 场景设置好之后，延迟一拍再调用 relayout 以获取 backBtn真实宽度
+        // After scene is set up, delay one frame to get backBtn's real width
         Platform.runLater(ResetPassword::relayout);
 
         return scene;
@@ -237,14 +238,14 @@ public class ResetPassword {
 
         UserService userService = new UserService();
 
-        // 先通过用户名获取用户对象
+        // First get user object by username
         User userByUsername = userService.findUserByUsername(uname);
         if (userByUsername == null) {
             showAlert("Error", "User not found!");
             return;
         }
 
-        // 获取 UID，再用 UID 查找完整用户信息
+        // Get UID, then use UID to find complete user information
         String uid = userByUsername.getUid();
         foundUser = userService.findUserByUid(uid);
         if (foundUser == null) {
@@ -252,7 +253,7 @@ public class ResetPassword {
             return;
         }
 
-        // 显示安全问题
+        // Display security question
         questionLabel.setText(foundUser.getSecurityQuestion());
         questionLabel.setDisable(false);
         answerField.setDisable(false);
@@ -279,19 +280,19 @@ public class ResetPassword {
             return;
         }
 
-        // 比对安全答案
+        // Compare security answer
         if (!answer.equalsIgnoreCase(foundUser.getSecurityAnswer())) {
             showAlert("Error", "Security answer mismatch!");
             return;
         }
 
-        // 匹配成功 => 重设密码
+        // Match successful => reset password
         foundUser.setPassword(newPass);
         UserService userService = new UserService();
-        boolean updated = userService.updatePassword(foundUser.getUid(), newPass); // 需实现
+        boolean updated = userService.updatePassword(foundUser.getUid(), newPass); // Needs implementation
         if (updated) {
             showAlert("Success", "Password reset successfully!");
-            // 回到登录界面
+            // Return to login interface
             stage.setScene(LoginScene.createScene(stage, root.getScene().getWidth(), root.getScene().getHeight()));
         } else {
             showAlert("Error", "Failed to reset password!");
@@ -307,7 +308,7 @@ public class ResetPassword {
         double curW = root.getScene().getWidth();
         double curH = root.getScene().getHeight();
 
-        // 多边形
+        // Polygons
         leftPolygon.getPoints().setAll(
                 LEFT_POLY_FRACS[0]*curW, LEFT_POLY_FRACS[1]*curH,
                 LEFT_POLY_FRACS[2]*curW, LEFT_POLY_FRACS[3]*curH,
@@ -327,7 +328,7 @@ public class ResetPassword {
         rightPane.setPrefSize(curW - paneX, curH);
         vbox.setPrefSize(rightPane.getPrefWidth(), rightPane.getPrefHeight());
 
-        // backBtn放在窗口右上角 => x= sceneWidth - backBtn.width - 10
+        // Place backBtn in top-right corner => x = sceneWidth - backBtn.width - 10
         backBtn.applyCss();
         backBtn.layout();
         double btnW = backBtn.getWidth();

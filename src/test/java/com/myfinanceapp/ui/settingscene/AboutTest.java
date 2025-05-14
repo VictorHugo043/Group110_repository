@@ -13,6 +13,17 @@ import org.testfx.framework.junit5.ApplicationExtension;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+/**
+ * Unit test class for the About scene.
+ * This class contains tests for about page functionality including:
+ * - Scene creation and initialization
+ * - Scene dimension validation
+ * - UI structure verification
+ * - Style property validation
+ *
+ * @author SE_Group110
+ * @version 4.0
+ */
 @ExtendWith(ApplicationExtension.class)
 class AboutTest {
 
@@ -22,11 +33,22 @@ class AboutTest {
     @Mock
     private User mockUser;
 
+    /**
+     * Sets up the test environment before each test.
+     * Initializes mock objects for Stage and User.
+     */
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
     }
 
+    /**
+     * Tests the creation of the about scene.
+     * Verifies that:
+     * - Scene is created successfully
+     * - Scene dimensions are set correctly
+     * - Scene is properly initialized
+     */
     @Test
     void createScene_shouldReturnNonNullScene() {
         // Arrange
@@ -42,6 +64,13 @@ class AboutTest {
         assertEquals(height, scene.getHeight(), "Scene height should match provided height");
     }
     
+    /**
+     * Tests the style and structure of the about scene.
+     * Verifies that:
+     * - Root node is properly initialized
+     * - Root node is of type BorderPane
+     * - Scene structure is correct
+     */
     @Test
     void createScene_shouldHaveCorrectStyleAndStructure() {
         // Arrange

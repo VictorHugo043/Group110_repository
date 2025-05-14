@@ -37,6 +37,9 @@ import java.util.List;
  * - Sort transactions by various criteria
  * The interface features theme customization, internationalization support,
  * and a responsive table layout with dynamic filtering capabilities.
+ *
+ * @author SE_Group110
+ * @version 4.0
  */
 public class TransactionManagementScene {
     private static final LanguageService languageService = LanguageService.getInstance();
@@ -104,46 +107,46 @@ public class TransactionManagementScene {
         BorderPane root = new BorderPane();
         root.setStyle(themeService.getCurrentThemeStyle());
 
-        // 使用相同的侧边栏
+        // Use the same sidebar
         VBox sideBar = LeftSidebarFactory.createLeftSidebar(stage, "Status", currentUser, themeService, currencyService);
         root.setLeft(sideBar);
 
-        // 主内容区
+        // Main content area
         VBox mainContent = new VBox(20);
         mainContent.setPadding(new Insets(20));
         mainContent.setAlignment(Pos.TOP_CENTER);
         mainContent.setFillWidth(true);
         mainContent.setStyle(themeService.getCurrentThemeStyle());
 
-        // 页面标题
+        // Page title
         HBox headerBox = createHeader();
 
-        // 筛选区域
+        // Filter area
         HBox filterBox = createFilterBox();
 
-        // 交易表格
+        // Transaction table
         createTransactionTable();
 
-        // 初始化服务
+        // Initialize service
         this.service = new TransactionManagementService(
                 currentUser, transactionTable, dateFilter, typeFilter,
                 currencyFilter, categoryFilter, paymentMethodFilter);
 
-        // 设置表格数据源
+        // Set table data source
         transactionTable.setItems(service.getFilteredTransactions());
 
-        // 在设置数据源后调用
+        // Call after setting data source
         transactionTable.setItems(service.getFilteredTransactions());
-        service.initializeFilters();  // 初始化筛选选项
+        service.initializeFilters();  // Initialize filter options
 
-        // 返回按钮
+        // Back button
         Button backButton = new Button(languageService.getTranslation("back_to_status"));
         backButton.setStyle(themeService.getButtonStyle());
         backButton.setOnAction(e -> {
-            // 获取当前窗口的实际大小
+            // Get current window size
             double currentWidth = stage.getWidth();
             double currentHeight = stage.getHeight();
-            // 回到 Status 界面
+            // Return to Status scene
             StatusScene statusScene = new StatusScene(stage, currentWidth, currentHeight, currentUser);
             Scene scene = statusScene.createScene(themeService, currencyService);
             stage.setScene(scene);
@@ -182,14 +185,14 @@ public class TransactionManagementScene {
      * @return An HBox containing the filter controls
      */
     private HBox createFilterBox() {
-        // 创建筛选下拉框
+        // Create filter combo boxes
         dateFilter = createFilterComboBox(languageService.getTranslation("date"));
         typeFilter = createFilterComboBox(languageService.getTranslation("transaction_type"));
         currencyFilter = createFilterComboBox(languageService.getTranslation("currency"));
         categoryFilter = createFilterComboBox(languageService.getTranslation("category"));
         paymentMethodFilter = createFilterComboBox(languageService.getTranslation("payment_method"));
 
-        // 重置按钮
+        // Reset button
         Button resetButton = new Button(languageService.getTranslation("reset_filter"));
         resetButton.setStyle(themeService.getButtonStyle());
         resetButton.setOnAction(e -> service.resetFilters());
@@ -236,21 +239,21 @@ public class TransactionManagementScene {
         transactionTable = new TableView<>();
         transactionTable.setEditable(true);
 
-        // 应用表格样式
+        // Apply table styles
         transactionTable.getStylesheets().add("data:text/css," + themeService.getTableStyle());
         transactionTable.getStylesheets().add("data:text/css," + themeService.getTableHeaderStyle());
 
-        // 允许表格进行排序
+        // Enable table sorting
         transactionTable.setSortPolicy(tableView -> {
             if (tableView.getComparator() != null) {
-                // 直接对原始数据源进行排序，避免调用 applyFilters
+                // Sort the original data source directly to avoid calling applyFilters
                 FXCollections.sort(service.getAllTransactions(), tableView.getComparator());
                 return true;
             }
             return true;
         });
 
-        // 创建表格列
+        // Create table columns
         TableColumn<Transaction, String> dateCol = new TableColumn<>(languageService.getTranslation("date"));
         dateCol.setCellValueFactory(new PropertyValueFactory<>("transactionDate"));
         dateCol.setCellFactory(TextFieldTableCell.forTableColumn());
@@ -328,7 +331,7 @@ public class TransactionManagementScene {
         });
         descriptionCol.setSortable(false);
 
-        // 添加表格排序监听器
+        // Add table sort listener
         transactionTable.getSortOrder().addListener((ListChangeListener<TableColumn<Transaction, ?>>) c -> {
             if (service != null && !transactionTable.getSortOrder().isEmpty()) {
                 TableColumn<Transaction, ?> column = transactionTable.getSortOrder().get(0);
@@ -336,7 +339,7 @@ public class TransactionManagementScene {
             }
         });
 
-        // 添加删除操作列
+        // Add delete action column
         TableColumn<Transaction, Void> actionCol = new TableColumn<>(languageService.getTranslation("action"));
         actionCol.setPrefWidth(100);
         actionCol.setCellFactory(param -> new TableCell<>() {
@@ -359,15 +362,15 @@ public class TransactionManagementScene {
                 }
             }
         });
-        actionCol.setSortable(false); // 操作列不需要排序
+        actionCol.setSortable(false); // Action column doesn't need sorting
 
-        // 设置列宽和表格属性
+        // Set column widths and table properties
         transactionTable.getColumns().addAll(dateCol, typeCol, currencyCol, amountCol, categoryCol, paymentCol,
                 descriptionCol, actionCol);
         transactionTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         transactionTable.setPrefHeight(500);
 
-        // 启用点击编辑
+        // Enable click-to-edit
         transactionTable.setEditable(true);
     }
 }

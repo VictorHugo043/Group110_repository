@@ -22,6 +22,9 @@ import java.util.stream.Collectors;
  * 
  * The service integrates with JavaFX components to provide a responsive
  * and interactive transaction management interface.
+ *
+ * @author SE_Group110
+ * @version 4.0
  */
 public class TransactionManagementService {
     private final User currentUser;
@@ -61,7 +64,7 @@ public class TransactionManagementService {
         this.categoryFilter = categoryFilter;
         this.paymentMethodFilter = paymentMethodFilter;
 
-        // 加载交易数据并初始化
+        // Load transaction data and initialize
         loadTransactions();
     }
 
@@ -101,8 +104,8 @@ public class TransactionManagementService {
     public List<String> getUniqueValues(java.util.function.Function<Transaction, String> extractor) {
         Set<String> uniqueValues = allTransactions.stream()
                 .map(extractor)
-                .filter(Objects::nonNull)  // 过滤掉空值
-                .collect(Collectors.toCollection(TreeSet::new));  // 使用TreeSet保证排序
+                .filter(Objects::nonNull)  // Filter out null values
+                .collect(Collectors.toCollection(TreeSet::new));  // Use TreeSet to ensure sorting
         return new ArrayList<>(uniqueValues);
     }
 
@@ -110,7 +113,7 @@ public class TransactionManagementService {
      * Initializes all filter ComboBoxes with available options.
      */
     public void initializeFilters() {
-        // 更新各个筛选下拉框的选项
+        // Update options for each filter ComboBox
         updateComboBox(dateFilter, "Date", transaction -> transaction.getTransactionDate());
         updateComboBox(typeFilter, "Type", transaction -> transaction.getTransactionType());
         updateComboBox(currencyFilter, "Currency", transaction -> transaction.getCurrency());
@@ -123,7 +126,7 @@ public class TransactionManagementService {
      * Maintains the current sort order while applying filters.
      */
     public void applyFilters() {
-        // 暂时移除排序监听器以避免递归调用
+        // Temporarily remove sort listener to avoid recursive calls
         boolean hasSortOrder = transactionTable.getSortOrder().size() > 0;
         TableColumn<Transaction, ?> sortColumn = null;
         TableColumn.SortType sortType = null;
@@ -134,7 +137,7 @@ public class TransactionManagementService {
             transactionTable.getSortOrder().clear();
         }
 
-        // 应用过滤器
+        // Apply filters
         Predicate<Transaction> filter = transaction -> {
             boolean dateMatch = dateFilter.getValue() == null ||
                     dateFilter.getValue().startsWith("All") ||
@@ -161,7 +164,7 @@ public class TransactionManagementService {
 
         filteredTransactions.setPredicate(filter);
 
-        // 重新应用排序
+        // Reapply sorting
         if (hasSortOrder && sortColumn != null) {
             sortColumn.setSortType(sortType);
             transactionTable.getSortOrder().add(sortColumn);
@@ -173,7 +176,7 @@ public class TransactionManagementService {
      * Maintains the current sort order while resetting filters.
      */
     public void resetFilters() {
-        // 暂时移除排序监听器以避免递归调用
+        // Temporarily remove sort listener to avoid recursive calls
         boolean hasSortOrder = transactionTable.getSortOrder().size() > 0;
         TableColumn<Transaction, ?> sortColumn = null;
         TableColumn.SortType sortType = null;
@@ -191,7 +194,7 @@ public class TransactionManagementService {
         paymentMethodFilter.setValue("All Payment Method");
         filteredTransactions.setPredicate(null);
 
-        // 重新应用排序
+        // Reapply sorting
         if (hasSortOrder && sortColumn != null) {
             sortColumn.setSortType(sortType);
             transactionTable.getSortOrder().add(sortColumn);
@@ -206,7 +209,7 @@ public class TransactionManagementService {
     public void applySorting(Comparator<Transaction> comparator) {
         if (comparator == null) return;
 
-        // 直接对数据源应用排序
+        // Apply sorting directly to the data source
         FXCollections.sort(allTransactions, comparator);
     }
 
@@ -214,28 +217,28 @@ public class TransactionManagementService {
      * Refreshes the options in all filter ComboBoxes while maintaining current selections.
      */
     public void refreshFilterOptions() {
-        // 临时保存当前筛选值
+        // Temporarily save current filter values
         String dateValue = dateFilter.getValue();
         String typeValue = typeFilter.getValue();
         String currencyValue = currencyFilter.getValue();
         String categoryValue = categoryFilter.getValue();
         String paymentMethodValue = paymentMethodFilter.getValue();
 
-        // 更新各个筛选下拉框的选项
+        // Update options for each filter ComboBox
         updateComboBox(dateFilter, "Date", transaction -> transaction.getTransactionDate());
         updateComboBox(typeFilter, "Type", transaction -> transaction.getTransactionType());
         updateComboBox(currencyFilter, "Currency", transaction -> transaction.getCurrency());
         updateComboBox(categoryFilter, "Category", transaction -> transaction.getCategory());
         updateComboBox(paymentMethodFilter, "Payment Method", transaction -> transaction.getPaymentMethod());
 
-        // 还原之前的筛选值
+        // Restore previous filter values
         setComboBoxValueSafely(dateFilter, dateValue, "All Date");
         setComboBoxValueSafely(typeFilter, typeValue, "All Type");
         setComboBoxValueSafely(currencyFilter, currencyValue, "All Currency");
         setComboBoxValueSafely(categoryFilter, categoryValue, "All Category");
         setComboBoxValueSafely(paymentMethodFilter, paymentMethodValue, "All Payment Method");
 
-        // 重新应用筛选
+        // Reapply filters
         applyFilters();
     }
 
@@ -258,15 +261,15 @@ public class TransactionManagementService {
         List<String> items = new ArrayList<>();
         items.add("All " + name);
         if (name.equals("Date")) {
-            // 将日期字符串转换为可排序的对象
+            // Convert date strings to sortable objects
             List<String> sortedDates = new ArrayList<>(uniqueValues);
             sortedDates.sort((date1, date2) -> {
                 try {
-                    // 假设日期格式为 yyyy-MM-dd
+                    // Assume date format is yyyy-MM-dd
                     String[] parts1 = date1.split("-");
                     String[] parts2 = date2.split("-");
 
-                    // 按年、月、日比较
+                    // Compare by year, month, day
                     int yearCompare = Integer.compare(
                             Integer.parseInt(parts1[0]),
                             Integer.parseInt(parts2[0])
@@ -284,13 +287,13 @@ public class TransactionManagementService {
                             Integer.parseInt(parts2[2])
                     );
                 } catch (Exception e) {
-                    // 如果解析失败，回退到字符串比较
+                    // If parsing fails, fall back to string comparison
                     return date1.compareTo(date2);
                 }
             });
             items.addAll(sortedDates);
         } else {
-            // 其他字段保持原样
+            // Keep other fields as is
             items.addAll(uniqueValues);
         }
 
@@ -306,7 +309,7 @@ public class TransactionManagementService {
      * @param defaultValue The default value to use if the desired value is not available
      */
     private void setComboBoxValueSafely(ComboBox<String> comboBox, String value, String defaultValue) {
-        // 安全设置ComboBox的值
+        // Safely set ComboBox value
         if (value != null && comboBox.getItems().contains(value)) {
             comboBox.setValue(value);
         } else {
@@ -321,37 +324,37 @@ public class TransactionManagementService {
      * @return true if the transaction was deleted, false if the operation was cancelled
      */
     public boolean deleteTransaction(Transaction transaction) {
-        // 显示确认对话框
+        // Show confirmation dialog
         Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
-        confirmAlert.setTitle("确认删除");
-        confirmAlert.setHeaderText("您确定要删除此交易记录吗？");
-        confirmAlert.setContentText("日期: " + transaction.getTransactionDate() +
-                "\n类型: " + transaction.getTransactionType() +
-                "\n金额: " + transaction.getAmount() + " " + transaction.getCurrency() +
-                "\n类别: " + transaction.getCategory());
+        confirmAlert.setTitle("Confirm Delete");
+        confirmAlert.setHeaderText("Are you sure you want to delete this transaction?");
+        confirmAlert.setContentText("Date: " + transaction.getTransactionDate() +
+                "\nType: " + transaction.getTransactionType() +
+                "\nAmount: " + transaction.getAmount() + " " + transaction.getCurrency() +
+                "\nCategory: " + transaction.getCategory());
 
         Optional<ButtonType> result = confirmAlert.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
-            // 获取所有交易
+            // Get all transactions
             List<Transaction> transactions = txService.loadTransactions(currentUser);
 
-            // 找到并移除要删除的交易
+            // Find and remove the transaction to delete
             transactions.removeIf(tx -> tx.equals(transaction));
 
-            // 保存回文件
+            // Save back to file
             txService.saveTransactions(currentUser, transactions);
 
-            // 从当前表格中移除
+            // Remove from current table
             allTransactions.remove(transaction);
 
-            // 更新筛选选项
+            // Update filter options
             refreshFilterOptions();
 
-            // 显示删除成功消息
+            // Show success message
             Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
-            successAlert.setTitle("删除成功");
+            successAlert.setTitle("Delete Successful");
             successAlert.setHeaderText(null);
-            successAlert.setContentText("交易记录已成功删除！");
+            successAlert.setContentText("Transaction has been successfully deleted!");
             successAlert.showAndWait();
             return true;
         }
@@ -364,25 +367,25 @@ public class TransactionManagementService {
      * @param transaction The transaction to update
      */
     public void updateTransaction(Transaction transaction) {
-        // 获取所有交易
+        // Get all transactions
         List<Transaction> transactions = txService.loadTransactions(currentUser);
 
-        // 找到要修改的交易并替换
+        // Find and replace the transaction
         for (int i = 0; i < transactions.size(); i++) {
             if (transactions.get(i).equals(transaction)) {
-                // 删除旧的
+                // Remove old
                 transactions.remove(i);
                 break;
             }
         }
 
-        // 添加新的
+        // Add new
         transactions.add(transaction);
 
-        // 保存回文件
+        // Save back to file
         txService.saveTransactions(currentUser, transactions);
 
-        // 更新筛选选项
+        // Update filter options
         refreshFilterOptions();
     }
 }

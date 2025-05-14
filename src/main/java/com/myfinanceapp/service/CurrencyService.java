@@ -8,6 +8,9 @@ package com.myfinanceapp.service;
  * - Using fixed exchange rates for conversions
  * 
  * The service uses USD as the base currency for all conversions.
+ *
+ * @author SE_Group110
+ * @version 4.0
  */
 public class CurrencyService {
     // Fixed exchange rates with USD as the base currency

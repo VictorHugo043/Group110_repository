@@ -1,3 +1,4 @@
+/* Base body style for night mode */
 body {
     background-color: #3C3C3C;
     color: white;
@@ -5,11 +6,13 @@ body {
     padding: 0;
 }
 
+/* Chat history container style */
 .chat-history {
     padding: 10px;
     font-family: Arial, sans-serif;
 }
 
+/* User message bubble style */
 .user-message {
     background-color: #4A6FA5;
     border-radius: 10px;
@@ -19,6 +22,7 @@ body {
     color: white;
 }
 
+/* Assistant message bubble style */
 .assistant-message {
     background-color: #3C3C3C;
     border-radius: 10px;
@@ -28,7 +32,7 @@ body {
     color: white;
 }
 
-/* 修复过长内容溢出问题 */
+/* Fix long content overflow issues */
 .user-message, .assistant-message {
     word-wrap: break-word;
     overflow-wrap: break-word;

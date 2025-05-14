@@ -26,6 +26,9 @@ import java.nio.file.Path;
  * 
  * The service stores transaction data in encrypted JSON files
  * located at src/main/resources/transaction/{userUID}.json
+ *
+ * @author SE_Group110
+ * @version 4.0
  */
 public class TransactionDataService {
     private final String userUid;
@@ -53,7 +56,7 @@ public class TransactionDataService {
     JSONArray loadTransactionData() throws IOException {
         Path filePath = Paths.get(TRANSACTION_DIR, userUid + ".json");
         
-        // 如果文件不存在，返回空数组
+        // Return empty array if file doesn't exist
         if (!Files.exists(filePath)) {
             return new JSONArray();
         }
@@ -83,8 +86,8 @@ public class TransactionDataService {
      * @throws EncryptionException If there is an error deriving the key
      */
     private SecretKey getEncryptionKey() throws EncryptionException {
-        // 使用固定密钥和用户ID派生加密密钥
-        byte[] salt = userUid.getBytes();  // 使用用户ID作为盐值
+        // Use fixed key and user ID to derive encryption key
+        byte[] salt = userUid.getBytes();  // Use user ID as salt
         return EncryptionService.deriveKey(FIXED_KEY, salt);
     }
 

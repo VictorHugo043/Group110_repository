@@ -3,53 +3,56 @@ package com.myfinanceapp.model;
 import java.time.LocalDate;
 
 /**
- * 表示用户的财务目标。
- * 一个目标可以是储蓄目标、债务偿还或预算控制。
- * 每个目标都有目标金额、当前金额和可选的截止日期。
+ * Represents a user's financial goal.
+ * A goal can be a savings target, debt repayment, or budget control.
+ * Each goal has a target amount, current amount, and optional deadline.
+ *
+ * @author SE_Group110
+ * @version 4.0
  */
 public class Goal {
-    /** 表示储蓄类型的目标 */
+    /** Represents a savings type goal */
     private static final String TYPE_SAVING = "SAVING";
-    /** 表示债务偿还类型的目标 */
+    /** Represents a debt repayment type goal */
     private static final String TYPE_DEBT_REPAYMENT = "DEBT_REPAYMENT";
-    /** 表示预算控制类型的目标 */
+    /** Represents a budget control type goal */
     private static final String TYPE_BUDGET_CONTROL = "BUDGET_CONTROL";
-    /** 默认货币单位 */
+    /** Default currency unit */
     private static final String DEFAULT_CURRENCY = "CNY";
 
-    /** 目标的唯一标识符 */
+    /** Unique identifier for the goal */
     private String id;
-    /** 拥有此目标的用户ID */
+    /** ID of the user who owns this goal */
     private String userId;
-    /** 目标类型(SAVING, DEBT_REPAYMENT, 或 BUDGET_CONTROL) */
+    /** Goal type (SAVING, DEBT_REPAYMENT, or BUDGET_CONTROL) */
     private String type;
-    /** 目标标题 */
+    /** Goal title */
     private String title;
-    /** 目标金额 */
+    /** Target amount for the goal */
     private double targetAmount;
-    /** 当前已完成的金额 */
+    /** Current amount achieved */
     private double currentAmount;
-    /** 目标完成的截止日期 */
+    /** Deadline for goal completion */
     private LocalDate deadline;
-    /** 目标所属类别 */
+    /** Category of the goal */
     private String category;
-    /** 货币单位，默认为CNY */
+    /** Currency unit, defaults to CNY */
     private String currency = DEFAULT_CURRENCY;
 
     /**
-     * 默认构造函数。
-     * 创建一个空的Goal对象，需要通过setter方法设置属性。
+     * Default constructor.
+     * Creates an empty Goal object, properties need to be set using setter methods.
      */
     public Goal() {}
 
     /**
-     * 创建一个包含基本属性的Goal对象。
+     * Creates a Goal object with basic properties.
      *
-     * @param id 目标的唯一标识符
-     * @param userId 拥有此目标的用户ID
-     * @param type 目标类型
-     * @param title 目标标题
-     * @param targetAmount 目标金额
+     * @param id Unique identifier for the goal
+     * @param userId ID of the user who owns this goal
+     * @param type Goal type
+     * @param title Goal title
+     * @param targetAmount Target amount for the goal
      */
     public Goal(String id, String userId, String type, String title, double targetAmount) {
         this.id = id;
@@ -60,17 +63,17 @@ public class Goal {
     }
 
     /**
-     * 创建一个包含所有属性的Goal对象。
+     * Creates a Goal object with all properties.
      *
-     * @param id 目标的唯一标识符
-     * @param userId 拥有此目标的用户ID
-     * @param type 目标类型
-     * @param title 目标标题
-     * @param targetAmount 目标金额
-     * @param currentAmount 当前已完成的金额
-     * @param deadline 目标完成的截止日期
-     * @param category 目标所属类别
-     * @param currency 货币单位，如为null则使用默认值CNY
+     * @param id Unique identifier for the goal
+     * @param userId ID of the user who owns this goal
+     * @param type Goal type
+     * @param title Goal title
+     * @param targetAmount Target amount for the goal
+     * @param currentAmount Current amount achieved
+     * @param deadline Deadline for goal completion
+     * @param category Category of the goal
+     * @param currency Currency unit, if null defaults to CNY
      */
     public Goal(String id, String userId, String type, String title, 
                double targetAmount, double currentAmount, LocalDate deadline,
@@ -87,119 +90,119 @@ public class Goal {
     }
 
     /**
-     * 获取目标的唯一标识符。
-     * @return 目标ID
+     * Gets the unique identifier of the goal.
+     * @return Goal ID
      */
     public String getId() { return id; }
     
     /**
-     * 获取拥有此目标的用户ID。
-     * @return 用户ID
+     * Gets the ID of the user who owns this goal.
+     * @return User ID
      */
     public String getUserId() { return userId; }
     
     /**
-     * 获取目标类型。
-     * @return 目标类型(SAVING, DEBT_REPAYMENT, 或 BUDGET_CONTROL)
+     * Gets the type of the goal.
+     * @return Goal type (SAVING, DEBT_REPAYMENT, or BUDGET_CONTROL)
      */
     public String getType() { return type; }
     
     /**
-     * 获取目标标题。
-     * @return 目标标题
+     * Gets the title of the goal.
+     * @return Goal title
      */
     public String getTitle() { return title; }
     
     /**
-     * 获取目标金额。
-     * @return 目标金额
+     * Gets the target amount of the goal.
+     * @return Target amount
      */
     public double getTargetAmount() { return targetAmount; }
     
     /**
-     * 获取当前已完成的金额。
-     * @return 当前金额
+     * Gets the current amount achieved.
+     * @return Current amount
      */
     public double getCurrentAmount() { return currentAmount; }
     
     /**
-     * 获取目标完成的截止日期。
-     * @return 截止日期
+     * Gets the deadline for goal completion.
+     * @return Deadline
      */
     public LocalDate getDeadline() { return deadline; }
     
     /**
-     * 获取目标所属类别。
-     * @return 目标类别
+     * Gets the category of the goal.
+     * @return Goal category
      */
     public String getCategory() { return category; }
     
     /**
-     * 获取货币单位。
-     * @return 货币单位
+     * Gets the currency unit.
+     * @return Currency unit
      */
     public String getCurrency() { return currency; }
 
     /**
-     * 设置目标的唯一标识符。
-     * @param id 目标ID
+     * Sets the unique identifier of the goal.
+     * @param id Goal ID
      */
     public void setId(String id) { this.id = id; }
     
     /**
-     * 设置拥有此目标的用户ID。
-     * @param userId 用户ID
+     * Sets the ID of the user who owns this goal.
+     * @param userId User ID
      */
     public void setUserId(String userId) { this.userId = userId; }
     
     /**
-     * 设置目标类型。
-     * @param type 目标类型(SAVING, DEBT_REPAYMENT, 或 BUDGET_CONTROL)
+     * Sets the type of the goal.
+     * @param type Goal type (SAVING, DEBT_REPAYMENT, or BUDGET_CONTROL)
      */
     public void setType(String type) { this.type = type; }
     
     /**
-     * 设置目标标题。
-     * @param title 目标标题
+     * Sets the title of the goal.
+     * @param title Goal title
      */
     public void setTitle(String title) { this.title = title; }
     
     /**
-     * 设置目标金额。
-     * @param targetAmount 目标金额
+     * Sets the target amount of the goal.
+     * @param targetAmount Target amount
      */
     public void setTargetAmount(double targetAmount) { this.targetAmount = targetAmount; }
     
     /**
-     * 设置当前已完成的金额。
-     * @param currentAmount 当前金额
+     * Sets the current amount achieved.
+     * @param currentAmount Current amount
      */
     public void setCurrentAmount(double currentAmount) { this.currentAmount = currentAmount; }
     
     /**
-     * 设置目标完成的截止日期。
-     * @param deadline 截止日期
+     * Sets the deadline for goal completion.
+     * @param deadline Deadline
      */
     public void setDeadline(LocalDate deadline) { this.deadline = deadline; }
     
     /**
-     * 设置目标所属类别。
-     * @param category 目标类别
+     * Sets the category of the goal.
+     * @param category Goal category
      */
     public void setCategory(String category) { this.category = category; }
     
     /**
-     * 设置货币单位。
-     * @param currency 货币单位
+     * Sets the currency unit.
+     * @param currency Currency unit
      */
     public void setCurrency(String currency) { this.currency = currency; }
 
     /**
-     * 计算目标完成百分比。
-     * 当目标金额为0时返回0。
-     * 当完成度超过100%时返回100。
+     * Calculates the goal completion percentage.
+     * Returns 0 if target amount is 0.
+     * Returns 100 if completion exceeds 100%.
      *
-     * @return 目标完成的百分比(0-100)
+     * @return Goal completion percentage (0-100)
      */
     public int getProgressPercentage() {
         if (targetAmount == 0) return 0;
@@ -207,11 +210,11 @@ public class Goal {
     }
 
     /**
-     * 判断目标是否已完成。
-     * 对于预算控制类型，当前金额小于等于目标金额时视为完成；
-     * 对于其他类型，当前金额大于等于目标金额时视为完成。
+     * Determines if the goal is completed.
+     * For budget control type, goal is considered complete when current amount is less than or equal to target amount;
+     * For other types, goal is considered complete when current amount is greater than or equal to target amount.
      *
-     * @return 如果目标已完成返回true，否则返回false
+     * @return true if the goal is completed, false otherwise
      */
     public boolean isCompleted() {
         return TYPE_BUDGET_CONTROL.equals(type)

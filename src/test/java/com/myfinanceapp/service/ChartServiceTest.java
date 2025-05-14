@@ -19,6 +19,18 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+/**
+ * Unit test class for the ChartService.
+ * This class contains tests for chart generation and update functionality including:
+ * - Line chart updates
+ * - Bar chart updates
+ * - Pie chart updates
+ * - Currency conversion handling
+ * - Empty data handling
+ *
+ * @author SE_Group110
+ * @version 4.0
+ */
 @ExtendWith(ApplicationExtension.class)
 class ChartServiceTest {
 
@@ -30,11 +42,21 @@ class ChartServiceTest {
     private User mockUser;
     private CurrencyService mockCurrencyService;
 
+    /**
+     * Initializes the JavaFX toolkit before running tests.
+     * This ensures proper JavaFX environment setup.
+     */
     @BeforeAll
     static void initToolkit() {
         // This ensures the JavaFX toolkit is initialized before any tests run
     }
 
+    /**
+     * Sets up the test environment with real JavaFX components and mocked services.
+     * Initializes charts and configures mock behavior for services.
+     *
+     * @param stage The JavaFX stage (unused in this context)
+     */
     @Start
     void start(javafx.stage.Stage stage) {
         // Initialize real JavaFX components instead of mocks
@@ -54,6 +76,13 @@ class ChartServiceTest {
         chartService = new ChartService(lineChart, barChart, pieChart, mockTxService, mockUser, mockCurrencyService);
     }
 
+    /**
+     * Tests updating all charts with valid transaction data.
+     * Verifies that:
+     * - Line chart shows both income and expense series
+     * - Bar chart shows both income and expense series
+     * - Pie chart shows expense categories
+     */
     @Test
     void updateAllCharts_updatesAllChartsWithCorrectDateRange() {
         List<Transaction> transactions = createSampleTransactions();
@@ -79,6 +108,13 @@ class ChartServiceTest {
         assertTrue(pieChart.getData().stream().anyMatch(d -> d.getName().contains("Food")));
     }
 
+    /**
+     * Tests chart updates with empty transaction data.
+     * Verifies that:
+     * - Line chart shows empty series
+     * - Bar chart shows empty series
+     * - Pie chart remains empty
+     */
     @Test
     void updateAllCharts_handlesEmptyTransactions() {
         when(mockTxService.loadTransactions(mockUser)).thenReturn(new ArrayList<>());
@@ -102,6 +138,13 @@ class ChartServiceTest {
         assertTrue(pieChart.getData().isEmpty()); // No expenses = empty pie
     }
 
+    /**
+     * Tests chart updates with currency conversion.
+     * Verifies that:
+     * - Line chart shows converted values
+     * - Bar chart shows converted values
+     * - Pie chart shows converted values
+     */
     @Test
     void updateAllCharts_handlesCurrencyConversion() {
         List<Transaction> transactions = createSampleTransactions();
@@ -132,6 +175,14 @@ class ChartServiceTest {
                 .anyMatch(d -> Math.abs(d.getPieValue() - 7.04) < 0.001));
     }
 
+    /**
+     * Creates sample transaction data for testing.
+     * Includes:
+     * - One income transaction (Salary)
+     * - Two expense transactions (Food and Rent)
+     *
+     * @return List of sample transactions
+     */
     private List<Transaction> createSampleTransactions() {
         List<Transaction> transactions = new ArrayList<>();
 

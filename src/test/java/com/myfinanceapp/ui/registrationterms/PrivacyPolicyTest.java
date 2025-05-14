@@ -19,12 +19,31 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.Mockito.mockStatic;
 
+/**
+ * Unit test class for the PrivacyPolicy scene.
+ * This class contains tests for privacy policy functionality including:
+ * - Scene creation and initialization
+ * - UI component validation
+ * - Text content verification
+ * - Navigation button handling
+ *
+ * @author SE_Group110
+ * @version 4.0
+ */
 @ExtendWith({MockitoExtension.class, ApplicationExtension.class})
 class PrivacyPolicyTest {
 
     @Mock
     private Stage stageMock;
 
+    /**
+     * Tests the creation of the privacy policy scene.
+     * Verifies that:
+     * - Scene is created with correct dimensions
+     * - Required UI components are present
+     * - Privacy policy text is displayed and non-editable
+     * - Back button is present and functional
+     */
     @Test
     void createScene() {
         // Define expected dimensions
@@ -71,7 +90,11 @@ class PrivacyPolicyTest {
     }
     
     /**
-     * Helper method to recursively get all nodes in the scene graph
+     * Helper method to recursively get all nodes in the scene graph.
+     * Traverses the entire scene graph and collects all nodes.
+     *
+     * @param root The root node of the scene graph
+     * @return List of all nodes in the scene graph
      */
     private java.util.List<javafx.scene.Node> getAllNodes(Parent root) {
         java.util.List<javafx.scene.Node> nodes = new java.util.ArrayList<>();
@@ -79,6 +102,13 @@ class PrivacyPolicyTest {
         return nodes;
     }
     
+    /**
+     * Recursively adds all descendant nodes to the provided list.
+     * Helper method for scene graph traversal.
+     *
+     * @param parent The parent node to traverse
+     * @param nodes The list to collect nodes in
+     */
     private void addAllDescendants(Parent parent, java.util.List<javafx.scene.Node> nodes) {
         for (javafx.scene.Node node : parent.getChildrenUnmodifiable()) {
             nodes.add(node);

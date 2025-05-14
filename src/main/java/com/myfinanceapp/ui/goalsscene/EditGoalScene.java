@@ -35,6 +35,9 @@ import java.time.LocalDate;
  * - Supporting multiple currencies and languages
  * - Handling theme-specific styling
  * - Enforcing minimum window dimensions
+ *
+ * @author SE_Group110
+ * @version 4.0
  */
 public class EditGoalScene {
     private static final Logger logger = LoggerFactory.getLogger(EditGoalScene.class);
@@ -50,7 +53,7 @@ public class EditGoalScene {
     private static final double MIN_WINDOW_WIDTH = 800;
     private static final double MIN_WINDOW_HEIGHT = 450;
 
-    // 存储ThemeService实例
+    // Store ThemeService instance
     private static ThemeService themeService;
 
     /**
@@ -99,9 +102,9 @@ public class EditGoalScene {
      * @return A Scene object for editing goals
      */
     public static Scene createScene(Stage stage, double width, double height, User loggedUser, Goal goalToEdit, ThemeService themeService, CurrencyService currencyService) {
-        EditGoalScene.themeService = themeService; // 存储ThemeService实例
+        EditGoalScene.themeService = themeService; // Store ThemeService instance
 
-        // 确保窗口大小不小于最小值
+        // Ensure window size is not less than minimum
         final double finalWidth = Math.max(width, MIN_WINDOW_WIDTH);
         final double finalHeight = Math.max(height, MIN_WINDOW_HEIGHT);
 
@@ -117,7 +120,7 @@ public class EditGoalScene {
         mainBox.setAlignment(Pos.CENTER);
         mainBox.setPadding(new Insets(MAIN_PADDING));
 
-        // 绑定主容器最大宽度到窗口宽度
+        // Bind main container max width to window width
         mainBox.maxWidthProperty().bind(
                 root.widthProperty()
                         .subtract(sideBar.widthProperty())
@@ -135,7 +138,7 @@ public class EditGoalScene {
         grid.setVgap(15);
         grid.setAlignment(Pos.CENTER);
 
-        // 绑定网格宽度到主容器宽度
+        // Bind grid width to main container width
         grid.prefWidthProperty().bind(mainBox.maxWidthProperty());
 
         // Goal type label (disabled)
@@ -237,7 +240,7 @@ public class EditGoalScene {
             SceneManager.switchScene(stage, goalsScene);
         });
 
-        // 绑定按钮宽度
+        // Bind button width
         saveButton.prefWidthProperty().bind(buttonBox.widthProperty().multiply(0.2));
         cancelButton.prefWidthProperty().bind(buttonBox.widthProperty().multiply(0.2));
 
@@ -251,13 +254,13 @@ public class EditGoalScene {
         centerContainer.setAlignment(Pos.CENTER);
         root.setCenter(centerContainer);
 
-        // 创建场景
+        // Create scene
         Scene scene = new Scene(root, finalWidth, finalHeight);
 
-        // 添加全局样式表
+        // Add global stylesheet
         scene.getStylesheets().add("data:text/css," + themeService.getThemeStylesheet());
 
-        // 添加窗口大小变化监听器
+        // Add window size change listener
         scene.widthProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal.doubleValue() < MIN_WINDOW_WIDTH) {
                 stage.setWidth(MIN_WINDOW_WIDTH);
@@ -270,7 +273,7 @@ public class EditGoalScene {
             }
         });
 
-        // 设置窗口标题
+        // Set window title
         stage.setTitle("Finanger - " + languageService.getTranslation("edit_goal"));
 
         return scene;
@@ -310,7 +313,7 @@ public class EditGoalScene {
         ComboBox<String> comboBox = new ComboBox<>();
         comboBox.getItems().addAll(items);
         comboBox.setPrefWidth(FIELD_WIDTH);
-        // 应用主题样式类
+        // Apply theme style class
         comboBox.getStyleClass().add(themeService.isDayMode() ? "day-theme-combo-box" : "night-theme-combo-box");
         addStyledRow(grid, row, labelText, comboBox, font, themeService);
         return comboBox;
@@ -331,7 +334,7 @@ public class EditGoalScene {
         TextField textField = new TextField();
         textField.setPromptText(promptText);
         textField.setPrefWidth(FIELD_WIDTH);
-        // 应用自定义样式
+        // Apply custom style
         String textFieldStyle = themeService.isDayMode() ?
                 "-fx-background-color: white; -fx-text-fill: black; -fx-prompt-text-fill: #555555; -fx-border-color: #D3D3D3; -fx-border-radius: 3;" :
                 "-fx-background-color: #3C3C3C; -fx-text-fill: white; -fx-prompt-text-fill: #CCCCCC; -fx-border-color: #555555; -fx-border-radius: 3;";
@@ -353,7 +356,7 @@ public class EditGoalScene {
     private static DatePicker createDatePicker(int row, GridPane grid, String labelText, Font font, ThemeService themeService) {
         DatePicker datePicker = new DatePicker();
         datePicker.setPrefWidth(FIELD_WIDTH);
-        // 应用主题样式类
+        // Apply theme style class
         datePicker.getStyleClass().add(themeService.isDayMode() ? "day-theme-date-picker" : "night-theme-date-picker");
         addStyledRow(grid, row, labelText, datePicker, font, themeService);
         return datePicker;

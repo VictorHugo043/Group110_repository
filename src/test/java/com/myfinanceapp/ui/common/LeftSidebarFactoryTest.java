@@ -15,6 +15,17 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 
+/**
+ * Unit test class for the LeftSidebarFactory.
+ * This class contains tests for sidebar UI component functionality including:
+ * - Sidebar creation and structure
+ * - Button selection states
+ * - Welcome message variations
+ * - Style and layout properties
+ *
+ * @author SE_Group110
+ * @version 4.0
+ */
 @ExtendWith(MockitoExtension.class)
 class LeftSidebarFactoryTest {
 
@@ -24,11 +35,26 @@ class LeftSidebarFactoryTest {
     @Mock
     private User mockUser;
     
+    /**
+     * Sets up the test environment before each test.
+     * Initializes mock objects for Stage and User.
+     */
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
     }
 
+    /**
+     * Tests the creation and properties of the left sidebar.
+     * Verifies:
+     * - Sidebar structure and dimensions
+     * - Welcome message variations based on selected button
+     * - Button styles for selected and non-selected states
+     * - Layout properties and component hierarchy
+     * 
+     * Note: This test requires JavaFX thread initialization.
+     * For proper testing, consider using TestFX framework.
+     */
     @Test
     void createLeftSidebar() {
         // Since JavaFX components cannot be directly tested without a running JavaFX thread,

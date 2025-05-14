@@ -16,12 +16,31 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Unit test class for the GoalService.
+ * This class contains tests for financial goal management functionality including:
+ * - Goal creation and retrieval
+ * - Goal updates and modifications
+ * - Goal deletion
+ * - Goal persistence
+ * - User-specific goal handling
+ *
+ * @author SE_Group110
+ * @version 4.0
+ */
 class GoalServiceTest {
 
     private User testUser;
     private Goal testGoal;
     private File goalsFile;
 
+    /**
+     * Sets up the test environment before each test.
+     * Initializes test user, test goal, and goals file.
+     * Ensures clean test environment by removing any existing goal files.
+     *
+     * @throws IOException if file operations fail
+     */
     @BeforeEach
     void setUp() throws IOException {
         testUser = new User();
@@ -54,6 +73,15 @@ class GoalServiceTest {
         }
     }
 
+    /**
+     * Tests the retrieval of user goals.
+     * Verifies that:
+     * - Initially returns empty list
+     * - Returns correct goal after adding
+     * - Goal properties are correctly stored and retrieved
+     *
+     * @throws IOException if file operations fail
+     */
     @Test
     void getUserGoals() throws IOException {
         List<Goal> goals = GoalService.getUserGoals(testUser);
@@ -69,6 +97,15 @@ class GoalServiceTest {
         assertEquals(testGoal.getTargetAmount(), goals.get(0).getTargetAmount(), 0.001);
     }
 
+    /**
+     * Tests the addition of a new goal.
+     * Verifies that:
+     * - Goal is successfully added
+     * - Goal properties are correctly set
+     * - Default values are properly initialized
+     *
+     * @throws IOException if file operations fail
+     */
     @Test
     void addGoal() throws IOException {
         Goal newGoal = new Goal();
@@ -89,6 +126,15 @@ class GoalServiceTest {
         assertEquals(0.0, goals.get(0).getCurrentAmount(), 0.001);
     }
 
+    /**
+     * Tests the update of an existing goal.
+     * Verifies that:
+     * - Goal is successfully updated
+     * - All properties are correctly modified
+     * - Other goals remain unchanged
+     *
+     * @throws IOException if file operations fail
+     */
     @Test
     void updateGoal() throws IOException {
         GoalService.addGoal(testGoal, testUser);
@@ -117,6 +163,15 @@ class GoalServiceTest {
         assertEquals("USD", goals.get(0).getCurrency());
     }
 
+    /**
+     * Tests the deletion of a goal.
+     * Verifies that:
+     * - Goal is successfully deleted
+     * - Other goals remain intact
+     * - Goal list is correctly updated
+     *
+     * @throws IOException if file operations fail
+     */
     @Test
     void deleteGoal() throws IOException {
         Goal goal2 = new Goal(
@@ -139,6 +194,15 @@ class GoalServiceTest {
         assertEquals("Loan Repayment", goals.get(0).getTitle());
     }
 
+    /**
+     * Tests the persistence of goals to file.
+     * Verifies that:
+     * - Goals are successfully saved to file
+     * - Goals can be loaded from file
+     * - All goal properties are preserved
+     *
+     * @throws IOException if file operations fail
+     */
     @Test
     void saveGoals() throws IOException {
         Goal goal2 = new Goal(
@@ -174,6 +238,10 @@ class GoalServiceTest {
         ), "Second goal should be present");
     }
 
+    /**
+     * Cleans up test resources after each test.
+     * Removes the test goals file if it exists.
+     */
     @AfterEach
     void tearDown() {
         if (goalsFile.exists()) {

@@ -21,13 +21,25 @@ import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+/**
+ * Unit test class for the TransactionManagementService.
+ * This class contains tests for transaction management functionality including:
+ * - Transaction loading and filtering
+ * - Transaction updates
+ * - Filter operations
+ * - UI component interactions
+ * - Data synchronization
+ *
+ * @author SE_Group110
+ * @version 4.0
+ */
 public class TransactionManagementServiceTest {
 
-    /* --------- 仍然用 mock 的对象 --------- */
+    /* --------- Mock objects --------- */
     @Mock private TransactionService mockTxService;
     @Mock private User              mockUser;
 
-    /* --------- 用真实 JavaFX 控件 --------- */
+    /* --------- Real JavaFX controls --------- */
     private TableView<Transaction>  tableView;
     private ComboBox<String> dateFilter;
     private ComboBox<String> typeFilter;
@@ -38,16 +50,27 @@ public class TransactionManagementServiceTest {
     private TransactionManagementService service;
     private List<Transaction> testTransactions;
 
+    /**
+     * Initializes the JavaFX runtime environment.
+     * Required for testing JavaFX components.
+     */
     @BeforeClass
-    public static void initJfx() {           // 初始化 JavaFX runtime
+    public static void initJfx() {
         new JFXPanel();
     }
 
+    /**
+     * Sets up the test environment before each test.
+     * Initializes mock objects, test data, and UI components.
+     * Configures the service with test data and initializes filters.
+     *
+     * @throws Exception if setup fails
+     */
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.openMocks(this);
 
-        /* --------- 构造 2 条测试交易 --------- */
+        /* --------- Create test transactions --------- */
         testTransactions = new ArrayList<>();
         Transaction tx1 = new Transaction();
         tx1.setTransactionDate("2023-01-15");
@@ -71,7 +94,7 @@ public class TransactionManagementServiceTest {
         when(mockTxService.loadTransactions(any(User.class)))
                 .thenReturn(testTransactions);
 
-        /* --------- 创建真实控件并初始化选项 --------- */
+        /* --------- Create and initialize real controls --------- */
         dateFilter      = buildCombo("All Date",      "2023-01-15", "2023-01-20");
         typeFilter      = buildCombo("All Type",      "Income", "Expense");
         currencyFilter  = buildCombo("All Currency",  "USD");
@@ -80,24 +103,30 @@ public class TransactionManagementServiceTest {
 
         tableView = new TableView<>();
 
-        /* --------- 创建待测 service --------- */
+        /* --------- Create service under test --------- */
         service = new TransactionManagementService(
                 mockUser, tableView,
                 dateFilter, typeFilter, currencyFilter,
                 categoryFilter, paymentFilter);
 
-        // --- 把内部 txService 换成 mock ---
+        // Replace internal txService with mock
         Field f = TransactionManagementService.class.getDeclaredField("txService");
         f.setAccessible(true);
         f.set(service, mockTxService);
 
-        /* 重新加载 & 初始化 ↓↓↓ */
-        service.loadTransactions();      // 重新从 mockTxService 获取测试数据
-        service.initializeFilters();     // 让各 ComboBox 选项同步
-
+        /* Reload and initialize */
+        service.loadTransactions();      // Reload test data from mockTxService
+        service.initializeFilters();     // Synchronize ComboBox options
     }
 
-    /* ---------- 帮助方法 ---------- */
+    /**
+     * Helper method to create and initialize a ComboBox.
+     * Sets up the ComboBox with the specified first item and additional items.
+     *
+     * @param first The first item in the ComboBox
+     * @param rest Additional items to add to the ComboBox
+     * @return Initialized ComboBox with the specified items
+     */
     private ComboBox<String> buildCombo(String first, String... rest) {
         ComboBox<String> cb = new ComboBox<>();
         ObservableList<String> items = FXCollections.observableArrayList();
@@ -108,8 +137,12 @@ public class TransactionManagementServiceTest {
         return cb;
     }
 
-    /* =============== 测试 =============== */
+    /* =============== Tests =============== */
 
+    /**
+     * Tests that loadTransactions calls the service exactly once.
+     * Verifies the interaction with the transaction service.
+     */
     @Test
     public void loadTransactions_callsServiceOnce() {
         clearInvocations(mockTxService);
@@ -117,6 +150,10 @@ public class TransactionManagementServiceTest {
         verify(mockTxService, times(1)).loadTransactions(mockUser);
     }
 
+    /**
+     * Tests transaction update functionality.
+     * Verifies that modified transactions are saved back to the service.
+     */
     @Test
     public void updateTransaction_savesBack() {
         Transaction modified = new Transaction();
@@ -131,6 +168,10 @@ public class TransactionManagementServiceTest {
         verify(mockTxService).saveTransactions(eq(mockUser), any(List.class));
     }
 
+    /**
+     * Tests unique value extraction from transactions.
+     * Verifies that distinct values are correctly extracted from transaction properties.
+     */
     @Test
     public void getUniqueValues_returnsDistinct() {
         List<String> dates = service.getUniqueValues(Transaction::getTransactionDate);
@@ -139,9 +180,13 @@ public class TransactionManagementServiceTest {
         assertTrue(dates.contains("2023-01-20"));
     }
 
+    /**
+     * Tests date-based filtering functionality.
+     * Verifies that transactions are correctly filtered by date.
+     */
     @Test
     public void applyFilters_filtersByDate() {
-        dateFilter.setValue("2023-01-15");   // 只看 15 号
+        dateFilter.setValue("2023-01-15");   // Filter for January 15th only
 
         service.applyFilters();
         FilteredList<Transaction> filtered = service.getFilteredTransactions();
@@ -149,14 +194,18 @@ public class TransactionManagementServiceTest {
         assertEquals("2023-01-15", filtered.get(0).getTransactionDate());
     }
 
+    /**
+     * Tests filter reset functionality.
+     * Verifies that all filter ComboBoxes are reset to their default "All" values.
+     */
     @Test
     public void resetFilters_resetsComboValues() {
-        // 改成其他值
+        // Change to different value
         typeFilter.setValue("Income");
-        // 调用
+        // Call reset
         service.resetFilters();
 
-        // 断言回到 All*
+        // Assert back to All*
         assertEquals("All Type", typeFilter.getValue());
         assertEquals("All Date", dateFilter.getValue());
     }

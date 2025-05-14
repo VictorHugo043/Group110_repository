@@ -22,6 +22,17 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+/**
+ * Unit test class for the CreateGoalScene.
+ * This class contains tests for goal creation scene functionality including:
+ * - Scene creation and initialization
+ * - Form validation
+ * - Goal saving process
+ * - User interaction handling
+ *
+ * @author SE_Group110
+ * @version 4.0
+ */
 @ExtendWith({MockitoExtension.class, ApplicationExtension.class})
 class CreateGoalSceneTest {
 
@@ -33,6 +44,13 @@ class CreateGoalSceneTest {
     
     private Scene scene;
 
+    /**
+     * Tests the creation of the goal creation scene.
+     * Verifies:
+     * - Scene is created successfully
+     * - Scene dimensions are set correctly
+     * - Scene is properly initialized
+     */
     @Test
     void createScene() {
         scene = CreateGoalScene.createScene(mockStage, 800, 600, mockUser);
@@ -42,6 +60,13 @@ class CreateGoalSceneTest {
         assertEquals(600, scene.getHeight());
     }
     
+    /**
+     * Tests scene creation with null user.
+     * Verifies that:
+     * - Scene can be created without a user
+     * - Scene is properly initialized
+     * - No null pointer exceptions occur
+     */
     @Test
     void createSceneWithNullUser() {
         scene = CreateGoalScene.createScene(mockStage, 800, 600, null);
@@ -49,18 +74,39 @@ class CreateGoalSceneTest {
         assertNotNull(scene);
     }
     
+    /**
+     * Tests form validation for negative amount input.
+     * Note: This test requires TestFX framework or method refactoring.
+     * Current implementation is a placeholder for demonstration.
+     */
     @Test
     void validateFormRejectsNegativeAmount() {
         // This test would need to access private method or test via the UI
         // For demonstration only - would require refactoring or TestFX
     }
     
+    /**
+     * Tests form validation for past deadline input.
+     * Note: This test requires TestFX framework or method refactoring.
+     * Current implementation is a placeholder for demonstration.
+     */
     @Test
     void validateFormRejectsPastDeadline() {
         // This test would need to access private method or test via the UI
         // For demonstration only - would require refactoring or TestFX
     }
     
+    /**
+     * Tests the goal saving process.
+     * Verifies that:
+     * - GoalService is called with correct parameters
+     * - Goal and User objects are properly passed
+     * 
+     * Note: This test requires TestFX framework for proper UI interaction testing.
+     * Current implementation is a placeholder for demonstration.
+     *
+     * @throws IOException if there is an error during goal saving
+     */
     @Test
     void saveGoalCallsGoalService() throws IOException {
         // Would require TestFX or refactoring to test properly

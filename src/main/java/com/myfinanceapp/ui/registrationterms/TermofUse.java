@@ -18,6 +18,9 @@ import java.io.InputStreamReader;
  * A terms of use display interface for the Finanger application.
  * This scene presents the application's terms of use in a scrollable text area
  * with a professional layout including a header and navigation controls.
+ *
+ * @author SE_Group110
+ * @version 4.0
  */
 public class TermofUse {
     private static final double INITIAL_WIDTH = 800;
@@ -37,17 +40,17 @@ public class TermofUse {
         BorderPane root = new BorderPane();
         root.setPrefSize(width, height);
 
-        // 设置最小窗口尺寸
+        // Set minimum window dimensions
         stage.setMinWidth(INITIAL_WIDTH);
         stage.setMinHeight(INITIAL_HEIGHT);
         stage.setResizable(true);
 
-        // 顶部区域
+        // Top area
         VBox topContainer = new VBox();
         topContainer.setPadding(new Insets(10, 15, 0, 15));
         topContainer.setSpacing(5);
 
-        // 行1: 左侧LOGO和右侧Back按钮
+        // Row 1: Left LOGO and right Back button
         HBox logoBackRow = new HBox();
         logoBackRow.setAlignment(Pos.CENTER_LEFT);
 
@@ -67,7 +70,7 @@ public class TermofUse {
         });
         logoBackRow.getChildren().addAll(logoLabel, spacer, backBtn);
 
-        // 行2: 居中显示 Last Updated 和 主标题
+        // Row 2: Center Last Updated and main title
         VBox updatedAndTitleBox = new VBox();
         updatedAndTitleBox.setAlignment(Pos.CENTER);
 
@@ -82,14 +85,14 @@ public class TermofUse {
         topContainer.getChildren().addAll(logoBackRow, updatedAndTitleBox);
         root.setTop(topContainer);
 
-        // 中心区域：TextArea 自动填充
+        // Center area: TextArea auto-fill
         TextArea textArea = new TextArea(loadTermsContent("/terms/TermOfUse.txt"));
         textArea.setWrapText(true);
         textArea.setEditable(false);
         textArea.setPadding(new Insets(10));
         textArea.setStyle("-fx-border-color: black; -fx-border-width: 1;");
 
-        // 绑定宽高，使其随 root 变化
+        // Bind width and height to root
         textArea.prefWidthProperty().bind(root.widthProperty().subtract(40));
         textArea.prefHeightProperty().bind(root.heightProperty().subtract(topContainer.getHeight() + 40));
         root.setCenter(textArea);

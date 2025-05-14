@@ -19,12 +19,31 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.Mockito.mockStatic;
 
+/**
+ * Unit test class for the ResetPassword scene.
+ * This class contains tests for password reset functionality including:
+ * - Scene creation and initialization
+ * - Scene dimension validation
+ * - UI component setup
+ * - Scene navigation
+ *
+ * @author SE_Group110
+ * @version 4.0
+ */
 @ExtendWith({MockitoExtension.class, ApplicationExtension.class})
 class ResetPasswordTest {
 
     @Mock
     private Stage stageMock;
 
+    /**
+     * Tests the creation of the reset password scene.
+     * Verifies that:
+     * - Scene is created successfully
+     * - Scene dimensions are set correctly
+     * - Scene is properly initialized
+     * - LoginScene integration works correctly
+     */
     @Test
     void createScene() {
         // Test that the createScene method returns a valid Scene

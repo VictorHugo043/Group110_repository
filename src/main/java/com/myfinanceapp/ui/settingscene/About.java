@@ -20,6 +20,9 @@ import javafx.stage.Stage;
  * An about page interface for the Finanger application.
  * This scene displays information about the application, including its description
  * and version details, with support for theme customization and internationalization.
+ *
+ * @author SE_Group110
+ * @version 4.0
  */
 public class About {
     private static final LanguageService languageService = LanguageService.getInstance();
@@ -63,25 +66,25 @@ public class About {
      * @return A configured Scene object for the about interface
      */
     public static Scene createScene(Stage stage, double width, double height, User loggedUser, ThemeService themeService, CurrencyService currencyService) {
-        // 整体 BorderPane
+        // Main BorderPane
         BorderPane root = new BorderPane();
         root.setStyle(themeService.getCurrentThemeStyle());
 
-        // 左侧边栏: Settings选中 (与 SystemSettings 相同)
+        // Left sidebar: Settings selected (same as SystemSettings)
         VBox sideBar = LeftSidebarFactory.createLeftSidebar(stage, "Settings", loggedUser, themeService, currencyService);
         root.setLeft(sideBar);
 
-        // 中心容器: 垂直组合 (topBar, outerBox)，放入 centerBox
+        // Center container: vertical combination (topBar, outerBox), placed in centerBox
         HBox centerBox = new HBox();
         centerBox.setAlignment(Pos.CENTER);
 
         VBox container = new VBox(0);
         container.setAlignment(Pos.CENTER);
 
-        // Tab栏: About 选中
+        // Tab bar: About selected
         HBox topBar = SettingsTopBarFactory.createTopBar(stage, "About", loggedUser, themeService, currencyService);
 
-        // outerBox: 下方圆角容器
+        // outerBox: bottom rounded container
         VBox outerBox = new VBox(0);
         outerBox.setAlignment(Pos.TOP_CENTER);
         outerBox.setMaxWidth(510);
@@ -94,7 +97,7 @@ public class About {
                         themeService.getCurrentFormBackgroundStyle()
         );
 
-        // 中心内容：About 文本
+        // Center content: About text
         Pane aboutContent = createAboutContent(stage, width, height, loggedUser, themeService, currencyService);
 
         outerBox.getChildren().addAll(aboutContent);
@@ -139,7 +142,7 @@ public class About {
         scrollPane.setPrefViewportHeight(250); // Set a reasonable height for the viewport
         scrollPane.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
 
-        // 按钮区
+        // Button area
         VBox buttonBox = new VBox();
         buttonBox.setAlignment(Pos.CENTER);
         buttonBox.setPadding(new Insets(20, 0, 0, 0));

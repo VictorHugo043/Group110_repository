@@ -13,6 +13,17 @@ import org.testfx.framework.junit5.ApplicationExtension;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Unit test class for the StatusScene.
+ * This class contains tests for status scene functionality including:
+ * - Scene creation and initialization
+ * - UI component validation
+ * - Chart initialization and configuration
+ * - Default value verification
+ *
+ * @author SE_Group110
+ * @version 4.0
+ */
 @ExtendWith(ApplicationExtension.class)
 class StatusSceneTest {
 
@@ -22,6 +33,10 @@ class StatusSceneTest {
     private User testUser;
     private StatusScene statusScene;
 
+    /**
+     * Sets up the test environment before each test.
+     * Initializes mock objects and creates a test user with predefined values.
+     */
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
@@ -31,12 +46,24 @@ class StatusSceneTest {
         statusScene = new StatusScene(stageMock, 800, 600, testUser);
     }
 
+    /**
+     * Tests the creation of the status scene.
+     * Verifies that:
+     * - Scene is created successfully
+     * - Scene is not null
+     */
     @Test
     void createScene_shouldReturnNonNullScene() {
         Scene scene = statusScene.createScene();
         assertNotNull(scene);
     }
 
+    /**
+     * Tests the dimensions of the status scene.
+     * Verifies that:
+     * - Scene width is set correctly
+     * - Scene height is set correctly
+     */
     @Test
     void createScene_shouldSetCorrectDimensions() {
         Scene scene = statusScene.createScene();
@@ -44,12 +71,25 @@ class StatusSceneTest {
         assertEquals(600, scene.getHeight());
     }
 
+    /**
+     * Tests the initialization of UI components in the status scene.
+     * Verifies that all required components are properly initialized:
+     * - Date pickers
+     * - Chart type combo box
+     * - Labels
+     * - Charts (Line, Bar, Pie)
+     * - Web view for suggestions
+     * - Question area
+     * - Send button
+     * - Transaction box
+     * - Chart pane
+     */
     @Test
     void createScene_shouldInitializeUIComponents() {
         statusScene.createScene();
 
-        assertNotNull(statusScene.startDatePicker); // 替换 dateCombo
-        assertNotNull(statusScene.endDatePicker);   // 替换 dateCombo
+        assertNotNull(statusScene.startDatePicker);
+        assertNotNull(statusScene.endDatePicker);
         assertNotNull(statusScene.chartTypeCombo);
         assertNotNull(statusScene.exLabel);
         assertNotNull(statusScene.inLabel);
@@ -63,6 +103,12 @@ class StatusSceneTest {
         assertNotNull(statusScene.chartPane);
     }
 
+    /**
+     * Tests the default values for combo boxes in the status scene.
+     * Verifies that:
+     * - Default chart type is set to "Line graph"
+     * - Chart type options include both "Line graph" and "Bar graph"
+     */
     @Test
     void createScene_shouldSetDefaultValuesForComboBoxes() {
         statusScene.createScene();
@@ -72,6 +118,13 @@ class StatusSceneTest {
         assertTrue(statusScene.chartTypeCombo.getItems().contains("Bar graph"));
     }
 
+    /**
+     * Tests the initialization of the chart pane in the status scene.
+     * Verifies that:
+     * - Chart pane is not null
+     * - Chart pane contains exactly one child
+     * - The child is an instance of LineChart
+     */
     @Test
     void createScene_shouldInitializeChartPane() {
         statusScene.createScene();

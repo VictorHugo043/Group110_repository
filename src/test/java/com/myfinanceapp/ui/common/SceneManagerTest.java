@@ -12,6 +12,17 @@ import org.testfx.util.WaitForAsyncUtils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+/**
+ * Unit test class for the SceneManager.
+ * This class contains tests for scene management functionality including:
+ * - Scene switching
+ * - Window size maintenance
+ * - JavaFX event handling
+ * - Stage management
+ *
+ * @author SE_Group110
+ * @version 4.0
+ */
 @ExtendWith(ApplicationExtension.class)
 public class SceneManagerTest {
 
@@ -19,6 +30,12 @@ public class SceneManagerTest {
     private Scene originalScene;
     private Scene newScene;
 
+    /**
+     * Initializes the test environment with a JavaFX stage and scenes.
+     * Sets up the initial scene and displays the stage.
+     *
+     * @param stage The JavaFX stage provided by TestFX
+     */
     @Start
     void start(Stage stage) {
         this.stage = stage;
@@ -31,6 +48,13 @@ public class SceneManagerTest {
         WaitForAsyncUtils.waitForFxEvents(); // Ensure JavaFX events are processed
     }
 
+    /**
+     * Tests that scene switching maintains the window size.
+     * Verifies that:
+     * - Initial window dimensions are preserved
+     * - Scene is correctly switched
+     * - Window size remains unchanged after scene switch
+     */
     @Test
     void testSwitchSceneMaintainsWindowSize() {
         // Arrange

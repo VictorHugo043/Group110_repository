@@ -42,6 +42,9 @@ import java.util.ArrayList;
  * - Supporting multiple currencies and languages
  * - Handling theme-specific styling
  * - Responsive layout that adapts to window size
+ *
+ * @author SE_Group110
+ * @version 4.0
  */
 public class Goals {
     private static final LanguageService languageService = LanguageService.getInstance();
@@ -77,28 +80,28 @@ public class Goals {
         BorderPane root = new BorderPane();
         root.setStyle(themeService.getCurrentThemeStyle());
 
-        // 左侧导航栏
+        // Left navigation bar
         VBox sideBar = LeftSidebarFactory.createLeftSidebar(stage, "Goals", loggedUser, themeService, currencyService);
         root.setLeft(sideBar);
 
-        // 创建网格布局
+        // Create grid layout
         GridPane centerGrid = new GridPane();
         centerGrid.setAlignment(Pos.CENTER);
         centerGrid.setHgap(20);
         centerGrid.setVgap(20);
         centerGrid.setPadding(new Insets(20, 20, 20, 20));
 
-        // 获取用户的目标列表
+        // Get user's goal list
         List<Goal> userGoals = GoalService.getUserGoals(loggedUser);
 
         // VBox to hold the grid
         VBox centerContent = new VBox(10);
         centerContent.setAlignment(Pos.TOP_CENTER);
 
-        // 初始化列数
+        // Initialize column count
         int initialMaxCols = calculateMaxColumns(width);
 
-        // 创建一个列表来存储所有卡片，以便后续重新布局
+        // Create a list to store all cards for later relayout
         List<VBox> allCards = new ArrayList<>();
 
         // If no goals, show a message
@@ -170,18 +173,18 @@ public class Goals {
                 ".scroll-pane > .viewport { -fx-background-color: " + backgroundColor + "; }" +
                 ".scroll-pane > .corner { -fx-background-color: " + backgroundColor + "; }");
 
-        // 添加窗口大小变化监听器
+        // Add window size change listener
         scene.widthProperty().addListener((obs, oldVal, newVal) -> {
             int newMaxCols = calculateMaxColumns(newVal.doubleValue());
-            // 清除现有布局
+            // Clear existing layout
             centerGrid.getChildren().clear();
             centerGrid.getColumnConstraints().clear();
 
-            // 重新布局所有卡片
+            // Relayout all cards
             layoutCards(centerGrid, allCards, newMaxCols);
         });
 
-        // 设置窗口标题
+        // Set window title
         stage.setTitle("Finanger - " + languageService.getTranslation("goals"));
 
         return scene;
@@ -194,8 +197,8 @@ public class Goals {
      * @return The maximum number of columns that can fit in the window
      */
     private static int calculateMaxColumns(double windowWidth) {
-        // 根据窗口宽度计算每行显示的目标卡片数量
-        // 假设每个卡片最小宽度为300px，间距为20px
+        // Calculate number of goal cards per row based on window width
+        // Assuming minimum card width of 300px and gap of 20px
         int minCardWidth = 300;
         int gap = 20;
         int maxCols = (int) ((windowWidth - 100) / (minCardWidth + gap));
@@ -322,13 +325,13 @@ public class Goals {
         title.setFont(Font.font("Arial", 16));
         title.setStyle(themeService.getTextColorStyle());
 
-        // 创建文字信息部分
+        // Create text information section
         VBox textInfo = new VBox(8);
         textInfo.setAlignment(Pos.CENTER_LEFT);
         textInfo.setPrefWidth(200);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
 
-        // 根据目标类型创建不同的内容
+        // Create different content based on goal type
         StackPane indicatorContainer = new StackPane();
         try {
             TransactionDataService transactionService = new TransactionDataService(loggedUser.getUid());
@@ -375,34 +378,34 @@ public class Goals {
                     break;
             }
 
-            // 创建进度指示器
+            // Create progress indicator
             Color progressColor = GoalService.getProgressColor(goal.getType(), progress, isCompleted);
             String progressText = GoalService.getProgressText(goal.getType(), progress, isCompleted);
             int fontSize = GoalService.getProgressFontSize(goal.getType(), isCompleted);
 
-            // 1. 创建背景圆弧（灰色部分，表示未完成）
+            // 1. Create background arc (gray part, representing incomplete)
             Arc backgroundArc = new Arc(0, 0, 40, 40, 90, 360);
             backgroundArc.setType(ArcType.OPEN);
             backgroundArc.setStroke(Color.LIGHTGRAY);
             backgroundArc.setFill(Color.TRANSPARENT);
             backgroundArc.setStrokeWidth(8);
 
-            // 2. 创建进度圆弧
+            // 2. Create progress arc
             Arc progressArc = new Arc(0, 0, 40, 40, 90, -360 * Math.min(100, progress) / 100);
             progressArc.setType(ArcType.OPEN);
             progressArc.setStroke(progressColor);
             progressArc.setFill(Color.TRANSPARENT);
             progressArc.setStrokeWidth(8);
 
-            // 3. 将两个圆弧组合起来
+            // 3. Combine the two arcs
             Group arcGroup = new Group(backgroundArc, progressArc);
 
-            // 4. 添加进度文字标签
+            // 4. Add progress text label
             Label progressLabel = new Label(progressText);
             progressLabel.setFont(Font.font("Arial", fontSize));
             progressLabel.setTextFill(progressColor);
 
-            // 5. 添加到容器
+            // 5. Add to container
             indicatorContainer.getChildren().addAll(arcGroup, progressLabel);
 
         } catch (IOException e) {
@@ -411,6 +414,12 @@ public class Goals {
             textInfo.getChildren().add(errorLabel);
             e.printStackTrace();
         }
+
+        // Create HBox for left-right layout with padding
+        HBox contentLayout = new HBox(20);
+        contentLayout.setAlignment(Pos.CENTER_LEFT);
+        contentLayout.setPadding(new Insets(10, 0, 0, 0));
+        contentLayout.getChildren().addAll(textInfo, indicatorContainer);
 
         // Create a container for the title and delete button
         StackPane titleContainer = new StackPane();
@@ -421,12 +430,6 @@ public class Goals {
         StackPane.setAlignment(titleBox, Pos.CENTER);
         StackPane.setAlignment(deleteButton, Pos.TOP_RIGHT);
         StackPane.setMargin(deleteButton, new Insets(0, 0, 0, 0));
-
-        // 创建左右布局的HBox，添加内边距
-        HBox contentLayout = new HBox(20);
-        contentLayout.setAlignment(Pos.CENTER_LEFT);
-        contentLayout.setPadding(new Insets(10, 0, 0, 0));
-        contentLayout.getChildren().addAll(textInfo, indicatorContainer);
 
         // Add the title container instead of just the title
         card.getChildren().addAll(titleContainer, contentLayout);
@@ -471,7 +474,7 @@ public class Goals {
         title.setFont(Font.font("Arial", 18));
         title.setTextFill(Color.GRAY);
 
-        // 创建文字信息部分，添加内边距
+        // Create text information section with padding
         VBox textInfo = new VBox(8);
         textInfo.setAlignment(Pos.CENTER_LEFT);
         textInfo.setPadding(new Insets(10, 0, 0, 0));
@@ -481,7 +484,7 @@ public class Goals {
         instructionLabel2.setStyle(themeService.getTextColorStyle());
         textInfo.getChildren().addAll(instructionLabel, instructionLabel2);
 
-        // 创建加号圆形
+        // Create plus circle
         StackPane plusContainer = new StackPane();
         plusContainer.setPadding(new Insets(0, 0, 0, 20));
         Circle plusCircle = new Circle(40);
@@ -493,15 +496,15 @@ public class Goals {
         plusLabel.setTextFill(themeService.isDayMode() ? Color.GRAY : Color.LIGHTGRAY);
         plusContainer.getChildren().addAll(plusCircle, plusLabel);
 
-        // 创建左右布局的HBox
+        // Create HBox for left-right layout
         HBox contentLayout = new HBox(15);
         contentLayout.setAlignment(Pos.CENTER);
         contentLayout.getChildren().addAll(textInfo, plusContainer);
         card.getChildren().addAll(title, contentLayout);
 
-        // 添加点击事件处理
+        // Add click event handler
         card.setOnMouseClicked(event -> {
-            // 获取当前窗口的实际大小
+            // Get current window dimensions
             double currentWidth = stage.getScene().getWidth();
             double currentHeight = stage.getScene().getHeight();
 
@@ -521,7 +524,7 @@ public class Goals {
      * @param maxCols Maximum number of columns in the grid
      */
     private static void layoutCards(GridPane grid, List<VBox> cards, int maxCols) {
-        // 添加列约束
+        // Add column constraints
         for (int i = 0; i < maxCols; i++) {
             ColumnConstraints column = new ColumnConstraints();
             column.setMinWidth(300);
@@ -530,7 +533,7 @@ public class Goals {
             grid.getColumnConstraints().add(column);
         }
 
-        // 布局所有卡片
+        // Layout all cards
         int row = 0;
         int col = 0;
         for (VBox card : cards) {

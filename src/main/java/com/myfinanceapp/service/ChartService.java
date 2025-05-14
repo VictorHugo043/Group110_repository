@@ -21,6 +21,9 @@ import java.util.stream.Collectors;
  * 
  * The service handles data aggregation, currency conversion, and chart updates
  * based on selected date ranges.
+ *
+ * @author SE_Group110
+ * @version 4.0
  */
 public class ChartService {
     private final LineChart<String, Number> lineChart;

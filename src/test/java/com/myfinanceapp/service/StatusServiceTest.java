@@ -42,6 +42,19 @@ import java.util.concurrent.TimeoutException;
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Unit test class for the StatusService.
+ * This class contains tests for financial status management functionality including:
+ * - Summary label updates
+ * - Transaction list updates
+ * - Date picker interactions
+ * - Chart type switching
+ * - Currency conversion
+ * - UI component initialization
+ *
+ * @author SE_Group110
+ * @version 4.0
+ */
 @ExtendWith(MockitoExtension.class)
 @ExtendWith(ApplicationExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -66,11 +79,24 @@ public class StatusServiceTest {
     private StatusService statusService;
     private User testUser;
 
+    /**
+     * Sets up the JavaFX toolkit before running tests.
+     * Registers the primary stage for UI testing.
+     *
+     * @throws Exception if setup fails
+     */
     @BeforeAll
     public static void setupClass() throws Exception {
         FxToolkit.registerPrimaryStage();
     }
 
+    /**
+     * Sets up the test environment before each test.
+     * Initializes UI components, mock services, and test data.
+     * Configures currency conversion and service injection.
+     *
+     * @throws Exception if setup fails
+     */
     @BeforeEach
     void setUp() throws Exception {
         testUser = new User("test-uid", "testUser", "password", "question", "answer", null);
@@ -83,25 +109,25 @@ public class StatusServiceTest {
                 double width = 800.0;
                 double height = 600.0;
 
-                // 初始化 StatusScene 并手动设置字段
+                // Initialize StatusScene and manually set fields
                 statusScene = new StatusScene(stage, width, height, testUser);
                 initializeStatusSceneFields(statusScene);
 
-                // 设置 Scene 并绑定到 Stage
+                // Set Scene and bind to Stage
                 Scene scene = new Scene(new Pane(), width, height);
                 stage.setScene(scene);
 
-                // 设置货币服务
+                // Configure currency service
                 when(currencyService.getSelectedCurrency()).thenReturn("CNY");
-                // 关键修复：确保货币转换返回正确数值
+                // Critical fix: Ensure currency conversion returns correct values
                 when(currencyService.convertCurrency(anyDouble(), anyString())).thenAnswer(
                         inv -> (Double) inv.getArgument(0)
                 );
 
-                // 创建 StatusService
+                // Create StatusService
                 statusService = new StatusService(statusScene, testUser, currencyService, languageService);
 
-                // 使用反射注入 mock 对象
+                // Inject mock objects using reflection
                 java.lang.reflect.Field txField = StatusService.class.getDeclaredField("txService");
                 txField.setAccessible(true);
                 txField.set(statusService, transactionService);
@@ -110,7 +136,7 @@ public class StatusServiceTest {
                 chartField.setAccessible(true);
                 chartField.set(statusService, chartService);
 
-                // 重置每个测试前的初始化日期以避免默认日期干扰测试
+                // Reset initialization dates before each test to avoid default date interference
                 java.lang.reflect.Field startDateField = StatusService.class.getDeclaredField("startDate");
                 startDateField.setAccessible(true);
                 java.lang.reflect.Field endDateField = StatusService.class.getDeclaredField("endDate");
@@ -131,12 +157,18 @@ public class StatusServiceTest {
         }
     }
 
+    /**
+     * Initializes the StatusScene UI components.
+     * Sets up charts, labels, and other UI elements with default values.
+     *
+     * @param statusScene The StatusScene instance to initialize
+     */
     private void initializeStatusSceneFields(StatusScene statusScene) {
         statusScene.lineChart = new LineChart<>(new CategoryAxis(), new NumberAxis());
         statusScene.barChart = new BarChart<>(new CategoryAxis(), new NumberAxis());
         statusScene.pieChart = new PieChart();
-        statusScene.exLabel = new Label("Ex.  0.00 CNY");  // 设置初始值
-        statusScene.inLabel = new Label("In.  0.00 CNY");  // 设置初始值
+        statusScene.exLabel = new Label("Ex.  0.00 CNY");  // Set initial value
+        statusScene.inLabel = new Label("In.  0.00 CNY");  // Set initial value
         statusScene.transactionsBox = new VBox();
         statusScene.questionArea = new TextArea();
         statusScene.suggestionsWebView = new WebView();
@@ -146,12 +178,19 @@ public class StatusServiceTest {
         statusScene.chartTypeCombo.getItems().addAll("Line graph", "Bar chart");
         statusScene.chartTypeCombo.setValue("Line graph");
         statusScene.chartPane = new StackPane();
-        statusScene.chartPane.getChildren().add(statusScene.lineChart);  // 默认添加lineChart
+        statusScene.chartPane.getChildren().add(statusScene.lineChart);  // Add lineChart by default
         statusScene.sendBtn = new Button("Send");
         statusScene.themeService = themeService;
         when(themeService.isDayMode()).thenReturn(true);
     }
 
+    /**
+     * Tests the update of summary labels for the current month.
+     * Verifies that:
+     * - Income and expense labels are correctly updated
+     * - Currency conversion is properly applied
+     * - Transaction amounts are correctly summed
+     */
     @Test
     void testUpdateSummaryLabels_ThisMonth() {
         List<Transaction> transactions = new ArrayList<>();
@@ -181,6 +220,13 @@ public class StatusServiceTest {
         assertEquals("In.  1000.00 CNY", statusScene.inLabel.getText());
     }
 
+    /**
+     * Tests the update of transaction list.
+     * Verifies that:
+     * - Transactions are correctly displayed
+     * - Transaction details are properly formatted
+     * - List is properly populated
+     */
     @Test
     void testUpdateTransactions() {
         List<Transaction> transactions = new ArrayList<>();
@@ -204,6 +250,15 @@ public class StatusServiceTest {
         assertEquals("2025-04-01   Salary    1000.00 CNY", txLabel.getText());
     }
 
+    /**
+     * Tests the date picker interaction.
+     * Verifies that:
+     * - Date changes trigger proper updates
+     * - Summary labels are updated
+     * - Charts are refreshed
+     *
+     * @throws TimeoutException if the test times out
+     */
     @Test
     void testDatePickerAction() throws TimeoutException {
         List<Transaction> transactions = new ArrayList<>();
@@ -216,7 +271,7 @@ public class StatusServiceTest {
 
         when(transactionService.loadTransactions(testUser)).thenReturn(transactions);
 
-        // 手动设置 StatusService 的日期字段
+        // Manually set StatusService date fields
         try {
             java.lang.reflect.Field startDateField = StatusService.class.getDeclaredField("startDate");
             startDateField.setAccessible(true);
@@ -233,11 +288,11 @@ public class StatusServiceTest {
                     startDateField.set(statusService, startDate);
                     endDateField.set(statusService, endDate);
 
-                    // 直接调用方法更新标签
+                    // Directly call methods to update labels
                     statusService.updateSummaryLabels(startDate, endDate);
                     statusService.updateTransactions(startDate, endDate);
 
-                    // 直接设置日期选择器的值
+                    // Directly set date picker values
                     statusScene.startDatePicker.setValue(startDate);
                     statusScene.endDatePicker.setValue(endDate);
                 } catch (Exception e) {
@@ -249,7 +304,7 @@ public class StatusServiceTest {
 
             assertTrue(dateLatch.await(5, TimeUnit.SECONDS), "Date picker action timed out");
 
-            // 验证
+            // Verify
             Platform.runLater(() -> {
                 assertEquals("Ex.  0.00 CNY", statusScene.exLabel.getText());
                 assertEquals("In.  2000.00 CNY", statusScene.inLabel.getText());
@@ -260,14 +315,23 @@ public class StatusServiceTest {
         }
     }
 
+    /**
+     * Tests the chart type combo box interaction for line graph.
+     * Verifies that:
+     * - Line chart is displayed
+     * - Bar chart is hidden
+     * - Charts are updated
+     *
+     * @throws TimeoutException if the test times out
+     */
     @Test
     void testChartTypeComboAction_LineGraph() throws TimeoutException {
-        // 手动设置日期
+        // Manually set dates
         LocalDate startDate = LocalDate.of(2025, 4, 1);
         LocalDate endDate = LocalDate.of(2025, 4, 12);
 
         try {
-            // 设置 StatusService 内部状态
+            // Set StatusService internal state
             java.lang.reflect.Field startDateField = StatusService.class.getDeclaredField("startDate");
             startDateField.setAccessible(true);
             startDateField.set(statusService, startDate);
@@ -276,14 +340,14 @@ public class StatusServiceTest {
             endDateField.setAccessible(true);
             endDateField.set(statusService, endDate);
 
-            // 清除之前的交互并重新设置预期
+            // Clear previous interactions and reset expectations
             reset(chartService);
 
             CountDownLatch chartLatch = new CountDownLatch(1);
 
             Platform.runLater(() -> {
                 try {
-                    // 设置图表类型并触发事件
+                    // Set chart type and trigger event
                     statusScene.chartTypeCombo.setValue("Line graph");
                     if (statusScene.chartTypeCombo.getOnAction() != null) {
                         statusScene.chartTypeCombo.getOnAction().handle(null);
@@ -295,15 +359,15 @@ public class StatusServiceTest {
 
             assertTrue(chartLatch.await(5, TimeUnit.SECONDS), "Chart action timed out");
 
-            // 使用 FxToolkit 进行 UI 验证
+            // Use FxToolkit for UI verification
             FxToolkit.setupFixture(() -> {
                 assertTrue(statusScene.chartPane.getChildren().contains(statusScene.lineChart));
                 assertFalse(statusScene.chartPane.getChildren().contains(statusScene.barChart));
-                // 只验证方法至少被调用一次，不关心具体次数
+                // Only verify method is called at least once, don't care about exact count
                 verify(chartService, atLeastOnce()).updateAllCharts(any(), any());
             });
         } catch (Exception e) {
-            fail("测试失败，异常信息: " + e.getMessage());
+            fail("Test failed, error message: " + e.getMessage());
         }
     }
 }

@@ -59,6 +59,9 @@ import javax.crypto.SecretKey;
  * - Detailed transaction listings
  * - Currency conversion
  * - Secure data handling
+ *
+ * @author SE_Group110
+ * @version 4.0
  */
 public class ExportReportService {
 
@@ -218,7 +221,7 @@ public class ExportReportService {
              PdfDocument pdf = new PdfDocument(writer);
              Document document = new Document(pdf)) {
 
-            // 设置字体
+            // Set font
             PdfFont font = getFont();
             document.setFont(font);
 
@@ -296,7 +299,7 @@ public class ExportReportService {
             // 3. Transaction Details
             document.add(new Paragraph("\n4. " + languageService.getTranslation("transaction_details")).setFontSize(14).setBold());
             Table table = new Table(new float[]{100, 80, 80, 80, 100, 100});
-            table.setFont(font);  // 设置表格字体
+            table.setFont(font);  // Set table font
             
             table.addHeaderCell(languageService.getTranslation("date"));
             table.addHeaderCell(languageService.getTranslation("transaction_type"));
@@ -405,16 +408,16 @@ public class ExportReportService {
     }
 
     private PdfFont getFont() throws IOException {
-        // 尝试加载系统中文字体，如果失败则使用默认字体
+        // Try to load system Chinese fonts, fall back to default if failed
         try {
-            // 尝试加载微软雅黑字体
+            // Try to load Microsoft YaHei font
             return PdfFontFactory.createFont("C:\\Windows\\Fonts\\msyh.ttc,0", PdfEncodings.IDENTITY_H);
         } catch (IOException e) {
             try {
-                // 尝试加载宋体
+                // Try to load SimSun font
                 return PdfFontFactory.createFont("C:\\Windows\\Fonts\\simsun.ttc,0", PdfEncodings.IDENTITY_H);
             } catch (IOException ex) {
-                // 如果都失败，使用默认字体
+                // If both fail, use default font
                 return PdfFontFactory.createFont();
             }
         }

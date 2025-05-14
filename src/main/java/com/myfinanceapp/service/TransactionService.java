@@ -29,6 +29,9 @@ import java.nio.file.Files;
  * 
  * All transaction data is encrypted before storage and decrypted when retrieved
  * to ensure data security.
+ *
+ * @author SE_Group110
+ * @version 4.0
  */
 public class TransactionService {
     private static final String TRANSACTION_DIR = "src/main/resources/transaction/";
