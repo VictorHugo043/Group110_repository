@@ -1,8 +1,12 @@
 package com.myfinanceapp.ui.mainwindow;
 
+import com.myfinanceapp.ui.common.AnimationUtils;
 import com.myfinanceapp.ui.common.SceneManager;
+import com.myfinanceapp.ui.common.SceneManager.AnimationType;
 import com.myfinanceapp.ui.loginscene.LoginScene;
+import javafx.animation.FadeTransition;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -14,6 +18,9 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 import java.util.Objects;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.util.Duration;
 
 /**
  * The main window of the Finanger application, featuring a dynamic split design with responsive layout.
@@ -115,6 +122,8 @@ public class MainWindow extends Application {
         relayout();
 
         stage.show();
+        // 添加初始化动画
+        AnimationUtils.animateMainWindowEntrance(scene);
     }
 
     /**
@@ -153,19 +162,40 @@ public class MainWindow extends Application {
                 + " -fx-background-color: #FFFFFF44;");
 
         arrowButton.setOnAction(e -> {
+            // 禁用按钮，防止用户多次点击
+            arrowButton.setDisable(true);
+            
+            try {
+                // 创建登录场景，但暂不展示
             Scene loginScene = LoginScene.createScene(stage, root.getScene().getWidth(), root.getScene().getHeight());
-            SceneManager.switchScene(stage, loginScene);  // Use SceneManager instead of direct setting
+                
+                // 直接使用淡入淡出动画，而非波纹
+                SceneManager.switchScene(stage, loginScene, AnimationType.FADE);
             stage.setTitle("Finanger - Login");
+            } catch (Exception ex) {
+                System.err.println("切换到登录页面失败: " + ex.getMessage());
+                ex.printStackTrace();
+                // 出错时恢复按钮可用
+                arrowButton.setDisable(false);
+            }
         });
 
         root.getChildren().add(arrowButton);
     }
 
     /**
+     * 为MainWindow添加初始化动画效果
+     *
+     * @param scene 主窗口场景
+     */
+
+
+    /**
      * Dynamically recalculates the layout of all UI components based on the current window size.
      * This method is called whenever the window is resized to maintain proper proportions
      * and positioning of all visual elements.
      */
+
     private void relayout() {
         double curWidth = root.getScene().getWidth();
         double curHeight = root.getScene().getHeight();

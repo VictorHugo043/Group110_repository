@@ -7,6 +7,8 @@ import com.myfinanceapp.ui.common.LeftSidebarFactory;
 import com.myfinanceapp.ui.transactionscene.TransactionManagementScene;
 import com.myfinanceapp.service.ThemeService;
 import com.myfinanceapp.service.CurrencyService;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -21,6 +23,10 @@ import javafx.scene.web.WebView;
 import javafx.scene.text.Text;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import com.myfinanceapp.ui.common.AnimationUtils;
+import javafx.application.Platform;
+import javafx.scene.Node;
+import javafx.util.Duration;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -163,10 +169,28 @@ public class StatusScene {
                 ".scroll-pane > .viewport { -fx-background-color: " + backgroundColor + "; }" +
                 ".scroll-pane > .corner { -fx-background-color: " + backgroundColor + "; }");
 
-        // Initialize StatusService with CurrencyService
+        // 初始化StatusService with CurrencyService
         StatusService statusService = new StatusService(this, currentUser, currencyService, languageService);
 
         return scene;
+    }
+    
+    /**
+     * 准备UI元素的入场动画，设置初始透明度为0
+     * 
+     * @param elements 需要动画效果的UI元素
+     */
+    private void prepareEntranceAnimations(Node... elements) {
+        // 此方法已不再使用，但保留方法签名以防其他地方调用
+    }
+    
+    /**
+     * 开始播放所有UI元素的入场动画
+     * 当场景被添加到舞台上并显示后调用此方法
+     */
+    public void startEntranceAnimations() {
+        // 此方法不再执行动画，避免与AnimationUtils.animateStatusSceneEntrance冲突
+        // 所有动画将由AnimationUtils.animateStatusSceneEntrance统一管理
     }
 
     /**

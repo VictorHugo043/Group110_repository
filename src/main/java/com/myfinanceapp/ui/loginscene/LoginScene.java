@@ -7,6 +7,9 @@ import com.myfinanceapp.ui.statusscene.StatusScene;
 import com.myfinanceapp.service.StatusService;
 import com.myfinanceapp.service.CurrencyService;
 import com.myfinanceapp.service.LanguageService;
+import com.myfinanceapp.ui.common.SceneManager;
+import com.myfinanceapp.ui.common.SceneManager.AnimationType;
+import com.myfinanceapp.ui.common.AnimationUtils;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
@@ -20,6 +23,9 @@ import javafx.scene.shape.Polygon;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
+import javafx.animation.Timeline;
+import javafx.animation.KeyFrame;
+import javafx.util.Duration;
 
 /**
  * A dynamic login scene for the Finanger application featuring a diagonal split design.
@@ -183,7 +189,7 @@ public class LoginScene {
         forgotLink.setOnAction(e -> {
             // Navigate to ResetPassword interface
             Scene resetScene = ResetPassword.createScene(stage, root.getScene().getWidth(), root.getScene().getHeight());
-            stage.setScene(resetScene);
+            SceneManager.switchScene(stage, resetScene, AnimationType.FADE);
             stage.setTitle("Finanger - Reset Password");
         });
 
@@ -206,10 +212,20 @@ public class LoginScene {
             if (loggedUser != null) {
                 // Login successful, jump to Status scene
                 StatusScene statusScene = new StatusScene(stage, root.getScene().getWidth(), root.getScene().getHeight(), loggedUser);
-                stage.setScene(statusScene.createScene());
-                StatusService statusService = new StatusService(statusScene, loggedUser, currencyService, LanguageService.getInstance()); // Pass currencyService and languageService
+                Scene statusSceneObj = statusScene.createScene();
+                
+                // 使用向上滑动动画切换到状态页面
+                SceneManager.switchScene(stage, statusSceneObj, AnimationType.SLIDE_UP);
+                
+                // 创建StatusService
+                StatusService statusService = new StatusService(statusScene, loggedUser, currencyService, LanguageService.getInstance());
                 stage.setTitle("Finanger - Status");
-                showAlert("Success", "Login Successful!");
+                
+                // 在场景切换后启动状态页面内部元素的动画效果
+                AnimationUtils.animateStatusSceneEntrance(statusSceneObj);
+                
+                // 不再显示弹出框，改为顺畅的过渡体验
+                // showAlert("Success", "Login Successful!");
             } else {
                 showAlert("Error", "Invalid username or password!");
             }
@@ -222,7 +238,7 @@ public class LoginScene {
         signUpLink.setTextFill(Color.DARKBLUE);
         signUpLink.setOnAction(e -> {
             Scene signUpScene = SignUp.createScene(stage, root.getScene().getWidth(), root.getScene().getHeight());
-            stage.setScene(signUpScene);
+            SceneManager.switchScene(stage, signUpScene, AnimationType.SLIDE_LEFT);
             stage.setTitle("Finanger - Sign Up");
         });
         signUpBox = new HBox(5, noAccountLabel, signUpLink);
@@ -236,6 +252,31 @@ public class LoginScene {
                 loginButton,
                 signUpBox
         );
+        
+        // 初始化时将控件设为透明
+        titleLabel.setOpacity(0);
+        userBox.setOpacity(0);
+        passBox.setOpacity(0);
+        forgotLink.setOpacity(0);
+        loginButton.setOpacity(0);
+        signUpBox.setOpacity(0);
+        
+        // 直接启动动画，无需等待鼠标移动事件
+        // 使用Timeline确保组件完全加载后再执行动画
+        Timeline timeline = new Timeline(new KeyFrame(
+            Duration.millis(500), // 延迟500毫秒
+            e -> {
+                // 添加元素依次渐入效果
+                AnimationUtils.fadeInNode(titleLabel, 100, 600);
+                AnimationUtils.slideInNode(userBox, 200, 500, "RIGHT", 50);
+                AnimationUtils.slideInNode(passBox, 300, 500, "RIGHT", 50);
+                AnimationUtils.fadeInNode(forgotLink, 400, 400);
+                AnimationUtils.slideInNode(loginButton, 500, 500, "UP", 30);
+                AnimationUtils.fadeInNode(signUpBox, 600, 400);
+            }
+        ));
+        timeline.setCycleCount(1);
+        timeline.play();
     }
 
     /**
