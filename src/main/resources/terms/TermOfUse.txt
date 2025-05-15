@@ -1,4 +1,6 @@
-Welcome to Finanger! These Terms of Use ("Terms") govern your use of the Finanger financial management software and related services (collectively, the "Service"), developed by SE_Group110 ("we," "us," or "our"). By using our Service, you agree to be bound by these Terms.If you do not agree to these Terms, please do not use Finanger.
+★ WELCOME TO FINANGER! ★
+
+These Terms of Use ("Terms") govern your use of the Finanger financial management software and related services (collectively, the "Service"), developed by SE_Group110 ("we," "us," or "our"). By using our Service, you agree to be bound by these Terms. If you do not agree to these Terms, please do not use Finanger.
 ————————————————————————————————————————————————————————
 1. Eligibility
 ◆ You must be at least 18 years old to use Finanger.
@@ -17,7 +19,8 @@ You agree NOT to:
 5. Intellectual Property
 ◆ All rights to Finanger (including design, code, and branding) belong to SE_Group110.
 ◆ You may not reproduce, distribute, or modify any part of the software without our permission.
-6. Termination of Service◆ We may suspend or terminate your access to Finanger if you violate these Terms.
+6. Termination of Service
+◆ We may suspend or terminate your access to Finanger if you violate these Terms.
 ◆ You may delete your account at any time, but some data may be retained for legal compliance.
 7. Limitation of Liability
 ◆ We do not guarantee that Finanger will be error-free or always available.

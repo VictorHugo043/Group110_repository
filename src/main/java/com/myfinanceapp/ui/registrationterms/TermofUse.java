@@ -8,11 +8,15 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Objects;
+import javafx.scene.shape.Line;
 
 /**
  * A terms of use display interface for the Finanger application.
@@ -39,6 +43,7 @@ public class TermofUse {
     public static Scene createScene(Stage stage, double width, double height) {
         BorderPane root = new BorderPane();
         root.setPrefSize(width, height);
+        root.getStyleClass().add("terms-root");
 
         // Set minimum window dimensions
         stage.setMinWidth(INITIAL_WIDTH);
@@ -47,22 +52,20 @@ public class TermofUse {
 
         // Top area
         VBox topContainer = new VBox();
-        topContainer.setPadding(new Insets(10, 15, 0, 15));
-        topContainer.setSpacing(5);
+        topContainer.getStyleClass().add("header-container");
 
         // Row 1: Left LOGO and right Back button
         HBox logoBackRow = new HBox();
         logoBackRow.setAlignment(Pos.CENTER_LEFT);
 
         Label logoLabel = new Label("Finanger");
-        logoLabel.setFont(Font.font("Arial", FontWeight.BOLD, 24));
-        logoLabel.setStyle("-fx-text-fill: #459af7;");
+        logoLabel.getStyleClass().add("logo-label");
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        Button backBtn = new Button("back");
-        backBtn.setStyle("-fx-background-color: #BEE3F8; -fx-text-fill: black;");
+        Button backBtn = new Button("Back");
+        backBtn.getStyleClass().add("back-button");
         backBtn.setOnAction(e -> {
             Scene signUpScene = SignUp.createScene(stage, root.getScene().getWidth(), root.getScene().getHeight());
             stage.setScene(signUpScene);
@@ -72,33 +75,137 @@ public class TermofUse {
 
         // Row 2: Center Last Updated and main title
         VBox updatedAndTitleBox = new VBox();
-        updatedAndTitleBox.setAlignment(Pos.CENTER);
+        updatedAndTitleBox.getStyleClass().add("title-container");
 
-        Label lastUpdated = new Label("Last Updated: March 19, 2025");
-        lastUpdated.setFont(Font.font("Arial", 12));
+        Label lastUpdated = new Label("Last Update: 2025.3.19");
+        lastUpdated.getStyleClass().add("last-updated-label");
 
-        Label titleLabel = new Label("Terms of Use");
-        titleLabel.setFont(Font.font("Arial", FontWeight.BOLD, 26));
+        Label titleLabel = new Label("Term of Use");
+        titleLabel.getStyleClass().add("title-label");
 
         updatedAndTitleBox.getChildren().addAll(lastUpdated, titleLabel);
 
         topContainer.getChildren().addAll(logoBackRow, updatedAndTitleBox);
         root.setTop(topContainer);
 
-        // Center area: TextArea auto-fill
-        TextArea textArea = new TextArea(loadTermsContent("/terms/TermOfUse.txt"));
-        textArea.setWrapText(true);
-        textArea.setEditable(false);
-        textArea.setPadding(new Insets(10));
-        textArea.setStyle("-fx-border-color: black; -fx-border-width: 1;");
-
-        // Bind width and height to root
-        textArea.prefWidthProperty().bind(root.widthProperty().subtract(40));
-        textArea.prefHeightProperty().bind(root.heightProperty().subtract(topContainer.getHeight() + 40));
-        root.setCenter(textArea);
+        // Center area with enhanced formatting
+        ScrollPane scrollPane = createFormattedTextContent("/terms/TermOfUse.txt");
+        scrollPane.prefWidthProperty().bind(root.widthProperty());
+        scrollPane.prefHeightProperty().bind(root.heightProperty().subtract(topContainer.heightProperty()));
+        
+        root.setCenter(scrollPane);
 
         Scene scene = new Scene(root, width, height);
+        String css = Objects.requireNonNull(TermofUse.class.getResource("/css/terms-style.css")).toExternalForm();
+        scene.getStylesheets().add(css);
+        
         return scene;
+    }
+
+    /**
+     * Creates a formatted scrollable content area for the terms
+     * with enhanced visual styling and text formatting.
+     *
+     * @param resourcePath The path to the terms content file
+     * @return A ScrollPane containing the formatted terms content
+     */
+    private static ScrollPane createFormattedTextContent(String resourcePath) {
+        String content = loadTermsContent(resourcePath);
+        
+        VBox contentBox = new VBox(15);
+        contentBox.setPadding(new Insets(25));
+        contentBox.setMaxWidth(Double.MAX_VALUE);
+        contentBox.getStyleClass().add("terms-text-area");
+        
+        // 分割原始内容
+        String[] sections = content.split("————————————————————————————————————————————————————————");
+        
+        if (sections.length > 0) {
+            // 添加标题部分，优化显示
+            String[] headerLines = sections[0].trim().split("\n");
+            if (headerLines.length > 0) {
+                // 如果包含星号标题
+                if (headerLines[0].contains("★")) {
+                    Text titleText = new Text(headerLines[0]);
+                    titleText.getStyleClass().add("header-title-text");
+                    
+                    HBox titleBox = new HBox();
+                    titleBox.setAlignment(Pos.CENTER);
+                    titleBox.getChildren().add(titleText);
+                    
+                    VBox headerContainer = new VBox(15);
+                    headerContainer.getStyleClass().add("header-container-box");
+                    headerContainer.setAlignment(Pos.CENTER);
+                    headerContainer.getChildren().add(titleBox);
+                    
+                    // 处理剩余的介绍部分，若有多行
+                    if (headerLines.length > 1) {
+                        TextFlow introFlow = new TextFlow();
+                        for (int i = 1; i < headerLines.length; i++) {
+                            if (!headerLines[i].trim().isEmpty()) {
+                                Text paraText = new Text(headerLines[i].trim() + "\n\n");
+                                paraText.getStyleClass().add("intro-text");
+                                paraText.setWrappingWidth(700);
+                                introFlow.getChildren().add(paraText);
+                            }
+                        }
+                        headerContainer.getChildren().add(introFlow);
+                    }
+                    
+                    contentBox.getChildren().add(headerContainer);
+                } else {
+                    // 原始格式直接显示
+                    Text introText = new Text(sections[0].trim());
+                    introText.setWrappingWidth(700);
+                    contentBox.getChildren().add(introText);
+                }
+            }
+            
+            // 添加分割线
+            Line divider = new Line(0, 0, 700, 0);
+            divider.getStyleClass().add("divider-line");
+            contentBox.getChildren().add(divider);
+            
+            // 处理主要条款部分
+            if (sections.length > 1) {
+                String[] paragraphs = sections[1].split("\n");
+                
+                for (String paragraph : paragraphs) {
+                    paragraph = paragraph.trim();
+                    if (paragraph.isEmpty()) continue;
+                    
+                    if (paragraph.matches("\\d+\\..+")) {
+                        // 这是一个章节标题
+                        Text sectionHeader = new Text(paragraph);
+                        sectionHeader.getStyleClass().add("section-header");
+                        contentBox.getChildren().add(sectionHeader);
+                    } else if (paragraph.startsWith("◆")) {
+                        // 这是一个列表项
+                        HBox listItem = new HBox(10);
+                        listItem.setAlignment(Pos.TOP_LEFT);
+                        
+                        Text bullet = new Text("•");
+                        Text itemText = new Text(paragraph.substring(1).trim());
+                        itemText.setWrappingWidth(670);
+                        
+                        listItem.getChildren().addAll(bullet, itemText);
+                        contentBox.getChildren().add(listItem);
+                    } else {
+                        // 普通段落
+                        Text paragraphText = new Text(paragraph);
+                        paragraphText.setWrappingWidth(700);
+                        contentBox.getChildren().add(paragraphText);
+                    }
+                }
+            }
+        }
+        
+        ScrollPane scrollPane = new ScrollPane(contentBox);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        
+        return scrollPane;
     }
 
     /**
