@@ -518,8 +518,13 @@ public class TransactionScene {
         scrollPane.setFitToWidth(true);
         scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
-        scrollPane.setStyle("-fx-background: white; -fx-background-color: white; -fx-border-color: transparent;");
         scrollPane.getStyleClass().add("custom-scroll-pane");
+        
+        // Apply theme-appropriate background color to scrollPane
+        String scrollPaneBackground = themeService.isDayMode() 
+                ? "-fx-background: white; -fx-background-color: white; -fx-border-color: transparent;"
+                : "-fx-background: #3C3C3C; -fx-background-color: #3C3C3C; -fx-border-color: transparent;";
+        scrollPane.setStyle(scrollPaneBackground);
 
         root.setCenter(scrollPane);
         Scene scene = new Scene(root, width, height);
@@ -661,7 +666,28 @@ public class TransactionScene {
                     -fx-fill: white;
                 }
                 """;
+        
+        // Add specific styles for TextArea controls in night mode
+        String textAreaStylesheet = """
+                .night-theme-text-field.text-area {
+                    -fx-control-inner-background: #3C3C3C;
+                }
+                .night-theme-text-field.text-area .content {
+                    -fx-background-color: #3C3C3C;
+                }
+                .night-theme-text-field.text-area .text {
+                    -fx-fill: white;
+                }
+                .night-theme-text-field.text-area .scroll-pane {
+                    -fx-background-color: #3C3C3C;
+                }
+                .night-theme-text-field.text-area .viewport {
+                    -fx-background-color: #3C3C3C;
+                }
+                """;
+                
         scene.getStylesheets().add("data:text/css," + componentStylesheet);
+        scene.getStylesheets().add("data:text/css," + textAreaStylesheet);
 
         scene.getStylesheets().add("data:text/css," + themeService.getThemeStylesheet());
 
