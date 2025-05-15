@@ -265,6 +265,7 @@ public class SystemSettings {
         HBox sizeBox = new HBox(20);
         sizeLabel.setFont(Font.font("Arial", 14));
         sizeLabel.setStyle(themeService.getTextColorStyle());
+        // Window size options with resolution descriptions
         sizeCombo.getItems().addAll(
                 "1440x900",  // WXGA+
                 "1920x1080", // Full HD
@@ -475,6 +476,9 @@ public class SystemSettings {
         scene.getStylesheets().add("data:text/css," + themeService.getThemeStylesheet());
         scene.getRoot().applyCss();
         scene.getRoot().layout();
+
+        // Update window icon dynamically
+        com.myfinanceapp.ui.mainwindow.MainWindow.updateWindowIcon(stage, themeService);
     }
 
     /**
