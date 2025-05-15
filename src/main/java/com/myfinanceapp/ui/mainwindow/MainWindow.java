@@ -21,6 +21,7 @@ import java.util.Objects;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.util.Duration;
+import com.myfinanceapp.service.ThemeService;
 
 /**
  * The main window of the Finanger application, featuring a dynamic split design with responsive layout.
@@ -75,6 +76,9 @@ public class MainWindow extends Application {
     private final double arrowBtnXFrac = 570.0/INITIAL_WIDTH;
     private final double arrowBtnYFrac = 170.0/INITIAL_HEIGHT;
 
+    // ThemeService instance
+    private ThemeService themeService = new ThemeService();
+
     /**
      * Initializes and displays the main window of the application.
      * Sets up the initial window size based on screen resolution and creates the UI components.
@@ -101,10 +105,11 @@ public class MainWindow extends Application {
         stage.setMinWidth(800);
         stage.setMinHeight(450);
 
-        // Set window icon
+        // Set window icon based on theme
         try {
+            String iconPath = themeService.isDayMode() ? "/pictures/logo_day.png" : "/pictures/logo_night.png";
             javafx.scene.image.Image icon = new javafx.scene.image.Image(
-                Objects.requireNonNull(getClass().getResource("/pictures/logo.png")).toExternalForm()
+                Objects.requireNonNull(getClass().getResource(iconPath)).toExternalForm()
             );
             stage.getIcons().add(icon);
         } catch (Exception e) {
@@ -162,20 +167,20 @@ public class MainWindow extends Application {
                 + " -fx-background-color: #FFFFFF44;");
 
         arrowButton.setOnAction(e -> {
-            // 禁用按钮，防止用户多次点击
+            // Disable button to prevent multiple clicks
             arrowButton.setDisable(true);
             
             try {
-                // 创建登录场景，但暂不展示
-            Scene loginScene = LoginScene.createScene(stage, root.getScene().getWidth(), root.getScene().getHeight());
+                // Create login scene, but don't show it yet
+                Scene loginScene = LoginScene.createScene(stage, root.getScene().getWidth(), root.getScene().getHeight());
                 
-                // 直接使用淡入淡出动画，而非波纹
+                // Use fade animation directly instead of ripple
                 SceneManager.switchScene(stage, loginScene, AnimationType.FADE);
-            stage.setTitle("Finanger - Login");
+                stage.setTitle("Finanger - Login");
             } catch (Exception ex) {
-                System.err.println("切换到登录页面失败: " + ex.getMessage());
+                System.err.println("Failed to switch to login page: " + ex.getMessage());
                 ex.printStackTrace();
-                // 出错时恢复按钮可用
+                // Re-enable button if error occurs
                 arrowButton.setDisable(false);
             }
         });
@@ -184,9 +189,9 @@ public class MainWindow extends Application {
     }
 
     /**
-     * 为MainWindow添加初始化动画效果
+     * Adds initialization animation effects to MainWindow
      *
-     * @param scene 主窗口场景
+     * @param scene The main window scene
      */
 
 
@@ -235,5 +240,23 @@ public class MainWindow extends Application {
      */
     public static void main(String[] args) {
         launch(args);
+    }
+
+    /**
+     * Dynamically updates the window icon based on the current theme (static method for external calls)
+     * @param stage The main window stage
+     * @param themeService The current theme service instance
+     */
+    public static void updateWindowIcon(Stage stage, ThemeService themeService) {
+        try {
+            String iconPath = themeService.isDayMode() ? "/pictures/logo_day.png" : "/pictures/logo_night.png";
+            javafx.scene.image.Image icon = new javafx.scene.image.Image(
+                Objects.requireNonNull(MainWindow.class.getResource(iconPath)).toExternalForm()
+            );
+            stage.getIcons().clear();
+            stage.getIcons().add(icon);
+        } catch (Exception e) {
+            System.err.println("[Warning] Failed to update window icon: " + e.getMessage());
+        }
     }
 }
