@@ -1,0 +1,14 @@
+com.myfinanceapp
+com.myfinanceapp.model
+com.myfinanceapp.security
+com.myfinanceapp.service
+com.myfinanceapp.ui.common
+com.myfinanceapp.ui.goalsscene
+com.myfinanceapp.ui.loginscene
+com.myfinanceapp.ui.mainwindow
+com.myfinanceapp.ui.registrationterms
+com.myfinanceapp.ui.settingscene
+com.myfinanceapp.ui.signupscene
+com.myfinanceapp.ui.statusscene
+com.myfinanceapp.ui.transactionscene
+com.myfinanceapp.ui.usermanual
