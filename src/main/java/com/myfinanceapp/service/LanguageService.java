@@ -4,8 +4,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Service class for managing internationalization and localization in the application.
- * This class implements the Singleton pattern to provide a centralized service for
+ * Service class for managing internationalization and localization in the
+ * application.
+ * This class implements the Singleton pattern to provide a centralized service
+ * for
  * handling multiple languages and translations throughout the application.
  * 
  * The service supports:
@@ -19,13 +21,19 @@ import java.util.Map;
  * @version 4.0
  */
 public class LanguageService {
+    /** Singleton instance of LanguageService */
     private static LanguageService instance;
+
+    /** Current selected language */
     private String currentLanguage;
+
+    /** Map of translations for different languages */
     private Map<String, Map<String, String>> translations;
 
     /**
      * Private constructor to enforce singleton pattern.
-     * Initializes the service with default language (English) and loads translations.
+     * Initializes the service with default language (English) and loads
+     * translations.
      */
     private LanguageService() {
         this.currentLanguage = "English";
@@ -56,7 +64,7 @@ public class LanguageService {
      */
     private void initializeTranslations() {
         translations = new HashMap<>();
-        
+
         // English translations
         Map<String, String> english = new HashMap<>();
         english.put("languages", "Languages");
@@ -71,7 +79,8 @@ public class LanguageService {
         english.put("user_options", "User Options");
         english.put("export_report", "Export Report");
         english.put("about", "About");
-        english.put("welcome_message", "Welcome to use the financial assistant. Please feel free to ask any financial questions you have.");
+        english.put("welcome_message",
+                "Welcome to use the financial assistant. Please feel free to ask any financial questions you have.");
         english.put("welcome_message_status", "Welcome back!");
         english.put("welcome_message_goals", "It's My Goal!!!!!");
         english.put("welcome_message_new", "Every day is a\nnew beginning");
@@ -85,7 +94,9 @@ public class LanguageService {
         english.put("logout_confirmation", "Are you sure you want to log out?");
         english.put("logout_title", "Confirm Logout");
         english.put("login", "Login");
-        
+        english.put("import_successful", "Import Successfully");
+        english.put("import_success_message", "Successfully import transaction items");
+
         // User Options translations
         english.put("current_username", "Current Username");
         english.put("reset_username", "Reset Username");
@@ -106,20 +117,19 @@ public class LanguageService {
         english.put("security_question_updated", "Security question updated!");
         english.put("security_question_update_failed", "Failed to update question!");
         english.put("reset_password", "Reset Password");
-        
+
         // About page translations
         english.put("about_finanger", "About Finanger");
-        english.put("about_description", 
-            "Finanger is an AI-powered personal finance manager designed to help you take control " +
-            "of your money with ease. Whether you input transactions manually or import files, " +
-            "Finanger keeps everything organized in one place.\n\n" +
-            "Using smart AI, Finanger automatically categorizes your expenses, detects spending " +
-            "patterns, and suggests personalized budgets and saving tips. Of course, you stay in " +
-            "control — review and adjust any misclassifications at any time.\n\n" +
-            "Smarter finance starts here. With Finanger, you're not just tracking money — " +
-            "you're mastering it."
-        );
-        
+        english.put("about_description",
+                "Finanger is an AI-powered personal finance manager designed to help you take control " +
+                        "of your money with ease. Whether you input transactions manually or import files, " +
+                        "Finanger keeps everything organized in one place.\n\n" +
+                        "Using smart AI, Finanger automatically categorizes your expenses, detects spending " +
+                        "patterns, and suggests personalized budgets and saving tips. Of course, you stay in " +
+                        "control — review and adjust any misclassifications at any time.\n\n" +
+                        "Smarter finance starts here. With Finanger, you're not just tracking money — " +
+                        "you're mastering it.");
+
         // Export Report translations
         english.put("select_date_range", "Select Date Range");
         english.put("start_date", "Start Date");
@@ -127,7 +137,7 @@ public class LanguageService {
         english.put("to", "to");
         english.put("export_success", "Financial report exported successfully!");
         english.put("export_failed", "Failed to export report");
-        
+
         // Transaction Scene translations
         english.put("manual_import", "Manual Import:");
         english.put("transaction_date", "Transaction Date");
@@ -152,7 +162,8 @@ public class LanguageService {
         english.put("missing_info", "Missing Information");
         english.put("fill_all_blanks", "Please fill in all blanks before submitting");
         english.put("invalid_date", "Invalid Date");
-        english.put("invalid_date_format", "Please enter a valid date in format yyyy-MM-dd\nMonth must be 1-12 and day must be 1-31");
+        english.put("invalid_date_format",
+                "Please enter a valid date in format yyyy-MM-dd\nMonth must be 1-12 and day must be 1-31");
         english.put("invalid_category", "Invalid Category");
         english.put("category_english_only", "Category must contain only English letters");
         english.put("invalid_payment_method", "Invalid Payment Method");
@@ -164,29 +175,35 @@ public class LanguageService {
         english.put("file_import", "File Import:");
         english.put("select_file", "Select a file");
         english.put("reference_template", "Reference Template");
-        english.put("save_template_csv", "Save Template CSV");
+        english.put("save_template_csv", "Save Template Excel");
         english.put("template_not_found", "Template file not found in resources/template folder.");
         english.put("download_complete", "Download Complete");
-        english.put("template_download_success", "CSV template downloaded successfully!");
+        english.put("template_download_success", "Excel template downloaded successfully!");
         english.put("download_failed", "Download Failed");
         english.put("template_download_failed", "Failed to download template");
-        english.put("csv_format_guide", 
-            "Your .CSV file should\ncontain the following columns:\n\n" +
-            "Transaction Date\n" +
-            "(format: YYYY-MM-DD, e.g. 2025-03-15)\n\n" +
-            "Transaction Type\n" +
-            "(only: Income / Expense)\n\n" +
-            "Currency\n" +
-            "(currency type, e.g. CNY, USD)\n\n" +
-            "Amount\n" +
-            "(number format, e.g. 1234.56)\n\n" +
-            "Description\n" +
-            "(transaction description)\n\n" +
-            "Category\n" +
-            "(income and expense category)\n\n" +
-            "Payment Method\n" +
-            "(payment method)");
-        
+        english.put("csv_format_guide",
+                "Your file (supports CSV UTF-8, CSV, Excel files) should\ncontain the following columns:\n\n" +
+                        "Transaction Date\n" +
+                        "(format: YYYY-MM-DD, e.g. 2025-03-15)\n\n" +
+                        "Transaction Type\n" +
+                        "(only: Income / Expense)\n\n" +
+                        "Currency\n" +
+                        "(currency type, e.g. CNY, USD)\n\n" +
+                        "Amount\n" +
+                        "(number format, e.g. 1234.56)\n\n" +
+                        "Description\n" +
+                        "(transaction description)\n\n" +
+                        "Category\n" +
+                        "(income and expense category)\n\n" +
+                        "Payment Method\n" +
+                        "(payment method)");
+
+        // File type filter translations
+        english.put("csv_utf8_filter", "CSV UTF-8 (Comma Separated) (*.csv)");
+        english.put("csv_filter", "CSV (Comma Separated) (*.csv)");
+        english.put("excel_filter", "Excel Files (*.xlsx)");
+        english.put("all_supported_filter", "All Supported Files (*.csv, *.xlsx)");
+
         // Status Scene translations
         english.put("income_and_expenses", "Income and Expenses");
         english.put("start_date", "Start Date");
@@ -209,7 +226,7 @@ public class LanguageService {
         english.put("chat_history", "Chat History");
         english.put("you", "You");
         english.put("assistant", "Assistant");
-        
+
         // Transaction Management translations
         english.put("transactions", "Transactions");
         english.put("manage_transactions", "Manage Your Transactions");
@@ -218,7 +235,7 @@ public class LanguageService {
         english.put("all", "All");
         english.put("action", "Action");
         english.put("delete", "Delete");
-        
+
         // Add export report translations
         english.put("financial_report", "Financial Report");
         english.put("user", "User");
@@ -240,7 +257,7 @@ public class LanguageService {
         english.put("payment_method", "Payment Method");
         english.put("income", "Income");
         english.put("expense", "Expense");
-        
+
         translations.put("English", english);
 
         // Chinese translations
@@ -271,7 +288,9 @@ public class LanguageService {
         chinese.put("logout_confirmation", "确定要退出登录吗？");
         chinese.put("logout_title", "确认退出");
         chinese.put("login", "登录");
-        
+        chinese.put("import_successful", "导入成功");
+        chinese.put("import_success_message", "成功导入交易记录");
+
         // User Options translations
         chinese.put("current_username", "当前用户名");
         chinese.put("reset_username", "重置用户名");
@@ -292,17 +311,16 @@ public class LanguageService {
         chinese.put("security_question_updated", "安全问题已更新！");
         chinese.put("security_question_update_failed", "更新安全问题失败！");
         chinese.put("reset_password", "重置密码");
-        
+
         // About page translations
         chinese.put("about_finanger", "关于 Finanger");
-        chinese.put("about_description", 
-            "Finanger 是一款由人工智能驱动的个人理财管理工具，旨在帮助您轻松掌控财务。无论您是手动输入交易还是导入文件，" +
-            "Finanger 都能将所有内容有条理地组织在一起。\n\n" +
-            "通过智能 AI 技术，Finanger 可以自动对您的支出进行分类，检测消费模式，并提供个性化的预算和储蓄建议。" +
-            "当然，您始终掌握控制权 — 随时可以查看和调整任何分类错误。\n\n" +
-            "更智能的理财从这里开始。使用 Finanger，您不仅仅是追踪资金 — 您正在掌握它。"
-        );
-        
+        chinese.put("about_description",
+                "Finanger 是一款由人工智能驱动的个人理财管理工具，旨在帮助您轻松掌控财务。无论您是手动输入交易还是导入文件，" +
+                        "Finanger 都能将所有内容有条理地组织在一起。\n\n" +
+                        "通过智能 AI 技术，Finanger 可以自动对您的支出进行分类，检测消费模式，并提供个性化的预算和储蓄建议。" +
+                        "当然，您始终掌握控制权 — 随时可以查看和调整任何分类错误。\n\n" +
+                        "更智能的理财从这里开始。使用 Finanger，您不仅仅是追踪资金 — 您正在掌握它。");
+
         // Export Report translations
         chinese.put("select_date_range", "选择日期范围");
         chinese.put("start_date", "开始日期");
@@ -310,7 +328,7 @@ public class LanguageService {
         chinese.put("to", "至");
         chinese.put("export_success", "财务报表导出成功！");
         chinese.put("export_failed", "导出报告失败");
-        
+
         // Transaction Scene translations
         chinese.put("manual_import", "手动导入：");
         chinese.put("transaction_date", "交易日期");
@@ -347,29 +365,35 @@ public class LanguageService {
         chinese.put("file_import", "文件导入：");
         chinese.put("select_file", "选择文件");
         chinese.put("reference_template", "参考模板");
-        chinese.put("save_template_csv", "保存 CSV 模板");
+        chinese.put("save_template_csv", "保存 Excel 模板");
         chinese.put("template_not_found", "在资源文件夹中未找到模板文件。");
         chinese.put("download_complete", "下载完成");
-        chinese.put("template_download_success", "CSV 模板下载成功！");
+        chinese.put("template_download_success", "Excel 模板下载成功！");
         chinese.put("download_failed", "下载失败");
         chinese.put("template_download_failed", "下载模板失败");
-        chinese.put("csv_format_guide", 
-            "您的 .CSV 文件应包含以下列：\n\n" +
-            "交易日期\n" +
-            "（格式：YYYY-MM-DD，例如 2025-03-15）\n\n" +
-            "交易类型\n" +
-            "（仅限：收入 / 支出）\n\n" +
-            "货币\n" +
-            "（货币类型，例如 CNY、USD）\n\n" +
-            "金额\n" +
-            "（数字格式，例如 1234.56）\n\n" +
-            "描述\n" +
-            "（交易描述）\n\n" +
-            "类别\n" +
-            "（收入和支出类别）\n\n" +
-            "支付方式\n" +
-            "（支付方式）");
-        
+        chinese.put("csv_format_guide",
+                "您的文件（支持CSV UTF-8、CSV、Excel文件）应包含以下列：\n\n" +
+                        "交易日期\n" +
+                        "（格式：YYYY-MM-DD，例如 2025-03-15）\n\n" +
+                        "交易类型\n" +
+                        "（仅限：收入 / 支出）\n\n" +
+                        "货币\n" +
+                        "（货币类型，例如 CNY、USD）\n\n" +
+                        "金额\n" +
+                        "（数字格式，例如 1234.56）\n\n" +
+                        "描述\n" +
+                        "（交易描述）\n\n" +
+                        "类别\n" +
+                        "（收入和支出类别）\n\n" +
+                        "支付方式\n" +
+                        "（支付方式）");
+
+        // File type filter translations
+        chinese.put("csv_utf8_filter", "CSV UTF-8 (逗号分隔) (*.csv)");
+        chinese.put("csv_filter", "CSV (逗号分隔) (*.csv)");
+        chinese.put("excel_filter", "Excel 文件 (*.xlsx)");
+        chinese.put("all_supported_filter", "所有支持的文件 (*.csv, *.xlsx)");
+
         // Status Scene translations
         chinese.put("income_and_expenses", "收支情况");
         chinese.put("start_date", "开始日期");
@@ -392,7 +416,7 @@ public class LanguageService {
         chinese.put("chat_history", "聊天历史");
         chinese.put("you", "您");
         chinese.put("assistant", "助手");
-        
+
         // Transaction Management translations
         chinese.put("transactions", "交易");
         chinese.put("manage_transactions", "管理您的交易");
@@ -401,7 +425,7 @@ public class LanguageService {
         chinese.put("all", "全部");
         chinese.put("action", "操作");
         chinese.put("delete", "删除");
-        
+
         // Add export report translations
         chinese.put("financial_report", "财务报表");
         chinese.put("user", "用户");
@@ -423,7 +447,7 @@ public class LanguageService {
         chinese.put("payment_method", "支付方式");
         chinese.put("income", "收入");
         chinese.put("expense", "支出");
-        
+
         translations.put("Chinese", chinese);
 
         // Goals page translations
@@ -444,7 +468,8 @@ public class LanguageService {
         english.put("general", "General");
         english.put("delete_goal", "Delete Goal");
         english.put("delete_goal_header", "Delete");
-        english.put("delete_goal_confirmation", "Are you sure you want to delete this goal? This action cannot be undone.");
+        english.put("delete_goal_confirmation",
+                "Are you sure you want to delete this goal? This action cannot be undone.");
         english.put("failed_to_delete_goal", "Failed to delete goal");
         english.put("error_loading_transaction", "Error loading transaction data");
 
@@ -507,7 +532,8 @@ public class LanguageService {
         chinese.put("failed_to_update_goal", "更新目标失败");
 
         // 添加欢迎消息的翻译
-        english.put("welcome_message", "Welcome to use the financial assistant. Please feel free to ask any financial questions you have.");
+        english.put("welcome_message",
+                "Welcome to use the financial assistant. Please feel free to ask any financial questions you have.");
         chinese.put("welcome_message", "欢迎使用财务助手。请随时询问任何财务相关的问题。");
     }
 
@@ -537,10 +563,11 @@ public class LanguageService {
      * If the key is not found, returns the key itself.
      *
      * @param key The translation key to look up
-     * @return The translated string for the given key, or the key itself if not found
+     * @return The translated string for the given key, or the key itself if not
+     *         found
      */
     public String getTranslation(String key) {
         Map<String, String> currentTranslations = translations.get(currentLanguage);
         return currentTranslations != null ? currentTranslations.getOrDefault(key, key) : key;
     }
-} 
+}
