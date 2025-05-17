@@ -20,22 +20,22 @@ import javafx.util.Duration;
  */
 public class SceneManager {
     /**
-     * 默认动画持续时间（毫秒）
+     * Default animation duration in milliseconds
      */
     private static final int DEFAULT_ANIMATION_DURATION = 600;
     
     /**
-     * 动画类型枚举
+     * Animation type enumeration
      */
     public enum AnimationType {
-        NONE,       // 无动画
-        FADE,       // 淡入淡出
-        SLIDE_LEFT, // 从右向左滑动
-        SLIDE_RIGHT,// 从左向右滑动
-        SLIDE_UP,   // 从下向上滑动
-        SLIDE_DOWN, // 从上向下滑动
-        RIPPLE,     // 波纹展开
-        ROTATE      // 旋转进入
+        NONE,       // No animation
+        FADE,       // Fade in/out
+        SLIDE_LEFT, // Slide from right to left
+        SLIDE_RIGHT,// Slide from left to right
+        SLIDE_UP,   // Slide from bottom to top
+        SLIDE_DOWN, // Slide from top to bottom
+        RIPPLE,     // Ripple effect
+        ROTATE      // Rotation effect
     }
     
     /**
@@ -51,44 +51,44 @@ public class SceneManager {
     }
     
     /**
-     * 使用指定的动画类型切换场景
+     * Switches to a new scene with specified animation type
      * 
-     * @param stage 当前舞台
-     * @param newScene 新场景
-     * @param animationType 动画类型
+     * @param stage The current stage
+     * @param newScene The new scene to display
+     * @param animationType The type of animation to use
      */
     public static void switchScene(Stage stage, Scene newScene, AnimationType animationType) {
         switchScene(stage, newScene, animationType, DEFAULT_ANIMATION_DURATION);
     }
     
     /**
-     * 使用指定的动画类型和持续时间切换场景
+     * Switches to a new scene with specified animation type and duration
      * 
-     * @param stage 当前舞台
-     * @param newScene 新场景
-     * @param animationType 动画类型
-     * @param duration 动画持续时间（毫秒）
+     * @param stage The current stage
+     * @param newScene The new scene to display
+     * @param animationType The type of animation to use
+     * @param duration The animation duration in milliseconds
      */
     /**
-     * 使用指定的动画类型和持续时间切换场景，优化过渡动画处理
+     * Switches to a new scene with specified animation type and duration, optimized for transition handling
      */
     public static void switchScene(Stage stage, Scene newScene, AnimationType animationType, int duration) {
-        // 保存当前窗口尺寸和位置
+        // Save current window dimensions and position
         double width = stage.getWidth();
         double height = stage.getHeight();
         double x = stage.getX();
         double y = stage.getY();
 
-        // 设置窗口尺寸，确保动画过程中尺寸不变
+        // Set window dimensions to ensure consistent size during animation
         stage.setWidth(width);
         stage.setHeight(height);
 
-        // 简化切换到状态页面时的动画处理
+        // Simplify animation handling for status page transitions
         if (animationType == AnimationType.SLIDE_UP &&
                 newScene.getRoot() instanceof BorderPane &&
                 ((BorderPane)newScene.getRoot()).getCenter() instanceof ScrollPane) {
 
-            // 对StatusScene使用简化的淡入动画，避免复杂动画导致卡顿
+            // Use simplified fade animation for StatusScene to avoid performance issues
             newScene.getRoot().setOpacity(0);
             stage.setScene(newScene);
 
@@ -100,7 +100,7 @@ public class SceneManager {
         }
 
         try {
-            // 根据动画类型执行相应的切换效果
+            // Execute corresponding transition effect based on animation type
             switch (animationType) {
                 case FADE:
                     AnimationUtils.fadeTransition(stage, newScene, duration);
@@ -123,11 +123,11 @@ public class SceneManager {
                     break;
             }
         } catch (Exception e) {
-            System.err.println("场景切换动画失败，直接切换: " + e.getMessage());
+            System.err.println("Scene transition animation failed, switching directly: " + e.getMessage());
             stage.setScene(newScene);
         }
 
-        // 确保窗口尺寸和位置保持不变
+        // Ensure window dimensions and position remain unchanged
         Platform.runLater(() -> {
             stage.setWidth(width);
             stage.setHeight(height);
