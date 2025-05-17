@@ -41,14 +41,15 @@ import java.text.ParseException;
  * @version 4.0
  */
 public class TransactionScene {
+    /** Language service instance for internationalization */
     private static final LanguageService languageService = LanguageService.getInstance();
 
     /**
      * Creates and returns a transaction scene with default theme settings.
      *
-     * @param stage The stage to display the scene
-     * @param width The initial width of the scene
-     * @param height The initial height of the scene
+     * @param stage      The stage to display the scene
+     * @param width      The initial width of the scene
+     * @param height     The initial height of the scene
      * @param loggedUser The currently logged-in user
      * @return A configured Scene object for the transaction interface
      */
@@ -59,10 +60,10 @@ public class TransactionScene {
     /**
      * Creates and returns a transaction scene with specified theme settings.
      *
-     * @param stage The stage to display the scene
-     * @param width The initial width of the scene
-     * @param height The initial height of the scene
-     * @param loggedUser The currently logged-in user
+     * @param stage        The stage to display the scene
+     * @param width        The initial width of the scene
+     * @param height       The initial height of the scene
+     * @param loggedUser   The currently logged-in user
      * @param themeService The theme service to use for styling
      * @return A configured Scene object for the transaction interface
      */
@@ -72,14 +73,15 @@ public class TransactionScene {
     }
 
     /**
-     * Creates and returns a transaction scene with specified theme and currency settings.
+     * Creates and returns a transaction scene with specified theme and currency
+     * settings.
      * The scene includes manual transaction input and CSV file import capabilities.
      *
-     * @param stage The stage to display the scene
-     * @param width The initial width of the scene
-     * @param height The initial height of the scene
-     * @param loggedUser The currently logged-in user
-     * @param themeService The theme service to use for styling
+     * @param stage           The stage to display the scene
+     * @param width           The initial width of the scene
+     * @param height          The initial height of the scene
+     * @param loggedUser      The currently logged-in user
+     * @param themeService    The theme service to use for styling
      * @param currencyService The currency service to use for the application
      * @return A configured Scene object for the transaction interface
      */
@@ -140,9 +142,8 @@ public class TransactionScene {
         typeLabel.setStyle(themeService.getTextColorStyle());
         ComboBox<String> typeCombo = new ComboBox<>();
         typeCombo.getItems().addAll(
-            languageService.getTranslation("income"),
-            languageService.getTranslation("expense")
-        );
+                languageService.getTranslation("income"),
+                languageService.getTranslation("expense"));
         typeCombo.setMaxWidth(200);
         typeCombo.setPrefWidth(150);
         typeCombo.setValue(languageService.getTranslation("expense"));
@@ -416,28 +417,34 @@ public class TransactionScene {
 
         importCSVButton.setOnAction(event -> {
             FileChooser fileChooser = new FileChooser();
-            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV Files", "*.csv"));
+            fileChooser.getExtensionFilters().addAll(
+                    new FileChooser.ExtensionFilter(languageService.getTranslation("all_supported_filter"), "*.csv",
+                            "*.xlsx"),
+                    new FileChooser.ExtensionFilter(languageService.getTranslation("csv_utf8_filter"), "*.csv"),
+                    new FileChooser.ExtensionFilter(languageService.getTranslation("csv_filter"), "*.csv"),
+                    new FileChooser.ExtensionFilter(languageService.getTranslation("excel_filter"), "*.xlsx"));
             File file = fileChooser.showOpenDialog(stage);
             if (file != null) {
                 TransactionService service = new TransactionService();
-                service.importTransactionsFromCSV(loggedUser, file);
+                service.importTransactions(loggedUser, file);
             }
         });
 
         // Add Reference Template button
         Button downloadTemplateButton = new Button(languageService.getTranslation("reference_template"));
-        downloadTemplateButton.setPrefWidth(160);
-        downloadTemplateButton.setStyle(buttonBaseStyle);
+        downloadTemplateButton.setPrefWidth(230);
+        downloadTemplateButton.setMinWidth(230);
+        downloadTemplateButton.setStyle(buttonBaseStyle + "-fx-font-size: 8px;");
 
         downloadTemplateButton.setOnAction(event -> {
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle(languageService.getTranslation("save_template_csv"));
-            fileChooser.setInitialFileName("template.csv");
-            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV Files", "*.csv"));
+            fileChooser.setInitialFileName("template.xlsx");
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Excel Files", "*.xlsx"));
             File destFile = fileChooser.showSaveDialog(stage);
             if (destFile != null) {
                 try {
-                    java.io.InputStream in = TransactionScene.class.getResourceAsStream("/template/template.csv");
+                    java.io.InputStream in = TransactionScene.class.getResourceAsStream("/template/template.xlsx");
                     if (in == null) {
                         throw new Exception(languageService.getTranslation("template_not_found"));
                     }
@@ -453,7 +460,8 @@ public class TransactionScene {
                     Alert alert = new Alert(Alert.AlertType.ERROR);
                     alert.setTitle(languageService.getTranslation("download_failed"));
                     alert.setHeaderText(null);
-                    alert.setContentText(languageService.getTranslation("template_download_failed") + ": " + e.getMessage());
+                    alert.setContentText(
+                            languageService.getTranslation("template_download_failed") + ": " + e.getMessage());
                     alert.showAndWait();
                 }
             }
@@ -519,9 +527,9 @@ public class TransactionScene {
         scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
         scrollPane.getStyleClass().add("custom-scroll-pane");
-        
+
         // Apply theme-appropriate background color to scrollPane
-        String scrollPaneBackground = themeService.isDayMode() 
+        String scrollPaneBackground = themeService.isDayMode()
                 ? "-fx-background: white; -fx-background-color: white; -fx-border-color: transparent;"
                 : "-fx-background: #3C3C3C; -fx-background-color: #3C3C3C; -fx-border-color: transparent;";
         scrollPane.setStyle(scrollPaneBackground);
@@ -666,7 +674,7 @@ public class TransactionScene {
                     -fx-fill: white;
                 }
                 """;
-        
+
         // Add specific styles for TextArea controls in night mode
         String textAreaStylesheet = """
                 .night-theme-text-field.text-area {
@@ -685,7 +693,7 @@ public class TransactionScene {
                     -fx-background-color: #3C3C3C;
                 }
                 """;
-                
+
         scene.getStylesheets().add("data:text/css," + componentStylesheet);
         scene.getStylesheets().add("data:text/css," + textAreaStylesheet);
 
@@ -704,13 +712,15 @@ public class TransactionScene {
                 double scaleH = currentHeight / 600;
                 double scale = Math.min(scaleW, scaleH);
 
-                // Base font size settings - can adjust these base values to suit different window sizes
+                // Base font size settings - can adjust these base values to suit different
+                // window sizes
                 double titleFontSize = 25 * scale;
                 double labelFontSize = 17 * scale;
                 double inputFontSize = 13 * scale;
                 double formatLabelFontSize = 15 * scale;
 
-                // Ensure font sizes have minimum and maximum limits to prevent too small or too large
+                // Ensure font sizes have minimum and maximum limits to prevent too small or too
+                // large
                 titleFontSize = Math.max(14, Math.min(titleFontSize, 28));
                 labelFontSize = Math.max(10, Math.min(labelFontSize, 22));
                 inputFontSize = Math.max(6, Math.min(inputFontSize, 18));
@@ -821,7 +831,8 @@ public class TransactionScene {
             }
         };
 
-        // Set a fixed margin constant to ensure borders and window edges always maintain this distance
+        // Set a fixed margin constant to ensure borders and window edges always
+        // maintain this distance
         final int BORDER_MARGIN = 20; // Can adjust this value as needed
 
         PauseTransition layoutPause = new PauseTransition(Duration.millis(50));
