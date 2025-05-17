@@ -475,6 +475,8 @@ public class TransactionScene {
         formatLabel.setFont(new Font(11));
         formatLabel.setStyle(themeService.getTextColorStyle());
         VBox.setMargin(formatLabel, new Insets(10, 0, 20, 0));
+        formatLabel.setWrapText(true);
+        formatLabel.maxWidthProperty().bind(rightBar.widthProperty().subtract(20));
 
         rightBar.getChildren().addAll(
                 promptLabel,
