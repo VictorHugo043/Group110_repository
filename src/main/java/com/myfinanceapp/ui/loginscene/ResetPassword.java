@@ -93,9 +93,15 @@ public class ResetPassword {
                         "-fx-text-fill: white;" +
                         "-fx-font-weight: bold;" +
                         "-fx-border-radius: 20;" +
-                        "-fx-background-radius: 20;"
+                        "-fx-background-radius: 20;"+
+                        "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.6), 5, 0, 0, 0);" // 添加阴影效果
         );
         backBtn.setPrefSize(60, 30);
+        double initialX = Math.min(width - 80, INITIAL_WIDTH - 80);
+        double initialY = 20;
+        backBtn.setLayoutX(initialX);
+        backBtn.setLayoutY(initialY);
+
 
         // Return to login interface when clicked
         backBtn.setOnAction(e->{
@@ -328,12 +334,24 @@ public class ResetPassword {
         rightPane.setPrefSize(curW - paneX, curH);
         vbox.setPrefSize(rightPane.getPrefWidth(), rightPane.getPrefHeight());
 
-        // Place backBtn in top-right corner => x = sceneWidth - backBtn.width - 10
-        backBtn.applyCss();
-        backBtn.layout();
-        double btnW = backBtn.getWidth();
-        backBtn.setLayoutX(curW - btnW - 10);
-        backBtn.setLayoutY(10);
+        // Place backBtn
+        final double MARGIN = 20.0;
+
+        // 确保按钮位置在可见区域内
+        backBtn.setLayoutX(Math.min(curW - backBtn.getPrefWidth() - MARGIN, curW - 70));
+        backBtn.setLayoutY(MARGIN);
+
+        // 设置按钮的样式使其更加明显
+        backBtn.setStyle(
+                "-fx-background-color: #A3D1FF;" +
+                        "-fx-text-fill: white;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-border-radius: 20;" +
+                        "-fx-background-radius: 20;" +
+                        "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.6), 5, 0, 0, 0);" // 添加阴影效果
+        );
+
+        // 确保按钮保持在最上层
         backBtn.toFront();
     }
 
