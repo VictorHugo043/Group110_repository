@@ -211,7 +211,14 @@ public class SystemSettings {
             String selectedLanguage = langCombo.getValue();
             if (selectedLanguage != null) {
                 languageService.setCurrentLanguage(selectedLanguage);
-                updateLanguage(stage, root, outerBox, sideBar, topBar, container, langLabel, nightLabel, sizeLabel, currencyLabel, langCombo, nightCombo, sizeCombo, currencyCombo);
+                // Set global Locale to ensure DatePicker popup language changes
+                if ("Chinese".equals(selectedLanguage)) {
+                    java.util.Locale.setDefault(java.util.Locale.SIMPLIFIED_CHINESE);
+                } else {
+                    java.util.Locale.setDefault(java.util.Locale.ENGLISH);
+                }
+                // Only refresh current settings page, do not navigate to status page
+                stage.setScene(SystemSettings.createScene(stage, stage.getWidth(), stage.getHeight(), loggedUser, themeService, currencyService));
             }
         });
         langBox.getChildren().addAll(languagesIcon, langLabel, langCombo);

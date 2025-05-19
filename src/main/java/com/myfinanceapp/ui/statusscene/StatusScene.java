@@ -27,6 +27,10 @@ import com.myfinanceapp.ui.common.AnimationUtils;
 import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.util.Duration;
+import java.util.Locale;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import javafx.util.StringConverter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -105,6 +109,12 @@ public class StatusScene {
      * @return A configured Scene object for the status interface
      */
     public Scene createScene(ThemeService themeService, CurrencyService currencyService) {
+        // Ensure DatePicker popup language matches application language on first entry
+        if ("Chinese".equals(languageService.getCurrentLanguage())) {
+            java.util.Locale.setDefault(java.util.Locale.SIMPLIFIED_CHINESE);
+        } else {
+            java.util.Locale.setDefault(java.util.Locale.ENGLISH);
+        }
         this.themeService = themeService;
         this.currencyService = currencyService; // Store the CurrencyService instance
         BorderPane root = new BorderPane();
@@ -169,28 +179,28 @@ public class StatusScene {
                 ".scroll-pane > .viewport { -fx-background-color: " + backgroundColor + "; }" +
                 ".scroll-pane > .corner { -fx-background-color: " + backgroundColor + "; }");
 
-        // 初始化StatusService with CurrencyService
+        // Initialize StatusService with CurrencyService
         StatusService statusService = new StatusService(this, currentUser, currencyService, languageService);
 
         return scene;
     }
     
     /**
-     * 准备UI元素的入场动画，设置初始透明度为0
+     * Prepares entrance animations for UI elements by setting initial opacity to 0
      * 
-     * @param elements 需要动画效果的UI元素
+     * @param elements UI elements that need animation effects
      */
     private void prepareEntranceAnimations(Node... elements) {
-        // 此方法已不再使用，但保留方法签名以防其他地方调用
+        // This method is no longer used but kept for potential future use
     }
     
     /**
-     * 开始播放所有UI元素的入场动画
-     * 当场景被添加到舞台上并显示后调用此方法
+     * Starts playing entrance animations for all UI elements
+     * This method is called after the scene is added to the stage and displayed
      */
     public void startEntranceAnimations() {
-        // 此方法不再执行动画，避免与AnimationUtils.animateStatusSceneEntrance冲突
-        // 所有动画将由AnimationUtils.animateStatusSceneEntrance统一管理
+        // This method no longer performs animations to avoid conflicts with AnimationUtils.animateStatusSceneEntrance
+        // All animations are now managed by AnimationUtils.animateStatusSceneEntrance
     }
 
     /**
@@ -227,6 +237,21 @@ public class StatusScene {
         startDatePicker.setPromptText(languageService.getTranslation("select_start_date"));
         startDatePicker.setPrefWidth(150);
         startDatePicker.getStyleClass().add(themeService.isDayMode() ? "day-theme-date-picker" : "night-theme-date-picker");
+        // Set Locale and format
+        Locale locale = getLocaleForCurrentLanguage();
+        DateTimeFormatter startFormatter = DateTimeFormatter.ofPattern(
+            "Chinese".equals(languageService.getCurrentLanguage()) ? "yyyy/M/d" : "yyyy-MM-dd", locale
+        );
+        startDatePicker.setConverter(new StringConverter<LocalDate>() {
+            @Override
+            public String toString(LocalDate date) {
+                return date != null ? startFormatter.format(date) : "";
+            }
+            @Override
+            public LocalDate fromString(String string) {
+                return (string == null || string.isEmpty()) ? null : LocalDate.parse(string, startFormatter);
+            }
+        });
         controlGrid.add(startDateLabel, 0, 0);
         controlGrid.add(startDatePicker, 1, 0);
 
@@ -237,6 +262,20 @@ public class StatusScene {
         endDatePicker.setPromptText(languageService.getTranslation("select_end_date"));
         endDatePicker.setPrefWidth(150);
         endDatePicker.getStyleClass().add(themeService.isDayMode() ? "day-theme-date-picker" : "night-theme-date-picker");
+        // Set Locale and format
+        DateTimeFormatter endFormatter = DateTimeFormatter.ofPattern(
+            "Chinese".equals(languageService.getCurrentLanguage()) ? "yyyy/M/d" : "yyyy-MM-dd", locale
+        );
+        endDatePicker.setConverter(new StringConverter<LocalDate>() {
+            @Override
+            public String toString(LocalDate date) {
+                return date != null ? endFormatter.format(date) : "";
+            }
+            @Override
+            public LocalDate fromString(String string) {
+                return (string == null || string.isEmpty()) ? null : LocalDate.parse(string, endFormatter);
+            }
+        });
         controlGrid.add(endDateLabel, 0, 1);
         controlGrid.add(endDatePicker, 1, 1);
 
@@ -648,5 +687,19 @@ public class StatusScene {
         Scene scene = new Scene(new StackPane(historyView), 600, 400);
         historyStage.setScene(scene);
         historyStage.show();
+    }
+
+    /**
+     * Gets the Locale corresponding to the current language setting
+     * 
+     * @return The appropriate Locale for the current language
+     */
+    private Locale getLocaleForCurrentLanguage() {
+        String lang = languageService.getCurrentLanguage();
+        if ("Chinese".equals(lang)) {
+            return Locale.SIMPLIFIED_CHINESE;
+        } else {
+            return Locale.ENGLISH;
+        }
     }
 }
