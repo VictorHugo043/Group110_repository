@@ -2,6 +2,7 @@ package com.myfinanceapp.ui.common;
 
 import javafx.animation.FadeTransition;
 import javafx.application.Platform;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
@@ -78,6 +79,23 @@ public class SceneManager {
         double height = stage.getHeight();
         double x = stage.getX();
         double y = stage.getY();
+
+        boolean hasComboBox = false;
+        if (newScene.getRoot() instanceof Parent) {
+            hasComboBox = ((Parent)newScene.getRoot()).lookupAll(".combo-box").size() > 0;
+        }
+
+        if (hasComboBox && animationType != AnimationType.NONE) {
+            // 对包含 ComboBox 的场景，先设置场景，然后再做简单的淡入动画
+            newScene.getRoot().setOpacity(0);
+            stage.setScene(newScene);
+
+            FadeTransition fadeIn = new FadeTransition(Duration.millis(duration), newScene.getRoot());
+            fadeIn.setFromValue(0);
+            fadeIn.setToValue(1);
+            fadeIn.play();
+            return;
+        }
 
         // Set window dimensions to ensure consistent size during animation
         stage.setWidth(width);

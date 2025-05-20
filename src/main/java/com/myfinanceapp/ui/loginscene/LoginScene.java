@@ -238,7 +238,7 @@ public class LoginScene {
         signUpLink.setTextFill(Color.DARKBLUE);
         signUpLink.setOnAction(e -> {
             Scene signUpScene = SignUp.createScene(stage, root.getScene().getWidth(), root.getScene().getHeight());
-            SceneManager.switchScene(stage, signUpScene, AnimationType.SLIDE_LEFT);
+            SceneManager.switchScene(stage, signUpScene, AnimationType.FADE);
             stage.setTitle("Finanger - Sign Up");
         });
         signUpBox = new HBox(5, noAccountLabel, signUpLink);

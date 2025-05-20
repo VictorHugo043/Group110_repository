@@ -6,6 +6,7 @@ import com.myfinanceapp.ui.registrationterms.TermofUse;
 import com.myfinanceapp.ui.usermanual.UserManual; // Import the new UserManual scene
 import com.myfinanceapp.ui.loginscene.LoginScene;
 import com.myfinanceapp.service.UserService;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
@@ -82,6 +83,8 @@ public class SignUp {
     public static Scene createScene(Stage stage, double width, double height) {
         root = new Group();
         Scene scene = new Scene(root, width, height);
+
+        stage.setScene(scene);
 
         // Set minimum window dimensions
         stage.setMinWidth(INITIAL_WIDTH);
@@ -250,6 +253,15 @@ public class SignUp {
         scene.widthProperty().addListener((obs, oldVal, newVal) -> relayout());
         scene.heightProperty().addListener((obs, oldVal, newVal) -> relayout());
         relayout();
+
+        Platform.runLater(() -> {
+            // 重新设置下拉框值，确保所有者窗口正确
+            if (securityQuestionCombo != null) {
+                String currentValue = securityQuestionCombo.getValue();
+                securityQuestionCombo.setValue(null);
+                securityQuestionCombo.setValue(currentValue);
+            }
+        });
 
         return scene;
     }
