@@ -68,13 +68,12 @@ public class TransactionScene {
      * @return A configured Scene object for the transaction interface
      */
     public static Scene createScene(Stage stage, double width, double height, User loggedUser,
-            ThemeService themeService) {
+                                    ThemeService themeService) {
         return createScene(stage, width, height, loggedUser, themeService, new CurrencyService("CNY"));
     }
 
     /**
-     * Creates and returns a transaction scene with specified theme and currency
-     * settings.
+     * Creates and returns a transaction scene with specified theme and currency settings.
      * The scene includes manual transaction input and CSV file import capabilities.
      *
      * @param stage           The stage to display the scene
@@ -86,7 +85,7 @@ public class TransactionScene {
      * @return A configured Scene object for the transaction interface
      */
     public static Scene createScene(Stage stage, double width, double height, User loggedUser,
-            ThemeService themeService, CurrencyService currencyService) {
+                                    ThemeService themeService, CurrencyService currencyService) {
         BorderPane root = new BorderPane();
         root.setStyle(themeService.getCurrentThemeStyle());
 
@@ -198,7 +197,11 @@ public class TransactionScene {
         descriptionBox.setAlignment(Pos.CENTER);
 
         Button autoSortButton = new Button(languageService.getTranslation("auto_sorting"));
-        autoSortButton.setStyle(themeService.getButtonStyle() + "-fx-font-weight: bold; " + "-fx-border-radius: 15;");
+        autoSortButton.setStyle(themeService.getButtonStyle() +
+                "-fx-font-weight: bold; " +
+                "-fx-border-radius: 15; " +
+                "-fx-wrap-text: true; " +
+                "-fx-text-alignment: center;");
         autoSortButton.setMaxWidth(100);
         autoSortButton.setPrefWidth(100);
 
@@ -321,7 +324,7 @@ public class TransactionScene {
                 return;
             }
 
-            if (!categoryField.getText().matches("^[a-zA-Z\\s]+$")) {
+            if (!categoryField.getText().matches("^[a-zA-Z\\s&]+$")) {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle(languageService.getTranslation("invalid_category"));
                 alert.setHeaderText(null);
@@ -827,6 +830,10 @@ public class TransactionScene {
                 double refBtnMinWidth = 60 * scale;
                 refBtnMinWidth = Math.max(40, Math.min(refBtnMinWidth, 120));
                 downloadTemplateButton.setMinWidth(refBtnMinWidth);
+
+                // Calculate smaller font size for Auto-sorting button
+                double autoSortFontSize = Math.max(6, inputFontSize * 0.7); // Use smaller font size
+                autoSortButton.setStyle(autoSortButton.getStyle() + "-fx-font-size: " + autoSortFontSize + "px;");
             } catch (Exception e) {
                 System.err.println("Font adjustment error: " + e.getMessage());
                 e.printStackTrace();
