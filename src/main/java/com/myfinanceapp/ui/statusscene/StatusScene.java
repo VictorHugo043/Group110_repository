@@ -185,23 +185,7 @@ public class StatusScene {
         return scene;
     }
     
-    /**
-     * Prepares entrance animations for UI elements by setting initial opacity to 0
-     * 
-     * @param elements UI elements that need animation effects
-     */
-    private void prepareEntranceAnimations(Node... elements) {
-        // This method is no longer used but kept for potential future use
-    }
-    
-    /**
-     * Starts playing entrance animations for all UI elements
-     * This method is called after the scene is added to the stage and displayed
-     */
-    public void startEntranceAnimations() {
-        // This method no longer performs animations to avoid conflicts with AnimationUtils.animateStatusSceneEntrance
-        // All animations are now managed by AnimationUtils.animateStatusSceneEntrance
-    }
+
 
     /**
      * Creates the top section of the status scene containing date range controls,

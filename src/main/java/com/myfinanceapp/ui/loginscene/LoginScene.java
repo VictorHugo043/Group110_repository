@@ -214,18 +214,17 @@ public class LoginScene {
                 StatusScene statusScene = new StatusScene(stage, root.getScene().getWidth(), root.getScene().getHeight(), loggedUser);
                 Scene statusSceneObj = statusScene.createScene();
                 
-                // 使用向上滑动动画切换到状态页面
+
                 SceneManager.switchScene(stage, statusSceneObj, AnimationType.SLIDE_UP);
                 
-                // 创建StatusService
+                // StatusService
                 StatusService statusService = new StatusService(statusScene, loggedUser, currencyService, LanguageService.getInstance());
                 stage.setTitle("Finanger - Status");
                 
-                // 在场景切换后启动状态页面内部元素的动画效果
+
                 AnimationUtils.animateStatusSceneEntrance(statusSceneObj);
                 
-                // 不再显示弹出框，改为顺畅的过渡体验
-                // showAlert("Success", "Login Successful!");
+
             } else {
                 showAlert("Error", "Invalid username or password!");
             }
@@ -253,7 +252,7 @@ public class LoginScene {
                 signUpBox
         );
         
-        // 初始化时将控件设为透明
+
         titleLabel.setOpacity(0);
         userBox.setOpacity(0);
         passBox.setOpacity(0);
@@ -261,12 +260,10 @@ public class LoginScene {
         loginButton.setOpacity(0);
         signUpBox.setOpacity(0);
         
-        // 直接启动动画，无需等待鼠标移动事件
-        // 使用Timeline确保组件完全加载后再执行动画
+
         Timeline timeline = new Timeline(new KeyFrame(
-            Duration.millis(500), // 延迟500毫秒
+            Duration.millis(500),
             e -> {
-                // 添加元素依次渐入效果
                 AnimationUtils.fadeInNode(titleLabel, 100, 600);
                 AnimationUtils.slideInNode(userBox, 200, 500, "RIGHT", 50);
                 AnimationUtils.slideInNode(passBox, 300, 500, "RIGHT", 50);

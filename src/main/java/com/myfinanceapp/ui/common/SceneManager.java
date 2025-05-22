@@ -86,7 +86,6 @@ public class SceneManager {
         }
 
         if (hasComboBox && animationType != AnimationType.NONE) {
-            // 对包含 ComboBox 的场景，先设置场景，然后再做简单的淡入动画
             newScene.getRoot().setOpacity(0);
             stage.setScene(newScene);
 

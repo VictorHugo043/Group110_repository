@@ -117,14 +117,12 @@ public class TermofUse {
         contentBox.setMaxWidth(Double.MAX_VALUE);
         contentBox.getStyleClass().add("terms-text-area");
         
-        // 分割原始内容
+
         String[] sections = content.split("————————————————————————————————————————————————————————");
         
         if (sections.length > 0) {
-            // 添加标题部分，优化显示
             String[] headerLines = sections[0].trim().split("\n");
             if (headerLines.length > 0) {
-                // 如果包含星号标题
                 if (headerLines[0].contains("★")) {
                     Text titleText = new Text(headerLines[0]);
                     titleText.getStyleClass().add("header-title-text");
@@ -137,8 +135,7 @@ public class TermofUse {
                     headerContainer.getStyleClass().add("header-container-box");
                     headerContainer.setAlignment(Pos.CENTER);
                     headerContainer.getChildren().add(titleBox);
-                    
-                    // 处理剩余的介绍部分，若有多行
+
                     if (headerLines.length > 1) {
                         TextFlow introFlow = new TextFlow();
                         for (int i = 1; i < headerLines.length; i++) {
@@ -154,19 +151,16 @@ public class TermofUse {
                     
                     contentBox.getChildren().add(headerContainer);
                 } else {
-                    // 原始格式直接显示
                     Text introText = new Text(sections[0].trim());
                     introText.setWrappingWidth(700);
                     contentBox.getChildren().add(introText);
                 }
             }
-            
-            // 添加分割线
+
             Line divider = new Line(0, 0, 700, 0);
             divider.getStyleClass().add("divider-line");
             contentBox.getChildren().add(divider);
-            
-            // 处理主要条款部分
+
             if (sections.length > 1) {
                 String[] paragraphs = sections[1].split("\n");
                 
@@ -175,12 +169,10 @@ public class TermofUse {
                     if (paragraph.isEmpty()) continue;
                     
                     if (paragraph.matches("\\d+\\..+")) {
-                        // 这是一个章节标题
                         Text sectionHeader = new Text(paragraph);
                         sectionHeader.getStyleClass().add("section-header");
                         contentBox.getChildren().add(sectionHeader);
                     } else if (paragraph.startsWith("◆")) {
-                        // 这是一个列表项
                         HBox listItem = new HBox(10);
                         listItem.setAlignment(Pos.TOP_LEFT);
                         
@@ -191,7 +183,6 @@ public class TermofUse {
                         listItem.getChildren().addAll(bullet, itemText);
                         contentBox.getChildren().add(listItem);
                     } else {
-                        // 普通段落
                         Text paragraphText = new Text(paragraph);
                         paragraphText.setWrappingWidth(700);
                         contentBox.getChildren().add(paragraphText);

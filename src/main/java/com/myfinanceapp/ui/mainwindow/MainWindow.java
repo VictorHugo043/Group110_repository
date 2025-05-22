@@ -127,7 +127,6 @@ public class MainWindow extends Application {
         relayout();
 
         stage.show();
-        // 添加初始化动画
         AnimationUtils.animateMainWindowEntrance(scene);
     }
 

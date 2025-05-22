@@ -111,15 +111,12 @@ public class PrivacyPolicy {
         contentBox.setPadding(new Insets(25));
         contentBox.setMaxWidth(Double.MAX_VALUE);
         contentBox.getStyleClass().add("terms-text-area");
-        
-        // 分割原始内容
+
         String[] sections = content.split("————————————————————————————————————————————————————————");
         
         if (sections.length > 0) {
-            // 添加标题部分，优化显示
             String introText = sections[0].trim();
-            
-            // 美化开头部分
+
             Text headerText = new Text("★ PRIVACY POLICY ★");
             headerText.getStyleClass().add("header-title-text");
             
@@ -131,21 +128,18 @@ public class PrivacyPolicy {
             headerContainer.getStyleClass().add("header-container-box");
             headerContainer.setAlignment(Pos.CENTER);
             headerContainer.getChildren().add(titleBox);
-            
-            // 添加正文介绍
+
             Text introContentText = new Text(introText);
             introContentText.getStyleClass().add("intro-text");
             introContentText.setWrappingWidth(700);
             headerContainer.getChildren().add(introContentText);
             
             contentBox.getChildren().add(headerContainer);
-            
-            // 添加分割线
+
             Line divider = new Line(0, 0, 700, 0);
             divider.getStyleClass().add("divider-line");
             contentBox.getChildren().add(divider);
-            
-            // 处理主要条款部分
+
             if (sections.length > 1) {
                 String[] paragraphs = sections[1].split("\n");
                 
@@ -154,12 +148,10 @@ public class PrivacyPolicy {
                     if (paragraph.isEmpty()) continue;
                     
                     if (paragraph.matches("\\d+\\..+")) {
-                        // 这是一个章节标题
                         Text sectionHeader = new Text(paragraph);
                         sectionHeader.getStyleClass().add("section-header");
                         contentBox.getChildren().add(sectionHeader);
                     } else if (paragraph.startsWith("◆")) {
-                        // 这是一个列表项
                         HBox listItem = new HBox(10);
                         listItem.setAlignment(Pos.TOP_LEFT);
                         
@@ -170,7 +162,6 @@ public class PrivacyPolicy {
                         listItem.getChildren().addAll(bullet, itemText);
                         contentBox.getChildren().add(listItem);
                     } else {
-                        // 普通段落
                         Text paragraphText = new Text(paragraph);
                         paragraphText.setWrappingWidth(700);
                         contentBox.getChildren().add(paragraphText);
