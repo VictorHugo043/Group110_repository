@@ -3,6 +3,10 @@ package com.myfinanceapp.service;
 import com.myfinanceapp.model.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
+import java.io.File;
+import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -21,15 +25,54 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 class UserServiceTest {
 
-    private UserService userService;
+    private TestUserService userService;
+    @TempDir
+    Path tempDir;
+
+    /**
+     * 测试专用的 UserService 子类，用于覆盖文件路径
+     */
+    private static class TestUserService extends UserService {
+        private final String testFilePath;
+
+        public TestUserService(String testFilePath) {
+            this.testFilePath = testFilePath;
+        }
+
+        @Override
+        protected String getUserJsonPath() {
+            return testFilePath;
+        }
+    }
 
     /**
      * Sets up the test environment before each test.
-     * Initializes a new UserService instance.
+     * Initializes a new UserService instance and sets up a temporary directory for test files.
      */
     @BeforeEach
     void setUp() {
-        userService = new UserService();
+        try {
+            // 创建测试专用的 UserService 实例
+            File usersFile = new File(tempDir.toFile(), "users.json");
+            if (!usersFile.exists()) {
+                if (!usersFile.createNewFile()) {
+                    throw new RuntimeException("Failed to create users.json file");
+                }
+                // 写入空的 JSON 数组
+                java.nio.file.Files.write(usersFile.toPath(), "[]".getBytes());
+            }
+            
+            userService = new TestUserService(usersFile.getAbsolutePath());
+            
+            // 验证文件是否可写
+            if (!usersFile.canWrite()) {
+                throw new RuntimeException("users.json file is not writable");
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to set up test environment", e);
+        }
     }
 
     /**
@@ -41,19 +84,23 @@ class UserServiceTest {
      */
     @Test
     void registerUser() {
-        // Test successful registration
+        // 测试成功注册
         boolean result = userService.registerUser("testuser", "password123", "What is your pet's name?", "Fluffy");
-        assertTrue(result);
+        assertTrue(result, "User registration should succeed");
 
-        // Verify that the user was added (UID should be generated automatically)
+        // 验证用户信息
         User user = userService.findUserByUsername("testuser");
-        assertNotNull(user);
-        assertNotNull(user.getUid()); // UID should be generated
-        assertEquals("testuser", user.getUsername());
+        assertNotNull(user, "User should be found after registration");
+        assertNotNull(user.getUid(), "UID should be generated");
+        assertEquals("testuser", user.getUsername(), "Username should match");
+        assertEquals("password123", user.getPassword(), "Password should match");
+        assertEquals("What is your pet's name?", user.getSecurityQuestion(), "Security question should match");
+        assertEquals("Fluffy", user.getSecurityAnswer(), "Security answer should match");
+        assertNotNull(user.getSalt(), "Salt should be generated");
 
-        // Test registration with an existing username
-        result = userService.registerUser("testuser", "password456", "What is your favorite color?", "Blue");
-        assertFalse(result);
+        // 测试重复用户名（大小写不敏感）
+        result = userService.registerUser("TestUser", "password456", "What is your favorite color?", "Blue");
+        assertFalse(result, "Registration with existing username (case-insensitive) should fail");
     }
 
     /**
@@ -64,16 +111,20 @@ class UserServiceTest {
      */
     @Test
     void checkLogin() {
-        // Register a user first
+        // 注册用户
         userService.registerUser("testuser", "password123", "What is your pet's name?", "Fluffy");
 
-        // Test successful login
+        // 测试成功登录
         boolean result = userService.checkLogin("testuser", "password123");
-        assertTrue(result);
+        assertTrue(result, "Login with correct credentials should succeed");
 
-        // Test failed login with incorrect password
+        // 测试密码错误
         result = userService.checkLogin("testuser", "wrongpassword");
-        assertFalse(result);
+        assertFalse(result, "Login with incorrect password should fail");
+
+        // 测试用户名大小写不匹配（大小写敏感）
+        result = userService.checkLogin("TestUser", "password123");
+        assertFalse(result, "Login should fail with different case username");
     }
 
     /**
@@ -84,17 +135,22 @@ class UserServiceTest {
      */
     @Test
     void findUserByUsername() {
-        // Register a user
+        // 注册用户
         userService.registerUser("testuser", "password123", "What is your pet's name?", "Fluffy");
 
-        // Test finding user by username
+        // 测试查找存在的用户（大小写不敏感）
         User user = userService.findUserByUsername("testuser");
-        assertNotNull(user);
-        assertEquals("testuser", user.getUsername());
+        assertNotNull(user, "Existing user should be found");
+        assertEquals("testuser", user.getUsername(), "Username should match");
 
-        // Test finding a non-existent user
+        // 测试查找不存在的用户
         user = userService.findUserByUsername("nonexistent");
-        assertNull(user);
+        assertNull(user, "Non-existent user should return null");
+
+        // 测试大小写不敏感的查找
+        user = userService.findUserByUsername("TestUser");
+        assertNotNull(user, "User should be found with different case");
+        assertEquals("testuser", user.getUsername(), "Original username should be preserved");
     }
 
     /**
@@ -105,19 +161,20 @@ class UserServiceTest {
      */
     @Test
     void findUserByUid() {
-        // Register a user and get UID
+        // 注册用户并获取 UID
         userService.registerUser("testuser", "password123", "What is your pet's name?", "Fluffy");
         User user = userService.findUserByUsername("testuser");
         String uid = user.getUid();
 
-        // Test finding user by UID
+        // 测试通过 UID 查找用户
         User foundUser = userService.findUserByUid(uid);
-        assertNotNull(foundUser);
-        assertEquals(uid, foundUser.getUid());
+        assertNotNull(foundUser, "User should be found by UID");
+        assertEquals(uid, foundUser.getUid(), "UID should match");
+        assertEquals("testuser", foundUser.getUsername(), "Username should match");
 
-        // Test with a non-existent UID
+        // 测试查找不存在的 UID
         foundUser = userService.findUserByUid("nonexistent-uid");
-        assertNull(foundUser);
+        assertNull(foundUser, "Non-existent UID should return null");
     }
 
     /**
@@ -128,25 +185,22 @@ class UserServiceTest {
      */
     @Test
     void updateUserName() {
-        // Register a user
+        // 注册用户
         userService.registerUser("olduser", "password123", "What is your pet's name?", "Fluffy");
 
-        // Test successful username update
+        // 测试成功更新用户名
         boolean result = userService.updateUserName("olduser", "newuser");
-        assertTrue(result);
+        assertTrue(result, "Username update should succeed");
 
-        // Verify the username was updated
+        // 验证用户名已更新
         User user = userService.findUserByUsername("newuser");
-        assertNotNull(user);
-        assertEquals("newuser", user.getUsername());
+        assertNotNull(user, "User should be found with new username");
+        assertEquals("newuser", user.getUsername(), "Username should be updated");
 
-        // Test failed username update due to existing username
-        // Register another user to simulate username conflict
+        // 测试更新到已存在的用户名（大小写不敏感）
         userService.registerUser("otheruser", "password456", "What is your favorite color?", "Blue");
-
-        // Try updating to a conflicting username
-        result = userService.updateUserName("newuser", "otheruser");
-        assertFalse(result);  // Expecting failure due to username conflict
+        result = userService.updateUserName("newuser", "OtherUser");
+        assertFalse(result, "Update to existing username (case-insensitive) should fail");
     }
 
     /**
@@ -157,17 +211,21 @@ class UserServiceTest {
      */
     @Test
     void loginGetUser() {
-        // Register a user
+        // 注册用户
         userService.registerUser("testuser", "password123", "What is your pet's name?", "Fluffy");
 
-        // Test getting user after login
+        // 测试成功登录后获取用户
         User user = userService.loginGetUser("testuser", "password123");
-        assertNotNull(user);
-        assertEquals("testuser", user.getUsername());
+        assertNotNull(user, "User should be retrieved after successful login");
+        assertEquals("testuser", user.getUsername(), "Username should match");
 
-        // Test failed login and get user
+        // 测试登录失败后获取用户
         user = userService.loginGetUser("testuser", "wrongpassword");
-        assertNull(user);
+        assertNull(user, "Failed login should return null");
+
+        // 测试用户名大小写不匹配（大小写敏感）
+        user = userService.loginGetUser("TestUser", "password123");
+        assertNull(user, "Login should fail with different case username");
     }
 
     /**
@@ -178,21 +236,21 @@ class UserServiceTest {
      */
     @Test
     void updatePassword() {
-        // Register a user
+        // 注册用户
         userService.registerUser("testuser", "password123", "What is your pet's name?", "Fluffy");
         User user = userService.findUserByUsername("testuser");
 
-        // Test password update
+        // 测试更新密码
         boolean result = userService.updatePassword(user.getUid(), "newpassword123");
-        assertTrue(result);
+        assertTrue(result, "Password update should succeed");
 
-        // Verify password update
+        // 验证密码已更新
         User updatedUser = userService.findUserByUid(user.getUid());
-        assertEquals("newpassword123", updatedUser.getPassword());
+        assertEquals("newpassword123", updatedUser.getPassword(), "Password should be updated");
 
-        // Test failed password update with incorrect UID
+        // 测试使用无效 UID 更新密码
         result = userService.updatePassword("nonexistent-uid", "newpassword123");
-        assertFalse(result);
+        assertFalse(result, "Password update with invalid UID should fail");
     }
 
     /**
@@ -203,20 +261,21 @@ class UserServiceTest {
      */
     @Test
     void updateSecurityQuestion() {
-        // Register a user
+        // 注册用户
         userService.registerUser("testuser", "password123", "What is your pet's name?", "Fluffy");
         User user = userService.findUserByUsername("testuser");
 
-        // Test security question update
+        // 测试更新安全问题
         boolean result = userService.updateSecurityQuestion(user.getUid(), "What is your favorite color?", "Blue");
-        assertTrue(result);
+        assertTrue(result, "Security question update should succeed");
 
-        // Verify security question update
+        // 验证安全问题已更新
         User updatedUser = userService.findUserByUid(user.getUid());
-        assertEquals("What is your favorite color?", updatedUser.getSecurityQuestion());
+        assertEquals("What is your favorite color?", updatedUser.getSecurityQuestion(), "Security question should be updated");
+        assertEquals("Blue", updatedUser.getSecurityAnswer(), "Security answer should be updated");
 
-        // Test failed security question update with incorrect UID
+        // 测试使用无效 UID 更新安全问题
         result = userService.updateSecurityQuestion("nonexistent-uid", "What is your favorite color?", "Blue");
-        assertFalse(result);
+        assertFalse(result, "Security question update with invalid UID should fail");
     }
 }

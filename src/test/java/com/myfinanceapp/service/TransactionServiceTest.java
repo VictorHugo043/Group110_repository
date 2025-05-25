@@ -2,13 +2,19 @@ package com.myfinanceapp.service;
 
 import com.myfinanceapp.model.Transaction;
 import com.myfinanceapp.model.User;
+import javafx.application.Platform;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.testfx.framework.junit5.ApplicationExtension;
+import org.testfx.util.WaitForAsyncUtils;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -23,6 +29,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author SE_Group110
  * @version 4.0
  */
+@ExtendWith(ApplicationExtension.class)
 class TransactionServiceTest {
 
     private TransactionService transactionService;
@@ -131,21 +138,34 @@ class TransactionServiceTest {
      */
     @Test
     void importTransactionsFromCSV() throws Exception {
+        // Create test CSV file
         File csvFile = new File("src/test/resources/sample_transactions.csv");
-
-        // Ensure the directory exists
         csvFile.getParentFile().mkdirs();
 
-        // Create CSV file if it doesn't exist
-        if (!csvFile.exists()) {
-            String csvContent = "2025-03-30,Income,USD,1000,Salary,Bank Transfer\n" +
-                    "2025-03-31,Expense,USD,200,Groceries,Credit Card";
-            Files.write(csvFile.toPath(), csvContent.getBytes(StandardCharsets.UTF_8));
-        }
+        // Create CSV content with header
+        String csvContent = "Transaction Date,Transaction Type,Currency,Amount,Description,Category,Payment Method\n" +
+                "2025-03-30,Income,USD,1000,Test description,Salary,Bank Transfer\n" +
+                "2025-03-31,Expense,USD,200,Test description,Groceries,Credit Card";
+        Files.write(csvFile.toPath(), csvContent.getBytes(StandardCharsets.UTF_8));
 
-        transactionService.importTransactionsFromCSV(testUser, csvFile);
+        // Create a CountDownLatch to wait for the import to complete
+        CountDownLatch latch = new CountDownLatch(1);
+
+        // Import transactions using the new method in JavaFX thread
+        Platform.runLater(() -> {
+            try {
+                transactionService.importTransactions(testUser, csvFile);
+            } finally {
+                latch.countDown();
+            }
+        });
+
+        // Wait for the import to complete
+        assertTrue(latch.await(5, TimeUnit.SECONDS), "Import operation timed out");
+        WaitForAsyncUtils.waitForFxEvents();
+
+        // Verify imported transactions
         List<Transaction> transactions = transactionService.loadTransactions(testUser);
-
         assertEquals(2, transactions.size(), "Should have 2 transactions after CSV import");
 
         Transaction tx1 = createTransaction("2025-03-30", "Income", "USD", 1000, "Salary", "Bank Transfer");
@@ -153,5 +173,8 @@ class TransactionServiceTest {
 
         assertTrue(transactions.contains(tx1), "Transaction list should contain first transaction");
         assertTrue(transactions.contains(tx2), "Transaction list should contain second transaction");
+
+        // Clean up
+        csvFile.delete();
     }
 }
