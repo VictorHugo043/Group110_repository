@@ -118,6 +118,9 @@
    # Clean and build project
    mvn clean install
    
+   # Skip tests during build (faster)
+   mvn clean install -DskipTests
+   
    # If encountering dependency download issues, try using local repository
    mvn clean install -Dmaven.repo.local=./m2/repository
    ```
