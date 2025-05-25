@@ -23,73 +23,164 @@
 ## **Key Features**
 
 - **Financial Overview**  
-  View monthly income and expense trends through interactive charts and graphs.
+  - Interactive line and bar charts for income/expense trends
+  - Pie chart for category proportion analysis
+  - Customizable date range selection
+  - Real-time financial status updates
 
 - **Goal Management**  
-  Set, edit, and monitor savings goals with dedicated goal creation and progress tracking interfaces.
+  - Multiple goal types: Savings, Debt Repayment, Budget Control
+  - Visual progress tracking with progress indicators
+  - Goal creation and editing interface
+  - Support for multiple currencies (CNY, USD, EUR, JPY, GBP)
 
 - **Transaction Management**  
-  Manually input transactions or import them in bulk. Manage and visualize financial activity in an organized UI.
+  - Comprehensive transaction table with filtering and sorting
+  - Multiple filter options: date, type, currency, category, payment method
+  - Bulk import functionality
+  - Transaction categorization and tagging
 
 - **AI Assistant**  
-  Receive personalized suggestions and spending insights based on your financial habits using the built-in `AIChatService` and `AISortingService`.
+  - Real-time financial advice and insights
+  - Natural language interaction
+  - Personalized spending analysis
+  - Smart transaction categorization
 
 - **Export Financial Reports**  
-  Generate and export detailed financial reports for personal tracking or sharing.
+  - Customizable report formats
+  - Multiple export options
+  - Detailed transaction history
+  - Financial summary reports
 
 - **Status Summary**  
-  Quickly view your financial status and summaries via the `StatusScene` interface.
+  - Real-time financial metrics
+  - Income/Expense balance tracking
+  - Category-wise spending analysis
+  - Recent transaction history
 
 - **User Manual & Help**  
-  Built-in help and guidance system through a dedicated `UserManual` section.
+  - Comprehensive documentation
+  - Interactive tutorials
+  - Feature guides
+  - Troubleshooting assistance
 
 - **Personalized Settings**  
-  Customize your experience with support for:
-    - Multiple languages
-    - Dark mode
-    - Export preferences
-    - Window resizing
+  - Multi-language support
+  - Dark/Light theme switching
+  - Currency preferences
+  - Export format customization
+  - Window size preferences
 
 - **Secure Account Management**  
-  Secure user registration, login, and password recovery using encryption and password hashing (`EncryptionService`, `PasswordHashService`).
+  - Encrypted data storage
+  - Secure password hashing
+  - User authentication
+  - Session management
 
 - **Legal Compliance**  
-  Clearly presented Privacy Policy and Terms of Use are shown during account registration (`PrivacyPolicy`, `TermOfUse`).
+  - Privacy Policy
+  - Terms of Use
+  - Data protection measures
+  - User agreement acceptance
+
+---
+
+## **Installation Instructions**
+
+1. **Prerequisites**
+   - Ensure Java 21 is installed
+     - Windows: Download and install from [Oracle website](https://www.oracle.com/java/technologies/downloads/#java21)
+     - Verify installation: Run `java -version` in terminal
+   - Install Maven 3.8.6 or later
+     - Windows: Download from [Maven website](https://maven.apache.org/download.cgi)
+     - Set up environment variables:
+       - Add `MAVEN_HOME` pointing to Maven installation directory
+       - Add `%MAVEN_HOME%\bin` to `PATH` environment variable
+     - Verify installation: Run `mvn -version` in terminal
+   - Ensure system environment variables are correctly set:
+     - `JAVA_HOME` pointing to Java installation directory
+     - `PATH` containing Java and Maven bin directories
+
+2. **Project Configuration**
+   - Clone the repository:
+     ```bash
+     git clone https://github.com/your-username/Group110_repository.git
+     ```
+   - Navigate to project directory:
+     ```bash
+     cd Group110_repository
+     ```
+   - Check if dependency versions in `pom.xml` are compatible with your environment
+   - Ensure all dependencies can be downloaded (may need to configure Maven mirror)
+
+3. **Build Project**
+   ```bash
+   # Clean and build project
+   mvn clean install
+   
+   # If encountering dependency download issues, try using local repository
+   mvn clean install -Dmaven.repo.local=./m2/repository
+   ```
+
+4. **Run Application**
+   ```bash
+   # Run using Maven
+   mvn javafx:run
+   
+   # Or run jar file directly (in target directory)
+   java -jar target/finanger-1.0-SNAPSHOT.jar
+   ```
+
+5. **Troubleshooting**
+   - If encountering JavaFX related errors:
+     - Ensure complete JDK is installed (including JavaFX)
+     - Check JavaFX dependency configuration in `pom.xml`
+   - If encountering dependency download failures:
+     - Check network connection
+     - Configure Maven mirror (recommended: Aliyun mirror)
+   - If encountering insufficient memory errors:
+     - Increase JVM memory parameter: `mvn javafx:run -Djavafx.memory=2g`
+
+6. **Development Environment Setup**
+   - Recommended IDEs: IntelliJ IDEA or Eclipse
+   - Ensure correct JDK version (Java 21) is configured in IDE
+   - Import project as Maven project
+   - Verify all dependencies are downloaded before running
 
 ---
 
 ## **Software Dependencies**
 
-| Dependency                              | Version     |
-|-----------------------------------------|-------------|
-| **Java**                                | `21`        |
-| **Maven**                               | `3.8.6`     |
-| **JavaFX Controls** (`javafx-controls`) | `21`        |
-| **JavaFX FXML** (`javafx-fxml`)         | `21`        |
-| **JavaFX Swing** (`javafx-swing`)       | `21`        |
-| **JavaFX Web** (`javafx-web`)           | `21`        |
-| **Gson** (`gson`)                       | `2.10.1`    |
-| **Jackson Databind** (`jackson-databind`) | `2.13.0`  |
-| **Jackson JSR310** (`jackson-datatype-jsr310`) | `2.13.0` |
-| **SLF4J API** (`slf4j-api`)             | `1.7.36`    |
-| **Logback Classic** (`logback-classic`) | `1.2.11`    |
-| **JSON** (`org.json`)                   | `20231013`  |
-| **BC Provider** (`bcprov-jdk18on`)     | `1.77`      |
-| **Argon2 for JVM** (`argon2-jvm`)       | `2.11`      |
-| **Flexmark Markdown Parser** (`flexmark-all`) | `0.64.8` |
-| **iText 7 Core** (`itext7-core`)        | `7.2.5`     |
+| Dependency                              | Version     | Purpose                                    |
+|-----------------------------------------|-------------|--------------------------------------------|
+| **Java**                                | `21`        | Core runtime environment                   |
+| **Maven**                               | `3.8.6`     | Build and dependency management           |
+| **JavaFX Controls** (`javafx-controls`) | `21`        | UI components and controls                |
+| **JavaFX FXML** (`javafx-fxml`)         | `21`        | UI layout and design                      |
+| **JavaFX Swing** (`javafx-swing`)       | `21`        | Legacy UI component support               |
+| **JavaFX Web** (`javafx-web`)           | `21`        | Web content rendering                     |
+| **Gson** (`gson`)                       | `2.10.1`    | JSON data processing                      |
+| **Jackson Databind** (`jackson-databind`) | `2.13.0`  | Advanced JSON processing                  |
+| **Jackson JSR310** (`jackson-datatype-jsr310`) | `2.13.0` | Date/time handling in JSON |
+| **SLF4J API** (`slf4j-api`)             | `1.7.36`    | Logging framework                         |
+| **Logback Classic** (`logback-classic`) | `1.2.11`    | Logging implementation                    |
+| **JSON** (`org.json`)                   | `20231013`  | JSON data handling                        |
+| **BC Provider** (`bcprov-jdk18on`)     | `1.77`      | Cryptography and security                 |
+| **Argon2 for JVM** (`argon2-jvm`)       | `2.11`      | Password hashing                          |
+| **Flexmark Markdown Parser** (`flexmark-all`) | `0.64.8` | Documentation rendering      |
+| **iText 7 Core** (`itext7-core`)        | `7.2.5`     | PDF report generation                     |
 
 ### **Test Dependencies**
 
-| Dependency                               | Version     |
-|------------------------------------------|-------------|
-| **JUnit 4** (`junit`)                    | `4.13.2`    |
-| **JUnit 5** (`junit-jupiter`)            | `RELEASE`   |
-| **Mockito Core** (`mockito-core`)        | `5.7.0`     |
-| **Mockito JUnit** (`mockito-junit-jupiter`) | `5.8.0` |
-| **TestFX Core** (`testfx-core`)          | `4.0.18`    |
-| **TestFX JUnit5** (`testfx-junit5`)      | `4.0.18`    |
-| **TestFX JUnit** (`testfx-junit`)        | `4.0.18`    |
+| Dependency                               | Version     | Purpose                                    |
+|------------------------------------------|-------------|--------------------------------------------|
+| **JUnit 4** (`junit`)                    | `4.13.2`    | Legacy unit testing                       |
+| **JUnit 5** (`junit-jupiter`)            | `RELEASE`   | Modern unit testing framework             |
+| **Mockito Core** (`mockito-core`)        | `5.7.0`     | Mocking framework                         |
+| **Mockito JUnit** (`mockito-junit-jupiter`) | `5.8.0` | JUnit 5 integration for Mockito          |
+| **TestFX Core** (`testfx-core`)          | `4.0.18`    | JavaFX UI testing                         |
+| **TestFX JUnit5** (`testfx-junit5`)      | `4.0.18`    | JUnit 5 integration for TestFX           |
+| **TestFX JUnit** (`testfx-junit`)        | `4.0.18`    | JUnit 4 integration for TestFX           |
 
 
 ---
@@ -114,20 +205,54 @@ Finanger/
 │   │   │   ├── service/              # Business logic services
 │   │   │   │   ├── AIChatService.java
 │   │   │   │   ├── AISortingService.java
+│   │   │   │   ├── ChartService.java
+│   │   │   │   ├── CurrencyService.java
+│   │   │   │   ├── GoalService.java
+│   │   │   │   ├── LanguageService.java
+│   │   │   │   ├── StatusService.java
+│   │   │   │   ├── ThemeService.java
 │   │   │   │   ├── TransactionService.java
 │   │   │   │   └── UserService.java
 │   │   │   │
 │   │   │   ├── ui/                   # User Interface components
 │   │   │   │   ├── common/          # Shared UI components
+│   │   │   │   │   ├── AnimationUtils.java
+│   │   │   │   │   ├── LeftSidebarFactory.java
+│   │   │   │   │   ├── SceneManager.java
+│   │   │   │   │   └── SettingsTopBarFactory.java
+│   │   │   │   │
 │   │   │   │   ├── goalsscene/      # Goal management UI
+│   │   │   │   │   ├── CreateGoalScene.java
+│   │   │   │   │   ├── EditGoalScene.java
+│   │   │   │   │   └── Goals.java
+│   │   │   │   │
 │   │   │   │   ├── loginscene/      # Login and authentication UI
+│   │   │   │   │   └── LoginScene.java
+│   │   │   │   │
 │   │   │   │   ├── mainwindow/      # Main application window
+│   │   │   │   │   └── MainWindow.java
+│   │   │   │   │
 │   │   │   │   ├── registrationterms/ # Legal agreements UI
+│   │   │   │   │   ├── PrivacyPolicy.java
+│   │   │   │   │   └── TermOfUse.java
+│   │   │   │   │
 │   │   │   │   ├── settingscene/    # Settings and preferences UI
+│   │   │   │   │   ├── About.java
+│   │   │   │   │   └── SystemSettings.java
+│   │   │   │   │
 │   │   │   │   ├── signupscene/     # User registration UI
+│   │   │   │   │   └── SignUp.java
+│   │   │   │   │
 │   │   │   │   ├── statusscene/     # Financial status display
+│   │   │   │   │   ├── StatusScene.java
+│   │   │   │   │   └── StatusService.java
+│   │   │   │   │
 │   │   │   │   ├── transactionscene/ # Transaction management UI
+│   │   │   │   │   ├── TransactionManagementScene.java
+│   │   │   │   │   └── TransactionScene.java
+│   │   │   │   │
 │   │   │   │   └── usermanual/      # Help and documentation UI
+│   │   │   │       └── UserManual.java
 │   │   │   │
 │   │   │   └── FinanceApp.java      # Application entry point
 │   │   │
@@ -140,49 +265,50 @@ Finanger/
 │   │       │   └── *.json
 │   │       │
 │   │       ├── pictures/           # UI assets and images
+│   │       │   ├── logo_day.png
+│   │       │   └── logo_night.png
+│   │       │
+│   │       ├── template/          # Report templates
+│   │       │   └── *.html
 │   │       │
 │   │       ├── terms/             # Legal documents
 │   │       │   ├── PrivacyPolicy.txt
 │   │       │   └── TermOfUse.txt
 │   │       │
-│   │       └── transaction/       # Transaction data storage
-│   │           └── *.json
+│   │       ├── transaction/       # Transaction data storage
+│   │       │   └── *.json
+│   │       │
+│   │       └── users.json         # User data storage
 │   │
 │   └── test/
 │       └── java/com/myfinanceapp/
 │           ├── model/             # Model unit tests
+│           │   ├── GoalTest.java
+│           │   ├── TransactionTest.java
+│           │   └── UserTest.java
+│           │
 │           ├── security/          # Security component tests
+│           │   ├── EncryptionServiceTest.java
+│           │   └── PasswordHashServiceTest.java
+│           │
 │           ├── service/           # Service layer tests
-│           ├── ui/               # UI component tests
-│           └── FinanceAppTest.java
+│           │   ├── AIChatServiceTest.java
+│           │   ├── GoalServiceTest.java
+│           │   ├── TransactionServiceTest.java
+│           │   └── UserServiceTest.java
+│           │
+│           └── ui/               # UI component tests
+│               ├── common/
+│               ├── goalsscene/
+│               ├── loginscene/
+│               ├── statusscene/
+│               └── transactionscene/
 │
 ├── target/                      # Compiled output
 ├── .gitignore                  # Git ignore rules
 ├── pom.xml                     # Maven configuration
 └── README.md                   # Project documentation
 ```
-
-## **Installation Instructions**
-
-1. **Prerequisites**
-   - Ensure you have Java 21 installed
-   - Install Maven 3.8.6 or later
-   - Set up your Java environment variables
-
-2. **Build and Run**
-   ```bash
-   # Clone the repository
-   git clone https://github.com/your-username/Group110_repository.git
-   
-   # Navigate to project directory
-   cd Group110_repository
-   
-   # Build the project
-   mvn clean install
-   
-   # Run the application
-   mvn javafx:run
-   ```
 
 ## **License**
 
