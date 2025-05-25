@@ -115,15 +115,31 @@
 
 3. **Build Project**
    ```bash
-   # Clean and build project
+   # Standard build (with tests)
    mvn clean install
    
-   # Skip tests during build (faster)
+   # Quick build (skip tests)
    mvn clean install -DskipTests
+   
+   # Run tests in headless mode (recommended for CI/CD)
+   mvn clean install -Dtestfx.headless=true
    
    # If encountering dependency download issues, try using local repository
    mvn clean install -Dmaven.repo.local=./m2/repository
+   
+   # If tests fail, try running tests separately
+   mvn clean test -Dtestfx.headless=true
    ```
+
+   Notes:
+   - During the first build, some tests might fail due to JavaFX test environment initialization
+   - If tests fail, you can:
+     1. Try running the build command again as the JavaFX environment might need time to initialize properly
+     2. If still failing, run `mvn clean install -DskipTests` to skip tests
+     3. Then run `mvn test -Dtestfx.headless=true` to run tests separately
+   - Ensure JavaFX environment is properly configured
+   - If using an IDE (like IntelliJ IDEA), configure VM options: `--add-modules javafx.controls,javafx.fxml`
+   - Recommended IDE: IntelliJ IDEA is recommended for this project as it handles JavaFX test environment initialization better than VSCode, reducing the likelihood of first-build test failures
 
 4. **Run Application**
    ```bash
