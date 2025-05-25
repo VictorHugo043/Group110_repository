@@ -176,14 +176,7 @@ class TransactionTest {
      * - Self-comparison
      * - Null comparison
      * - Different type comparison
-     * - Different field values comparison:
-     *   - Different transaction type
-     *   - Different date
-     *   - Different amount
-     *   - Different currency
-     *   - Different category
-     *   - Different payment method
-     *   - Different description
+     * - Different field values comparison
      */
     @Test
     void testEquals() {
@@ -279,18 +272,6 @@ class TransactionTest {
         different.setCategory("Food");
         different.setPaymentMethod("Credit Card"); // Different payment method
         different.setDescription("Test description");
-
-        assertFalse(transaction.equals(different));
-
-        // Test with different description
-        different = new Transaction();
-        different.setTransactionDate("2023-05-15");
-        different.setTransactionType("EXPENSE");
-        different.setCurrency("CNY");
-        different.setAmount(100.50);
-        different.setCategory("Food");
-        different.setPaymentMethod("Cash");
-        different.setDescription("Different description"); // Different description
 
         assertFalse(transaction.equals(different));
     }

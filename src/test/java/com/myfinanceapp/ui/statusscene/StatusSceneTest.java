@@ -3,15 +3,18 @@ package com.myfinanceapp.ui.statusscene;
 import com.myfinanceapp.model.User;
 import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.testfx.framework.junit5.ApplicationExtension;
+import org.testfx.framework.junit5.ApplicationTest;
+import javafx.application.Platform;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.testfx.util.WaitForAsyncUtils.waitForFxEvents;
 
 /**
  * Unit test class for the StatusScene.
@@ -25,112 +28,105 @@ import static org.junit.jupiter.api.Assertions.*;
  * @version 4.0
  */
 @ExtendWith(ApplicationExtension.class)
-class StatusSceneTest {
+class StatusSceneTest extends ApplicationTest {
 
-    @Mock
-    private Stage stageMock;
-
+    private Stage stage;
     private User testUser;
     private StatusScene statusScene;
 
-    /**
-     * Sets up the test environment before each test.
-     * Initializes mock objects and creates a test user with predefined values.
-     */
+    @Override
+    public void start(Stage stage) {
+        this.stage = stage;
+    }
+
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
-        testUser = new User();
-        testUser.setUsername("testUser");
-        testUser.setPassword("password");
-        statusScene = new StatusScene(stageMock, 800, 600, testUser);
+        Platform.runLater(() -> {
+            testUser = new User();
+            testUser.setUsername("testUser");
+            testUser.setPassword("password");
+            statusScene = new StatusScene(stage, 800, 600, testUser);
+        });
+        waitForFxEvents();
     }
 
-    /**
-     * Tests the creation of the status scene.
-     * Verifies that:
-     * - Scene is created successfully
-     * - Scene is not null
-     */
     @Test
     void createScene_shouldReturnNonNullScene() {
-        Scene scene = statusScene.createScene();
-        assertNotNull(scene);
+        Platform.runLater(() -> {
+            Scene scene = statusScene.createScene();
+            assertNotNull(scene, "Scene should not be null");
+            assertEquals(800, scene.getWidth(), "Scene width should match provided width");
+            assertEquals(600, scene.getHeight(), "Scene height should match provided height");
+        });
+        waitForFxEvents();
     }
 
-    /**
-     * Tests the dimensions of the status scene.
-     * Verifies that:
-     * - Scene width is set correctly
-     * - Scene height is set correctly
-     */
     @Test
-    void createScene_shouldSetCorrectDimensions() {
-        Scene scene = statusScene.createScene();
-        assertEquals(800, scene.getWidth());
-        assertEquals(600, scene.getHeight());
+    void createScene_shouldHaveCorrectStructure() {
+        Platform.runLater(() -> {
+            Scene scene = statusScene.createScene();
+            
+            // 验证根节点
+            assertTrue(scene.getRoot() instanceof BorderPane, "Root should be a BorderPane");
+            BorderPane root = (BorderPane) scene.getRoot();
+            
+            // 验证左侧边栏
+            assertNotNull(root.getLeft(), "Left sidebar should exist");
+            
+            // 验证中心区域
+            assertTrue(root.getCenter() instanceof ScrollPane, "Center should be a ScrollPane");
+            ScrollPane centerScrollPane = (ScrollPane) root.getCenter();
+            
+            // 验证主要内容
+            assertTrue(centerScrollPane.getContent() instanceof VBox, "ScrollPane content should be a VBox");
+            VBox mainContent = (VBox) centerScrollPane.getContent();
+            
+            // 验证顶部面板
+            assertTrue(mainContent.getChildren().get(0) instanceof Pane, "First child should be top pane");
+            
+            // 验证底部区域
+            assertTrue(mainContent.getChildren().get(1) instanceof HBox, "Second child should be bottom area");
+            HBox bottomArea = (HBox) mainContent.getChildren().get(1);
+            
+            // 验证左侧列
+            assertTrue(bottomArea.getChildren().get(0) instanceof VBox, "First child of bottom area should be left column");
+            VBox leftColumn = (VBox) bottomArea.getChildren().get(0);
+            assertEquals(2, leftColumn.getChildren().size(), "Left column should have 2 children (category and transactions)");
+            
+            // 验证右侧列
+            assertTrue(bottomArea.getChildren().get(1) instanceof VBox, "Second child of bottom area should be right column");
+            VBox rightColumn = (VBox) bottomArea.getChildren().get(1);
+            assertEquals(2, rightColumn.getChildren().size(), "Right column should have 2 children (AI and suggestions)");
+        });
+        waitForFxEvents();
     }
 
-    /**
-     * Tests the initialization of UI components in the status scene.
-     * Verifies that all required components are properly initialized:
-     * - Date pickers
-     * - Chart type combo box
-     * - Labels
-     * - Charts (Line, Bar, Pie)
-     * - Web view for suggestions
-     * - Question area
-     * - Send button
-     * - Transaction box
-     * - Chart pane
-     */
     @Test
     void createScene_shouldInitializeUIComponents() {
-        statusScene.createScene();
+        Platform.runLater(() -> {
+            statusScene.createScene();
 
-        assertNotNull(statusScene.startDatePicker);
-        assertNotNull(statusScene.endDatePicker);
-        assertNotNull(statusScene.chartTypeCombo);
-        assertNotNull(statusScene.exLabel);
-        assertNotNull(statusScene.inLabel);
-        assertNotNull(statusScene.lineChart);
-        assertNotNull(statusScene.barChart);
-        assertNotNull(statusScene.pieChart);
-        assertNotNull(statusScene.suggestionsWebView);
-        assertNotNull(statusScene.questionArea);
-        assertNotNull(statusScene.sendBtn);
-        assertNotNull(statusScene.transactionsBox);
-        assertNotNull(statusScene.chartPane);
-    }
-
-    /**
-     * Tests the default values for combo boxes in the status scene.
-     * Verifies that:
-     * - Default chart type is set to "Line graph"
-     * - Chart type options include both "Line graph" and "Bar graph"
-     */
-    @Test
-    void createScene_shouldSetDefaultValuesForComboBoxes() {
-        statusScene.createScene();
-
-        assertEquals("Line graph", statusScene.chartTypeCombo.getValue());
-        assertTrue(statusScene.chartTypeCombo.getItems().contains("Line graph"));
-        assertTrue(statusScene.chartTypeCombo.getItems().contains("Bar graph"));
-    }
-
-    /**
-     * Tests the initialization of the chart pane in the status scene.
-     * Verifies that:
-     * - Chart pane is not null
-     * - Chart pane contains exactly one child
-     * - The child is an instance of LineChart
-     */
-    @Test
-    void createScene_shouldInitializeChartPane() {
-        statusScene.createScene();
-
-        assertNotNull(statusScene.chartPane);
-        assertEquals(1, statusScene.chartPane.getChildren().size());
-        assertTrue(statusScene.chartPane.getChildren().get(0) instanceof LineChart);
+            // 验证日期选择器
+            assertNotNull(statusScene.startDatePicker, "Start date picker should be initialized");
+            assertNotNull(statusScene.endDatePicker, "End date picker should be initialized");
+            
+            // 验证图表类型选择器
+            assertNotNull(statusScene.chartTypeCombo, "Chart type combo box should be initialized");
+            assertEquals("Line graph", statusScene.chartTypeCombo.getValue(), "Default chart type should be Line graph");
+            
+            // 验证图表
+            assertNotNull(statusScene.lineChart, "Line chart should be initialized");
+            assertNotNull(statusScene.barChart, "Bar chart should be initialized");
+            assertNotNull(statusScene.pieChart, "Pie chart should be initialized");
+            
+            // 验证 AI 助手组件
+            assertNotNull(statusScene.questionArea, "Question area should be initialized");
+            assertNotNull(statusScene.sendBtn, "Send button should be initialized");
+            assertNotNull(statusScene.suggestionsWebView, "Suggestions web view should be initialized");
+            
+            // 验证交易列表
+            assertNotNull(statusScene.transactionsBox, "Transactions box should be initialized");
+        });
+        waitForFxEvents();
     }
 }

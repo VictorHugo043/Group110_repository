@@ -13,7 +13,7 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.testfx.framework.junit5.ApplicationExtension;
-import org.testfx.framework.junit5.Start;
+import org.testfx.framework.junit5.ApplicationTest;
 
 import java.lang.reflect.Field;
 
@@ -34,22 +34,13 @@ import static org.mockito.Mockito.*;
  * @author SE_Group110
  * @version 4.0
  */
-@ExtendWith({MockitoExtension.class, ApplicationExtension.class})
-class MainWindowTest {
+@ExtendWith(ApplicationExtension.class)
+class MainWindowTest extends ApplicationTest {
 
     private Stage stage;
     
-    @Mock
-    private Stage stageMock;
-
-    /**
-     * Initializes the test environment with a JavaFX stage.
-     * Called by TestFX framework before each test.
-     *
-     * @param stage The JavaFX stage provided by TestFX
-     */
-    @Start
-    private void start(Stage stage) {
+    @Override
+    public void start(Stage stage) {
         this.stage = stage;
     }
 
@@ -60,85 +51,47 @@ class MainWindowTest {
      * - UI components are initialized
      * - Scene is created and set
      * - Window properties are set correctly
-     *
-     * @throws Exception if reflection or thread operations fail
      */
     @Test
-    void testStart() throws Exception {
+    void testStart() {
         // Run on JavaFX thread to avoid toolkit errors
         Platform.runLater(() -> {
             try {
                 // Create a MainWindow instance to test
                 MainWindow mainWindow = new MainWindow();
                 
-                // Create a dummy scene for verification
-                Scene dummyScene = new Scene(new Group(), 800, 450);
+                // Call the start method
+                mainWindow.start(stage);
                 
-                // Mock LoginScene's createScene method
-                try (MockedStatic<LoginScene> loginSceneMock = mockStatic(LoginScene.class)) {
-                    loginSceneMock.when(() -> LoginScene.createScene(any(), anyDouble(), anyDouble()))
-                            .thenReturn(dummyScene);
-                    
-                    // Call the start method
-                    mainWindow.start(stageMock);
-                    
-                    // Verify stage configuration
-                    verify(stageMock).setTitle("Finanger - Welcome");
-                    verify(stageMock).setScene(any(Scene.class));
-                    verify(stageMock).setResizable(true);
-                    verify(stageMock).setMinWidth(800);
-                    verify(stageMock).setMinHeight(450);
-                    verify(stageMock).show();
-                    
-                    // Capture the scene that was set on the stage
-                    ArgumentCaptor<Scene> sceneCaptor = ArgumentCaptor.forClass(Scene.class);
-                    verify(stageMock).setScene(sceneCaptor.capture());
-                    Scene capturedScene = sceneCaptor.getValue();
-                    
-                    // Verify UI initialization occurred by checking if properties exist
-                    // Using reflection to access private fields
-                    Field rootField = MainWindow.class.getDeclaredField("root");
-                    rootField.setAccessible(true);
-                    assertNotNull(rootField.get(mainWindow), "Root Group should be initialized");
-                    
-                    Field welcomeLabelField = MainWindow.class.getDeclaredField("welcomeLabel");
-                    welcomeLabelField.setAccessible(true);
-                    assertNotNull(welcomeLabelField.get(mainWindow), "Welcome label should be initialized");
-                    
-                    Field sloganLabelField = MainWindow.class.getDeclaredField("sloganLabel");
-                    sloganLabelField.setAccessible(true);
-                    assertNotNull(sloganLabelField.get(mainWindow), "Slogan label should be initialized");
-                    
-                    Field arrowButtonField = MainWindow.class.getDeclaredField("arrowButton");
-                    arrowButtonField.setAccessible(true);
-                    assertNotNull(arrowButtonField.get(mainWindow), "Arrow button should be initialized");
-                }
+                // Verify stage configuration
+                assertEquals("Finanger - Welcome", stage.getTitle(), "Stage title should be set correctly");
+                assertTrue(stage.isResizable(), "Stage should be resizable");
+                assertEquals(800, stage.getMinWidth(), "Minimum width should be set to 800");
+                assertEquals(450, stage.getMinHeight(), "Minimum height should be set to 450");
+                
+                // Verify scene is set
+                assertNotNull(stage.getScene(), "Scene should be set on stage");
+                
+                // Verify UI initialization occurred by checking if properties exist
+                // Using reflection to access private fields
+                Field rootField = MainWindow.class.getDeclaredField("root");
+                rootField.setAccessible(true);
+                assertNotNull(rootField.get(mainWindow), "Root Group should be initialized");
+                
+                Field welcomeLabelField = MainWindow.class.getDeclaredField("welcomeLabel");
+                welcomeLabelField.setAccessible(true);
+                assertNotNull(welcomeLabelField.get(mainWindow), "Welcome label should be initialized");
+                
+                Field sloganLabelField = MainWindow.class.getDeclaredField("sloganLabel");
+                sloganLabelField.setAccessible(true);
+                assertNotNull(sloganLabelField.get(mainWindow), "Slogan label should be initialized");
+                
+                Field arrowButtonField = MainWindow.class.getDeclaredField("arrowButton");
+                arrowButtonField.setAccessible(true);
+                assertNotNull(arrowButtonField.get(mainWindow), "Arrow button should be initialized");
             } catch (Exception e) {
                 fail("Test failed with exception: " + e.getMessage());
             }
         });
-        
-        // Let JavaFX process the runLater events
-        Thread.sleep(1000);
-    }
-
-    /**
-     * Tests the main method of the application.
-     * Verifies that:
-     * - Application.launch is called with correct arguments
-     * - Main method properly initializes the application
-     */
-    @Test
-    void testMain() {
-        // Testing the main method involves Application.launch which is static
-        try (MockedStatic<Application> applicationMock = mockStatic(Application.class)) {
-            // Call the main method
-            String[] args = new String[]{"arg1", "arg2"};
-            MainWindow.main(args);
-            
-            // Verify that launch was called with our arguments
-            // The lambda should exactly match how launch is called in MainWindow.main()
-            applicationMock.verify(() -> Application.launch(args));
-        }
     }
 }

@@ -1,18 +1,21 @@
 package com.myfinanceapp.ui.settingscene;
 
-import com.myfinanceapp.service.UserService;
-import com.myfinanceapp.ui.loginscene.LoginScene;
+import com.myfinanceapp.model.User;
+import com.myfinanceapp.service.ThemeService;
+import com.myfinanceapp.service.CurrencyService;
+import com.myfinanceapp.service.LanguageService;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.DatePicker;
+import javafx.scene.control.Label;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.junit.jupiter.MockitoExtension;
-
 import org.testfx.framework.junit5.ApplicationExtension;
-
+import org.testfx.framework.junit5.ApplicationTest;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -20,74 +23,101 @@ import static org.junit.jupiter.api.Assertions.*;
  * Unit test class for the ExportReport functionality.
  * This class contains tests for scene creation and UI behavior including:
  * - Scene creation and validation
- * - Stage resizing behavior
- * - Scene dimensions verification
  * - UI component initialization
+ * - Scene structure verification
+ * - Theme and style validation
  *
  * @author SE_Group110
  * @version 4.0
  */
-@ExtendWith(MockitoExtension.class)
 @ExtendWith(ApplicationExtension.class)
-public class ExportReportTest {
+class ExportReportTest extends ApplicationTest {
 
-    @Mock
-    private Stage mockStage;
-
-    @Mock
-    private UserService mockUserService;
-
-    /**
-     * Initializes mock objects before each test.
-     * Sets up the test environment with required mocks.
-     */
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
+    private Stage stage;
+    private User user;
+    private ThemeService themeService;
+    private CurrencyService currencyService;
+    private LanguageService languageService;
+    
+    @Override
+    public void start(Stage stage) {
+        this.stage = stage;
+        this.user = new User("testUser", "testPass", "testQuestion", "testAnswer");
+        this.themeService = new ThemeService();
+        this.currencyService = new CurrencyService("CNY");
+        this.languageService = LanguageService.getInstance();
     }
 
     /**
-     * Tests the scene creation functionality.
+     * Tests the creation of the export report scene.
      * Verifies that:
-     * - Created scene is not null
-     * - Scene dimensions match the requested values
-     * - Scene width is set to 800
-     * - Scene height is set to 450
+     * - Scene is created successfully
+     * - Scene dimensions are set correctly
+     * - Scene is properly initialized
      */
     @Test
-    void createScene_returnValidScene() {
-        // Test that createScene returns a non-null Scene
-        Scene scene = LoginScene.createScene(mockStage, 800, 450);
+    void createScene_shouldReturnNonNullScene() {
+        // Arrange
+        double width = 800;
+        double height = 450;
+        
+        // Act
+        Scene scene = ExportReport.createScene(stage, width, height, user, themeService, currencyService);
+        
+        // Assert
         assertNotNull(scene, "Scene should not be null");
-        assertEquals(800, scene.getWidth(), "Scene width should match requested width");
-        assertEquals(450, scene.getHeight(), "Scene height should match requested height");
+        assertEquals(width, scene.getWidth(), "Scene width should match provided width");
+        assertEquals(height, scene.getHeight(), "Scene height should match provided height");
     }
-
+    
     /**
-     * Tests the stage resizing behavior.
-     * Verifies that the stage properties are correctly set
-     * when creating a new scene.
-     * Note: This test uses assertions instead of Mockito verify()
-     * for simplicity.
+     * Tests the style and structure of the export report scene.
+     * Verifies that:
+     * - Root node is properly initialized
+     * - Root node is of type BorderPane
+     * - Scene structure is correct
+     * - All required UI components are present
      */
     @Test
-    void createScene_setsResizableOnStage() {
-        LoginScene.createScene(mockStage, 800, 450);
-        // Verify that stage properties are set correctly
-        // Note: This would ideally use verify() but we're keeping it simple with assertions
-    }
-
-    /**
-     * Tests the scene's resize handling capability.
-     * Verifies that the scene properly handles resize events.
-     * Note: This test would require TestFX interaction
-     * to be properly tested.
-     */
-    @Test
-    void createScene_handlesResizing() {
-        // Test that the scene properly handles resize events
-        Scene scene = LoginScene.createScene(mockStage, 800, 450);
-        // Simulate resize event
-        // This would require TestFX interaction to be properly tested
+    void createScene_shouldHaveCorrectStyleAndStructure() {
+        // Arrange
+        double width = 800;
+        double height = 450;
+        
+        // Act
+        Scene scene = ExportReport.createScene(stage, width, height, user, themeService, currencyService);
+        
+        // Assert
+        assertNotNull(scene.getRoot(), "Root node should not be null");
+        assertTrue(scene.getRoot() instanceof BorderPane, "Root should be BorderPane");
+        BorderPane root = (BorderPane) scene.getRoot();
+        
+        // Verify left sidebar
+        assertNotNull(root.getLeft(), "Left sidebar should not be null");
+        assertTrue(root.getLeft() instanceof VBox, "Left sidebar should be a VBox");
+        
+        // Verify center content
+        assertNotNull(root.getCenter(), "Center content should not be null");
+        assertTrue(root.getCenter() instanceof HBox, "Center content should be an HBox");
+        HBox centerBox = (HBox) root.getCenter();
+        assertTrue(centerBox.getChildren().get(0) instanceof VBox, "Center box should contain a VBox");
+        
+        // Verify top bar and content container
+        VBox container = (VBox) centerBox.getChildren().get(0);
+        assertTrue(container.getChildren().get(0) instanceof HBox, "Container should have a top bar");
+        assertTrue(container.getChildren().get(1) instanceof VBox, "Container should have a content box");
+        
+        // Verify outer box
+        VBox outerBox = (VBox) container.getChildren().get(1);
+        assertTrue(outerBox.getChildren().get(0) instanceof HBox, "First child should be a date range header");
+        assertTrue(outerBox.getChildren().get(1) instanceof HBox, "Second child should be a date picker row");
+        assertTrue(outerBox.getChildren().get(2) instanceof Button, "Third child should be an export button");
+        assertTrue(outerBox.getChildren().get(3) instanceof Button, "Fourth child should be a back button");
+        
+        // Verify date picker row
+        HBox datePickerRow = (HBox) outerBox.getChildren().get(1);
+        assertTrue(datePickerRow.getChildren().get(0) instanceof DatePicker, "First child should be a start date picker");
+        assertTrue(datePickerRow.getChildren().get(1) instanceof Label, "Second child should be a 'to' label");
+        assertTrue(datePickerRow.getChildren().get(2) instanceof DatePicker, "Third child should be an end date picker");
     }
 }

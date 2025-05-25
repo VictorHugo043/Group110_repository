@@ -1,24 +1,19 @@
 package com.myfinanceapp.ui.transactionscene;
 
 import com.myfinanceapp.model.User;
-import com.myfinanceapp.service.TransactionService;
-import com.myfinanceapp.service.AISortingService;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.testfx.framework.junit5.ApplicationExtension;
+import org.testfx.framework.junit5.ApplicationTest;
+import javafx.application.Platform;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.testfx.util.WaitForAsyncUtils.waitForFxEvents;
 
 /**
  * Unit test class for the TransactionScene.
@@ -33,273 +28,145 @@ import static org.mockito.Mockito.*;
  * @version 4.0
  */
 @ExtendWith(ApplicationExtension.class)
-class TransactionSceneTest {
+class TransactionSceneTest extends ApplicationTest {
 
-    @Mock
-    private Stage stageMock;
-
-    @Mock
-    private AISortingService aiSortingService;
-
+    private Stage stage;
     private User testUser;
 
-    /**
-     * Sets up the test environment before each test.
-     * Initializes mock objects and creates a test user with predefined values.
-     */
+    @Override
+    public void start(Stage stage) {
+        this.stage = stage;
+    }
+
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
-        testUser = new User();
-        testUser.setUsername("testUser");
-        testUser.setPassword("password");
+        Platform.runLater(() -> {
+            testUser = new User();
+            testUser.setUsername("testUser");
+            testUser.setPassword("password");
+        });
+        waitForFxEvents();
     }
 
-    /**
-     * Tests the creation of the transaction scene.
-     * Verifies that:
-     * - Scene is created successfully
-     * - Scene is not null
-     */
     @Test
     void createScene_shouldReturnNonNullScene() {
-        Scene scene = TransactionScene.createScene(stageMock, 800, 600, testUser);
-        assertNotNull(scene);
+        Platform.runLater(() -> {
+            Scene scene = TransactionScene.createScene(stage, 800, 600, testUser);
+            assertNotNull(scene, "Scene should not be null");
+            assertEquals(800, scene.getWidth(), "Scene width should match provided width");
+            assertEquals(600, scene.getHeight(), "Scene height should match provided height");
+        });
+        waitForFxEvents();
     }
 
-    /**
-     * Tests the dimensions of the transaction scene.
-     * Verifies that:
-     * - Scene width is set correctly
-     * - Scene height is set correctly
-     */
     @Test
-    void createScene_shouldHaveCorrectDimensions() {
-        Scene scene = TransactionScene.createScene(stageMock, 800, 600, testUser);
-        assertEquals(800, scene.getWidth());
-        assertEquals(600, scene.getHeight());
+    void createScene_shouldHaveCorrectStructure() {
+        Platform.runLater(() -> {
+            Scene scene = TransactionScene.createScene(stage, 800, 600, testUser);
+            
+            // 验证根节点
+            assertTrue(scene.getRoot() instanceof BorderPane, "Root should be a BorderPane");
+            BorderPane root = (BorderPane) scene.getRoot();
+            
+            // 验证左侧边栏
+            assertNotNull(root.getLeft(), "Left sidebar should exist");
+            assertTrue(root.getLeft() instanceof VBox, "Left sidebar should be a VBox");
+            
+            // 验证中心区域
+            assertTrue(root.getCenter() instanceof ScrollPane, "Center should be a ScrollPane");
+            ScrollPane centerScrollPane = (ScrollPane) root.getCenter();
+            
+            // 验证主要内容
+            assertTrue(centerScrollPane.getContent() instanceof VBox, "ScrollPane content should be a VBox");
+            VBox contentWrapper = (VBox) centerScrollPane.getContent();
+            
+            // 验证 GridPane
+            assertTrue(contentWrapper.getChildren().get(0) instanceof GridPane, "First child should be a GridPane");
+            GridPane centerAndRight = (GridPane) contentWrapper.getChildren().get(0);
+            
+            // 验证手动输入部分
+            assertTrue(centerAndRight.getChildren().get(0) instanceof VBox, "First child should be manual input VBox");
+            VBox centerBox = (VBox) centerAndRight.getChildren().get(0);
+            
+            // 验证文件导入部分
+            assertTrue(centerAndRight.getChildren().get(1) instanceof VBox, "Second child should be file import VBox");
+            VBox rightBar = (VBox) centerAndRight.getChildren().get(1);
+            
+            // 验证手动输入部分的组件
+            assertTrue(centerBox.getChildren().get(0) instanceof Label, "Should have topic label");
+            assertTrue(centerBox.getChildren().get(1) instanceof VBox, "Should have date box");
+            assertTrue(centerBox.getChildren().get(2) instanceof VBox, "Should have type box");
+            assertTrue(centerBox.getChildren().get(3) instanceof VBox, "Should have currency box");
+            assertTrue(centerBox.getChildren().get(4) instanceof VBox, "Should have amount box");
+            assertTrue(centerBox.getChildren().get(5) instanceof VBox, "Should have description box");
+            assertTrue(centerBox.getChildren().get(6) instanceof VBox, "Should have category box");
+            assertTrue(centerBox.getChildren().get(7) instanceof VBox, "Should have method box");
+            assertTrue(centerBox.getChildren().get(8) instanceof Button, "Should have submit button");
+            
+            // 验证文件导入部分的组件
+            assertTrue(rightBar.getChildren().get(0) instanceof Label, "Should have prompt label");
+            assertTrue(rightBar.getChildren().get(1) instanceof HBox, "Should have button box");
+            HBox fileButtonBox = (HBox) rightBar.getChildren().get(1);
+            assertTrue(fileButtonBox.getChildren().get(0) instanceof Button, "Should have import button");
+            assertTrue(fileButtonBox.getChildren().get(1) instanceof Button, "Should have template button");
+            
+            Button importButton = (Button) fileButtonBox.getChildren().get(0);
+            Button templateButton = (Button) fileButtonBox.getChildren().get(1);
+            
+            assertTrue(importButton.getText().contains("Select") || importButton.getText().contains("选择"), "Import button should have correct text");
+            assertTrue(templateButton.getText().contains("Reference") || templateButton.getText().contains("参考"), "Template button should have correct text");
+        });
+        waitForFxEvents();
     }
 
-    /**
-     * Tests the root container of the transaction scene.
-     * Verifies that:
-     * - Root node is a BorderPane
-     */
-    @Test
-    void createScene_shouldContainBorderPaneAsRoot() {
-        Scene scene = TransactionScene.createScene(stageMock, 800, 600, testUser);
-        assertTrue(scene.getRoot() instanceof BorderPane);
-    }
-
-    /**
-     * Tests the left sidebar of the transaction scene.
-     * Verifies that:
-     * - Left section is not null
-     * - Left section is a VBox
-     */
-    @Test
-    void createScene_shouldContainLeftSidebar() {
-        Scene scene = TransactionScene.createScene(stageMock, 800, 600, testUser);
-        BorderPane root = (BorderPane) scene.getRoot();
-        assertNotNull(root.getLeft());
-        assertTrue(root.getLeft() instanceof VBox);
-    }
-
-    /**
-     * Tests the center and right sections of the transaction scene.
-     * Verifies that:
-     * - Center section is a GridPane
-     * - GridPane contains two columns
-     * - First column is a VBox (centerBox)
-     * - Second column is a VBox (rightBar)
-     */
-    @Test
-    void createScene_shouldContainCenterAndRightBoxes() {
-        Scene scene = TransactionScene.createScene(stageMock, 800, 600, testUser);
-        BorderPane root = (BorderPane) scene.getRoot();
-        assertNotNull(root.getCenter());
-        assertTrue(root.getCenter() instanceof GridPane);
-
-        GridPane centerAndRight = (GridPane) root.getCenter();
-        assertEquals(2, centerAndRight.getChildren().size());
-        assertTrue(centerAndRight.getChildren().get(0) instanceof VBox);
-        assertTrue(centerAndRight.getChildren().get(1) instanceof VBox);
-    }
-
-    /**
-     * Tests the manual input controls in the transaction scene.
-     * Verifies that all required input controls are properly initialized:
-     * - Date field
-     * - Type combo box
-     * - Currency combo box
-     * - Amount field
-     * - Category field
-     * - Payment method field
-     * - Submit button
-     * Also verifies default values for combo boxes.
-     */
     @Test
     void createScene_shouldInitializeManualInputControls() {
-        Scene scene = TransactionScene.createScene(stageMock, 800, 600, testUser);
-        BorderPane root = (BorderPane) scene.getRoot();
-        GridPane centerAndRight = (GridPane) root.getCenter();
-        VBox centerBox = (VBox) centerAndRight.getChildren().get(0);
-
-        // Find manual input form controls
-        TextField dateField = null;
-        ComboBox<String> typeCombo = null;
-        ComboBox<String> currencyCombo = null;
-        TextField amountField = null;
-        TextField categoryField = null;
-        TextField methodField = null;
-        Button submitButton = null;
-
-        for (int i = 0; i < centerBox.getChildren().size(); i++) {
-            if (centerBox.getChildren().get(i) instanceof VBox) {
-                VBox item = (VBox) centerBox.getChildren().get(i);
-                if (item.getChildren().size() >= 2) {
-                    if (item.getChildren().get(0) instanceof Label && item.getChildren().get(1) instanceof TextField) {
-                        Label label = (Label) item.getChildren().get(0);
-                        if (label.getText().contains("Date")) {
-                            dateField = (TextField) item.getChildren().get(1);
-                        } else if (label.getText().contains("Amount")) {
-                            amountField = (TextField) item.getChildren().get(1);
-                        } else if (label.getText().contains("Category")) {
-                            categoryField = (TextField) item.getChildren().get(1);
-                        } else if (label.getText().contains("Payment")) {
-                            methodField = (TextField) item.getChildren().get(1);
-                        }
-                    } else if (item.getChildren().get(0) instanceof Label
-                            && item.getChildren().get(1) instanceof ComboBox) {
-                        Label label = (Label) item.getChildren().get(0);
-                        if (label.getText().contains("Type")) {
-                            typeCombo = (ComboBox<String>) item.getChildren().get(1);
-                        } else if (label.getText().contains("Currency")) {
-                            currencyCombo = (ComboBox<String>) item.getChildren().get(1);
-                        }
-                    }
-                }
-            } else if (centerBox.getChildren().get(i) instanceof Button) {
-                submitButton = (Button) centerBox.getChildren().get(i);
-            }
-        }
-
-        assertNotNull(dateField, "Date field should exist");
-        assertNotNull(typeCombo, "Type combo box should exist");
-        assertNotNull(currencyCombo, "Currency combo box should exist");
-        assertNotNull(amountField, "Amount field should exist");
-        assertNotNull(categoryField, "Category field should exist");
-        assertNotNull(methodField, "Method field should exist");
-        assertNotNull(submitButton, "Submit button should exist");
-
-        assertEquals("Expense", typeCombo.getValue());
-        assertEquals("CNY", currencyCombo.getValue());
-    }
-
-    /**
-     * Tests the auto-sorting button in the transaction scene.
-     * Verifies that:
-     * - Auto-sort button exists
-     * - Button text is correct
-     * - Button has correct style
-     */
-    @Test
-    void createScene_shouldInitializeAutoSortingButton() {
-        Scene scene = TransactionScene.createScene(stageMock, 800, 600, testUser);
-        BorderPane root = (BorderPane) scene.getRoot();
-        HBox centerAndRight = (HBox) root.getCenter();
-        VBox centerBox = (VBox) centerAndRight.getChildren().get(0);
-
-        Button autoSortButton = null;
-        for (int i = 0; i < centerBox.getChildren().size(); i++) {
-            if (centerBox.getChildren().get(i) instanceof VBox) {
-                VBox item = (VBox) centerBox.getChildren().get(i);
-                if (item.getChildren().size() >= 2 && item.getChildren().get(1) instanceof HBox) {
-                    HBox hbox = (HBox) item.getChildren().get(1);
-                    for (int j = 0; j < hbox.getChildren().size(); j++) {
-                        if (hbox.getChildren().get(j) instanceof Button) {
-                            autoSortButton = (Button) hbox.getChildren().get(j);
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-
-        assertNotNull(autoSortButton, "Auto-sort button should exist");
-        assertEquals("Auto-sorting", autoSortButton.getText());
-        assertTrue(autoSortButton.getStyle().contains("-fx-background-color: #E0F0FF"));
-    }
-
-    /**
-     * Tests the description area in the transaction scene.
-     * Verifies that:
-     * - Description text area exists
-     * - Description label exists
-     * - Label text is correct
-     * - Text area has correct prompt text
-     * - Text area has correct row count
-     * - Text area has word wrap enabled
-     */
-    @Test
-    void createScene_shouldInitializeDescriptionArea() {
-        Scene scene = TransactionScene.createScene(stageMock, 800, 600, testUser);
-        BorderPane root = (BorderPane) scene.getRoot();
-        HBox centerAndRight = (HBox) root.getCenter();
-        VBox centerBox = (VBox) centerAndRight.getChildren().get(0);
-
-        TextArea descriptionArea = null;
-        Label descriptionLabel = null;
-
-        for (int i = 0; i < centerBox.getChildren().size(); i++) {
-            if (centerBox.getChildren().get(i) instanceof VBox) {
-                VBox item = (VBox) centerBox.getChildren().get(i);
-                if (item.getChildren().size() >= 2
-                        && item.getChildren().get(1) instanceof TextArea) {
-                    descriptionArea = (TextArea) item.getChildren().get(1);
-                    descriptionLabel = (Label) item.getChildren().get(0);
-                    break;
-                }
-            }
-        }
-
-        assertNotNull(descriptionArea, "Description text area should exist");
-        assertNotNull(descriptionLabel, "Description label should exist");
-        assertEquals("Description", descriptionLabel.getText());
-        assertEquals("Enter transaction description", descriptionArea.getPromptText());
-        assertEquals(3, descriptionArea.getPrefRowCount());
-        assertTrue(descriptionArea.isWrapText());
-    }
-
-    /**
-     * Tests the file import controls in the transaction scene.
-     * Verifies that:
-     * - Import button exists
-     * - CSV instructions label exists
-     * - Button text is correct
-     */
-    @Test
-    void createScene_shouldInitializeFileImportControls() {
-        Scene scene = TransactionScene.createScene(stageMock, 800, 600, testUser);
-        BorderPane root = (BorderPane) scene.getRoot();
-        GridPane centerAndRight = (GridPane) root.getCenter();
-        VBox rightBar = (VBox) centerAndRight.getChildren().get(1);
-
-        Button importButton = null;
-        Label instructionsLabel = null;
-
-        for (int i = 0; i < rightBar.getChildren().size(); i++) {
-            if (rightBar.getChildren().get(i) instanceof Button) {
-                importButton = (Button) rightBar.getChildren().get(i);
-            } else if (rightBar.getChildren().get(i) instanceof Label
-                    && ((Label) rightBar.getChildren().get(i)).getText().contains("Your .CSV file")) {
-                instructionsLabel = (Label) rightBar.getChildren().get(i);
-            }
-        }
-
-        assertNotNull(importButton, "Import button should exist");
-        assertNotNull(instructionsLabel, "CSV instructions label should exist");
-        assertEquals("Select a file", importButton.getText());
+        Platform.runLater(() -> {
+            Scene scene = TransactionScene.createScene(stage, 800, 600, testUser);
+            BorderPane root = (BorderPane) scene.getRoot();
+            ScrollPane centerScrollPane = (ScrollPane) root.getCenter();
+            VBox contentWrapper = (VBox) centerScrollPane.getContent();
+            GridPane centerAndRight = (GridPane) contentWrapper.getChildren().get(0);
+            VBox centerBox = (VBox) centerAndRight.getChildren().get(0);
+            
+            // 获取各个输入控件
+            VBox dateBox = (VBox) centerBox.getChildren().get(1);
+            VBox typeBox = (VBox) centerBox.getChildren().get(2);
+            VBox currencyBox = (VBox) centerBox.getChildren().get(3);
+            VBox amountBox = (VBox) centerBox.getChildren().get(4);
+            VBox descriptionBox = (VBox) centerBox.getChildren().get(5);
+            VBox categoryBox = (VBox) centerBox.getChildren().get(6);
+            VBox methodBox = (VBox) centerBox.getChildren().get(7);
+            
+            // 验证日期选择器
+            assertTrue(dateBox.getChildren().get(1) instanceof DatePicker, "Should have date picker");
+            
+            // 验证类型选择器
+            assertTrue(typeBox.getChildren().get(1) instanceof ComboBox, "Should have type combo box");
+            ComboBox<String> typeCombo = (ComboBox<String>) typeBox.getChildren().get(1);
+            assertEquals("Expense", typeCombo.getValue(), "Default type should be Expense");
+            
+            // 验证货币选择器
+            assertTrue(currencyBox.getChildren().get(1) instanceof ComboBox, "Should have currency combo box");
+            ComboBox<String> currencyCombo = (ComboBox<String>) currencyBox.getChildren().get(1);
+            assertEquals("CNY", currencyCombo.getValue(), "Default currency should be CNY");
+            
+            // 验证金额输入框
+            assertTrue(amountBox.getChildren().get(1) instanceof TextField, "Should have amount field");
+            
+            // 验证描述文本区
+            assertTrue(descriptionBox.getChildren().get(1) instanceof TextArea, "Should have description area");
+            
+            // 验证类别输入框
+            assertTrue(categoryBox.getChildren().get(1) instanceof HBox, "Should have category box with button");
+            HBox categoryAndButton = (HBox) categoryBox.getChildren().get(1);
+            assertTrue(categoryAndButton.getChildren().get(0) instanceof TextField, "Should have category field");
+            assertTrue(categoryAndButton.getChildren().get(1) instanceof Button, "Should have auto-sort button");
+            
+            // 验证支付方式输入框
+            assertTrue(methodBox.getChildren().get(1) instanceof TextField, "Should have method field");
+        });
+        waitForFxEvents();
     }
 }
 

@@ -1,20 +1,22 @@
 package com.myfinanceapp.ui.settingscene;
 
 import com.myfinanceapp.model.User;
+import com.myfinanceapp.service.ThemeService;
+import com.myfinanceapp.service.CurrencyService;
+import com.myfinanceapp.service.LanguageService;
 import javafx.scene.Scene;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.testfx.framework.junit5.ApplicationExtension;
+import org.testfx.framework.junit5.ApplicationTest;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 /**
  * Unit test class for the SystemSettings scene.
@@ -28,21 +30,21 @@ import static org.mockito.Mockito.*;
  * @version 4.0
  */
 @ExtendWith(ApplicationExtension.class)
-class SystemSettingsTest {
+class SystemSettingsTest extends ApplicationTest {
 
-    @Mock
-    private Stage mockStage;
+    private Stage stage;
+    private User user;
+    private ThemeService themeService;
+    private CurrencyService currencyService;
+    private LanguageService languageService;
     
-    @Mock
-    private User mockUser;
-
-    /**
-     * Sets up the test environment before each test.
-     * Initializes mock objects for Stage and User.
-     */
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
+    @Override
+    public void start(Stage stage) {
+        this.stage = stage;
+        this.user = new User("testUser", "testPass", "testQuestion", "testAnswer");
+        this.themeService = new ThemeService();
+        this.currencyService = new CurrencyService("CNY");
+        this.languageService = LanguageService.getInstance();
     }
 
     /**
@@ -59,7 +61,7 @@ class SystemSettingsTest {
         double height = 450;
         
         // Act
-        Scene scene = SystemSettings.createScene(mockStage, width, height, mockUser);
+        Scene scene = SystemSettings.createScene(stage, width, height, user, themeService, currencyService);
         
         // Assert
         assertNotNull(scene, "Scene should not be null");
@@ -68,78 +70,72 @@ class SystemSettingsTest {
     }
     
     /**
-     * Tests the root structure of the system settings scene.
+     * Tests the style and structure of the system settings scene.
      * Verifies that:
-     * - Root node is a BorderPane
-     * - Left and center sections are properly initialized
-     * - Section types are correct (VBox and HBox)
+     * - Root node is properly initialized
+     * - Root node is of type BorderPane
+     * - Scene structure is correct
+     * - All required UI components are present
      */
     @Test
-    void createScene_shouldHaveCorrectRootStructure() {
+    void createScene_shouldHaveCorrectStyleAndStructure() {
         // Arrange
         double width = 800;
         double height = 450;
         
         // Act
-        Scene scene = SystemSettings.createScene(mockStage, width, height, mockUser);
+        Scene scene = SystemSettings.createScene(stage, width, height, user, themeService, currencyService);
         
         // Assert
         assertNotNull(scene.getRoot(), "Root node should not be null");
         assertTrue(scene.getRoot() instanceof BorderPane, "Root should be BorderPane");
         BorderPane root = (BorderPane) scene.getRoot();
-        assertNotNull(root.getLeft(), "Left section should not be null");
-        assertNotNull(root.getCenter(), "Center section should not be null");
-        assertTrue(root.getLeft() instanceof VBox, "Left section should be VBox");
-        assertTrue(root.getCenter() instanceof HBox, "Center section should be HBox");
-    }
-    
-    /**
-     * Tests the style properties of the system settings scene.
-     * Verifies that:
-     * - Root node has correct background color
-     * - Style properties are properly applied
-     */
-    @Test
-    void createScene_shouldHaveCorrectStyle() {
-        // Arrange
-        double width = 800;
-        double height = 450;
         
-        // Act
-        Scene scene = SystemSettings.createScene(mockStage, width, height, mockUser);
+        // Verify left sidebar
+        assertNotNull(root.getLeft(), "Left sidebar should not be null");
+        assertTrue(root.getLeft() instanceof VBox, "Left sidebar should be a VBox");
         
-        // Assert
-        BorderPane root = (BorderPane) scene.getRoot();
-        assertEquals("-fx-background-color: white;", root.getStyle(), "Root should have white background");
-    }
-    
-    /**
-     * Tests the component hierarchy of the system settings scene.
-     * Verifies that:
-     * - Center box is properly initialized
-     * - Component hierarchy is correct
-     * - Child components are of correct type
-     * 
-     * Note: This test assumes a specific component structure
-     * and may need adjustment based on actual implementation.
-     */
-    @Test
-    void createScene_shouldIncludeSettingsComponents() {
-        // Arrange
-        double width = 800;
-        double height = 450;
-        
-        // Act
-        Scene scene = SystemSettings.createScene(mockStage, width, height, mockUser);
-        
-        // Assert
-        BorderPane root = (BorderPane) scene.getRoot();
+        // Verify center content
+        assertNotNull(root.getCenter(), "Center content should not be null");
+        assertTrue(root.getCenter() instanceof HBox, "Center content should be an HBox");
         HBox centerBox = (HBox) root.getCenter();
-        assertNotNull(centerBox, "Center box should not be null");
+        assertTrue(centerBox.getChildren().get(0) instanceof VBox, "Center box should contain a VBox");
         
-        // This assumes we can access the container VBox from centerBox
-        // The test may need adjustment based on actual structure
-        assertEquals(1, centerBox.getChildren().size(), "Center box should have one child");
-        assertTrue(centerBox.getChildren().get(0) instanceof VBox, "Container should be a VBox");
+        // Verify container structure
+        VBox container = (VBox) centerBox.getChildren().get(0);
+        assertTrue(container.getChildren().get(0) instanceof HBox, "Container should have a top bar");
+        assertTrue(container.getChildren().get(1) instanceof VBox, "Container should have an outer box");
+        
+        // Verify outer box
+        VBox outerBox = (VBox) container.getChildren().get(1);
+        assertTrue(outerBox.getChildren().get(0) instanceof VBox, "Outer box should contain a settings form");
+        
+        // Verify settings form
+        VBox settingsForm = (VBox) outerBox.getChildren().get(0);
+        assertTrue(settingsForm.getChildren().get(0) instanceof HBox, "First child should be language selection");
+        assertTrue(settingsForm.getChildren().get(1) instanceof HBox, "Second child should be theme selection");
+        assertTrue(settingsForm.getChildren().get(2) instanceof HBox, "Third child should be window size selection");
+        assertTrue(settingsForm.getChildren().get(3) instanceof HBox, "Fourth child should be currency selection");
+        assertTrue(settingsForm.getChildren().get(4) instanceof HBox, "Fifth child should be button box");
+        
+        // Verify language selection
+        HBox langBox = (HBox) settingsForm.getChildren().get(0);
+        assertTrue(langBox.getChildren().get(1) instanceof Label, "Should have a language label");
+        assertTrue(langBox.getChildren().get(2) instanceof ComboBox, "Should have a language combo box");
+        
+        // Verify theme selection
+        HBox themeBox = (HBox) settingsForm.getChildren().get(1);
+        assertTrue(themeBox.getChildren().get(1) instanceof Label, "Should have a theme label");
+        assertTrue(themeBox.getChildren().get(2) instanceof ComboBox, "Should have a theme combo box");
+        
+        // Verify window size selection
+        HBox sizeBox = (HBox) settingsForm.getChildren().get(2);
+        assertTrue(sizeBox.getChildren().get(1) instanceof Label, "Should have a size label");
+        assertTrue(sizeBox.getChildren().get(2) instanceof ComboBox, "Should have a size combo box");
+        
+        // Verify currency selection
+        HBox currencyBox = (HBox) settingsForm.getChildren().get(3);
+        assertTrue(currencyBox.getChildren().get(1) instanceof Label, "Should have a currency label");
+        assertTrue(currencyBox.getChildren().get(2) instanceof ComboBox, "Should have a currency combo box");
     }
 }

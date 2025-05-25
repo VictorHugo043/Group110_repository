@@ -26,10 +26,20 @@ import java.util.*;
 public class UserService {
 
     /** Path to the JSON file storing user data */
-    static final String USER_JSON_PATH = "src/main/resources/users.json";
+    private static final String USER_JSON_PATH = "src/main/resources/users.json";
 
     private static final Gson gson = new Gson();
     private static final Type USER_LIST_TYPE = new TypeToken<List<User>>() {}.getType();
+
+    /**
+     * Gets the path to the user data JSON file.
+     * This method can be overridden by subclasses to provide a different path.
+     *
+     * @return The path to the user data JSON file
+     */
+    protected String getUserJsonPath() {
+        return USER_JSON_PATH;
+    }
 
     /**
      * Registers a new user in the system.
@@ -157,7 +167,7 @@ public class UserService {
     public User loginGetUser(String username, String password) {
         List<User> users = loadUsers();
         for (User u : users) {
-            if (u.getUsername().equalsIgnoreCase(username) && u.getPassword().equals(password)) {
+            if (u.getUsername().equals(username) && u.getPassword().equals(password)) {
                 return u;
             }
         }
@@ -171,8 +181,8 @@ public class UserService {
      *
      * @return List of all registered users
      */
-    private static List<User> loadUsers() {
-        File jsonFile = new File(USER_JSON_PATH);
+    private List<User> loadUsers() {
+        File jsonFile = new File(getUserJsonPath());
         if (!jsonFile.exists()) {
             return new ArrayList<>();
         }
@@ -201,8 +211,8 @@ public class UserService {
      *
      * @param users The list of users to save
      */
-    private static void saveUsers(List<User> users) {
-        File jsonFile = new File(USER_JSON_PATH);
+    private void saveUsers(List<User> users) {
+        File jsonFile = new File(getUserJsonPath());
 
         try (Writer writer = new OutputStreamWriter(new FileOutputStream(jsonFile), StandardCharsets.UTF_8)) {
             gson.toJson(users, writer);
