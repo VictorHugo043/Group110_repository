@@ -91,7 +91,7 @@ class LeftSidebarFactoryTest {
                         assertEquals("Only you can do!", welcomeLabel.getText());
                         break;
                     default:
-                        assertEquals("Only \nyou can do!", welcomeLabel.getText());
+                        assertEquals("Welcome to Finanger", welcomeLabel.getText());
                         break;
                 }
                 
