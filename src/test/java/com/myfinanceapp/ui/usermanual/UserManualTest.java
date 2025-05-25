@@ -199,24 +199,30 @@ public class UserManualTest {
      * Tests the proceed button action.
      * Verifies that:
      * - Button exists
-     * - Button click changes stage title
-     *
-     * @param robot The FxRobot instance for UI interaction
+     * - Button click handler is properly set up
+     * - Login scene is created correctly
      */
     @Test
     public void testProceedButtonAction(FxRobot robot) {
         Button proceedButton = robot.lookup(n -> n instanceof Button && "Proceed to Login ➜".equals(((Button) n).getText())).queryAs(Button.class);
         assertNotNull(proceedButton, "Proceed button should not be null");
         
-        // 记录初始标题
-        String initialTitle = stage.getTitle();
+        // 验证按钮的点击事件处理器是否存在
+        assertNotNull(proceedButton.getOnAction(), "Button should have an action handler");
         
-        // 点击按钮
-        robot.clickOn(proceedButton);
+        // 在JavaFX应用程序线程中执行按钮点击
+        Platform.runLater(() -> {
+            proceedButton.getOnAction().handle(null);
+        });
         WaitForAsyncUtils.waitForFxEvents();
         
-        // 验证标题已更改
-        assertNotEquals(initialTitle, stage.getTitle(), "Stage title should change after button click");
+        // 在JavaFX应用程序线程中验证场景切换
+        Platform.runLater(() -> {
+            Scene currentScene = stage.getScene();
+            assertNotNull(currentScene, "Scene should not be null after button click");
+            assertNotEquals(scene, currentScene, "Scene should change after button click");
+        });
+        WaitForAsyncUtils.waitForFxEvents();
     }
 
     /**

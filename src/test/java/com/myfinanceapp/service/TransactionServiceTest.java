@@ -3,6 +3,7 @@ package com.myfinanceapp.service;
 import com.myfinanceapp.model.Transaction;
 import com.myfinanceapp.model.User;
 import javafx.application.Platform;
+import javafx.stage.Window;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -151,6 +152,29 @@ class TransactionServiceTest {
         // Create a CountDownLatch to wait for the import to complete
         CountDownLatch latch = new CountDownLatch(1);
 
+        // Set up a thread to automatically close any alerts that appear
+        Thread alertHandler = new Thread(() -> {
+            while (!Thread.currentThread().isInterrupted()) {
+                Platform.runLater(() -> {
+                    javafx.stage.Stage stage = (javafx.stage.Stage) javafx.stage.Stage.getWindows().stream()
+                            .filter(Window::isShowing)
+                            .findFirst()
+                            .orElse(null);
+                    if (stage != null) {
+                        stage.close();
+                    }
+                });
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
+            }
+        });
+        alertHandler.setDaemon(true);
+        alertHandler.start();
+
         // Import transactions using the new method in JavaFX thread
         Platform.runLater(() -> {
             try {
@@ -163,6 +187,9 @@ class TransactionServiceTest {
         // Wait for the import to complete
         assertTrue(latch.await(5, TimeUnit.SECONDS), "Import operation timed out");
         WaitForAsyncUtils.waitForFxEvents();
+
+        // Stop the alert handler thread
+        alertHandler.interrupt();
 
         // Verify imported transactions
         List<Transaction> transactions = transactionService.loadTransactions(testUser);
