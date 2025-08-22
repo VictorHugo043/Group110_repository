@@ -19,7 +19,7 @@ import java.util.*;
  */
 public class AiChatService {
     private static final String API_URL = "https://api.siliconflow.cn/v1/chat/completions";
-    private static final String API_KEY = "sk-ijbuhipcfqfnwdbpmxqvsxgvhkktafpvxoizivjhwblqlent";
+    private static final String API_KEY = "";
     /** The AI model to use for chat completions */
     private static final String MODEL   = "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B";
 
